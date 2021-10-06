@@ -24,12 +24,21 @@ const StyledMenuBar = styled.div`
     top: ${Number(p.theme.trainerHeight) + Number(p.theme.mapButtonTop)}px;
   `}
 `;
+function sendEventToDevice(event) {
+  let ifrm = document.createElement("IFRAME");
+  ifrm.setAttribute("src", "js-frame:" + event);
+  document.documentElement.appendChild(ifrm);
+  ifrm.parentNode.removeChild(ifrm);
+  ifrm = null;
+}
 // The map navigation region
 const MenuBar = observer(props => {
   const menuItems = props.menuItems || [];
   const handleClick = () => {
     runInAction(() => {
       props.viewState.topElement = "MenuBar";
+      console.log("Menu setting Open");
+      sendEventToDevice("menubarOpen");
     });
   };
 
