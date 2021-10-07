@@ -1,4 +1,5 @@
 import React from "react";
+import { isMobile } from "react-device-detect";
 import styled from "styled-components";
 
 import PropTypes from "prop-types";
@@ -35,11 +36,13 @@ function sendEventToDevice(event) {
 const MenuBar = observer(props => {
   const menuItems = props.menuItems || [];
   const handleClick = () => {
-    runInAction(() => {
-      props.viewState.topElement = "MenuBar";
-      console.log("Menu setting Open");
-      sendEventToDevice("menubarOpen");
-    });
+    if (!isMobile) {
+      runInAction(() => {
+        props.viewState.topElement = "MenuBar";
+        console.log("Menu setting Open");
+        sendEventToDevice("menubarOpen");
+      });
+    }
   };
 
   const storyEnabled = props.terria.configParameters.storyEnabled;
