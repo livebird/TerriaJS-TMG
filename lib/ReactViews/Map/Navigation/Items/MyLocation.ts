@@ -39,10 +39,10 @@ class MyLocation extends MapNavigationItemController {
     this.followMeEnabled = this.followMeEnabled.bind(this);
 
     if (this.terria.gotoCoordinate !== undefined) {
-      this.terria.gotoCoordinate(this.gotoCoordinate);
+      this.terria.gotoCoordinate(this.gotoCoordinate, this);
     }
     if (this.terria.getCenterLatLong !== undefined) {
-      this.terria.getCenterLatLong(this.getCenterLatLong);
+      this.terria.getCenterLatLong(this.getCenterLatLong, this);
     }
   }
 
@@ -154,13 +154,13 @@ class MyLocation extends MapNavigationItemController {
     });
   }
 
-  gotoCoordinate(latitude: number, longitude: number) {
+  gotoCoordinate(latitude: number, longitude: number, that: MyLocation) {
     const augmentedVirtualityEnabled =
-      this.terria.augmentedVirtuality &&
-      this.terria.augmentedVirtuality.enabled;
+      that.terria.augmentedVirtuality &&
+      that.terria.augmentedVirtuality.enabled;
 
     if (augmentedVirtualityEnabled) {
-      this.terria.augmentedVirtuality.moveTo(
+      that.terria.augmentedVirtuality.moveTo(
         CesiumCartographic.fromDegrees(longitude, latitude),
         27500
       );
@@ -172,14 +172,17 @@ class MyLocation extends MapNavigationItemController {
         longitude + 0.1,
         latitude + 0.1
       );
-      this.terria.currentViewer.zoomTo(rectangle);
+      that.terria.currentViewer.zoomTo(rectangle);
     }
   }
-  getCenterLatLong() {
-    const position = this.terria.currentViewer.getCurrentCameraView().position;
+  getCenterLatLong(that: any) {
+    const position = that.terria.currentViewer.getCurrentCameraView().rectangle;
     if (position !== undefined) {
-      const con = CesiumCartographic.fromCartesian(position);
-      return [con.latitude * (180 / Math.PI), con.longitude * (180 / Math.PI)];
+      const coord = Rectangle.center(position);
+      return [
+        coord.latitude * (180 / Math.PI),
+        coord.longitude * (180 / Math.PI)
+      ];
     }
     return [0, 0];
   }
