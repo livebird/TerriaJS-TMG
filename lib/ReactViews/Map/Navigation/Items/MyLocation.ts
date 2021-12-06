@@ -1,4 +1,5 @@
 import i18next from "i18next";
+import Cartesian3 from "terriajs-cesium/Source/Core/Cartesian3";
 import { action, observable, runInAction } from "mobx";
 import React from "react";
 import CesiumCartographic from "terriajs-cesium/Source/Core/Cartographic";
@@ -36,6 +37,13 @@ class MyLocation extends MapNavigationItemController {
       this
     );
     this.followMeEnabled = this.followMeEnabled.bind(this);
+
+    if (this.terria.gotoCoordinate !== undefined) {
+      this.terria.gotoCoordinate(this.gotoCoordinate);
+    }
+    if (this.terria.getCenterLatLong !== undefined) {
+      this.terria.getCenterLatLong(this.getCenterLatLong);
+    }
   }
 
   get glyph(): any {
@@ -48,36 +56,41 @@ class MyLocation extends MapNavigationItemController {
 
   @action.bound
   getLocation() {
-    const t = i18next.t.bind(i18next);
-    if (navigator.geolocation) {
-      const options = {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0
-      };
-      if (!this.augmentedVirtualityEnabled()) {
-        // When Augmented Virtuality is not enabled then just get a single position update.
-        navigator.geolocation.getCurrentPosition(
-          this.zoomToMyLocation,
-          this.handleLocationError,
-          options
-        );
+    const useJSNavigator = this.terria.configParameters.useJSNavigator;
+    if (useJSNavigator) {
+      const t = i18next.t.bind(i18next);
+      if (navigator.geolocation) {
+        const options = {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
+        };
+        if (!this.augmentedVirtualityEnabled()) {
+          // When Augmented Virtuality is not enabled then just get a single position update.
+          navigator.geolocation.getCurrentPosition(
+            this.zoomToMyLocation,
+            this.handleLocationError,
+            options
+          );
+        } else {
+          // When Augmented Virtuality is enabled then we effectively toggle into watch mode and the position is repeatedly updated.
+          this.watchId = navigator.geolocation.watchPosition(
+            this.zoomToMyLocation,
+            this.handleLocationError,
+            options
+          );
+        }
       } else {
-        // When Augmented Virtuality is enabled then we effectively toggle into watch mode and the position is repeatedly updated.
-        this.watchId = navigator.geolocation.watchPosition(
-          this.zoomToMyLocation,
-          this.handleLocationError,
-          options
+        this.terria.raiseErrorToUser(
+          new TerriaError({
+            sender: this,
+            title: t("location.errorGettingLocation"),
+            message: t("location.browserCannotProvide")
+          })
         );
       }
-    } else {
-      this.terria.raiseErrorToUser(
-        new TerriaError({
-          sender: this,
-          title: t("location.errorGettingLocation"),
-          message: t("location.browserCannotProvide")
-        })
-      );
+    } else if (this.terria.locationService != undefined) {
+      this.terria.locationService(this.zoomToMyLocation);
     }
   }
 
@@ -139,6 +152,36 @@ class MyLocation extends MapNavigationItemController {
 
       this.terria.workbench.add(this._marker);
     });
+  }
+
+  gotoCoordinate(latitude: number, longitude: number) {
+    const augmentedVirtualityEnabled =
+      this.terria.augmentedVirtuality &&
+      this.terria.augmentedVirtuality.enabled;
+
+    if (augmentedVirtualityEnabled) {
+      this.terria.augmentedVirtuality.moveTo(
+        CesiumCartographic.fromDegrees(longitude, latitude),
+        27500
+      );
+    } else {
+      // west, south, east, north, result
+      const rectangle = Rectangle.fromDegrees(
+        longitude - 0.1,
+        latitude - 0.1,
+        longitude + 0.1,
+        latitude + 0.1
+      );
+      this.terria.currentViewer.zoomTo(rectangle);
+    }
+  }
+  getCenterLatLong() {
+    const position = this.terria.currentViewer.getCurrentCameraView().position;
+    if (position !== undefined) {
+      const con = CesiumCartographic.fromCartesian(position);
+      return [con.latitude * (180 / Math.PI), con.longitude * (180 / Math.PI)];
+    }
+    return [0, 0];
   }
 
   handleLocationError(err: any) {

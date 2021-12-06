@@ -270,6 +270,11 @@ interface ConfigParameters {
    * Extra links to show in the credit line at the bottom of the map (currently only the Cesium map).
    */
   extraCreditLinks?: { url: string; text: string }[];
+
+  /*
+  Techmaven
+  */
+  useJSNavigator: boolean;
 }
 
 interface StartOptions {
@@ -325,6 +330,18 @@ interface HomeCameraInit {
 }
 
 export default class Terria {
+  /*
+  Techmaven Start
+  */
+
+  locationService: any;
+  gotoCoordinate: any;
+  getCenterLatLong: any;
+
+  /*
+  Techmaven End
+  */
+
   private models = observable.map<string, BaseModel>();
   /** Map from share key -> id */
   readonly shareKeysMap = observable.map<string, string>();
@@ -441,7 +458,9 @@ export default class Terria {
         url: "about.html#data-attribution"
       },
       { text: "map.extraCreditLinks.disclaimer", url: "about.html#disclaimer" }
-    ]
+    ],
+    // Techmaven
+    useJSNavigator: false
   };
 
   @observable
