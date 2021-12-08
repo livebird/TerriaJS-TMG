@@ -141,6 +141,10 @@ const MobileHeader = observer(
     },
 
     render() {
+      window.onAddDataClicked = () => {
+        this.onMobileDataCatalogClicked();
+      };
+
       const searchState = this.props.viewState.searchState;
       const { t } = this.props;
       const nowViewingLength =
