@@ -151,7 +151,7 @@ const SidePanel = observer(
     },
     render() {
       window.onAddDataClicked = () => {
-        this.props.refForUploadData.current.click();
+        this.props.refForExploreMapData.current.click();
       };
 
       const { t, theme } = this.props;
