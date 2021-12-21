@@ -122,12 +122,12 @@ const MobileMenu = observer(
                 {menuItem}
               </div>
             </For>
-            {/* <If condition={this.props.showFeedback}>
-              <MobileMenuItem
+            <If condition={this.props.showFeedback}>
+              {/* <MobileMenuItem
                 onClick={this.onFeedbackFormClick}
                 caption={t("feedback.feedbackBtnText")}
-              />
-            </If> */}
+              /> */}
+            </If>
             <If condition={hasStories}>
               <MobileMenuItem
                 onClick={this.runStories}
