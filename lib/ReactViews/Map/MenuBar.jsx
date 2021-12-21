@@ -81,9 +81,9 @@ const MenuBar = observer(props => {
           <li className={Styles.menuItem}>
             <SettingPanel terria={props.terria} viewState={props.viewState} />
           </li>
-          <li className={Styles.menuItem}>
+          {/* <li className={Styles.menuItem}>
             <HelpButton viewState={props.viewState} />
-          </li>
+          </li> */}
 
           {props.terria.configParameters?.languageConfiguration?.enabled ? (
             <li className={Styles.menuItem}>

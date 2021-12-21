@@ -192,28 +192,28 @@ export const registerMapNavigations = (viewState: ViewState) => {
     noExpand: true
   });
 
-  const feedbackController = new FeedbackButtonController(viewState);
-  mapNavigationModel.addItem({
-    id: FEEDBACK_TOOL_ID,
-    name: "translate#feedback.feedbackBtnText",
-    title: "translate#feedback.feedbackBtnText",
-    location: "BOTTOM",
-    screenSize: "medium",
-    controller: feedbackController,
-    order: 8
-  });
+  // const feedbackController = new FeedbackButtonController(viewState);
+  // mapNavigationModel.addItem({
+  //   id: FEEDBACK_TOOL_ID,
+  //   name: "translate#feedback.feedbackBtnText",
+  //   title: "translate#feedback.feedbackBtnText",
+  //   location: "BOTTOM",
+  //   screenSize: "medium",
+  //   controller: feedbackController,
+  //   order: 8
+  // });
 
-  const helpController = new GenericMapNavigationItemController({
-    icon: GLYPHS.helpThick,
-    handleClick: () => viewState.showHelpPanel()
-  });
-  mapNavigationModel.addItem({
-    id: HELP_PANEL_ID,
-    name: "translate#helpMenu.btnText",
-    title: "translate#helpMenu.btnTitle",
-    location: "BOTTOM",
-    screenSize: "medium",
-    controller: helpController,
-    order: 9
-  });
+  // const helpController = new GenericMapNavigationItemController({
+  //   icon: GLYPHS.helpThick,
+  //   handleClick: () => viewState.showHelpPanel()
+  // });
+  // mapNavigationModel.addItem({
+  //   id: HELP_PANEL_ID,
+  //   name: "translate#helpMenu.btnText",
+  //   title: "translate#helpMenu.btnTitle",
+  //   location: "BOTTOM",
+  //   screenSize: "medium",
+  //   controller: helpController,
+  //   order: 9
+  // });
 };
