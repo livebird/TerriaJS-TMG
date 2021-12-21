@@ -123,10 +123,10 @@ const MobileMenu = observer(
               </div>
             </For>
             <If condition={this.props.showFeedback}>
-              {/* <MobileMenuItem
+              <MobileMenuItem
                 onClick={this.onFeedbackFormClick}
                 caption={t("feedback.feedbackBtnText")}
-              /> */}
+              />
             </If>
             <If condition={hasStories}>
               <MobileMenuItem
