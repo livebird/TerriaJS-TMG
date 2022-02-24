@@ -67,13 +67,13 @@ const MenuBar = observer(props => {
               <ToolsPanel terria={props.terria} viewState={props.viewState} />
             </li>
           )}
-          <If condition={!props.viewState.useSmallScreenInterface}>
+          {/* <If condition={!props.viewState.useSmallScreenInterface}>
             <For each="element" of={props.menuLeftItems} index="i">
               <li className={Styles.menuItem} key={i}>
                 {element}
               </li>
             </For>
-          </If>
+          </If> */}
         </ul>
       </section>
       <section className={classNames(Styles.flex)}>
@@ -105,15 +105,16 @@ const MenuBar = observer(props => {
             </li>
           </ul>
         </If>
-        <ul className={classNames(Styles.menu)}>
+        {/* <ul className={classNames(Styles.menu)}>
           <li className={Styles.menuItem}>
             <SharePanel
+              storyEnabled={false}
               terria={props.terria}
               viewState={props.viewState}
               animationDuration={props.animationDuration}
             />
           </li>
-        </ul>
+        </ul> */}
         <If condition={!props.viewState.useSmallScreenInterface}>
           <For each="element" of={menuItems} index="i">
             <li className={Styles.menuItem} key={i}>
