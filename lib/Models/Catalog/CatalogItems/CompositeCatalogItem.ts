@@ -37,7 +37,7 @@ export default class CompositeCatalogItem extends MappableMixin(
     }
 
     return filterOutUndefined(
-      members.map(id =>
+      members.map((id) =>
         ModelReference.isRemoved(id)
           ? undefined
           : this.terria.getModelById(BaseModel, id)
@@ -46,39 +46,39 @@ export default class CompositeCatalogItem extends MappableMixin(
   }
 
   protected async forceLoadMetadata(): Promise<void> {
+    const members = this.memberModels.filter(CatalogMemberMixin.isMixedInto);
+    // Avoid calling loadX functions in a computed context
+    await Promise.resolve();
     Result.combine(
       await Promise.all(
-        this.memberModels
-          .filter(CatalogMemberMixin.isMixedInto)
-          .map(async model => await model.loadMetadata())
+        members.map(async (model) => await model.loadMetadata())
       ),
       "Failed to load composite catalog items metadata"
     ).throwIfError();
   }
 
   async forceLoadMapItems(): Promise<void> {
+    const members = this.memberModels.filter(MappableMixin.isMixedInto);
+    // Avoid calling loadX functions in a computed context
+    await Promise.resolve();
     Result.combine(
-      await Promise.all(
-        this.memberModels
-          .filter(MappableMixin.isMixedInto)
-          .map(model => model.loadMapItems())
-      ),
+      await Promise.all(members.map((model) => model.loadMapItems())),
       "Failed to load composite catalog items mapItems"
     ).throwIfError();
   }
 
   syncVisibilityToMembers() {
     const { show } = this;
-    this.memberModels.forEach(model => {
+    this.memberModels.forEach((model) => {
       runInAction(() => {
-        model.setTrait(CommonStrata.user, "show", show);
+        model.setTrait(CommonStrata.underride, "show", show);
       });
     });
   }
 
   @computed get mapItems() {
     const result: MapItem[] = [];
-    this.memberModels.filter(MappableMixin.isMixedInto).forEach(model => {
+    this.memberModels.filter(MappableMixin.isMixedInto).forEach((model) => {
       result.push(...model.mapItems);
     });
     return result;

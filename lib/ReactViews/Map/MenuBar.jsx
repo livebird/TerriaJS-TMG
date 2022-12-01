@@ -1,25 +1,24 @@
-import React from "react";
-import { isMobile } from "react-device-detect";
-import styled from "styled-components";
-
-import PropTypes from "prop-types";
 import classNames from "classnames";
+import { runInAction } from "mobx";
+import { observer } from "mobx-react";
+import PropTypes from "prop-types";
+import React from "react";
+import styled from "styled-components";
+import withControlledVisibility from "../../ReactViews/HOCs/withControlledVisibility";
+import { useViewState } from "../StandardUserInterface/ViewStateContext";
+import HelpButton from "./HelpButton/HelpButton";
+import LangPanel from "./Panels/LangPanel/LangPanel";
 import SettingPanel from "./Panels/SettingPanel";
 import SharePanel from "./Panels/SharePanel/SharePanel";
 import ToolsPanel from "./Panels/ToolsPanel/ToolsPanel";
 import StoryButton from "./StoryButton/StoryButton";
-import LangPanel from "./Panels/LangPanel/LangPanel";
+import { isMobile } from "react-device-detect";
 
 import Styles from "./menu-bar.scss";
-import { runInAction } from "mobx";
-import { observer } from "mobx-react";
-
-import withControlledVisibility from "../../ReactViews/HOCs/withControlledVisibility";
-import HelpButton from "./HelpButton/HelpButton";
 
 const StyledMenuBar = styled.div`
   pointer-events: none;
-  ${p =>
+  ${(p) =>
     p.trainerBarVisible &&
     `
     top: ${Number(p.theme.trainerHeight) + Number(p.theme.mapButtonTop)}px;
@@ -33,7 +32,9 @@ function sendEventToDevice(event) {
   ifrm = null;
 }
 // The map navigation region
-const MenuBar = observer(props => {
+const MenuBar = observer((props) => {
+  const viewState = useViewState();
+  const terria = viewState.terria;
   const menuItems = props.menuItems || [];
   const handleClick = () => {
     if (!isMobile) {
@@ -45,29 +46,29 @@ const MenuBar = observer(props => {
     }
   };
 
-  const storyEnabled = props.terria.configParameters.storyEnabled;
-  const enableTools = props.terria.getUserProperty("tools") === "1";
+  const storyEnabled = terria.configParameters.storyEnabled;
+  const enableTools = terria.userProperties.get("tools") === "1";
 
   return (
     <StyledMenuBar
       className={classNames(
-        props.viewState.topElement === "MenuBar" ? "top-element" : "",
+        viewState.topElement === "MenuBar" ? "top-element" : "",
         Styles.menuBar,
         {
-          [Styles.menuBarWorkbenchClosed]: props.viewState.isMapFullScreen
+          [Styles.menuBarWorkbenchClosed]: viewState.isMapFullScreen
         }
       )}
       onClick={handleClick}
-      trainerBarVisible={props.viewState.trainerBarVisible}
+      trainerBarVisible={viewState.trainerBarVisible}
     >
       <section>
         <ul className={classNames(Styles.menu)}>
           {enableTools && (
             <li className={Styles.menuItem}>
-              <ToolsPanel terria={props.terria} viewState={props.viewState} />
+              <ToolsPanel />
             </li>
           )}
-          {/* <If condition={!props.viewState.useSmallScreenInterface}>
+          {/* <If condition={!viewState.useSmallScreenInterface}>
             <For each="element" of={props.menuLeftItems} index="i">
               <li className={Styles.menuItem} key={i}>
                 {element}
@@ -79,17 +80,17 @@ const MenuBar = observer(props => {
       <section className={classNames(Styles.flex)}>
         <ul className={classNames(Styles.menu)}>
           <li className={Styles.menuItem}>
-            <SettingPanel terria={props.terria} viewState={props.viewState} />
+            <SettingPanel terria={terria} viewState={viewState} />
           </li>
           {/* <li className={Styles.menuItem}>
-            <HelpButton viewState={props.viewState} />
+            <HelpButton viewState={viewState} />
           </li> */}
 
-          {props.terria.configParameters?.languageConfiguration?.enabled ? (
+          {terria.configParameters?.languageConfiguration?.enabled ? (
             <li className={Styles.menuItem}>
               <LangPanel
-                terria={props.terria}
-                smallScreen={props.viewState.useSmallScreenInterface}
+                terria={terria}
+                smallScreen={viewState.useSmallScreenInterface}
               />
             </li>
           ) : null}
@@ -98,8 +99,8 @@ const MenuBar = observer(props => {
           <ul className={classNames(Styles.menu)}>
             <li className={Styles.menuItem}>
               <StoryButton
-                terria={props.terria}
-                viewState={props.viewState}
+                terria={terria}
+                viewState={viewState}
                 theme={props.theme}
               />
             </li>
@@ -108,14 +109,14 @@ const MenuBar = observer(props => {
         {/* <ul className={classNames(Styles.menu)}>
           <li className={Styles.menuItem}>
             <SharePanel
+              terria={terria}
               storyEnabled={false}
-              terria={props.terria}
-              viewState={props.viewState}
+              viewState={viewState}
               animationDuration={props.animationDuration}
             />
           </li>
         </ul> */}
-        <If condition={!props.viewState.useSmallScreenInterface}>
+        <If condition={!viewState.useSmallScreenInterface}>
           <For each="element" of={menuItems} index="i">
             <li className={Styles.menuItem} key={i}>
               {element}
@@ -128,9 +129,6 @@ const MenuBar = observer(props => {
 });
 MenuBar.displayName = "MenuBar";
 MenuBar.propTypes = {
-  terria: PropTypes.object,
-  viewState: PropTypes.object.isRequired,
-  allBaseMaps: PropTypes.array, // Not implemented yet
   animationDuration: PropTypes.number,
   menuItems: PropTypes.arrayOf(PropTypes.element),
   menuLeftItems: PropTypes.arrayOf(PropTypes.element)

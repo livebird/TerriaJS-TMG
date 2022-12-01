@@ -1,5 +1,4 @@
 import i18next from "i18next";
-import Cartesian3 from "terriajs-cesium/Source/Core/Cartesian3";
 import { action, observable, runInAction } from "mobx";
 import React from "react";
 import CesiumCartographic from "terriajs-cesium/Source/Core/Cartographic";
@@ -9,11 +8,13 @@ import isDefined from "../../../../Core/isDefined";
 import TerriaError from "../../../../Core/TerriaError";
 import GeoJsonCatalogItem from "../../../../Models/Catalog/CatalogItems/GeoJsonCatalogItem";
 import CommonStrata from "../../../../Models/Definition/CommonStrata";
+import createStratumInstance from "../../../../Models/Definition/createStratumInstance";
 import Terria from "../../../../Models/Terria";
 import ViewerMode from "../../../../Models/ViewerMode";
 import { GLYPHS } from "../../../../Styled/Icon";
+import StyleTraits from "../../../../Traits/TraitsClasses/StyleTraits";
 import MapNavigationItemController from "../../../../ViewModels/MapNavigation/MapNavigationItemController";
-
+import Cartesian3 from "terriajs-cesium/Source/Core/Cartesian3";
 interface PropTypes {
   terria: Terria;
 }
@@ -33,11 +34,9 @@ class MyLocation extends MapNavigationItemController {
     this._marker = new GeoJsonCatalogItem(createGuid(), props.terria);
     this.zoomToMyLocation = this.zoomToMyLocation.bind(this);
     this.handleLocationError = this.handleLocationError.bind(this);
-    this.augmentedVirtualityEnabled = this.augmentedVirtualityEnabled.bind(
-      this
-    );
+    this.augmentedVirtualityEnabled =
+      this.augmentedVirtualityEnabled.bind(this);
     this.followMeEnabled = this.followMeEnabled.bind(this);
-
     if (this.terria.gotoCoordinate !== undefined) {
       this.terria.gotoCoordinate(this.gotoCoordinate, this);
     }
@@ -137,23 +136,20 @@ class MyLocation extends MapNavigationItemController {
           latitude: latitude
         }
       });
-      this._marker.setTrait(CommonStrata.user, "style", {
-        "marker-size": "25",
-        "marker-color": "#08ABD5",
-        "marker-symbol": undefined,
-        "marker-opacity": undefined,
-        "marker-url": undefined,
-        stroke: "#ffffff",
-        "stroke-opacity": undefined,
-        "stroke-width": 3,
-        fill: undefined,
-        "fill-opacity": undefined
-      });
+      this._marker.setTrait(
+        CommonStrata.user,
+        "style",
+        createStratumInstance(StyleTraits, {
+          "marker-size": "25",
+          "marker-color": "#08ABD5",
+          stroke: "#ffffff",
+          "stroke-width": 3
+        })
+      );
 
       this.terria.workbench.add(this._marker);
     });
   }
-
   gotoCoordinate(latitude: number, longitude: number, that: MyLocation) {
     const augmentedVirtualityEnabled =
       that.terria.augmentedVirtuality &&
@@ -186,7 +182,6 @@ class MyLocation extends MapNavigationItemController {
     }
     return [0, 0];
   }
-
   handleLocationError(err: any) {
     const t = i18next.t.bind(i18next);
     let message = err.message;

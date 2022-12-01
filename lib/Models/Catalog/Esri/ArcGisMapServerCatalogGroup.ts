@@ -6,7 +6,7 @@ import isDefined from "../../../Core/isDefined";
 import loadJson from "../../../Core/loadJson";
 import replaceUnderscores from "../../../Core/replaceUnderscores";
 import runLater from "../../../Core/runLater";
-import TerriaError from "../../../Core/TerriaError";
+import TerriaError, { networkRequestError } from "../../../Core/TerriaError";
 import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
 import GroupMixin from "../../../ModelMixins/GroupMixin";
 import UrlMixin from "../../../ModelMixins/UrlMixin";
@@ -122,20 +122,12 @@ export class MapServerStratum extends LoadableStratum(
       .then((mapServer: MapServer) => {
         // Is this really a MapServer REST response?
         if (!mapServer || (!mapServer.layers && !mapServer.subLayers)) {
-          throw new TerriaError({
+          throw networkRequestError({
             title: i18next.t(
               "models.arcGisMapServerCatalogGroup.invalidServiceTitle"
             ),
             message: i18next.t(
-              "models.arcGisMapServerCatalogGroup.invalidServiceTitle",
-              {
-                email:
-                  '<a href="mailto:' +
-                  terria.supportEmail +
-                  '">' +
-                  terria.supportEmail +
-                  "</a>"
-              }
+              "models.arcGisMapServerCatalogGroup.invalidServiceMessage"
             )
           });
         }
@@ -143,24 +135,13 @@ export class MapServerStratum extends LoadableStratum(
         return stratum;
       })
       .catch(() => {
-        throw new TerriaError({
+        throw networkRequestError({
           sender: catalogGroup,
           title: i18next.t(
             "models.arcGisMapServerCatalogGroup.groupNotAvailableTitle"
           ),
           message: i18next.t(
-            "models.arcGisMapServerCatalogGroup.groupNotAvailableMessage",
-            {
-              cors:
-                '<a href="http://enable-cors.org/" target="_blank">CORS</a>',
-              appName: terria.appName,
-              email:
-                '<a href="mailto:' +
-                terria.supportEmail +
-                '">' +
-                terria.supportEmail +
-                "</a>"
-            }
+            "models.arcGisMapServerCatalogGroup.groupNotAvailableMessage"
           )
         });
       });
@@ -170,14 +151,14 @@ export class MapServerStratum extends LoadableStratum(
   get members(): ModelReference[] {
     return filterOutUndefined(
       this.layers
-        .map(layer => {
+        .map((layer) => {
           if (!isDefined(layer.id) || layer.parentLayerId !== -1) {
             return undefined;
           }
           return this._catalogGroup.uniqueId + "/" + layer.id;
         })
         .concat(
-          this.subLayers.map(subLayer => {
+          this.subLayers.map((subLayer) => {
             if (!isDefined(subLayer.id)) {
               return undefined;
             }
@@ -199,7 +180,7 @@ export class MapServerStratum extends LoadableStratum(
 
   @action
   createMembersFromLayers() {
-    this.layers.forEach(layer => this.createMemberFromLayer(layer));
+    this.layers.forEach((layer) => this.createMemberFromLayer(layer));
   }
 
   @action
@@ -251,20 +232,16 @@ export class MapServerStratum extends LoadableStratum(
     }
 
     // Replace the stratum inherited from the parent group.
-    const stratum = CommonStrata.underride;
+    model.strata.delete(CommonStrata.definition);
 
-    model.strata.delete(stratum);
-
-    model.setTrait(stratum, "name", replaceUnderscores(layer.name));
+    model.setTrait(
+      CommonStrata.definition,
+      "name",
+      replaceUnderscores(layer.name)
+    );
 
     var uri = new URI(this._catalogGroup.url).segment(layer.id + ""); // Convert layer id to string as segment(0) means sthg different.
-    model.setTrait(stratum, "url", uri.toString());
-
-    if (this._catalogGroup.itemProperties !== undefined) {
-      Object.keys(this._catalogGroup.itemProperties).map((k: any) =>
-        model.setTrait(stratum, k, this._catalogGroup.itemProperties![k])
-      );
-    }
+    model.setTrait(CommonStrata.definition, "url", uri.toString());
   }
 }
 
@@ -291,7 +268,7 @@ export default class ArcGisMapServerCatalogGroup extends UrlMixin(
   }
 
   protected forceLoadMetadata(): Promise<void> {
-    return MapServerStratum.load(this).then(stratum => {
+    return MapServerStratum.load(this).then((stratum) => {
       runInAction(() => {
         this.strata.set(MapServerStratum.stratumName, stratum);
       });

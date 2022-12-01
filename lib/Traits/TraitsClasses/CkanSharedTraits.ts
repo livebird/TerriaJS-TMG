@@ -1,18 +1,12 @@
-import primitiveTrait from "../Decorators/primitiveTrait";
-import anyTrait from "../Decorators/anyTrait";
 import JsonObject from "../../Core/Json";
+import anyTrait from "../Decorators/anyTrait";
 import objectArrayTrait from "../Decorators/objectArrayTrait";
-import CkanResourceFormatTraits from "./CkanResourceFormatTraits";
+import primitiveTrait from "../Decorators/primitiveTrait";
 import mixTraits from "../mixTraits";
+import CkanResourceFormatTraits from "./CkanResourceFormatTraits";
+import ReferenceTraits from "./ReferenceTraits";
 
-export default class CkanSharedTraits extends mixTraits() {
-  @anyTrait({
-    name: "Item Properties",
-    description:
-      "An object of properties that will be set on the item created from the CKAN resource."
-  })
-  itemProperties?: JsonObject;
-
+export default class CkanSharedTraits extends mixTraits(ReferenceTraits) {
   @primitiveTrait({
     type: "boolean",
     name: "Use resource name",
@@ -29,8 +23,7 @@ export default class CkanSharedTraits extends mixTraits() {
 
   @primitiveTrait({
     type: "boolean",
-    name:
-      "Use combination of dataset and resource name where multiple resources",
+    name: "Use combination of dataset and resource name where multiple resources",
     description: `Use a combination of the name and the resource and dataset name where there are multiple resources for a single dataset.`
   })
   useCombinationNameWhereMultipleResources: boolean = false;
@@ -44,4 +37,11 @@ export default class CkanSharedTraits extends mixTraits() {
     idProperty: "id"
   })
   supportedResourceFormats?: CkanResourceFormatTraits[];
+
+  @primitiveTrait({
+    type: "boolean",
+    name: "Use single resource",
+    description: `Only use a single resource for each dataset. If multiple resources exist, the highest match from \`supportedResourceFormats\` will be used. If this is true, then \`useDatasetNameAndFormatWhereMultipleResources\` and \`useCombinationNameWhereMultipleResources\` will be ignored`
+  })
+  useSingleResource: boolean = false;
 }

@@ -4,9 +4,7 @@ import RequestErrorEvent from "terriajs-cesium/Source/Core/RequestErrorEvent";
 import Resource from "terriajs-cesium/Source/Core/Resource";
 import filterOutUndefined from "../../../Core/filterOutUndefined";
 import isDefined from "../../../Core/isDefined";
-import TerriaError from "../../../Core/TerriaError";
-import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
-import ChartableMixin from "../../../ModelMixins/ChartableMixin";
+import TerriaError, { TerriaErrorSeverity } from "../../../Core/TerriaError";
 import TableMixin from "../../../ModelMixins/TableMixin";
 import UrlMixin from "../../../ModelMixins/UrlMixin";
 import Csv from "../../../Table/Csv";
@@ -14,20 +12,20 @@ import TableAutomaticStylesStratum from "../../../Table/TableAutomaticStylesStra
 import SdmxCatalogItemTraits from "../../../Traits/TraitsClasses/SdmxCatalogItemTraits";
 import CreateModel from "../../Definition/CreateModel";
 import { BaseModel } from "../../Definition/Model";
-import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
-import SelectableDimensions, {
-  SelectableDimension
-} from "../../SelectableDimensions";
 import StratumOrder from "../../Definition/StratumOrder";
+import SelectableDimensions, {
+  filterEnums,
+  SelectableDimension
+} from "../../SelectableDimensions/SelectableDimensions";
 import Terria from "../../Terria";
+import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
 import { SdmxJsonDataflowStratum } from "./SdmxJsonDataflowStratum";
-import { sdmxErrorString } from "./SdmxJsonServerStratum";
+import { sdmxErrorString, SdmxHttpErrorCodes } from "./SdmxJsonServerStratum";
 
 export default class SdmxJsonCatalogItem
-  extends ChartableMixin(
-    TableMixin(UrlMixin(CatalogMemberMixin(CreateModel(SdmxCatalogItemTraits))))
-  )
-  implements SelectableDimensions {
+  extends TableMixin(UrlMixin(CreateModel(SdmxCatalogItemTraits)))
+  implements SelectableDimensions
+{
   static get type() {
     return "sdmx-json";
   }
@@ -70,7 +68,7 @@ export default class SdmxJsonCatalogItem
    */
   @computed
   get sdmxSelectableDimensions(): SelectableDimension[] {
-    return this.dimensions.map(dim => {
+    return this.dimensions.map((dim) => {
       return {
         id: dim.id,
         name: dim.name,
@@ -79,17 +77,21 @@ export default class SdmxJsonCatalogItem
         allowUndefined: dim.allowUndefined,
         disable:
           dim.disable ||
-          this.columns.find(col => col.name === dim.id)?.type === "region",
-        setDimensionValue: async (stratumId: string, value: string) => {
+          this.columns.find((col) => col.name === dim.id)?.type === "region",
+        setDimensionValue: async (
+          stratumId: string,
+          value: string | undefined
+        ) => {
           let dimensionTraits = this.dimensions?.find(
-            sdmxDim => sdmxDim.id === dim.id
+            (sdmxDim) => sdmxDim.id === dim.id
           );
           if (!isDefined(dimensionTraits)) {
             dimensionTraits = this.addObject(stratumId, "dimensions", dim.id!)!;
           }
 
           dimensionTraits.setTrait(stratumId, "selectedId", value);
-          (await this.loadMapItems()).throwIfError();
+
+          (await this.loadMapItems()).raiseError(this.terria);
         }
       };
     });
@@ -99,11 +101,9 @@ export default class SdmxJsonCatalogItem
   get selectableDimensions(): SelectableDimension[] {
     return filterOutUndefined([
       ...super.selectableDimensions.filter(
-        d => d.id !== this.styleDimensions?.id
+        (d) => d.id !== this.styleDimensions?.id
       ),
-      ...this.sdmxSelectableDimensions,
-      this.regionColumnDimensions,
-      this.regionProviderDimensions
+      ...this.sdmxSelectableDimensions
     ]);
   }
 
@@ -130,9 +130,9 @@ export default class SdmxJsonCatalogItem
           (isDefined(b.position) ? b.position : this.dimensions.length)
       )
       // If a dimension is disabled, use empty string (which is wildcard)
-      .map(dim =>
+      .map((dim) =>
         !dim.disable &&
-        this.columns.find(col => col.name === dim.id)?.type !== "region"
+        this.columns.find((col) => col.name === dim.id)?.type !== "region"
           ? dim.selectedId
           : ""
       )
@@ -155,7 +155,10 @@ export default class SdmxJsonCatalogItem
       if (!isDefined(csvString)) {
         throw new TerriaError({
           title: i18next.t("models.sdmxCatalogItem.loadDataErrorTitle"),
-          message: i18next.t("models.sdmxCatalogItem.loadDataErrorTitle", this)
+          message: i18next.t(
+            "models.sdmxCatalogItem.loadDataErrorMessage",
+            this
+          )
         });
       }
 
@@ -165,19 +168,46 @@ export default class SdmxJsonCatalogItem
         error instanceof RequestErrorEvent &&
         typeof error.response === "string"
       ) {
-        this.terria.raiseErrorToUser(
-          new TerriaError({
-            message: sdmxErrorString.has(error.statusCode)
-              ? `${sdmxErrorString.get(error.statusCode)}: ${error.response}`
-              : `${error.response}`,
-            title: `Failed to load SDMX data for "${this.name ??
-              this.uniqueId}"`
-          })
-        );
+        // If no results and we have selcetable dimensions, give message regarding dimensions
+        // This message will include values for each selectable dimension
+        if (
+          error.statusCode === SdmxHttpErrorCodes.NoResults &&
+          this.selectableDimensions.length > 0
+        ) {
+          throw new TerriaError({
+            message: i18next.t(
+              "models.sdmxCatalogItem.noResultsWithDimensions",
+              {
+                dimensions: filterEnums(this.selectableDimensions)
+                  .filter((dim) => !dim.disable && dim.options?.length !== 1)
+                  .map(
+                    (dim) =>
+                      // Format string into `${dimenion name} = ${dimenion selected value}
+                      `- ${dim.name} = \`${
+                        dim.options?.find(
+                          (option) => option.id === dim.selectedId
+                        )?.name ?? dim.selectedId
+                      }\``
+                  )
+                  .join("\n")
+              }
+            ),
+            title: i18next.t("models.sdmxCatalogItem.loadDataErrorTitle", this),
+            severity: TerriaErrorSeverity.Warning,
+            importance: 1,
+            overrideRaiseToUser: true
+          });
+        }
+        throw new TerriaError({
+          message: sdmxErrorString.has(error.statusCode)
+            ? `${sdmxErrorString.get(error.statusCode)}: ${error.response}`
+            : `${error.response}`,
+          title: i18next.t("models.sdmxCatalogItem.loadDataErrorTitle", this)
+        });
       } else {
-        this.terria.raiseErrorToUser(
-          `Failed to load SDMX data for "${this.name ?? this.uniqueId}"`
-        );
+        throw TerriaError.from(error, {
+          message: i18next.t("models.sdmxCatalogItem.loadDataErrorTitle", this)
+        });
       }
     }
   }

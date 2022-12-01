@@ -36,23 +36,23 @@ class FeatureInfoPanelChart extends React.Component {
   @computed
   get chartItem() {
     return this.props.item.chartItems.find(
-      chartItem =>
+      (chartItem) =>
         chartItem.type === "line" || chartItem.type === "lineAndPoint"
     );
   }
 
   async componentDidUpdate() {
-    (await this.props.item.loadMapItems()).raiseError(
-      this.props.item.terria,
-      `Failed to load chart for ${this.props.item.name}`
-    );
+    (await this.props.item.loadMapItems()).raiseError(this.props.item.terria, {
+      message: `Failed to load chart for ${this.props.item.name}`,
+      importance: -1
+    });
   }
 
   async componentDidMount() {
-    (await this.props.item.loadMapItems()).raiseError(
-      this.props.item.terria,
-      `Failed to load chart for ${this.props.item.name}`
-    );
+    (await this.props.item.loadMapItems()).raiseError(this.props.item.terria, {
+      message: `Failed to load chart for ${this.props.item.name}`,
+      importance: -1
+    });
   }
 
   render() {
@@ -211,8 +211,8 @@ const ChartStatusText = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: ${p => p.width}px;
-  height: ${p => p.height}px;
+  width: ${(p) => p.width}px;
+  height: ${(p) => p.height}px;
 `;
 
 export default FeatureInfoPanelChart;

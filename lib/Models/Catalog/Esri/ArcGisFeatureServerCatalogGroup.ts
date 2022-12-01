@@ -6,7 +6,7 @@ import isDefined from "../../../Core/isDefined";
 import loadJson from "../../../Core/loadJson";
 import replaceUnderscores from "../../../Core/replaceUnderscores";
 import runLater from "../../../Core/runLater";
-import TerriaError from "../../../Core/TerriaError";
+import TerriaError, { networkRequestError } from "../../../Core/TerriaError";
 import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
 import GroupMixin from "../../../ModelMixins/GroupMixin";
 import UrlMixin from "../../../ModelMixins/UrlMixin";
@@ -126,20 +126,12 @@ export class FeatureServerStratum extends LoadableStratum(
       .then((featureServer: FeatureServer) => {
         // Is this really a FeatureServer REST response?
         if (!featureServer || !featureServer.layers) {
-          throw new TerriaError({
+          throw networkRequestError({
             title: i18next.t(
               "models.arcGisFeatureServerCatalogGroup.invalidServiceTitle"
             ),
             message: i18next.t(
-              "models.arcGisFeatureServerCatalogGroup.invalidServiceTitle",
-              {
-                email:
-                  '<a href="mailto:' +
-                  terria.supportEmail +
-                  '">' +
-                  terria.supportEmail +
-                  "</a>"
-              }
+              "models.arcGisFeatureServerCatalogGroup.invalidServiceMessage"
             )
           });
         }
@@ -148,24 +140,13 @@ export class FeatureServerStratum extends LoadableStratum(
         return stratum;
       })
       .catch(() => {
-        throw new TerriaError({
+        throw networkRequestError({
           sender: catalogGroup,
           title: i18next.t(
             "models.arcGisFeatureServerCatalogGroup.groupNotAvailableTitle"
           ),
           message: i18next.t(
-            "models.arcGisFeatureServerCatalogGroup.groupNotAvailableMessage",
-            {
-              cors:
-                '<a href="http://enable-cors.org/" target="_blank">CORS</a>',
-              appName: terria.appName,
-              email:
-                '<a href="mailto:' +
-                terria.supportEmail +
-                '">' +
-                terria.supportEmail +
-                "</a>"
-            }
+            "models.arcGisFeatureServerCatalogGroup.groupNotAvailableMessage"
           )
         });
       });
@@ -174,7 +155,7 @@ export class FeatureServerStratum extends LoadableStratum(
   @computed
   get members(): ModelReference[] {
     return filterOutUndefined(
-      this.layers.map(layer => {
+      this.layers.map((layer) => {
         if (!isDefined(layer.id)) {
           return undefined;
         }
@@ -190,7 +171,7 @@ export class FeatureServerStratum extends LoadableStratum(
 
   @action
   createMembersFromLayers() {
-    this.layers.forEach(layer => this.createMemberFromLayer(layer));
+    this.layers.forEach((layer) => this.createMemberFromLayer(layer));
   }
 
   @action
@@ -218,14 +199,16 @@ export class FeatureServerStratum extends LoadableStratum(
     }
 
     // Replace the stratum inherited from the parent group.
-    const stratum = CommonStrata.underride;
+    model.strata.delete(CommonStrata.definition);
 
-    model.strata.delete(stratum);
-
-    model.setTrait(stratum, "name", replaceUnderscores(layer.name));
+    model.setTrait(
+      CommonStrata.definition,
+      "name",
+      replaceUnderscores(layer.name)
+    );
 
     var uri = new URI(this._catalogGroup.url).segment(layer.id + ""); // Convert layer id to string as segment(0) means sthg different.
-    model.setTrait(stratum, "url", uri.toString());
+    model.setTrait(CommonStrata.definition, "url", uri.toString());
   }
 }
 
@@ -247,7 +230,7 @@ export default class ArcGisFeatureServerCatalogGroup extends UrlMixin(
   }
 
   protected forceLoadMetadata(): Promise<void> {
-    return FeatureServerStratum.load(this).then(stratum => {
+    return FeatureServerStratum.load(this).then((stratum) => {
       runInAction(() => {
         this.strata.set(FeatureServerStratum.stratumName, stratum);
       });

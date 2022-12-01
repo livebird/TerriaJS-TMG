@@ -11,15 +11,21 @@ import Result from "../Core/Result";
 import Model from "../Models/Definition/Model";
 import MappableTraits from "../Traits/TraitsClasses/MappableTraits";
 import CatalogMemberMixin, { getName } from "./CatalogMemberMixin";
-import TableMixin from "./TableMixin";
+
+// Unfortunately Cesium does not declare a single interface that represents a primitive,
+// but here is what primitives have in common:
+export interface AbstractPrimitive {
+  show: boolean;
+  destroy(): void;
+  isDestroyed(): boolean;
+}
 
 export type MapItem =
   | ImageryParts
   | DataSource
-  | Cesium3DTileset
+  | AbstractPrimitive
   | TerrainProvider;
 
-// Shouldn't this be a class?
 export interface ImageryParts {
   alpha: number;
   clippingRectangle: Rectangle | undefined;
@@ -32,6 +38,10 @@ export namespace ImageryParts {
   export function is(object: MapItem): object is ImageryParts {
     return "imageryProvider" in object;
   }
+}
+
+export function isPrimitive(mapItem: MapItem): mapItem is AbstractPrimitive {
+  return "isDestroyed" in mapItem;
 }
 
 export function isCesium3DTileset(
@@ -131,7 +141,10 @@ function MappableMixin<T extends Constructor<Model<MappableTraits>>>(Base: T) {
 
         (await this._mapItemsLoader.load(force)).throwIfError();
       } catch (e) {
-        return Result.error(e, `Failed to load \`${getName(this)}\` mapItems`);
+        return Result.error(e, {
+          message: `Failed to load \`${getName(this)}\` mapItems`,
+          importance: -1
+        });
       }
 
       return Result.none();
@@ -160,7 +173,7 @@ function MappableMixin<T extends Constructor<Model<MappableTraits>>>(Base: T) {
       // This function is deliberately not a computed,
       // this.terria.notificationState.addNotificationToQueue changes state
       this.initialMessageShown = true;
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         this.terria.notificationState.addNotificationToQueue({
           title: this.initialMessage.title ?? i18next.t("notification.title"),
           width: this.initialMessage.width,
@@ -188,7 +201,12 @@ namespace MappableMixin {
   export interface Instance
     extends InstanceType<ReturnType<typeof MappableMixin>> {}
   export function isMixedInto(model: any): model is Instance {
-    return model && model.isMappable;
+    return (
+      model &&
+      model.isMappable &&
+      "forceLoadMapItems" in model &&
+      typeof model.forceLoadMapItems === "function"
+    );
   }
 }
 

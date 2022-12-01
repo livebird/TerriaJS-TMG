@@ -1,15 +1,14 @@
-import { observable, runInAction, untracked } from "mobx";
+import { computed, observable, runInAction, untracked } from "mobx";
 import DeveloperError from "terriajs-cesium/Source/Core/DeveloperError";
 import AsyncLoader from "../Core/AsyncLoader";
 import Constructor from "../Core/Constructor";
 import Result from "../Core/Result";
 import Model, { BaseModel, ModelInterface } from "../Models/Definition/Model";
-import ModelTraits from "../Traits/ModelTraits";
+import ReferenceTraits from "../Traits/TraitsClasses/ReferenceTraits";
 import { getName } from "./CatalogMemberMixin";
+import { applyItemProperties } from "./GroupMixin";
 
-type RequiredTraits = ModelTraits;
-
-interface ReferenceInterface extends ModelInterface<RequiredTraits> {
+interface ReferenceInterface extends ModelInterface<ReferenceTraits> {
   readonly isLoadingReference: boolean;
   readonly target: BaseModel | undefined;
   loadReference(): Promise<Result<void>>;
@@ -22,27 +21,44 @@ interface ReferenceInterface extends ModelInterface<RequiredTraits> {
  * loaded, the `CkanCatalogItem` may be dereferenced to obtain the `WebMapServiceCatalogItem`,
  * `GeoJsonCatalogItem`, or whatever else representing the dataset.
  */
-function ReferenceMixin<T extends Constructor<Model<RequiredTraits>>>(Base: T) {
-  abstract class ReferenceMixin extends Base implements ReferenceInterface {
+function ReferenceMixin<T extends Constructor<Model<ReferenceTraits>>>(
+  Base: T
+) {
+  abstract class ReferenceMixinClass
+    extends Base
+    implements ReferenceInterface
+  {
+    /** A "weak" reference has a target which doesn't include the `sourceReference` property.
+     * This means the reference is treated more like a shortcut to the target. So share links, for example, will use the target instead of sourceReference. */
+    protected readonly weakReference: boolean = false;
+
     @observable
     private _target: BaseModel | undefined;
 
-    private _referenceLoader = new AsyncLoader(() => {
+    private _referenceLoader = new AsyncLoader(async () => {
       const previousTarget = untracked(() => this._target);
-      return this.forceLoadReference(previousTarget).then(target => {
-        if (
-          target &&
-          (target.sourceReference !== this || target.uniqueId !== this.uniqueId)
-        ) {
-          throw new DeveloperError(
-            "The model returned by `forceLoadReference` must be constructed " +
-              "with its `sourceReference` set to the Reference model and its " +
-              "`uniqueId` set to the same value as the Reference model."
-          );
-        }
-        runInAction(() => {
-          this._target = target;
-        });
+      const target = await this.forceLoadReference(previousTarget);
+
+      if (!target) {
+        throw new DeveloperError("Failed to create reference");
+      }
+      if (target?.uniqueId !== this.uniqueId) {
+        throw new DeveloperError(
+          "The model returned by `forceLoadReference` must be constructed with its `uniqueId` set to the same value as the Reference model."
+        );
+      }
+      if (!this.weakReference && target?.sourceReference !== this) {
+        throw new DeveloperError(
+          "The model returned by `forceLoadReference` must be constructed with its `sourceReference` set to the Reference model."
+        );
+      }
+      if (this.weakReference && target?.sourceReference) {
+        throw new DeveloperError(
+          'This is a "weak" reference, so the model returned by `forceLoadReference` must not have a `sourceReference` set.'
+        );
+      }
+      runInAction(() => {
+        this._target = target;
       });
     });
 
@@ -66,6 +82,16 @@ function ReferenceMixin<T extends Constructor<Model<RequiredTraits>>>(Base: T) {
     }
 
     /**
+     * If this a nested reference return the target of the final reference.
+     */
+    @computed
+    get nestedTarget(): BaseModel | undefined {
+      return ReferenceMixin.isMixedInto(this._target)
+        ? this._target.nestedTarget
+        : this._target;
+    }
+
+    /**
      * Asynchronously loads the reference. When the returned promise resolves,
      * {@link ReferenceMixin#target} should return the target of the reference.
      * @param forceReload True to force the load to happen again, even if nothing
@@ -76,10 +102,25 @@ function ReferenceMixin<T extends Constructor<Model<RequiredTraits>>>(Base: T) {
      *
      * {@see AsyncLoader}
      */
-    async loadReference(forceReload: boolean = false) {
-      return (await this._referenceLoader.load(forceReload)).clone(
+    async loadReference(forceReload: boolean = false): Promise<Result<void>> {
+      const result = (await this._referenceLoader.load(forceReload)).clone(
         `Failed to load reference \`${getName(this)}\``
       );
+
+      if (!result.error && this.target) {
+        runInAction(() => {
+          // Copy knownContainerUniqueIds to target
+          this.knownContainerUniqueIds.forEach((id) =>
+            !this.target!.knownContainerUniqueIds.includes(id)
+              ? this.target!.knownContainerUniqueIds.push(id)
+              : null
+          );
+        });
+
+        applyItemProperties(this, this.target);
+      }
+
+      return result;
     }
 
     /**
@@ -102,13 +143,15 @@ function ReferenceMixin<T extends Constructor<Model<RequiredTraits>>>(Base: T) {
     }
   }
 
-  return ReferenceMixin;
+  return ReferenceMixinClass;
 }
 
-ReferenceMixin.isMixedInto = function(
-  model: BaseModel
-): model is ReferenceInterface {
-  return "loadReference" in model && "target" in model;
-};
+namespace ReferenceMixin {
+  export interface Instance
+    extends InstanceType<ReturnType<typeof ReferenceMixin>> {}
+  export function isMixedInto(model: any): model is Instance {
+    return model && "loadReference" in model;
+  }
+}
 
 export default ReferenceMixin;

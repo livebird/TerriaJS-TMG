@@ -197,7 +197,10 @@ export default class YDYRCatalogFunction extends CatalogFunctionMixin(
 
   @computed
   get description() {
-    return `Your Data Your Regions (YDYR) is an API for the conversion of data between different Australian geographic boundaries. See <a href="https://ydyr.info">ydyr.info</a> for more information`;
+    return (
+      super.description ??
+      `Your Data Your Regions (YDYR) is an API for the conversion of data between different Australian geographic boundaries. See <a href="https://ydyr.info">ydyr.info</a> for more information`
+    );
   }
 
   @computed
@@ -207,7 +210,7 @@ export default class YDYRCatalogFunction extends CatalogFunctionMixin(
     }
     const layer = this.terria.workbench.items
       .filter(TableMixin.isMixedInto)
-      .filter(item => item.uniqueId === this.inputLayers!.value)[0];
+      .filter((item) => item.uniqueId === this.inputLayers!.value)[0];
 
     return layer;
   }
@@ -225,11 +228,11 @@ export default class YDYRCatalogFunction extends CatalogFunctionMixin(
   get inputLayers() {
     const possibleValues = this.terria.workbench.items
       .filter(
-        item =>
+        (item) =>
           TableMixin.isMixedInto(item) && item.activeTableStyle.isRegions()
       )
-      .filter(item => item.uniqueId)
-      .map(item => {
+      .filter((item) => item.uniqueId)
+      .map((item) => {
         return {
           id: item.uniqueId,
           name: CatalogMemberMixin.isMixedInto(item) ? item.name : undefined
@@ -278,13 +281,13 @@ export default class YDYRCatalogFunction extends CatalogFunctionMixin(
       this.selectedTableCatalogMember?.tableColumns
         // Filter region columns which use supported regions
         .filter(
-          col =>
+          (col) =>
             col.type === TableColumnType.region &&
             isDefined(
-              DATASETS.find(d => d.dataCol === col.regionType?.regionProp)
+              DATASETS.find((d) => d.dataCol === col.regionType?.regionProp)
             )
         )
-        .map(col => {
+        .map((col) => {
           return { id: col.name };
         }) || [];
 
@@ -311,7 +314,7 @@ export default class YDYRCatalogFunction extends CatalogFunctionMixin(
 The region mapping can be set in the Workbench.
 
 **Supported regions:**
-${DATASETS.map(d => `\n- ${d.title}`)}`
+${DATASETS.map((d) => `\n- ${d.title}`)}`
       });
     }
   }
@@ -323,8 +326,8 @@ ${DATASETS.map(d => `\n- ${d.title}`)}`
     }
     const possibleValues =
       this.selectedTableCatalogMember?.tableColumns
-        .filter(col => col.type === TableColumnType.scalar)
-        .map(col => {
+        .filter((col) => col.type === TableColumnType.scalar)
+        .map((col) => {
           return { id: col.name };
         }) || [];
     if (possibleValues.length === 0) {
@@ -357,7 +360,7 @@ ${DATASETS.map(d => `\n- ${d.title}`)}`
     return new EnumerationParameter(this, {
       id: "Output Geography",
       description: "The output geography to be converted to.",
-      options: DATASETS.map(d => {
+      options: DATASETS.map((d) => {
         return { id: d.title };
       }),
       isRequired: true
@@ -383,7 +386,7 @@ ${DATASETS.map(d => `\n- ${d.title}`)}`
       return [];
     }
     return ALGORITHMS.map(
-      alg =>
+      (alg) =>
         new BooleanParameter(this, {
           id: alg[0]
         })

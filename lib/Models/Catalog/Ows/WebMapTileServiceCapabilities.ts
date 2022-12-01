@@ -2,7 +2,7 @@ import i18next from "i18next";
 import { createTransformer } from "mobx-utils";
 import defined from "terriajs-cesium/Source/Core/defined";
 import loadXML from "../../../Core/loadXML";
-import TerriaError from "../../../Core/TerriaError";
+import TerriaError, { networkRequestError } from "../../../Core/TerriaError";
 import xml2json from "../../../ThirdParty/xml2json";
 import {
   BoundingBox,
@@ -127,14 +127,12 @@ export interface TileMatrix {
 }
 
 export default class WebMapTileServiceCapabilities {
-  static fromUrl: (
-    url: string
-  ) => Promise<WebMapTileServiceCapabilities> = createTransformer(
-    (url: string) => {
-      return Promise.resolve(loadXML(url)).then(function(capabilitiesXml) {
+  static fromUrl: (url: string) => Promise<WebMapTileServiceCapabilities> =
+    createTransformer((url: string) => {
+      return Promise.resolve(loadXML(url)).then(function (capabilitiesXml) {
         const json = xml2json(capabilitiesXml);
         if (!defined(json.ServiceIdentification)) {
-          throw new TerriaError({
+          throw networkRequestError({
             title: i18next.t(
               "models.webMapTileServiceCatalogGroup.invalidCapabilitiesTitle"
             ),
@@ -149,8 +147,7 @@ export default class WebMapTileServiceCapabilities {
 
         return new WebMapTileServiceCapabilities(capabilitiesXml, json);
       });
-    }
-  );
+    });
 
   readonly layers: WmtsLayer[];
   readonly tileMatrixSets: TileMatrixSet[];
@@ -168,7 +165,7 @@ export default class WebMapTileServiceCapabilities {
     if (layerElements && Array.isArray(layerElements)) {
       this.layers.push(...layerElements);
     } else if (layerElements) {
-      this.layers.push(layerElements);
+      this.layers.push(layerElements as WmtsLayer);
     }
 
     const tileMatrixSetsElements = this.json.Contents?.TileMatrixSet as
@@ -177,7 +174,7 @@ export default class WebMapTileServiceCapabilities {
     if (tileMatrixSetsElements && Array.isArray(tileMatrixSetsElements)) {
       this.tileMatrixSets.push(...tileMatrixSetsElements);
     } else if (tileMatrixSetsElements) {
-      this.tileMatrixSets.push(tileMatrixSetsElements);
+      this.tileMatrixSets.push(tileMatrixSetsElements as TileMatrixSet);
     }
   }
 
@@ -208,7 +205,7 @@ export default class WebMapTileServiceCapabilities {
       return undefined;
     }
     let match = this.layers.find(
-      layer => layer.Identifier === name || layer.Title === name
+      (layer) => layer.Identifier === name || layer.Title === name
     );
     if (!match) {
       const colonIndex = name.indexOf(":");
@@ -217,7 +214,7 @@ export default class WebMapTileServiceCapabilities {
         // as just their name without the namespace qualifier.
         const nameWithoutNamespace = name.substring(colonIndex + 1);
         match = this.layers.find(
-          layer =>
+          (layer) =>
             layer.Identifier === nameWithoutNamespace ||
             layer.Title === nameWithoutNamespace
         );
@@ -232,7 +229,7 @@ export default class WebMapTileServiceCapabilities {
       return undefined;
     }
     return this.tileMatrixSets.find(
-      tileMatrixSet => tileMatrixSet.Identifier === set
+      (tileMatrixSet) => tileMatrixSet.Identifier === set
     );
   }
 }

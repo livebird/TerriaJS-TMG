@@ -1,7 +1,9 @@
+import { i18n } from "i18next";
 import { observer } from "mobx-react";
 import React from "react";
+import { withTranslation } from "react-i18next";
 import styled from "styled-components";
-import { useTranslationIfExists } from "../../../../Language/languageHelpers";
+import { applyTranslationIfExists } from "../../../../Language/languageHelpers";
 import Terria from "../../../../Models/Terria";
 import Box from "../../../../Styled/Box";
 import Icon, { GLYPHS } from "../../../../Styled/Icon";
@@ -12,16 +14,18 @@ interface PropTypes {
   item: IMapNavigationItem;
   terria: Terria;
   closeTool?: boolean;
+  expandInPlace?: boolean;
+  i18n: i18n;
 }
 
 @observer
-export class MapNavigationItem extends React.Component<PropTypes> {
+class MapNavigationItem extends React.Component<PropTypes> {
   constructor(props: PropTypes) {
     super(props);
   }
 
   render() {
-    const { closeTool = true, item } = this.props;
+    const { closeTool = true, item, expandInPlace, i18n } = this.props;
     if (item.render)
       return (
         <Control key={item.id} ref={item.controller.itemRef}>
@@ -30,11 +34,12 @@ export class MapNavigationItem extends React.Component<PropTypes> {
       );
     return (
       <Control ref={item.controller.itemRef}>
+        {/* in small screens, do not expand in place to avoid overlapping buttons */}
         <MapIconButton
-          expandInPlace
+          expandInPlace={expandInPlace === undefined ? true : expandInPlace}
           noExpand={item.noExpand}
           iconElement={() => <Icon glyph={item.controller.glyph} />}
-          title={useTranslationIfExists(item.title || item.name)}
+          title={applyTranslationIfExists(item.title || item.name, i18n)}
           onClick={() => {
             item.controller.handleClick();
           }}
@@ -44,7 +49,7 @@ export class MapNavigationItem extends React.Component<PropTypes> {
             closeTool ? () => <Icon glyph={GLYPHS.closeTool} /> : undefined
           }
         >
-          {useTranslationIfExists(item.name)}
+          {applyTranslationIfExists(item.name, i18n)}
         </MapIconButton>
       </Control>
     );
@@ -56,14 +61,16 @@ export const Control = styled(Box).attrs({
   column: true
 })`
   pointer-events: auto;
-  @media (min-width: ${props => props.theme.sm}px) {
+  @media (min-width: ${(props) => props.theme.sm}px) {
     margin: 0;
     padding-top: 10px;
     height: auto;
   }
-  @media (max-width: ${props => props.theme.mobile}px) {
+  @media (max-width: ${(props) => props.theme.mobile}px) {
     padding-right: 10px;
     margin-bottom: 5px;
   }
   text-align: center;
 `;
+
+export default withTranslation()(MapNavigationItem);

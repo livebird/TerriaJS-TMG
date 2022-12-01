@@ -2,8 +2,7 @@ import i18next from "i18next";
 import filterOutUndefined from "../../../Core/filterOutUndefined";
 import { isJsonObject, isJsonString } from "../../../Core/Json";
 import loadXML from "../../../Core/loadXML";
-import makeRealPromise from "../../../Core/makeRealPromise";
-import TerriaError from "../../../Core/TerriaError";
+import TerriaError, { networkRequestError } from "../../../Core/TerriaError";
 import xml2json from "../../../ThirdParty/xml2json";
 import {
   OnlineResource,
@@ -60,13 +59,11 @@ export default class WebProcessingServiceCapabilities {
   ) {}
 
   static fromUrl(url: string): Promise<WebProcessingServiceCapabilities> {
-    return Promise.resolve(makeRealPromise<string>(loadXML(url))).then(function(
-      capabilitiesXml
-    ) {
+    return Promise.resolve(loadXML(url)).then(function (capabilitiesXml) {
       const capabilities = parseCapabilities(xml2json(capabilitiesXml));
 
       if (capabilities === undefined) {
-        throw new TerriaError({
+        throw networkRequestError({
           title: i18next.t(
             "models.webProcessingServiceCatalogGroup.invalidCapabilitiesTitle"
           ),
@@ -127,7 +124,7 @@ function parseServiceIdentification(
     ? [json.ServiceTypeVersion]
     : Array.isArray(json.ServiceTypeVersion)
     ? filterOutUndefined(
-        json.ServiceTypeVersion.map(s => (isJsonString(s) ? s : undefined))
+        json.ServiceTypeVersion.map((s) => (isJsonString(s) ? s : undefined))
       )
     : undefined;
 

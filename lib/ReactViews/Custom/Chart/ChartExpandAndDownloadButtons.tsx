@@ -7,7 +7,6 @@ import { WithTranslation, withTranslation } from "react-i18next";
 import filterOutUndefined from "../../../Core/filterOutUndefined";
 import ChartableMixin from "../../../ModelMixins/ChartableMixin";
 import hasTraits from "../../../Models/Definition/hasTraits";
-import raiseErrorOnRejectedPromise from "../../../Models/raiseErrorOnRejectedPromise";
 import Terria from "../../../Models/Terria";
 import Icon from "../../../Styled/Icon";
 import UrlTraits from "../../../Traits/TraitsClasses/UrlTraits";
@@ -48,39 +47,37 @@ class ChartExpandAndDownloadButtons extends React.Component<PropsType> {
    */
   private expandItem(sourceIndex: number) {
     const terria = this.props.terria;
-    raiseErrorOnRejectedPromise(
-      terria,
-      runInAction(() => {
-        const sourceItems = this.sourceItems;
-        const itemToExpand = sourceItems[sourceIndex];
-        const workbench = terria.workbench;
-        if (!itemToExpand) {
-          return;
-        }
 
-        // We want to show only one source item at a time, so remove any
-        // existing source items from the workbench
-        sourceItems.forEach(sourceItem => {
-          workbench.items.forEach(workbenchItem => {
-            if (sourceItem.uniqueId === workbenchItem.uniqueId) {
-              workbench.remove(workbenchItem);
-            }
-          });
+    runInAction(async () => {
+      const sourceItems = this.sourceItems;
+      const itemToExpand = sourceItems[sourceIndex];
+      const workbench = terria.workbench;
+      if (!itemToExpand) {
+        return;
+      }
+
+      // We want to show only one source item at a time, so remove any
+      // existing source items from the workbench
+      sourceItems.forEach((sourceItem) => {
+        workbench.items.forEach((workbenchItem) => {
+          if (sourceItem.uniqueId === workbenchItem.uniqueId) {
+            workbench.remove(workbenchItem);
+          }
         });
+      });
 
-        try {
-          terria.addModel(itemToExpand);
-        } catch {}
-        return workbench.add(itemToExpand);
-      })
-    );
+      try {
+        terria.addModel(itemToExpand);
+      } catch {}
+      (await workbench.add(itemToExpand)).raiseError(terria, undefined, true);
+    });
   }
 
   resolveSourceItems() {
     Promise.all(
-      this.props.sourceItems.map(sourceItem => Promise.resolve(sourceItem))
+      this.props.sourceItems.map((sourceItem) => Promise.resolve(sourceItem))
     ).then(
-      action(results => {
+      action((results) => {
         this.sourceItems = filterOutUndefined(results);
       })
     );
@@ -104,7 +101,7 @@ class ChartExpandAndDownloadButtons extends React.Component<PropsType> {
     // The downloads and download names default to the sources and source names if not defined.
     let downloads: string[] = filterOutUndefined(
       this.props.downloads ||
-        this.sourceItems.map(item =>
+        this.sourceItems.map((item) =>
           hasTraits(item, UrlTraits, "url") ? item.url : undefined
         )
     );
@@ -139,7 +136,7 @@ class ChartExpandAndDownloadButtons extends React.Component<PropsType> {
   }
 }
 
-const ExpandAndDownloadDropdowns = function(props: {
+const ExpandAndDownloadDropdowns = function (props: {
   sourceNames: string[];
   canDownload: boolean;
   downloads: { name: string; href: string }[];
@@ -168,7 +165,7 @@ const ExpandAndDownloadDropdowns = function(props: {
       <div className={Styles.chartDropdownButton}>
         <Dropdown
           selectOption={props.onExpand}
-          options={props.sourceNames.map(name => ({ name }))}
+          options={props.sourceNames.map((name) => ({ name }))}
           theme={expandDropdownTheme}
         >
           {props.t("chart.expand") + " ▾"}
@@ -183,7 +180,7 @@ const ExpandAndDownloadDropdowns = function(props: {
   );
 };
 
-const ExpandAndDownloadButtons = function(props: {
+const ExpandAndDownloadButtons = function (props: {
   onExpand: () => void;
   downloadUrl?: string;
   t: TFunction;
@@ -199,6 +196,7 @@ const ExpandAndDownloadButtons = function(props: {
       </button>
       {props.downloadUrl && (
         <a
+          download
           className={classNames(Styles.btnSmall, Styles.aDownload)}
           href={props.downloadUrl}
         >

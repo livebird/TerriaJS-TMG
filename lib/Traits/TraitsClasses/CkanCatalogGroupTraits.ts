@@ -1,27 +1,20 @@
 import { JsonObject } from "../../Core/Json";
 import anyTrait from "../Decorators/anyTrait";
+import primitiveTrait from "../Decorators/primitiveTrait";
+import mixTraits from "../mixTraits";
 import CatalogMemberTraits from "./CatalogMemberTraits";
 import CkanSharedTraits from "./CkanSharedTraits";
 import GroupTraits from "./GroupTraits";
-import mixTraits from "../mixTraits";
-import primitiveArrayTrait from "../Decorators/primitiveArrayTrait";
-import primitiveTrait from "../Decorators/primitiveTrait";
+import LegendOwnerTraits from "./LegendOwnerTraits";
 import UrlTraits from "./UrlTraits";
 
 export default class CkanCatalogGroupTraits extends mixTraits(
   GroupTraits,
   UrlTraits,
   CatalogMemberTraits,
+  LegendOwnerTraits,
   CkanSharedTraits
 ) {
-  @primitiveArrayTrait({
-    name: "Blacklist",
-    type: "string",
-    description: `An array of strings of blacklisted group names and dataset titles.
-      A group or dataset that appears in this list will not be shown to the user.`
-  })
-  blacklist?: string[];
-
   @anyTrait({
     name: "Filter Query",
     description: `Gets or sets the filter query to pass to CKAN when querying the available data sources and their groups. Each item in the
@@ -38,8 +31,7 @@ export default class CkanCatalogGroupTraits extends mixTraits(
   })
   filterQuery?: (JsonObject | string)[] = [
     {
-      fq:
-        '(res_format:(czml OR CZML OR geojson OR GeoJSON OR WMS OR wms OR kml OR KML OR kmz OR KMZ OR WFS OR wfs OR CSV-GEO-AU OR csv-geo-au OR "Esri REST"))'
+      fq: '(res_format:(czml OR CZML OR geojson OR GeoJSON OR WMS OR wms OR kml OR KML OR kmz OR KMZ OR WFS OR wfs OR CSV-GEO-AU OR csv-geo-au OR "Esri REST"))'
     }
   ];
 
@@ -61,4 +53,19 @@ export default class CkanCatalogGroupTraits extends mixTraits(
       If the value is a blank string or undefined, these items will be left at the top level, not grouped.`
   })
   ungroupedTitle: string = "No group";
+
+  @primitiveTrait({
+    type: "boolean",
+    name: "Allow entire WMS Servers",
+    description:
+      "True to allow entire WMS servers (that is, WMS resources without a clearly-defined layer) to be added to the catalog; otherwise, false."
+  })
+  allowEntireWmsServers: boolean = true;
+
+  @primitiveTrait({
+    type: "boolean",
+    name: "Exclude inactive datasets",
+    description: `True to remove inactive datasets. Where \`state = "deleted"\` (CKAN official), \`state === "draft"\` (CKAN official) or \`data_state === "inactive"\` (Data.gov.au CKAN).`
+  })
+  excludeInactiveDatasets: boolean = true;
 }

@@ -1,9 +1,14 @@
-import { action, computed, observable, runInAction } from "mobx";
+import { action, computed, observable, runInAction, toJS } from "mobx";
+import filterOutUndefined from "../../Core/filterOutUndefined";
+import flatten from "../../Core/flatten";
+import isDefined from "../../Core/isDefined";
+import TerriaError from "../../Core/TerriaError";
 import { getObjectId } from "../../Traits/ArrayNestedStrataMap";
+import { ObjectArrayTrait } from "../../Traits/Decorators/objectArrayTrait";
 import { ModelId } from "../../Traits/ModelReference";
 import ModelTraits from "../../Traits/ModelTraits";
-import { ObjectArrayTrait } from "../../Traits/Decorators/objectArrayTrait";
 import TraitsConstructor from "../../Traits/TraitsConstructor";
+import Terria from "../Terria";
 import addModelStrataView from "./addModelStrataView";
 import createStratumInstance from "./createStratumInstance";
 import { isLoadableStratum } from "./LoadableStratum";
@@ -15,7 +20,6 @@ import ModelType, {
 } from "./Model";
 import StratumFromTraits from "./StratumFromTraits";
 import StratumOrder from "./StratumOrder";
-import Terria from "../Terria";
 
 export default function CreateModel<T extends TraitsConstructor<ModelTraits>>(
   Traits: T
@@ -57,7 +61,7 @@ export default function CreateModel<T extends TraitsConstructor<ModelTraits>>(
     /**
      * Gets the uniqueIds of models that are known to contain this one.
      * This is important because strata sometimes flow from container to
-     * containee, so the properties of this model may not be complete
+     * container, so the properties of this model may not be complete
      * if the container isn't loaded yet. It's also important for locating
      * this model in a hierarchical catalog.
      */
@@ -89,16 +93,29 @@ export default function CreateModel<T extends TraitsConstructor<ModelTraits>>(
     }
 
     duplicateModel(newId: ModelId, sourceReference?: BaseModel): this {
-      const newModel = new (<any>this.constructor)(
-        newId,
-        this.terria,
-        sourceReference
-      );
+      let newModel: this;
+      try {
+        newModel = new (<any>this.constructor)(
+          newId,
+          this.terria,
+          sourceReference
+        );
+      } catch (e) {
+        throw TerriaError.from(`Failed to create model \`"${newId}"\``);
+      }
+
       this.strata.forEach((stratum, stratumId) => {
-        const newStratum = isLoadableStratum(stratum)
-          ? stratum.duplicateLoadableStratum(newModel)
-          : createStratumInstance(Traits, stratum);
-        newModel.strata.set(stratumId, newStratum);
+        try {
+          const newStratum = isLoadableStratum(stratum)
+            ? stratum.duplicateLoadableStratum(newModel)
+            : createStratumInstance(Traits, toJS(stratum));
+          newModel.strata.set(stratumId, newStratum);
+        } catch (e) {
+          throw TerriaError.from(e, {
+            message: `Failed to duplicate stratum \`${stratumId}\` for model \`${newId}\`.`,
+            importance: -1
+          });
+        }
       });
       return newModel;
     }
@@ -132,14 +149,13 @@ export default function CreateModel<T extends TraitsConstructor<ModelTraits>>(
     addObject<Key extends keyof ArrayElementTypes<Traits>>(
       stratumId: string,
       traitId: Key,
-      objectId: string
+      objectId?: string | undefined
     ): ModelType<ArrayElementTypes<Traits>[Key]> | undefined {
       const trait = this.traits[traitId as string] as ObjectArrayTrait<
         ArrayElementTypes<Traits>[Key]
       >;
       const nestedTraitsClass = trait.type;
       const newStratum = createStratumInstance(nestedTraitsClass);
-      (<any>newStratum)[trait.idProperty] = objectId;
 
       const stratum: any = this.getOrCreateStratum(stratumId);
       let array = stratum[traitId];
@@ -148,14 +164,64 @@ export default function CreateModel<T extends TraitsConstructor<ModelTraits>>(
         array = stratum[traitId];
       }
 
-      array.push(newStratum);
+      // If objectID is provided, set idProperty and then return new object
+      if (isDefined(objectId)) {
+        (<any>newStratum)[trait.idProperty] = objectId;
+        array.push(newStratum);
 
-      const models: readonly ModelType<ArrayElementTypes<Traits>[Key]>[] = (<
-        any
-      >this)[traitId];
-      return models.find(
-        (o: any, i: number) => getObjectId(trait.idProperty, o, i) === objectId
-      );
+        const models: readonly ModelType<ArrayElementTypes<Traits>[Key]>[] = (<
+          any
+        >this)[traitId];
+        return models.find(
+          (o: any, i: number) =>
+            getObjectId(trait.idProperty, o, i) === objectId
+        );
+      }
+      // If no objectID is provided, we create a new object the end of the array (across all strata)
+      // This method `isRemoval` and `idProperty="index"` into account.
+      else {
+        let maxIndex = -1;
+        this.strata.forEach((s) =>
+          (s[traitId] as Array<unknown> | undefined)?.forEach(
+            (e, idx) => (maxIndex = idx > maxIndex ? idx : maxIndex)
+          )
+        );
+
+        // We need to make sure that the array in this stratum is as long as in every
+        for (let i = array.length; i <= maxIndex; i++) {
+          array[i] = createStratumInstance(nestedTraitsClass);
+        }
+
+        array[maxIndex + 1] = newStratum;
+
+        // Return newly created model
+        const models: readonly ModelType<ArrayElementTypes<Traits>[Key]>[] = (<
+          any
+        >this)[traitId];
+        return models[models.length - 1];
+      }
+    }
+
+    /** Return full list of knownContainerUniqueIds.
+     * This will recursively traverse tree of knownContainerUniqueIds models to return full list of dependencies
+     */
+    @computed
+    get completeKnownContainerUniqueIds(): string[] {
+      const findContainers = (model: BaseModel): string[] => [
+        ...model.knownContainerUniqueIds,
+        ...flatten(
+          filterOutUndefined(
+            model.knownContainerUniqueIds.map((parentId) => {
+              const parent = this.terria.getModelById(BaseModel, parentId);
+              if (parent) {
+                return findContainers(parent);
+              }
+            })
+          )
+        )
+      ];
+
+      return findContainers(this).reverse();
     }
   }
 

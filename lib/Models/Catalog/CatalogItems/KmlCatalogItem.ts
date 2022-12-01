@@ -12,19 +12,23 @@ import KmlDataSource from "terriajs-cesium/Source/DataSources/KmlDataSource";
 import Property from "terriajs-cesium/Source/DataSources/Property";
 import isDefined from "../../../Core/isDefined";
 import readXml from "../../../Core/readXml";
-import TerriaError from "../../../Core/TerriaError";
-import MappableMixin from "../../../ModelMixins/MappableMixin";
+import TerriaError, { networkRequestError } from "../../../Core/TerriaError";
 import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
+import MappableMixin from "../../../ModelMixins/MappableMixin";
 import UrlMixin from "../../../ModelMixins/UrlMixin";
 import KmlCatalogItemTraits from "../../../Traits/TraitsClasses/KmlCatalogItemTraits";
 import CreateModel from "../../Definition/CreateModel";
+import HasLocalData from "../../HasLocalData";
 import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
 
 const kmzRegex = /\.kmz$/i;
 
-class KmlCatalogItem extends MappableMixin(
-  UrlMixin(CatalogMemberMixin(CreateModel(KmlCatalogItemTraits)))
-) {
+class KmlCatalogItem
+  extends MappableMixin(
+    UrlMixin(CatalogMemberMixin(CreateModel(KmlCatalogItemTraits)))
+  )
+  implements HasLocalData
+{
   static readonly type = "kml";
   get type() {
     return KmlCatalogItem.type;
@@ -51,22 +55,7 @@ class KmlCatalogItem extends MappableMixin(
   }
 
   protected forceLoadMapItems(): Promise<void> {
-    const createLoadError = () =>
-      new TerriaError({
-        sender: this,
-        title: i18next.t("models.kml.errorLoadingTitle"),
-        message: i18next.t("models.kml.errorLoadingMessage", {
-          appName: this.terria.appName,
-          email:
-            '<a href="mailto:' +
-            this.terria.supportEmail +
-            '">' +
-            this.terria.supportEmail +
-            "</a>."
-        })
-      });
-
-    return new Promise<string | Resource | Document | Blob>(resolve => {
+    return new Promise<string | Resource | Document | Blob>((resolve) => {
       if (isDefined(this.kmlString)) {
         const parser = new DOMParser();
         resolve(parser.parseFromString(this.kmlString, "text/xml"));
@@ -79,26 +68,30 @@ class KmlCatalogItem extends MappableMixin(
       } else if (isDefined(this.url)) {
         resolve(proxyCatalogItemUrl(this, this.url));
       } else {
-        throw new TerriaError({
+        throw networkRequestError({
           sender: this,
           title: i18next.t("models.kml.unableToLoadItemTitle"),
           message: i18next.t("models.kml.unableToLoadItemMessage")
         });
       }
     })
-      .then(kmlLoadInput => {
+      .then((kmlLoadInput) => {
         return KmlDataSource.load(kmlLoadInput);
       })
-      .then(dataSource => {
+      .then((dataSource) => {
         this._dataSource = dataSource;
         this.doneLoading(dataSource); // Unsure if this is necessary
       })
-      .catch(e => {
-        if (e instanceof TerriaError) {
-          throw e;
-        } else {
-          throw createLoadError();
-        }
+      .catch((e) => {
+        throw networkRequestError(
+          TerriaError.from(e, {
+            sender: this,
+            title: i18next.t("models.kml.errorLoadingTitle"),
+            message: i18next.t("models.kml.errorLoadingMessage", {
+              appName: this.terria.appName
+            })
+          })
+        );
       });
   }
 
@@ -127,7 +120,7 @@ class KmlCatalogItem extends MappableMixin(
 
         const polygon = entity.polygon;
         if (isDefined(polygon)) {
-          polygon.perPositionHeight = (true as unknown) as Property;
+          polygon.perPositionHeight = true as unknown as Property;
           const polygonHierarchy = getPropertyValue<PolygonHierarchy>(
             polygon.hierarchy
           );
@@ -141,7 +134,7 @@ class KmlCatalogItem extends MappableMixin(
         }
       }
       const terrainProvider = this.terria.cesium.scene.globe.terrainProvider;
-      sampleTerrain(terrainProvider, 11, positionsToSample).then(function() {
+      sampleTerrain(terrainProvider, 11, positionsToSample).then(function () {
         for (let i = 0; i < positionsToSample.length; ++i) {
           const position = positionsToSample[i];
           if (!isDefined(position.height)) {

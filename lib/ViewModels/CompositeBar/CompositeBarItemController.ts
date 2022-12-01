@@ -1,4 +1,4 @@
-import { computed, observable } from "mobx";
+import { computed, observable, action } from "mobx";
 import ViewerMode from "../../Models/ViewerMode";
 import React from "react";
 
@@ -15,7 +15,8 @@ export interface ICompositeBarItemController {
 }
 
 export abstract class CompositeBarItemController
-  implements ICompositeBarItemController {
+  implements ICompositeBarItemController
+{
   static id: string;
   itemRef: React.RefObject<HTMLDivElement> = React.createRef();
 
@@ -120,11 +121,9 @@ export abstract class CompositeBarItemController
     return this._visible;
   }
 
-  /**
-   * Sets the {@link this._visible}
-   */
-  set visible(value: boolean) {
-    this._visible = value;
+  @action
+  setVisible(v: boolean) {
+    this._visible = v;
   }
 
   /**
