@@ -39,7 +39,7 @@ export default class MeasureTool extends MapNavigationItemController {
     this.userDrawing = new UserDrawing({
       terria: props.terria,
       messageHeader: () => i18next.t("measure.measureTool"),
-      allowPolygon: false,
+      allowPolygon: true,
       onPointClicked: this.onPointClicked.bind(this),
       onPointMoved: this.onPointMoved.bind(this),
       onCleanUp: this.onCleanUp.bind(this),

@@ -132,7 +132,7 @@ const SidePanel = observer<React.FC<SidePanelProps>>(
     const onAddDataClicked: React.MouseEventHandler<HTMLButtonElement> = (
       e
     ) => {
-      console.log("Window", window);
+      console.log("window", window);
 
       e.stopPropagation();
       viewState.setTopElement(ExplorerWindowElementName);

@@ -1,4 +1,5 @@
 import i18next from "i18next";
+import Cartesian3 from "terriajs-cesium/Source/Core/Cartesian3";
 import { action, observable, runInAction } from "mobx";
 import React from "react";
 import CesiumCartographic from "terriajs-cesium/Source/Core/Cartographic";
@@ -14,7 +15,7 @@ import ViewerMode from "../../../../Models/ViewerMode";
 import { GLYPHS } from "../../../../Styled/Icon";
 import StyleTraits from "../../../../Traits/TraitsClasses/StyleTraits";
 import MapNavigationItemController from "../../../../ViewModels/MapNavigation/MapNavigationItemController";
-import Cartesian3 from "terriajs-cesium/Source/Core/Cartesian3";
+
 interface PropTypes {
   terria: Terria;
 }

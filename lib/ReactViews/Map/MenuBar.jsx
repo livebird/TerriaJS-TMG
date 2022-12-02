@@ -13,7 +13,6 @@ import SharePanel from "./Panels/SharePanel/SharePanel";
 import ToolsPanel from "./Panels/ToolsPanel/ToolsPanel";
 import StoryButton from "./StoryButton/StoryButton";
 import { isMobile } from "react-device-detect";
-
 import Styles from "./menu-bar.scss";
 
 const StyledMenuBar = styled.div`
@@ -106,16 +105,16 @@ const MenuBar = observer((props) => {
             </li>
           </ul>
         </If>
-        {/* <ul className={classNames(Styles.menu)}>
+        <ul className={classNames(Styles.menu)}>
           <li className={Styles.menuItem}>
             <SharePanel
-              terria={terria}
               storyEnabled={false}
+              terria={terria}
               viewState={viewState}
               animationDuration={props.animationDuration}
             />
           </li>
-        </ul> */}
+        </ul>
         <If condition={!viewState.useSmallScreenInterface}>
           <For each="element" of={menuItems} index="i">
             <li className={Styles.menuItem} key={i}>

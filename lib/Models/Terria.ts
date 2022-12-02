@@ -272,6 +272,10 @@ interface ConfigParameters {
    */
   persistViewerMode?: boolean;
 
+  /*
+  Techmaven
+  */
+  useJSNavigator: boolean;
   /**
    * Whether to open the add data explorer panel on load.
    */
@@ -299,10 +303,6 @@ interface ConfigParameters {
    */
   extraCreditLinks?: ICredit[];
 
-  /*
-  Techmaven
-  */
-  useJSNavigator: boolean;
   /**
    * Configurable discalimer that shows up in print view
    */
@@ -400,17 +400,9 @@ interface HomeCameraInit {
 }
 
 export default class Terria {
-  /*
-  Techmaven Start
-  */
-
   locationService: any;
   gotoCoordinate: any;
   getCenterLatLong: any;
-
-  /*
-  Techmaven End
-  */
   private readonly models = observable.map<string, BaseModel>();
 
   /** Map from share key -> id */
@@ -548,7 +540,6 @@ export default class Terria {
       },
       { text: "map.extraCreditLinks.disclaimer", url: "about.html#disclaimer" }
     ],
-    // Techmaven
     useJSNavigator: false,
     printDisclaimer: undefined,
     storyRouteUrlPrefix: undefined,

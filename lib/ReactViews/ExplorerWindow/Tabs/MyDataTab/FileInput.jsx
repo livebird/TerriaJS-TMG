@@ -43,6 +43,7 @@ const FileInput = createReactClass({
         <input
           type="file"
           onChange={this.handleChange}
+          // accept={this.props.accept}
           className={Styles.input}
         />
         <label

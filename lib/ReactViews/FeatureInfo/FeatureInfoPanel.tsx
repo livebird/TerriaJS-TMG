@@ -43,10 +43,204 @@ interface Props {
 
 @observer
 class FeatureInfoPanel extends React.Component<Props> {
+  fixLongitude(lng: number) {
+    while (lng > 180.0) {
+      lng -= 360.0;
+    }
+    while (lng < -180.0) {
+      lng += 360.0;
+    }
+    return lng;
+  }
+  latLng2Name(lat: number, lng: number, rounding: number) {
+    let latitude = Math.floor(Math.abs(lat));
+    latitude -= latitude % rounding;
+    let longitude = Math.floor(lng);
+    longitude -= longitude % rounding;
+
+    longitude = this.fixLongitude(longitude);
+    const longitudeCardinal = longitude >= 0 && longitude < 180.0 ? "E" : "W";
+    const latitudeCardinal = lat >= 0 ? "N" : "S";
+    return (
+      Math.abs(longitude) + longitudeCardinal + latitude + latitudeCardinal
+    );
+  }
+  MGRSString(Lat: number, Long: number) {
+    if (Lat < -80) return "Too far South";
+    if (Lat > 84) return "Too far North";
+    var c = 1 + Math.floor((Long + 180) / 6);
+    var e = c * 6 - 183;
+    var k = (Lat * Math.PI) / 180;
+    var l = (Long * Math.PI) / 180;
+    var m = (e * Math.PI) / 180;
+    var n = Math.cos(k);
+    var o = 0.006739496819936062 * Math.pow(n, 2);
+    var p = 40680631590769 / (6356752.314 * Math.sqrt(1 + o));
+    var q = Math.tan(k);
+    var r = q * q;
+    var s = r * r * r - Math.pow(q, 6);
+    var t = l - m;
+    var u = 1.0 - r + o;
+    var v = 5.0 - r + 9 * o + 4.0 * (o * o);
+    var w = 5.0 - 18.0 * r + r * r + 14.0 * o - 58.0 * r * o;
+    var x = 61.0 - 58.0 * r + r * r + 270.0 * o - 330.0 * r * o;
+    var y = 61.0 - 479.0 * r + 179.0 * (r * r) - r * r * r;
+    var z = 1385.0 - 3111.0 * r + 543.0 * (r * r) - r * r * r;
+    var aa =
+      p * n * t +
+      (p / 6.0) * Math.pow(n, 3) * u * Math.pow(t, 3) +
+      (p / 120.0) * Math.pow(n, 5) * w * Math.pow(t, 5) +
+      (p / 5040.0) * Math.pow(n, 7) * y * Math.pow(t, 7);
+    var ab =
+      6367449.14570093 *
+        (k -
+          0.00251882794504 * Math.sin(2 * k) +
+          0.00000264354112 * Math.sin(4 * k) -
+          0.00000000345262 * Math.sin(6 * k) +
+          0.000000000004892 * Math.sin(8 * k)) +
+      (q / 2.0) * p * Math.pow(n, 2) * Math.pow(t, 2) +
+      (q / 24.0) * p * Math.pow(n, 4) * v * Math.pow(t, 4) +
+      (q / 720.0) * p * Math.pow(n, 6) * x * Math.pow(t, 6) +
+      (q / 40320.0) * p * Math.pow(n, 8) * z * Math.pow(t, 8);
+    aa = aa * 0.9996 + 500000.0;
+    ab = ab * 0.9996;
+    if (ab < 0.0) ab += 10000000.0;
+    var ad = "CDEFGHJKLMNPQRSTUVWXX".charAt(Math.floor(Lat / 8 + 10));
+    var ae = Math.floor(aa / 100000);
+    var af = ["ABCDEFGH", "JKLMNPQR", "STUVWXYZ"][(c - 1) % 3].charAt(ae - 1);
+    var ag = Math.floor(ab / 100000) % 20;
+    var ah = ["ABCDEFGHJKLMNPQRSTUV", "FGHJKLMNPQRSTUVABCDE"][
+      (c - 1) % 2
+    ].charAt(ag);
+    function pad(val: number) {
+      var newVal: String = "";
+      if (val < 10) {
+        newVal = "0000" + val;
+      } else if (val < 100) {
+        newVal = "000" + val;
+      } else if (val < 1000) {
+        newVal = "00" + val;
+      } else if (val < 10000) {
+        newVal = "0" + val;
+      }
+      return newVal;
+    }
+    aa = Math.floor(aa % 100000);
+    var aa1 = pad(aa);
+    ab = Math.floor(ab % 100000);
+    var ab1 = pad(ab);
+    return c + ad + "" + af + ah + "" + aa1 + "" + ab1;
+  }
+  latLng2GARS(lat: number, lng: number) {
+    const letter_array = [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "J",
+      "K",
+      "L",
+      "M",
+      "N",
+      "P",
+      "Q",
+      "R",
+      "S",
+      "T",
+      "U",
+      "V",
+      "W",
+      "X",
+      "Y",
+      "Z"
+    ];
+    const five_minute_array = [
+      ["7", "4", "1"],
+      ["8", "5", "2"],
+      ["9", "6", "3"]
+    ];
+
+    let latitude = lat;
+
+    let longitude = this.fixLongitude(lng);
+    /* North pole is an exception, read over and down */
+    if (latitude === 90.0) {
+      latitude = 89.99999999999;
+    }
+    // Check for valid lat/lon range
+    if (latitude < -90 || latitude > 90) {
+      return "0";
+    }
+    if (longitude < -180 || longitude > 180) {
+      return "0";
+    }
+    // Get the longitude band ==============================================
+    let longBand = longitude + 180;
+    // Normalize to 0.0 <= longBand < 360
+    while (longBand < 0) {
+      longBand = longBand + 360;
+    }
+    while (longBand > 360) {
+      longBand = longBand - 360;
+    }
+    longBand = Math.floor(longBand * 2.0);
+    let intLongBand = longBand + 1; // Start at 001, not 000
+    let strLongBand = intLongBand.toString();
+    // Left pad the string with 0's so X becomes 00X
+    while (strLongBand.length < 3) {
+      strLongBand = "0" + strLongBand;
+    }
+
+    // Get the latitude band ===============================================
+    let offset = latitude + 90;
+    // Normalize offset to 0 < offset <90
+    while (offset < 0) {
+      offset = offset + 180;
+    }
+    while (offset > 180) {
+      offset = offset - 180;
+    }
+    offset = Math.floor(offset * 2.0);
+    const firstOffest = Math.floor(offset / letter_array.length);
+    const secondOffest = Math.floor(offset % letter_array.length);
+    let strLatBand = letter_array[firstOffest] + letter_array[secondOffest];
+
+    // Get the quadrant ====================================================
+    let latBand = Math.floor((latitude + 90.0) * 4.0) % 2.0;
+    longBand = Math.floor((longitude + 180.0) * 4.0) % 2.0;
+    let quadrant = "0";
+    // return "0" if error occurs
+    if (latBand < 0 || latBand > 1) {
+      return "0";
+    }
+    if (longBand < 0 || longBand > 1) {
+      return "0";
+    }
+    // Otherwise get the quadrant
+    if (latBand === 0.0 && longBand === 0.0) {
+      quadrant = "3";
+    } else if (latBand === 1.0 && longBand === 0.0) {
+      quadrant = "1";
+    } else if (latBand === 1.0 && longBand === 1.0) {
+      quadrant = "2";
+    } else if (latBand === 0.0 && longBand === 1.0) {
+      quadrant = "4";
+    }
+
+    const keypad =
+      five_minute_array[
+        Math.floor(((((longitude + 180) * 60.0) % 30) % 15) / 5.0)
+      ][Math.floor(((((latitude + 90) * 60.0) % 30) % 15) / 5.0)];
+
+    return strLongBand + strLatBand + quadrant + keypad;
+  }
   componentDidMount() {
     const { t } = this.props;
     const terria = this.props.viewState.terria;
-
     disposeOnUnmount(
       this,
       reaction(
@@ -230,7 +424,8 @@ class FeatureInfoPanel extends React.Component<Props> {
     const longitude = CesiumMath.toDegrees(cartographic.longitude);
     const pretty = prettifyCoordinates(longitude, latitude);
     // this.locationUpdated(longitude, latitude);
-
+    const mgrs = this.MGRSString(latitude, longitude);
+    const gard = this.latLng2GARS(latitude, longitude);
     const that = this;
     const pinClicked = function () {
       that.pinClicked(longitude, latitude);
@@ -255,6 +450,31 @@ class FeatureInfoPanel extends React.Component<Props> {
             </button>
           )}
         </span>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div>
+            <span>Lat / Lon&nbsp;</span>
+            <span>
+              {pretty.latitude + ", " + pretty.longitude}
+              {!this.props.printView && (
+                <button
+                  type="button"
+                  onClick={pinClicked}
+                  className={locationButtonStyle}
+                >
+                  <Icon glyph={Icon.GLYPHS.location} />
+                </button>
+              )}
+            </span>
+          </div>
+          <div>
+            <span>MGRS&nbsp;</span>
+            <span>{mgrs}</span>
+          </div>
+          <div>
+            <span>GARS&nbsp;</span>
+            <span>{gard}</span>
+          </div>
+        </div>
       </div>
     );
   }

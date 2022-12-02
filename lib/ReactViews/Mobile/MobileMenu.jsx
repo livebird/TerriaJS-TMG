@@ -149,12 +149,12 @@ const MobileMenu = observer(
               </div>
             </For>
             {mapUserGuide && <MobileMenuItem {...mapUserGuide} />}
-            <If condition={this.props.showFeedback}>
+            {/* <If condition={this.props.showFeedback}>
               <MobileMenuItem
                 onClick={this.onFeedbackFormClick}
                 caption={t("feedback.feedbackBtnText")}
               />
-            </If>
+            </If> */}
             <If condition={hasStories}>
               <MobileMenuItem
                 onClick={this.runStories}
