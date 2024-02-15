@@ -1,4 +1,5 @@
 node_modules/
+dist/
 .idea/
 wwwroot/build/
 wwwroot/doc/
@@ -22,4 +23,6 @@ deploy/packages/
 deploy/work/
 packages/
 pancake/
+dist/
 *.rar
+buildprocess/

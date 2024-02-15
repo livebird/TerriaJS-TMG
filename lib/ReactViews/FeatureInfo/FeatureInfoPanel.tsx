@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { TFunction } from "i18next";
-import { action, reaction, runInAction } from "mobx";
+import { action, reaction, runInAction, makeObservable } from "mobx";
 import { disposeOnUnmount, observer } from "mobx-react";
 import React from "react";
 import { withTranslation } from "react-i18next";
@@ -29,9 +29,10 @@ import Workbench from "../../Models/Workbench";
 import ViewState from "../../ReactViewModels/ViewState";
 import Icon from "../../Styled/Icon";
 import Loader from "../Loader";
-import { withViewState } from "../StandardUserInterface/ViewStateContext";
+import { withViewState } from "../Context";
 import Styles from "./feature-info-panel.scss";
 import FeatureInfoCatalogItem from "./FeatureInfoCatalogItem";
+const converter = require("coordinator");
 
 const DragWrapper = require("../DragWrapper");
 
@@ -66,6 +67,9 @@ class FeatureInfoPanel extends React.Component<Props> {
     );
   }
   MGRSString(Lat: number, Long: number) {
+    var fn = converter("latlong", "mgrs");
+    return fn(Lat, Long, 5);
+
     if (Lat < -80) return "Too far South";
     if (Lat > 84) return "Too far North";
     var c = 1 + Math.floor((Long + 180) / 6);
@@ -238,9 +242,15 @@ class FeatureInfoPanel extends React.Component<Props> {
 
     return strLongBand + strLatBand + quadrant + keypad;
   }
+  constructor(props: Props) {
+    super(props);
+    makeObservable(this);
+  }
+
   componentDidMount() {
     const { t } = this.props;
     const terria = this.props.viewState.terria;
+
     disposeOnUnmount(
       this,
       reaction(
@@ -420,9 +430,12 @@ class FeatureInfoPanel extends React.Component<Props> {
     if (cartographic === undefined) {
       return <></>;
     }
+    //alert(cartographic.longitude);
     const latitude = CesiumMath.toDegrees(cartographic.latitude);
     const longitude = CesiumMath.toDegrees(cartographic.longitude);
+
     const pretty = prettifyCoordinates(longitude, latitude);
+
     // this.locationUpdated(longitude, latitude);
     const mgrs = this.MGRSString(latitude, longitude);
     const gard = this.latLng2GARS(latitude, longitude);
@@ -437,24 +450,11 @@ class FeatureInfoPanel extends React.Component<Props> {
 
     return (
       <div className={Styles.location}>
-        <span>Lat / Lon&nbsp;</span>
-        <span>
-          {pretty.latitude + ", " + pretty.longitude}
-          {!this.props.printView && (
-            <button
-              type="button"
-              onClick={pinClicked}
-              className={locationButtonStyle}
-            >
-              <Icon glyph={Icon.GLYPHS.location} />
-            </button>
-          )}
-        </span>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div>
             <span>Lat / Lon&nbsp;</span>
             <span>
-              {pretty.latitude + ", " + pretty.longitude}
+              {latitude.toFixed(6) + ", " + longitude.toFixed(6)}
               {!this.props.printView && (
                 <button
                   type="button"
@@ -510,7 +510,7 @@ class FeatureInfoPanel extends React.Component<Props> {
             ? featureMap.get(catalogItem.uniqueId)
             : undefined) ?? [];
         return {
-          catalogItem: catalogItem as TimeFilterMixin.Instance,
+          catalogItem: catalogItem,
           feature: isDefined(features[0]) ? features[0] : undefined
         };
       })

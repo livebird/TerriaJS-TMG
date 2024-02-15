@@ -42,18 +42,6 @@ gulp.task("watch-specs", function (done) {
   watchWebpack(webpack, webpackConfig, done);
 });
 
-gulp.task("make-schema", function () {
-  var genSchema = require("generate-terriajs-schema");
-  var schemaSourceGlob = require("./buildprocess/schemaSourceGlob");
-
-  return genSchema({
-    sourceGlob: schemaSourceGlob,
-    dest: "wwwroot/schema",
-    noversionsubdir: true,
-    quiet: true
-  });
-});
-
 gulp.task("lint", function (done) {
   var runExternalModule = require("./buildprocess/runExternalModule");
 
@@ -61,13 +49,11 @@ gulp.task("lint", function (done) {
     "lib",
     "test",
     "--ext",
-    ".jsx",
-    "--ext",
-    ".js",
+    ".jsx,.js,.ts,.tsx",
     "--ignore-pattern",
     "lib/ThirdParty",
     "--max-warnings",
-    "0"
+    "481" // TODO: Bring this back to 0
   ]);
 
   done();
@@ -85,18 +71,46 @@ gulp.task("reference-guide", function (done) {
   done();
 });
 
-gulp.task("copy-cesium-assets", function () {
+gulp.task("copy-cesium-workers", function () {
   var path = require("path");
 
   var cesiumPackage = require.resolve("terriajs-cesium/package.json");
   var cesiumRoot = path.dirname(cesiumPackage);
-  var cesiumWebRoot = path.join(cesiumRoot, "wwwroot");
+  var cesiumWorkersRoot = path.join(cesiumRoot, "Build", "Workers");
 
   return gulp
-    .src([path.join(cesiumWebRoot, "**")], {
-      base: cesiumWebRoot
+    .src([path.join(cesiumWorkersRoot, "**")], {
+      base: cesiumWorkersRoot
     })
-    .pipe(gulp.dest("wwwroot/build/Cesium"));
+    .pipe(gulp.dest("wwwroot/build/Cesium/build/Workers"));
+});
+
+gulp.task("copy-cesium-thirdparty", function () {
+  var path = require("path");
+
+  var cesiumPackage = require.resolve("terriajs-cesium/package.json");
+  var cesiumRoot = path.dirname(cesiumPackage);
+  var cesiumThirdPartyRoot = path.join(cesiumRoot, "Source", "ThirdParty");
+
+  return gulp
+    .src([path.join(cesiumThirdPartyRoot, "**")], {
+      base: cesiumThirdPartyRoot
+    })
+    .pipe(gulp.dest("wwwroot/build/Cesium/build/ThirdParty"));
+});
+
+gulp.task("copy-cesium-source-assets", function () {
+  var path = require("path");
+
+  var cesiumPackage = require.resolve("terriajs-cesium/package.json");
+  var cesiumRoot = path.dirname(cesiumPackage);
+  var cesiumAssetsRoot = path.join(cesiumRoot, "Source", "Assets");
+
+  return gulp
+    .src([path.join(cesiumAssetsRoot, "**")], {
+      base: cesiumAssetsRoot
+    })
+    .pipe(gulp.dest("wwwroot/build/Cesium/build/Assets"));
 });
 
 gulp.task("test-browserstack", function (done) {
@@ -170,23 +184,21 @@ gulp.task("build-for-doc-generation", function buildForDocGeneration(done) {
 });
 
 gulp.task(
-  "user-guide",
+  "render-guide",
   gulp.series(
-    gulp.parallel(
-      "make-schema",
-      "code-attribution",
-      "build-for-doc-generation"
-    ),
-    function userGuide(done) {
-      var fse = require("fs-extra");
-      var PluginError = require("plugin-error");
-      var spawnSync = require("child_process").spawnSync;
-
+    function copyToBuild(done) {
+      const fse = require("fs-extra");
       fse.copySync("doc", "build/doc");
+      done();
+    },
+    function generateMemberPages(done) {
+      const fse = require("fs-extra");
+      const PluginError = require("plugin-error");
+      const spawnSync = require("child_process").spawnSync;
 
       fse.mkdirpSync("build/doc/connecting-to-data/catalog-type-details");
 
-      var result = spawnSync("node", ["generateDocs.js"], {
+      const result = spawnSync("node", ["generateDocs.js"], {
         cwd: "build",
         stdio: "inherit",
         shell: false
@@ -199,8 +211,13 @@ gulp.task(
           { showStack: false }
         );
       }
+      done();
+    },
+    function mkdocs(done) {
+      const PluginError = require("plugin-error");
+      const spawnSync = require("child_process").spawnSync;
 
-      result = spawnSync(
+      const result = spawnSync(
         "mkdocs",
         ["build", "--clean", "--config-file", "mkdocs.yml"],
         {
@@ -210,11 +227,14 @@ gulp.task(
         }
       );
       if (result.status !== 0) {
-        throw new PluginError("user-doc", "Mkdocs exited with an error.", {
-          showStack: false
-        });
+        throw new PluginError(
+          "user-doc",
+          `Mkdocs exited with an error. Maybe you didn't install mkdocs and other python dependencies in requirements.txt - see https://docs.terria.io/guide/contributing/development-environment/#documentation?`,
+          {
+            showStack: false
+          }
+        );
       }
-
       done();
     }
   )
@@ -222,15 +242,87 @@ gulp.task(
 
 gulp.task(
   "docs",
-  gulp.series("user-guide", function docs(done) {
-    var fse = require("fs-extra");
-    fse.copySync("doc/index-built.html", "wwwroot/doc/index.html");
-    done();
-  })
+  gulp.series(
+    gulp.parallel("code-attribution", "build-for-doc-generation"),
+    "render-guide",
+    function docs(done) {
+      var fse = require("fs-extra");
+      fse.copySync("doc/index-redirect.html", "wwwroot/doc/index.html");
+      done();
+    }
+  )
 );
 
+gulp.task("terriajs-server", function (done) {
+  // E.g. gulp terriajs-server --terriajsServerArg port=4000 --terriajsServerArg verbose=true
+  //  or gulp dev --terriajsServerArg port=3000
+  const { spawn } = require("child_process");
+  const fs = require("fs");
+  const minimist = require("minimist");
+
+  const knownOptions = {
+    string: ["terriajsServerArg"],
+    default: {
+      terriajsServerArg: []
+    }
+  };
+  const options = minimist(process.argv.slice(2), knownOptions);
+
+  const logFile = fs.openSync("./terriajs-server.log", "a");
+  const serverArgs = Array.isArray(options.terriajsServerArg)
+    ? options.terriajsServerArg
+    : [options.terriajsServerArg];
+  // Spawn detached - attached does not make terriajs-server
+  //  quit when the gulp task is stopped
+  const child = spawn(
+    "node",
+    [
+      "./node_modules/.bin/terriajs-server",
+      "--port=3002",
+      ...serverArgs.map((arg) => `--${arg}`)
+    ],
+    { detached: true, stdio: ["ignore", logFile, logFile] }
+  );
+  child.on("exit", (exitCode, signal) => {
+    done(
+      new Error(
+        "terriajs-server quit" +
+          (exitCode !== null ? ` with exit code: ${exitCode}` : "") +
+          (signal ? ` from signal: ${signal}` : "") +
+          "\nCheck terriajs-server.log for more information."
+      )
+    );
+  });
+  // Intercept SIGINT, SIGTERM and SIGHUP, cleanup terriajs-server and re-send signal
+  // May fail to catch some relevant signals on Windows
+  // SIGINT: ctrl+c
+  // SIGTERM: kill <pid>
+  // SIGHUP: terminal closed
+  process.once("SIGINT", () => {
+    child.kill("SIGTERM");
+    process.kill(process.pid, "SIGINT");
+  });
+  process.once("SIGTERM", () => {
+    child.kill("SIGTERM");
+    process.kill(process.pid, "SIGTERM");
+  });
+  process.once("SIGHUP", () => {
+    child.kill("SIGTERM");
+    process.kill(process.pid, "SIGHUP");
+  });
+});
+
+gulp.task(
+  "copy-cesium-assets",
+  gulp.series(
+    "copy-cesium-source-assets",
+    "copy-cesium-workers",
+    "copy-cesium-thirdparty"
+  )
+);
 gulp.task("build", gulp.series("copy-cesium-assets", "build-specs"));
 gulp.task("release", gulp.series("copy-cesium-assets", "release-specs"));
 gulp.task("watch", gulp.series("copy-cesium-assets", "watch-specs"));
+gulp.task("dev", gulp.parallel("terriajs-server", "watch"));
 gulp.task("post-npm-install", gulp.series("copy-cesium-assets"));
 gulp.task("default", gulp.series("lint", "build"));

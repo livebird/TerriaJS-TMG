@@ -1,7 +1,7 @@
 import { ApiClient, fromCatalog } from "@opendatasoft/api-client";
 import { Dataset } from "@opendatasoft/api-client/dist/client/types";
 import i18next from "i18next";
-import { computed, runInAction } from "mobx";
+import { computed, makeObservable, override, runInAction } from "mobx";
 import ms from "ms";
 import Mustache from "mustache";
 import JulianDate from "terriajs-cesium/Source/Core/JulianDate";
@@ -12,16 +12,15 @@ import isDefined from "../../../Core/isDefined";
 import { isJsonObject, isJsonString } from "../../../Core/Json";
 import TerriaError from "../../../Core/TerriaError";
 import AutoRefreshingMixin from "../../../ModelMixins/AutoRefreshingMixin";
-import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
 import TableMixin from "../../../ModelMixins/TableMixin";
 import UrlMixin from "../../../ModelMixins/UrlMixin";
 import TableAutomaticStylesStratum from "../../../Table/TableAutomaticStylesStratum";
 import { MetadataUrlTraits } from "../../../Traits/TraitsClasses/CatalogMemberTraits";
 import EnumDimensionTraits from "../../../Traits/TraitsClasses/DimensionTraits";
 import OpenDataSoftCatalogItemTraits from "../../../Traits/TraitsClasses/OpenDataSoftCatalogItemTraits";
-import TableColumnTraits from "../../../Traits/TraitsClasses/TableColumnTraits";
-import TableStyleTraits from "../../../Traits/TraitsClasses/TableStyleTraits";
-import TableTimeStyleTraits from "../../../Traits/TraitsClasses/TableTimeStyleTraits";
+import TableColumnTraits from "../../../Traits/TraitsClasses/Table/ColumnTraits";
+import TableStyleTraits from "../../../Traits/TraitsClasses/Table/StyleTraits";
+import TableTimeStyleTraits from "../../../Traits/TraitsClasses/Table/TimeStyleTraits";
 import CreateModel from "../../Definition/CreateModel";
 import createStratumInstance from "../../Definition/createStratumInstance";
 import LoadableStratum from "../../Definition/LoadableStratum";
@@ -143,6 +142,7 @@ export class OpenDataSoftDatasetStratum extends LoadableStratum(
     private readonly pointTimeSeries?: PointTimeSeries[]
   ) {
     super();
+    makeObservable(this);
   }
 
   @computed get name() {
@@ -533,10 +533,8 @@ function getTimeField(dataset: Dataset) {
 StratumOrder.addLoadStratum(OpenDataSoftDatasetStratum.stratumName);
 
 export default class OpenDataSoftCatalogItem
-  extends TableMixin(
-    AutoRefreshingMixin(
-      UrlMixin(CatalogMemberMixin(CreateModel(OpenDataSoftCatalogItemTraits)))
-    )
+  extends AutoRefreshingMixin(
+    TableMixin(UrlMixin(CreateModel(OpenDataSoftCatalogItemTraits)))
   )
   implements SelectableDimensions
 {
@@ -548,6 +546,7 @@ export default class OpenDataSoftCatalogItem
     sourceReference: BaseModel | undefined
   ) {
     super(id, terria, sourceReference);
+    makeObservable(this);
     this.strata.set(
       TableAutomaticStylesStratum.stratumName,
       new TableAutomaticStylesStratum(this)
@@ -675,7 +674,7 @@ export default class OpenDataSoftCatalogItem
     }
   }
 
-  @computed
+  @override
   get selectableDimensions() {
     return filterOutUndefined([
       this.availableFieldsDimension,

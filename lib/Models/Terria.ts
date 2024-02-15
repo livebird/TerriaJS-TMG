@@ -1,5 +1,13 @@
 import i18next from "i18next";
-import { action, computed, observable, runInAction, toJS, when } from "mobx";
+import {
+  action,
+  computed,
+  observable,
+  runInAction,
+  toJS,
+  when,
+  makeObservable
+} from "mobx";
 import { createTransformer } from "mobx-utils";
 import buildModuleUrl from "terriajs-cesium/Source/Core/buildModuleUrl";
 import Clock from "terriajs-cesium/Source/Core/Clock";
@@ -14,7 +22,11 @@ import TerrainProvider from "terriajs-cesium/Source/Core/TerrainProvider";
 import Entity from "terriajs-cesium/Source/DataSources/Entity";
 import SplitDirection from "terriajs-cesium/Source/Scene/SplitDirection";
 import URI from "urijs";
-import { Category, LaunchAction } from "../Core/AnalyticEvents/analyticEvents";
+import {
+  Category,
+  LaunchAction,
+  DataSourceAction
+} from "../Core/AnalyticEvents/analyticEvents";
 import AsyncLoader from "../Core/AsyncLoader";
 import Class from "../Core/Class";
 import ConsoleAnalytics from "../Core/ConsoleAnalytics";
@@ -22,6 +34,7 @@ import CorsProxy from "../Core/CorsProxy";
 import ensureSuffix from "../Core/ensureSuffix";
 import filterOutUndefined from "../Core/filterOutUndefined";
 import getDereferencedIfExists from "../Core/getDereferencedIfExists";
+import getPath from "../Core/getPath";
 import GoogleAnalytics from "../Core/GoogleAnalytics";
 import hashEntity from "../Core/hashEntity";
 import instanceOf from "../Core/instanceOf";
@@ -57,7 +70,7 @@ import TimeVarying from "../ModelMixins/TimeVarying";
 import { HelpContentItem } from "../ReactViewModels/defaultHelpContent";
 import { defaultTerms, Term } from "../ReactViewModels/defaultTerms";
 import NotificationState from "../ReactViewModels/NotificationState";
-import { ICredit } from "../ReactViews/Credits";
+import { ICredit } from "../ReactViews/Map/BottomBar/Credits";
 import { SHARE_VERSION } from "../ReactViews/Map/Panels/SharePanel/BuildShareLink";
 import { shareConvertNotification } from "../ReactViews/Notification/shareConvertNotification";
 import MappableTraits from "../Traits/TraitsClasses/MappableTraits";
@@ -104,16 +117,20 @@ import MapInteractionMode from "./MapInteractionMode";
 import NoViewer from "./NoViewer";
 import { defaultRelatedMaps, RelatedMap } from "./RelatedMaps";
 import CatalogIndex from "./SearchProviders/CatalogIndex";
+import { SearchBarModel } from "./SearchProviders/SearchBarModel";
 import ShareDataService from "./ShareDataService";
 import { StoryVideoSettings } from "./StoryVideoSettings";
 import TimelineStack from "./TimelineStack";
 import { isViewerMode, setViewerMode } from "./ViewerMode";
 import Workbench from "./Workbench";
 import SelectableDimensionWorkflow from "./Workflows/SelectableDimensionWorkflow";
+import { SearchBarTraits } from "../Traits/SearchProviders/SearchBarTraits";
+import ModelPropertiesFromTraits from "./Definition/ModelPropertiesFromTraits";
+import SearchProviderTraits from "../Traits/SearchProviders/SearchProviderTraits";
 
 // import overrides from "../Overrides/defaults.jsx";
 
-interface ConfigParameters {
+export interface ConfigParameters {
   /**
    * TerriaJS uses this name whenever it needs to display the name of the application.
    */
@@ -272,10 +289,6 @@ interface ConfigParameters {
    */
   persistViewerMode?: boolean;
 
-  /*
-  Techmaven
-  */
-  useJSNavigator: boolean;
   /**
    * Whether to open the add data explorer panel on load.
    */
@@ -331,6 +344,12 @@ interface ConfigParameters {
   plugins?: Record<string, any>;
 
   aboutButtonHrefUrl?: string | null;
+
+  /**
+   * The search bar allows requesting information from various search services at once.
+   */
+  searchBarConfig?: ModelPropertiesFromTraits<SearchBarTraits>;
+  searchProviders: ModelPropertiesFromTraits<SearchProviderTraits>[];
 }
 
 interface StartOptions {
@@ -355,7 +374,7 @@ interface StartOptions {
   beforeRestoreAppState?: () => Promise<void> | void;
 }
 
-interface Analytics {
+export interface Analytics {
   start: (
     configParameters: Partial<{
       enableConsoleAnalytics: boolean;
@@ -367,7 +386,7 @@ interface Analytics {
     category: string,
     action: string,
     label?: string,
-    value?: string
+    value?: number
   ) => void;
 }
 
@@ -429,6 +448,7 @@ export default class Terria {
   readonly overlays = new Workbench();
   readonly catalog = new Catalog(this);
   readonly baseMapsModel = new BaseMapsModel("basemaps", this);
+  readonly searchBarModel = new SearchBarModel(this);
   readonly timelineClock = new Clock({ shouldAnimate: false });
   // readonly overrides: any = overrides; // TODO: add options.functionOverrides like in master
 
@@ -540,14 +560,15 @@ export default class Terria {
       },
       { text: "map.extraCreditLinks.disclaimer", url: "about.html#disclaimer" }
     ],
-    useJSNavigator: false,
     printDisclaimer: undefined,
     storyRouteUrlPrefix: undefined,
     enableConsoleAnalytics: undefined,
     googleAnalyticsOptions: undefined,
     relatedMaps: defaultRelatedMaps,
     aboutButtonHrefUrl: "about.html",
-    plugins: undefined
+    plugins: undefined,
+    searchBarConfig: undefined,
+    searchProviders: []
   };
 
   @observable
@@ -571,6 +592,16 @@ export default class Terria {
   /** Gets or sets the active SelectableDimensionWorkflow, if defined, then the workflow will be displayed using `WorkflowPanel` */
   @observable
   selectableDimensionWorkflow?: SelectableDimensionWorkflow;
+
+  /**
+   * Flag for zooming to workbench items after all init sources have been loaded.
+   *
+   * This is automatically enabled when your init file has the following settings:
+   * ```
+   *    {"initialCamera": {"focusWorkbenchItems": true}}
+   * ```
+   */
+  private focusWorkbenchItemsAfterLoadingInitSources: boolean = false;
 
   @computed
   get baseMapContrastColor() {
@@ -655,6 +686,7 @@ export default class Terria {
   errorService: ErrorServiceProvider = new StubErrorServiceProvider();
 
   constructor(options: TerriaOptions = {}) {
+    makeObservable(this);
     if (options.appBaseHref) {
       this.appBaseHref = new URL(
         options.appBaseHref,
@@ -817,7 +849,7 @@ export default class Terria {
     type: Class<T>,
     id: string
   ): T | undefined {
-    let model = this.getModelById(type, id);
+    const model = this.getModelById(type, id);
     if (model) {
       return model;
     } else {
@@ -970,6 +1002,7 @@ export default class Terria {
         if (isJsonObject(config) && isJsonObject(config.parameters)) {
           this.updateParameters(config.parameters);
         }
+
         if (this.configParameters.errorService) {
           this.setupErrorServiceProvider(this.configParameters.errorService);
         }
@@ -1027,6 +1060,15 @@ export default class Terria {
         )
       );
 
+    this.searchBarModel
+      .updateModelConfig(this.configParameters.searchBarConfig)
+      .initializeSearchProviders(this.configParameters.searchProviders)
+      .catchError((error) =>
+        this.raiseErrorToUser(
+          TerriaError.from(error, "Failed to initialize searchProviders")
+        )
+      );
+
     if (typeof options.beforeRestoreAppState === "function") {
       try {
         await options.beforeRestoreAppState();
@@ -1044,7 +1086,43 @@ export default class Terria {
         this
       );
     }
+
     this.loadPersistedMapSettings();
+  }
+
+  /**
+   * Zoom to workbench items if `focusWorkbenchItemsAfterLoadingInitSources` is `true`.
+   *
+   * Note that the current behaviour is to zoom to the first item of the
+   * workbench, however in the future we should modify it to zoom to a view
+   * which shows all the workbench items.
+   *
+   * If a Cesium or Leaflet viewer is not available,
+   * we wait for it to load before triggering the zoom.
+   */
+  private async doZoomToWorkbenchItems() {
+    if (!this.focusWorkbenchItemsAfterLoadingInitSources) {
+      return;
+    }
+
+    // TODO: modify this to zoom to a view that shows all workbench items
+    // instead of just zooming to the first workbench item!
+    const firstMappableItem = this.workbench.items.find((item) =>
+      MappableMixin.isMixedInto(item)
+    ) as MappableMixin.Instance | undefined;
+    if (firstMappableItem) {
+      // When the app loads, Cesium/Leaflet viewers are loaded
+      // asynchronously. Until they become available, a stub viewer called
+      // `NoViewer` is used. `NoViewer` does not implement zooming to mappable
+      // items. So here wait for a valid viewer to become available before
+      // attempting to zoom to the mappable item.
+      const isViewerAvailable = () => this.currentViewer.type !== NoViewer.type;
+      // Note: In some situations the following use of when() can result in
+      // a hanging promise if a valid viewer never becomes available,
+      // for eg: when react is not rendered - `currentViewer` will always be `NoViewer`.
+      await when(isViewerAvailable);
+      await this.currentViewer.zoomTo(firstMappableItem, 0.0);
+    }
   }
 
   loadPersistedMapSettings(): void {
@@ -1150,6 +1228,16 @@ export default class Terria {
     const hash = uri.fragment();
     const hashProperties = queryToObject(hash);
 
+    function checkSegments(urlSegments: string[], customRoute: string) {
+      // Accept /${customRoute}/:some-id/ or /${customRoute}/:some-id
+      return (
+        ((urlSegments.length === 3 && urlSegments[2] === "") ||
+          urlSegments.length === 2) &&
+        urlSegments[0] === customRoute &&
+        urlSegments[1].length > 0
+      );
+    }
+
     try {
       await interpretHash(
         this,
@@ -1166,15 +1254,6 @@ export default class Terria {
 
       // /catalog/ and /story/ routes
       if (newUrl.startsWith(this.appBaseHref)) {
-        function checkSegments(urlSegments: string[], customRoute: string) {
-          // Accept /${customRoute}/:some-id/ or /${customRoute}/:some-id
-          return (
-            ((urlSegments.length === 3 && urlSegments[2] === "") ||
-              urlSegments.length === 2) &&
-            urlSegments[0] === customRoute &&
-            urlSegments[1].length > 0
-          );
-        }
         const pageUrl = new URL(newUrl);
         // Find relative path from baseURI to documentURI excluding query and hash
         // then split into url segments
@@ -1225,7 +1304,7 @@ export default class Terria {
   @action
   updateParameters(parameters: ConfigParameters | JsonObject): void {
     Object.entries(parameters).forEach(([key, value]) => {
-      if (this.configParameters.hasOwnProperty(key)) {
+      if (Object.hasOwnProperty.call(this.configParameters, key)) {
         (this.configParameters as any)[key] = value;
       }
     });
@@ -1332,6 +1411,11 @@ export default class Terria {
         this.loadPersistedOrInitBaseMap();
       }
     });
+
+    // Zoom to workbench items if any of the init sources specifically requested it
+    if (this.focusWorkbenchItemsAfterLoadingInitSources) {
+      this.doZoomToWorkbenchItems();
+    }
 
     if (errors.length > 0) {
       // Note - this will get wrapped up in a Result object because it is called in AsyncLoader
@@ -1632,8 +1716,25 @@ export default class Terria {
     }
 
     if (isJsonObject(initData.initialCamera)) {
-      const initialCamera = CameraView.fromJson(initData.initialCamera);
-      this.currentViewer.zoomTo(initialCamera, 2.0);
+      // When initialCamera is set:
+      // - try to construct a CameraView and zoom to it
+      // - otherwise, if `initialCamera.focusWorkbenchItems` is `true` flag it
+      //   so that we can zoom after the workbench items are loaded.
+      // - If there are multiple initSources, the setting from the last source takes effect
+      try {
+        const initialCamera = CameraView.fromJson(initData.initialCamera);
+        this.currentViewer.zoomTo(initialCamera, 2.0);
+        // reset in case this was enabled by a previous initSource
+        this.focusWorkbenchItemsAfterLoadingInitSources = false;
+      } catch (error) {
+        // Not a CameraView but does it specify focusWorkbenchItems?
+        if (typeof initData.initialCamera.focusWorkbenchItems === "boolean") {
+          this.focusWorkbenchItemsAfterLoadingInitSources =
+            initData.initialCamera.focusWorkbenchItems;
+        } else {
+          throw error;
+        }
+      }
     }
 
     if (isJsonBoolean(initData.showSplitter)) {
@@ -1726,7 +1827,7 @@ export default class Terria {
     const newItems: BaseModel[] = [];
 
     // Maintain the model order in the workbench.
-    while (true) {
+    for (;;) {
       const model = newItemsRaw.shift();
       if (model) {
         await this.pushAndLoadMapItems(model, newItems, errors);
@@ -1734,6 +1835,15 @@ export default class Terria {
         break;
       }
     }
+
+    newItems.forEach((item) => {
+      // fire the google analytics event
+      this.analytics?.logEvent(
+        Category.dataSource,
+        DataSourceAction.addFromShareOrInit,
+        getPath(item)
+      );
+    });
 
     runInAction(() => (this.workbench.items = newItems));
 
@@ -1785,6 +1895,13 @@ export default class Terria {
         this.pickedFeatures = undefined;
         this.selectedFeature = undefined;
       });
+    }
+
+    if (initData.settings?.shortenShareUrls !== undefined) {
+      this.setLocalProperty(
+        "shortenShareUrls",
+        initData.settings.shortenShareUrls
+      );
     }
 
     if (errors.length > 0)
@@ -1888,7 +2005,7 @@ export default class Terria {
     this.setupInitializationUrls(baseUri, config.aspects?.["terria-config"]);
     /** Load up rest of terria catalog if one is inlined in terria-init */
     if (config.aspects?.["terria-init"]) {
-      const { catalog, ...rest } = initObj;
+      const { catalog } = initObj;
       this.initSources.push({
         name: `Magda map-config aspect terria-init from ${configUrl}`,
         errorSeverity: TerriaErrorSeverity.Error,
@@ -1902,7 +2019,7 @@ export default class Terria {
   @action
   async loadPickedFeatures(pickedFeatures: JsonObject): Promise<void> {
     let vectorFeatures: TerriaFeature[] = [];
-    let featureIndex: Record<number, TerriaFeature[] | undefined> = {};
+    const featureIndex: Record<number, TerriaFeature[] | undefined> = {};
 
     if (Array.isArray(pickedFeatures.entities)) {
       // Build index of terria features by a hash of their properties.
@@ -2003,7 +2120,7 @@ export default class Terria {
       // SecurityError can arise if 3rd party cookies are blocked in Chrome and we're served in an iFrame
       return null;
     }
-    var v = window.localStorage.getItem(this.appName + "." + key);
+    const v = window.localStorage.getItem(this.appName + "." + key);
     if (v === "true") {
       return true;
     } else if (v === "false") {
@@ -2134,7 +2251,6 @@ async function interpretStartData(
   if (isJsonObject(startData, false)) {
     // Convert startData to v8 if necessary
     let startDataV8: ShareInitSourceData | null;
-
     try {
       if (
         // If startData.version has version 0.x.x - user catalog-converter to convert startData

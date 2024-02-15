@@ -11,25 +11,30 @@ import updateModelFromJson from "../../lib/Models/Definition/updateModelFromJson
 import TerriaFeature from "../../lib/Models/Feature/Feature";
 import { TerriaFeatureData } from "../../lib/Models/Feature/FeatureData";
 import Terria from "../../lib/Models/Terria";
-import TableColorStyleTraits from "../../lib/Traits/TraitsClasses/TableColorStyleTraits";
+import TableColorStyleTraits from "../../lib/Traits/TraitsClasses/Table/ColorStyleTraits";
 import TableLabelStyleTraits, {
   EnumLabelSymbolTraits,
   LabelSymbolTraits
-} from "../../lib/Traits/TraitsClasses/TableLabelStyleTraits";
+} from "../../lib/Traits/TraitsClasses/Table/LabelStyleTraits";
 import TableOutlineStyleTraits, {
   BinOutlineSymbolTraits,
   EnumOutlineSymbolTraits
-} from "../../lib/Traits/TraitsClasses/TableOutlineStyleTraits";
+} from "../../lib/Traits/TraitsClasses/Table/OutlineStyleTraits";
 import TablePointStyleTraits, {
   BinPointSymbolTraits,
-  EnumPointSymbolTraits
-} from "../../lib/Traits/TraitsClasses/TablePointStyleTraits";
-import TableStyleTraits from "../../lib/Traits/TraitsClasses/TableStyleTraits";
-import TableTimeStyleTraits from "../../lib/Traits/TraitsClasses/TableTimeStyleTraits";
+  EnumPointSymbolTraits,
+  PointSymbolTraits
+} from "../../lib/Traits/TraitsClasses/Table/PointStyleTraits";
+import TableStyleTraits from "../../lib/Traits/TraitsClasses/Table/StyleTraits";
+import TableTimeStyleTraits from "../../lib/Traits/TraitsClasses/Table/TimeStyleTraits";
 import TableTrailStyleTraits, {
   BinTrailSymbolTraits,
   EnumTrailSymbolTraits
-} from "../../lib/Traits/TraitsClasses/TableTrailStyleTraits";
+} from "../../lib/Traits/TraitsClasses/Table/TrailStyleTraits";
+
+import HorizontalOrigin from "terriajs-cesium/Source/Scene/HorizontalOrigin";
+import VerticalOrigin from "terriajs-cesium/Source/Scene/VerticalOrigin";
+import ScaleByDistanceTraits from "../../lib/Traits/TraitsClasses/ScaleByDistanceTraits";
 
 const LatLonValCsv = require("raw-loader!../../wwwroot/test/csv/lat_lon_val.csv");
 const LatLonEnumCsv = require("raw-loader!../../wwwroot/test/csv/lat_lon_enum.csv");
@@ -59,6 +64,8 @@ const regionIdsLgaNameStates = JSON.stringify(
   require("../../wwwroot/data/regionids/region_map-FID_LGA_2011_AUST_STE_NAME11.json")
 );
 
+const NUMBER_OF_REGION_MAPPING_TYPES = 144;
+
 describe("TableMixin", function () {
   let item: CsvCatalogItem;
   let terria: Terria;
@@ -70,24 +77,26 @@ describe("TableMixin", function () {
     item = new CsvCatalogItem("test", terria, undefined);
 
     jasmine.Ajax.install();
+    jasmine.Ajax.stubRequest(/.*/).andError({});
+
     jasmine.Ajax.stubRequest(
       "build/TerriaJS/data/regionMapping.json"
     ).andReturn({ responseText: regionMapping });
 
     jasmine.Ajax.stubRequest(
-      "build/TerriaJS/data/regionids/region_map-STE_2016_AUST_STE_NAME16.json"
+      "https://tiles.terria.io/region-mapping/regionids/region_map-STE_2016_AUST_STE_NAME16.json"
     ).andReturn({ responseText: regionIdsSte });
 
     jasmine.Ajax.stubRequest(
-      "build/TerriaJS/data/regionids/region_map-FID_LGA_2011_AUST_LGA_NAME11.json"
+      "https://tiles.terria.io/region-mapping/regionids/region_map-FID_LGA_2011_AUST_LGA_NAME11.json"
     ).andReturn({ responseText: regionIdsLgaName });
 
     jasmine.Ajax.stubRequest(
-      "build/TerriaJS/data/regionids/region_map-FID_LGA_2015_AUST_LGA_CODE15.json"
+      "https://tiles.terria.io/region-mapping/regionids/region_map-FID_LGA_2015_AUST_LGA_CODE15.json"
     ).andReturn({ responseText: regionIdsLgaCode });
 
     jasmine.Ajax.stubRequest(
-      "build/TerriaJS/data/regionids/region_map-FID_LGA_2011_AUST_STE_NAME11.json"
+      "https://tiles.terria.io/region-mapping/regionids/region_map-FID_LGA_2011_AUST_STE_NAME11.json"
     ).andReturn({ responseText: regionIdsLgaNameStates });
   });
 
@@ -99,7 +108,7 @@ describe("TableMixin", function () {
     let dataSource: CustomDataSource;
     beforeEach(async function () {
       item.setTrait(CommonStrata.user, "csvString", LatLonEnumDateIdCsv);
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
       dataSource = <CustomDataSource>item.mapItems[0];
       expect(dataSource instanceof CustomDataSource).toBe(true);
     });
@@ -166,7 +175,7 @@ describe("TableMixin", function () {
 
       it("creates entities for all times", async function () {
         item.defaultStyle.time.setTrait(CommonStrata.user, "timeColumn", null);
-        await item.loadMapItems();
+        (await item.loadMapItems()).throwIfError();
         const mapItem = item.mapItems[0];
         expect(mapItem instanceof CustomDataSource).toBe(true);
         if (mapItem instanceof CustomDataSource) {
@@ -187,7 +196,7 @@ describe("TableMixin", function () {
         "csvString",
         LatLonEnumDateIdWithRegionCsv
       );
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
       dataSource = <CustomDataSource>item.mapItems[0];
       expect(dataSource instanceof CustomDataSource).toBe(true);
     });
@@ -261,7 +270,7 @@ describe("TableMixin", function () {
 
       it("creates entities for all times", async function () {
         item.defaultStyle.time.setTrait(CommonStrata.user, "timeColumn", null);
-        await item.loadMapItems();
+        (await item.loadMapItems()).throwIfError();
         const mapItem = item.mapItems[0];
         expect(mapItem instanceof CustomDataSource).toBe(true);
         if (mapItem instanceof CustomDataSource) {
@@ -277,7 +286,7 @@ describe("TableMixin", function () {
         item.setTrait(CommonStrata.user, "csvString", LatLonValCsv)
       );
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
       const mapItem = item.mapItems[0];
       expect(mapItem instanceof CustomDataSource).toBe(true);
       if (mapItem instanceof CustomDataSource) {
@@ -291,7 +300,7 @@ describe("TableMixin", function () {
         item.setTrait(CommonStrata.user, "removeDuplicateRows", true);
       });
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
       const mapItem = item.mapItems[0];
       expect(mapItem instanceof CustomDataSource).toBe(true);
       if (mapItem instanceof CustomDataSource) {
@@ -299,7 +308,7 @@ describe("TableMixin", function () {
 
         const duplicateValue = 7;
         let occurrences = 0;
-        for (let entity of mapItem.entities.values) {
+        for (const entity of mapItem.entities.values) {
           const val = entity.properties?.value.getValue();
           if (val === duplicateValue) {
             occurrences++;
@@ -313,7 +322,7 @@ describe("TableMixin", function () {
       runInAction(() =>
         item.setTrait(CommonStrata.user, "csvString", LatLonValCsv)
       );
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
       const dataSource = item.mapItems[0] as CustomDataSource;
       const propertyNames =
         dataSource.entities.values[0].properties?.propertyNames;
@@ -327,7 +336,7 @@ describe("TableMixin", function () {
         item.setTrait(CommonStrata.user, "csvString", BadDatesCsv)
       );
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
       const mapItem = item.mapItems[0];
       expect(mapItem instanceof CustomDataSource).toBe(true);
       if (mapItem instanceof CustomDataSource) {
@@ -340,7 +349,7 @@ describe("TableMixin", function () {
     let dataSource: CustomDataSource;
     beforeEach(async function () {
       item.setTrait(CommonStrata.user, "csvString", ParkingSensorDataCsv);
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
       dataSource = <CustomDataSource>item.mapItems[0];
       expect(dataSource instanceof CustomDataSource).toBe(true);
     });
@@ -504,7 +513,7 @@ describe("TableMixin", function () {
         item.setTrait(CommonStrata.user, "csvString", LatLonEnumDateIdCsv);
       });
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
       expect(item.timeDisableDimension).toBeUndefined();
     });
 
@@ -514,7 +523,7 @@ describe("TableMixin", function () {
         item.setTrait(CommonStrata.user, "showDisableTimeOption", true);
       });
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
       expect(item.timeDisableDimension).toBeDefined();
     });
   });
@@ -525,7 +534,7 @@ describe("TableMixin", function () {
         item.setTrait(CommonStrata.user, "csvString", LatLonEnumDateIdCsv);
       });
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       expect(item.styleDimensions?.options?.length).toBe(4);
       expect(item.styleDimensions?.options?.[2].id).toBe("value");
@@ -538,7 +547,7 @@ describe("TableMixin", function () {
         item.setTrait(CommonStrata.user, "showDisableStyleOption", true);
       });
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       expect(item.styleDimensions?.options?.length).toBe(4);
       expect(item.styleDimensions?.allowUndefined).toBeTruthy();
@@ -555,7 +564,7 @@ describe("TableMixin", function () {
         });
       });
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       expect(item.styleDimensions?.options?.[2].id).toBe("value");
       expect(item.styleDimensions?.options?.[2].name).toBe("Some Title");
@@ -570,7 +579,7 @@ describe("TableMixin", function () {
         });
       });
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       expect(item.styleDimensions?.options?.[2].id).toBe("value");
       expect(item.styleDimensions?.options?.[2].name).toBe("Some Style Title");
@@ -579,13 +588,15 @@ describe("TableMixin", function () {
     it("loads regionProviderLists on loadMapItems", async function () {
       item.setTrait(CommonStrata.user, "csvString", LatLonEnumDateIdCsv);
 
-      await item.loadMetadata();
+      (await item.loadMetadata()).throwIfError();
 
       expect(item.regionProviderLists).toBeUndefined();
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
-      expect(item.regionProviderLists?.[0]?.regionProviders.length).toBe(114);
+      expect(item.regionProviderLists?.[0]?.regionProviders.length).toBe(
+        NUMBER_OF_REGION_MAPPING_TYPES
+      );
     });
 
     it("loads regionProviderLists on loadMapItems - with multiple regionMappingDefinitionsUrl", async function () {
@@ -605,16 +616,18 @@ describe("TableMixin", function () {
 
       item.setTrait(CommonStrata.user, "csvString", LgaWithDisambigCsv);
 
-      await item.loadMetadata();
+      (await item.loadMetadata()).throwIfError();
 
       expect(item.regionProviderLists).toBeUndefined();
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       expect(item.regionProviderLists?.length).toBe(2);
 
       expect(item.regionProviderLists?.[0]?.regionProviders.length).toBe(2);
-      expect(item.regionProviderLists?.[1]?.regionProviders.length).toBe(114);
+      expect(item.regionProviderLists?.[1]?.regionProviders.length).toBe(
+        NUMBER_OF_REGION_MAPPING_TYPES
+      );
 
       // Item region provider should match from "additionalRegion.json" (as it comes before "build/TerriaJS/data/regionMapping.json")
       expect(item.activeTableStyle.regionColumn?.regionType?.description).toBe(
@@ -640,15 +653,17 @@ describe("TableMixin", function () {
 
       item.setTrait(CommonStrata.user, "csvString", LgaWithDisambigCsv);
 
-      await item.loadMetadata();
+      (await item.loadMetadata()).throwIfError();
 
       expect(item.regionProviderLists).toBeUndefined();
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       expect(item.regionProviderLists?.length).toBe(1);
 
-      expect(item.regionProviderLists?.[0]?.regionProviders.length).toBe(114);
+      expect(item.regionProviderLists?.[0]?.regionProviders.length).toBe(
+        NUMBER_OF_REGION_MAPPING_TYPES
+      );
 
       // Item region provider should match from "build/TerriaJS/data/regionMapping.json"
       expect(item.activeTableStyle.regionColumn?.regionType?.description).toBe(
@@ -663,7 +678,7 @@ describe("TableMixin", function () {
 
       item.setTrait("definition", "activeStyle", "0dp");
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       expect(item.legends[0].items.length).toBe(7);
       expect(item.legends[0].items.map((i) => i.title)).toEqual([
@@ -682,7 +697,7 @@ describe("TableMixin", function () {
 
       item.setTrait("definition", "activeStyle", "1dp");
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       expect(item.legends[0].items.length).toBe(7);
       expect(item.legends[0].items.map((i) => i.title)).toEqual([
@@ -701,7 +716,7 @@ describe("TableMixin", function () {
 
       item.setTrait("definition", "activeStyle", "2dp");
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       expect(item.legends[0].items.length).toBe(7);
       expect(item.legends[0].items.map((i) => i.title)).toEqual([
@@ -720,7 +735,7 @@ describe("TableMixin", function () {
 
       item.setTrait("definition", "activeStyle", "3dp");
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       expect(item.legends[0].items.length).toBe(7);
       expect(item.legends[0].items.map((i) => i.title)).toEqual([
@@ -733,12 +748,25 @@ describe("TableMixin", function () {
         "0.010"
       ]);
     });
+
+    it(" - uses color column title by default", async function () {
+      item.setTrait("definition", "csvString", LegendDecimalPlacesCsv);
+      item.setTrait("definition", "activeStyle", "0dp");
+
+      updateModelFromJson(item, CommonStrata.user, {
+        styles: [{ name: "0dp", title: "Some title" }]
+      });
+
+      (await item.loadMapItems()).throwIfError();
+
+      expect(item.legends[0].title).toBe("0dp");
+    });
   });
 
   describe("region mapping - LGA with disambig", function () {
     beforeEach(async function () {
       item.setTrait(CommonStrata.user, "csvString", LgaWithDisambigCsv);
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       await item.regionProviderLists?.[0]
         ?.getRegionProvider("LGA_NAME_2011")
@@ -816,7 +844,7 @@ describe("TableMixin", function () {
         `
       );
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       expect(item.activeTableStyle.regionColumn?.name).toBe("lga code-_-2015");
       expect(item.activeTableStyle.regionColumn?.regionType?.regionType).toBe(
@@ -848,6 +876,44 @@ describe("TableMixin", function () {
   });
 
   describe("applies TableStyles to lat/lon features", function () {
+    it("supports image marker style", async function () {
+      item.setTrait(CommonStrata.user, "csvString", LatLonValCsv);
+
+      const image =
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAZNJREFUWIXtlrFLQlEUxr/QPGYhTbYEhhgWErjU0twQ9AdEGNnU0CiBL60pMBqC2gSHhgoamhoFt8ZaIugtQhFFY1Hmp0EN+ehZDd3e84ngB493733vnPPjXj7OdaPFcncA2h3AIyLrJBMiskcy01QAEdkgmTavkTTeaQDpbyFdtgKQXFH5/y9SPQKPefII7PuB2Xqe0xGRgE4ONxOgQX4gbppOHpGlmGIOW10wCoRUY2wFKP0jxhJAHMAqgCCAawBRpwEO6o8VWQKYjqK8lYAEA3Bd3UGf0BBxFOBYg6+n+3M8HkJkaQqVXAFexwCM4oZ2F+HNFdRytHczeq017sJyHi8Aeh0DmMniaSeB96EBeC5ucJ4vYlI1hyWA4iX8Y1/tSbm4ZQCJohxegHgDcD3fQtczDtswtgafMe4PIxLZRElPqfUDW13QN9jiZlR5UI+xBPBWA9wmG96fNN+GVZhuRWfzP74rFVcGEJFtkinVIrYBkNQAaKYlj4hkSc6JyCHJZFMBflG1XjRpXM+dBrCsDsAHoPtrwlSQt8wAAAAASUVORK5CYII=";
+
+      item.setTrait(CommonStrata.user, "styles", [
+        createStratumInstance(TableStyleTraits, {
+          id: "test-style",
+          point: createStratumInstance(TablePointStyleTraits, {
+            null: createStratumInstance(PointSymbolTraits, {
+              marker: image,
+              height: 20
+            })
+          })
+        })
+      ]);
+      item.setTrait(CommonStrata.user, "activeStyle", "test-style");
+
+      (await item.loadMapItems()).throwIfError();
+
+      const mapItem = item.mapItems[0] as CustomDataSource;
+
+      mapItem.entities.values.forEach((feature) => {
+        expect(
+          feature.billboard?.image?.getValue(
+            item.terria.timelineClock.currentTime
+          )
+        ).toBe(image);
+
+        expect(
+          feature.billboard?.height?.getValue(
+            item.terria.timelineClock.currentTime
+          )
+        ).toBe(20);
+      });
+    });
+
     it("bin outline style with points", async function () {
       item.setTrait(CommonStrata.user, "csvString", LatLonValCsv);
 
@@ -903,7 +969,7 @@ describe("TableMixin", function () {
       ]);
       item.setTrait(CommonStrata.user, "activeStyle", "test-style");
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       const mapItem = item.mapItems[0] as CustomDataSource;
 
@@ -1012,7 +1078,7 @@ describe("TableMixin", function () {
       ]);
       item.setTrait(CommonStrata.user, "activeStyle", "test-style");
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       const mapItem = item.mapItems[0] as CustomDataSource;
 
@@ -1024,6 +1090,7 @@ describe("TableMixin", function () {
           marker: "hospital",
           height: 30,
           width: 15,
+          // Convert to counter-clockwise radians
           rotation: ((360 - 45) / 360) * (2 * Math.PI)
         },
         {
@@ -1186,7 +1253,7 @@ describe("TableMixin", function () {
       ]);
       item.setTrait(CommonStrata.user, "activeStyle", "test-style");
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       const mapItem = item.mapItems[0] as CustomDataSource;
 
@@ -1305,7 +1372,9 @@ describe("TableMixin", function () {
                 style: "FILL",
                 scale: 1.5,
                 fillColor: "#ff00ff",
-                pixelOffset: [0, 0]
+                pixelOffset: [0, 0],
+                horizontalOrigin: "LEFT",
+                verticalOrigin: "TOP"
               }),
               createStratumInstance(EnumLabelSymbolTraits, {
                 value: "boots",
@@ -1316,7 +1385,9 @@ describe("TableMixin", function () {
                 fillColor: "#0000ff",
                 outlineColor: "#00ff00",
                 outlineWidth: 1,
-                pixelOffset: [1, 1]
+                pixelOffset: [1, 1],
+                horizontalOrigin: "CENTER",
+                verticalOrigin: "CENTER"
               }),
               createStratumInstance(EnumLabelSymbolTraits, {
                 value: "frogs",
@@ -1326,7 +1397,9 @@ describe("TableMixin", function () {
                 scale: 3,
                 outlineColor: "#ff0000",
                 outlineWidth: 2,
-                pixelOffset: [2, 2]
+                pixelOffset: [2, 2],
+                horizontalOrigin: "RIGHT",
+                verticalOrigin: "BOTTOM"
               })
             ]
           })
@@ -1334,7 +1407,7 @@ describe("TableMixin", function () {
       ]);
       item.setTrait(CommonStrata.user, "activeStyle", "test-style");
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       const mapItem = item.mapItems[0] as CustomDataSource;
 
@@ -1349,7 +1422,9 @@ describe("TableMixin", function () {
           style: LabelStyle.FILL,
           scale: 1.5,
           fillColor: "rgb(255,0,255)",
-          pixelOffset: "(0, 0)" // Cartesian2.toString()
+          pixelOffset: "(0, 0)", // Cartesian2.toString()
+          horizontalOrigin: HorizontalOrigin.LEFT,
+          verticalOrigin: VerticalOrigin.TOP
         },
         {
           value: "boots",
@@ -1360,7 +1435,9 @@ describe("TableMixin", function () {
           fillColor: "rgb(0,0,255)",
           outlineColor: "rgb(0,255,0)",
           outlineWidth: 1,
-          pixelOffset: "(1, 1)" // Cartesian2.toString()
+          pixelOffset: "(1, 1)", // Cartesian2.toString()
+          horizontalOrigin: HorizontalOrigin.CENTER,
+          verticalOrigin: VerticalOrigin.CENTER
         },
         {
           value: "frogs",
@@ -1370,7 +1447,9 @@ describe("TableMixin", function () {
           scale: 3,
           outlineColor: "rgb(255,0,0)",
           outlineWidth: 2,
-          pixelOffset: "(2, 2)" // Cartesian2.toString()
+          pixelOffset: "(2, 2)", // Cartesian2.toString()
+          horizontalOrigin: HorizontalOrigin.RIGHT,
+          verticalOrigin: VerticalOrigin.BOTTOM
         }
       ];
 
@@ -1409,6 +1488,18 @@ describe("TableMixin", function () {
             ?.getValue(item.terria.timelineClock.currentTime)
             ?.toString()
         ).toBe(style.pixelOffset, failMessage("pixelOffset"));
+
+        expect(
+          feature.label?.verticalOrigin?.getValue(
+            item.terria.timelineClock.currentTime
+          )
+        ).toBe(style.verticalOrigin, failMessage("verticalOrigin"));
+
+        expect(
+          feature.label?.horizontalOrigin?.getValue(
+            item.terria.timelineClock.currentTime
+          )
+        ).toBe(style.horizontalOrigin, failMessage("horizontalOrigin"));
 
         if (style.fillColor)
           expect(
@@ -1491,7 +1582,7 @@ describe("TableMixin", function () {
       ]);
       item.setTrait(CommonStrata.user, "activeStyle", "test-style");
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       const mapItem = item.mapItems[0] as CustomDataSource;
 
@@ -1693,7 +1784,7 @@ describe("TableMixin", function () {
       ]);
       item.setTrait(CommonStrata.user, "activeStyle", "test-style");
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       const mapItem = item.mapItems[0] as CustomDataSource;
 
@@ -1831,7 +1922,7 @@ describe("TableMixin", function () {
       ]);
       item.setTrait(CommonStrata.user, "activeStyle", "test-style");
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       const mapItem = item.mapItems[0] as CustomDataSource;
 
@@ -1934,10 +2025,68 @@ describe("TableMixin", function () {
       });
     });
 
+    it("correctly applies disableDepthTestDistance trait", async function () {
+      item.setTrait(CommonStrata.user, "csvString", LatLonValCsv);
+      item.setTrait(CommonStrata.user, "styles", [
+        createStratumInstance(TableStyleTraits, {
+          id: "test-style",
+          point: createStratumInstance(TablePointStyleTraits, {
+            null: createStratumInstance(PointSymbolTraits, {
+              disableDepthTestDistance: 42
+            })
+          })
+        })
+      ]);
+      item.setTrait(CommonStrata.user, "activeStyle", "test-style");
+      await item.loadMapItems();
+
+      const mapItem = item.mapItems[0] as CustomDataSource;
+      mapItem.entities.values.forEach((entity) =>
+        expect(
+          entity.point?.disableDepthTestDistance?.getValue(JulianDate.now())
+        ).toBe(42)
+      );
+    });
+
+    it("correctly applies scaleByDistance traits", async function () {
+      item.setTrait(CommonStrata.user, "csvString", LatLonValCsv);
+      item.setTrait(CommonStrata.user, "styles", [
+        createStratumInstance(TableStyleTraits, {
+          id: "test-style",
+          point: createStratumInstance(TablePointStyleTraits, {
+            null: createStratumInstance(PointSymbolTraits, {
+              scaleByDistance: createStratumInstance(ScaleByDistanceTraits, {
+                near: 0,
+                nearValue: 4,
+                far: 50000,
+                farValue: 10
+              })
+            })
+          })
+        })
+      ]);
+      item.setTrait(CommonStrata.user, "activeStyle", "test-style");
+      await item.loadMapItems();
+
+      const mapItem = item.mapItems[0] as CustomDataSource;
+      mapItem.entities.values.forEach((entity) =>
+        expect(
+          entity.point?.scaleByDistance?.getValue(JulianDate.now())
+        ).toEqual(
+          jasmine.objectContaining({
+            near: 0,
+            nearValue: 4,
+            far: 50000,
+            farValue: 10
+          })
+        )
+      );
+    });
+
     it("doesn't pick hidden style as default activeStyle", async function () {
       item.setTrait(CommonStrata.user, "csvString", ParkingSensorDataCsv);
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       expect(item.activeStyle).toBe("eventid");
 
@@ -1948,7 +2097,7 @@ describe("TableMixin", function () {
         })
       ]);
 
-      await item.loadMapItems();
+      (await item.loadMapItems()).throwIfError();
 
       expect(item.activeStyle).toBe("parkflag");
     });

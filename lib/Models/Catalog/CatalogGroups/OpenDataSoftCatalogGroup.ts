@@ -1,7 +1,7 @@
 import { ApiClient, fromCatalog } from "@opendatasoft/api-client";
 import { Dataset, Facet } from "@opendatasoft/api-client/dist/client/types";
 import i18next from "i18next";
-import { action, computed, runInAction } from "mobx";
+import { action, computed, runInAction, makeObservable } from "mobx";
 import URI from "urijs";
 import filterOutUndefined from "../../../Core/filterOutUndefined";
 import isDefined from "../../../Core/isDefined";
@@ -39,7 +39,7 @@ export class OpenDataSoftCatalogStratum extends LoadableStratum(
       domain: catalogGroup.url
     });
 
-    let datasets: ValidDataset[] = [];
+    const datasets: ValidDataset[] = [];
     let facets: ValidFacet[] | undefined;
 
     // If no facetFilters, try to get some facets
@@ -115,6 +115,7 @@ export class OpenDataSoftCatalogStratum extends LoadableStratum(
     readonly datasets: ValidDataset[]
   ) {
     super();
+    makeObservable(this);
   }
 
   @computed

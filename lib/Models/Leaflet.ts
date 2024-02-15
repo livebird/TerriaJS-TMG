@@ -1,8 +1,14 @@
-import i18next from "i18next";
 import { GridLayer } from "leaflet";
-import { action, autorun, computed, observable, runInAction } from "mobx";
+import {
+  action,
+  autorun,
+  computed,
+  makeObservable,
+  observable,
+  reaction,
+  runInAction
+} from "mobx";
 import { computedFn } from "mobx-utils";
-import cesiumCancelAnimationFrame from "terriajs-cesium/Source/Core/cancelAnimationFrame";
 import Cartesian2 from "terriajs-cesium/Source/Core/Cartesian2";
 import Cartesian3 from "terriajs-cesium/Source/Core/Cartesian3";
 import Cartographic from "terriajs-cesium/Source/Core/Cartographic";
@@ -12,11 +18,9 @@ import Ellipsoid from "terriajs-cesium/Source/Core/Ellipsoid";
 import EventHelper from "terriajs-cesium/Source/Core/EventHelper";
 import CesiumMath from "terriajs-cesium/Source/Core/Math";
 import Rectangle from "terriajs-cesium/Source/Core/Rectangle";
-import cesiumRequestAnimationFrame from "terriajs-cesium/Source/Core/requestAnimationFrame";
 import DataSource from "terriajs-cesium/Source/DataSources/DataSource";
 import DataSourceCollection from "terriajs-cesium/Source/DataSources/DataSourceCollection";
 import Entity from "terriajs-cesium/Source/DataSources/Entity";
-import ImageryLayerFeatureInfo from "terriajs-cesium/Source/Scene/ImageryLayerFeatureInfo";
 import ImageryProvider from "terriajs-cesium/Source/Scene/ImageryProvider";
 import SplitDirection from "terriajs-cesium/Source/Scene/SplitDirection";
 import html2canvas from "terriajs-html2canvas";
@@ -54,7 +58,6 @@ import hasTraits from "./Definition/hasTraits";
 import TerriaFeature from "./Feature/Feature";
 import GlobeOrMap from "./GlobeOrMap";
 import { LeafletAttribution } from "./LeafletAttribution";
-import MapInteractionMode from "./MapInteractionMode";
 import Terria from "./Terria";
 
 // We want TS to look at the type declared in lib/ThirdParty/terriajs-cesium-extra/index.d.ts
@@ -123,6 +126,8 @@ export default class Leaflet extends GlobeOrMap {
     parts: ImageryParts,
     item: MappableMixin.Instance
   ) {
+    if (parts.imageryProvider === undefined) return undefined;
+
     if (TileErrorHandlerMixin.isMixedInto(item)) {
       // because this code path can run multiple times, make sure we remove the
       // handler if it is already registered
@@ -143,6 +148,7 @@ export default class Leaflet extends GlobeOrMap {
 
   constructor(terriaViewer: TerriaViewer, container: string | HTMLElement) {
     super();
+    makeObservable(this);
     this.terria = terriaViewer.terria;
     this.terriaViewer = terriaViewer;
     this.map = L.map(container, {
@@ -181,7 +187,7 @@ export default class Leaflet extends GlobeOrMap {
     const ticker = () => {
       if (!this._stopRequestAnimationFrame) {
         this.terria.timelineClock.tick();
-        this._cesiumReqAnimFrameId = cesiumRequestAnimationFrame(ticker);
+        this._cesiumReqAnimFrameId = requestAnimationFrame(ticker);
       }
     };
 
@@ -250,7 +256,7 @@ export default class Leaflet extends GlobeOrMap {
    */
   private _initProgressEvent() {
     const onTileLoadChange = () => {
-      var tilesLoadingCount = 0;
+      let tilesLoadingCount = 0;
 
       this.map.eachLayer(function (layerOrGridlayer) {
         // _tiles is protected but our knockout-loading-logic accesses it here anyway
@@ -334,7 +340,7 @@ export default class Leaflet extends GlobeOrMap {
     // synchronously as a result of timelineClock ticking due to ticker()
     this._stopRequestAnimationFrame = true;
     if (isDefined(this._cesiumReqAnimFrameId)) {
-      cesiumCancelAnimationFrame(this._cesiumReqAnimFrameId);
+      cancelAnimationFrame(this._cesiumReqAnimFrameId);
     }
     this.dataSourceDisplay.destroy();
     this.map.off("move");
@@ -342,12 +348,53 @@ export default class Leaflet extends GlobeOrMap {
     this.map.remove();
   }
 
+  @computed
+  get availableCatalogItems() {
+    const catalogItems = [
+      ...this.terriaViewer.items.get(),
+      this.terriaViewer.baseMap
+    ];
+    return catalogItems;
+  }
+
+  @computed
+  get availableDataSources() {
+    const catalogItems = this.availableCatalogItems;
+    /* Handle datasources */
+    const allMapItems = ([] as MapItem[]).concat(
+      ...catalogItems.filter(isDefined).map((item) => item.mapItems)
+    );
+    const dataSources = allMapItems.filter(isDataSource);
+    return dataSources;
+  }
+
   private observeModelLayer() {
-    return autorun(() => {
-      const catalogItems = [
-        ...this.terriaViewer.items.get(),
-        this.terriaViewer.baseMap
-      ];
+    // Setup reaction to sync datSources collection with availableDataSources
+    //
+    // To avoid buggy concurrent syncs, we have to ensure that even when
+    // multiple sync reactions are triggered, we run them one after the
+    // other. To do this, we make each run of the reaction wait for the
+    // previous `syncDataSourcesPromise` to finish before starting itself.
+    let syncDataSourcesPromise: Promise<void> = Promise.resolve();
+    const dataSourcesReactionDisposer = reaction(
+      () => this.availableDataSources,
+      () => {
+        syncDataSourcesPromise = syncDataSourcesPromise
+          .then(async () => {
+            await this.syncDataSourceCollection(
+              this.availableDataSources,
+              this.dataSources
+            );
+            this.notifyRepaintRequired();
+          })
+          .catch(console.error);
+      },
+      { fireImmediately: true }
+    );
+
+    // Reaction to sync imagery from model layer with cesium map
+    const imageryReactionDisposer = autorun(() => {
+      const catalogItems = this.availableCatalogItems;
       // Flatmap
       const allImageryMapItems = (
         [] as {
@@ -391,7 +438,7 @@ export default class Leaflet extends GlobeOrMap {
       // Add layer and update its zIndex
       let zIndex = 100; // Start at an arbitrary value
       allImagery.reverse().forEach(({ parts, layer }) => {
-        if (parts.show) {
+        if (layer && parts.show) {
           layer.setOpacity(parts.alpha);
           layer.setZIndex(zIndex);
           zIndex++;
@@ -399,41 +446,55 @@ export default class Leaflet extends GlobeOrMap {
           if (!this.map.hasLayer(layer)) {
             this.map.addLayer(layer);
           }
-        } else {
+        } else if (layer) {
           this.map.removeLayer(layer);
         }
       });
-
-      /* Handle datasources */
-      const allMapItems = ([] as MapItem[]).concat(
-        ...catalogItems.filter(isDefined).map((item) => item.mapItems)
-      );
-      const allDataSources = allMapItems.filter(isDataSource);
-
-      // Remove deleted data sources
-      let dataSources = this.dataSources;
-      for (let i = 0; i < dataSources.length; i++) {
-        const d = dataSources.get(i);
-        if (allDataSources.indexOf(d) === -1) {
-          dataSources.remove(d);
-          --i;
-        }
-      }
-
-      // Add new data sources, remove hidden ones
-      allDataSources.forEach((d) => {
-        if (d.show) {
-          if (!dataSources.contains(d)) {
-            dataSources.add(d);
-          }
-        } else {
-          dataSources.remove(d);
-        }
-      });
-
-      // Ensure stacking order matches order in allDataSources - first item appears on top.
-      allDataSources.forEach((d) => dataSources.raiseToTop(d));
     });
+
+    return () => {
+      dataSourcesReactionDisposer();
+      imageryReactionDisposer();
+    };
+  }
+
+  /**
+   * Syncs the `dataSources` collection against the latest `availableDataSources`.
+   *
+   */
+  private async syncDataSourceCollection(
+    availableDataSources: DataSource[],
+    dataSources: DataSourceCollection
+  ) {
+    // 1. Remove deleted data sources
+    //
+    // Iterate backwards because we're removing items.
+    for (let i = dataSources.length - 1; i >= 0; i--) {
+      const ds = dataSources.get(i);
+      if (availableDataSources.indexOf(ds) === -1 || !ds.show) {
+        dataSources.remove(ds);
+      }
+    }
+
+    // 2. Add new data sources
+    for (const ds of availableDataSources) {
+      if (!dataSources.contains(ds) && ds.show) {
+        await dataSources.add(ds);
+      }
+    }
+
+    // 3. Ensure stacking order matches order in `availableDataSources` - first item appears on top.
+    runInAction(() =>
+      availableDataSources.forEach((ds) => {
+        // There is a buggy/un-intended side-effect when calling raiseToTop() with
+        // a source that doesn't exist in the collection. Doing this will replace
+        // the last entry in the collection with the new one. So we should be
+        // careful to raiseToTop() only if the DS already exists in the collection.
+        // Relevant code:
+        //   https://github.com/CesiumGS/cesium/blob/dbd452328a48bfc4e192146862a9f8fa15789dc8/packages/engine/Source/DataSources/DataSourceCollection.js#L298-L299
+        dataSources.contains(ds) && dataSources.raiseToTop(ds);
+      })
+    );
   }
 
   doZoomTo(
@@ -520,46 +581,6 @@ export default class Leaflet extends GlobeOrMap {
     );
   }
 
-  /**
-   * Return features at a latitude, longitude and (optionally) height for the given imageryLayer.
-   * @param latLngHeight The position on the earth to pick
-   * @param providerCoords A map of imagery provider urls to the tile coords used to get features for those imagery
-   * @returns A flat array of all the features for the given tiles that are currently on the map
-   */
-  @action
-  async getFeaturesAtLocation(
-    latLngHeight: LatLonHeight,
-    providerCoords: ProviderCoordsMap
-  ) {
-    const pickMode = new MapInteractionMode({
-      message: i18next.t("models.imageryLayer.resolvingAvailability"),
-      onCancel: () => {
-        this.terria.mapInteractionModeStack.pop();
-      }
-    });
-    this.terria.mapInteractionModeStack.push(pickMode);
-    this._pickFeatures(
-      L.latLng({
-        lat: latLngHeight.latitude,
-        lng: latLngHeight.longitude,
-        alt: latLngHeight.height
-      }),
-      providerCoords,
-      [],
-      true
-    );
-
-    if (pickMode.pickedFeatures) {
-      const pickedFeatures = pickMode.pickedFeatures;
-      await pickedFeatures.allFeaturesAvailablePromise;
-    }
-
-    return runInAction(() => {
-      this.terria.mapInteractionModeStack.pop();
-      return pickMode.pickedFeatures?.features;
-    });
-  }
-
   /*
    * There are two "listeners" for clicks which are set up in our constructor.
    * - One fires for any click: `map.on('click', ...`.  It calls `pickFeatures`.
@@ -587,7 +608,7 @@ export default class Leaflet extends GlobeOrMap {
       const owner = entity.entityCollection.owner;
       if (
         owner instanceof DataSource &&
-        owner.name == GlobeOrMap._featureHighlightName
+        owner.name === GlobeOrMap._featureHighlightName
       ) {
         return;
       }
@@ -910,8 +931,15 @@ export default class Leaflet extends GlobeOrMap {
 
     if (isDefined(feature) && isDefined(feature.position)) {
       const cartographicScratch = new Cartographic();
+      const cartesianPosition = feature.position.getValue(
+        this.terria.timelineClock.currentTime
+      );
+      if (cartesianPosition === undefined) {
+        this._selectionIndicator.animateSelectionIndicatorDepart();
+        return;
+      }
       const cartographic = Ellipsoid.WGS84.cartesianToCartographic(
-        feature.position.getValue(this.terria.timelineClock.currentTime),
+        cartesianPosition,
         cartographicScratch
       );
       this._selectionIndicator.setLatLng(

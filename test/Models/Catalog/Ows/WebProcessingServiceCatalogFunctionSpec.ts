@@ -1,4 +1,4 @@
-import { configure, reaction, runInAction } from "mobx";
+import { action, configure, reaction, runInAction } from "mobx";
 import Cartographic from "terriajs-cesium/Source/Core/Cartographic";
 import GeoJsonDataSource from "terriajs-cesium/Source/DataSources/GeoJsonDataSource";
 import isDefined from "../../../../lib/Core/isDefined";
@@ -49,15 +49,18 @@ describe("WebProcessingServiceCatalogFunction", function () {
     jasmine.Ajax.install();
     jasmine.Ajax.stubRequest(
       "http://example.com/wps?service=WPS&request=DescribeProcess&version=1.0.0&Identifier=someId"
-    ).andReturn({ responseText: processDescriptionsXml });
+    ).andReturn({
+      responseText: processDescriptionsXml,
+      contentType: "text/xml"
+    });
 
     jasmine.Ajax.stubRequest(
       "http://example.com/wps?service=WPS&request=Execute&version=1.0.0"
-    ).andReturn({ responseText: executeResponseXml });
+    ).andReturn({ responseText: executeResponseXml, contentType: "text/xml" });
 
     jasmine.Ajax.stubRequest(
       "http://example.com/wps?service=WPS&request=Execute&version=1.0.0&Identifier=someId&DataInputs=geometry%3D%7B%22type%22%3A%22FeatureCollection%22%2C%22features%22%3A%5B%7B%22type%22%3A%22Feature%22%2C%22geometry%22%3A%7B%22type%22%3A%22Point%22%2C%22coordinates%22%3A%5B144.97227858979468%2C-37.771379205590165%2C-1196.8235676901866%5D%7D%2C%22properties%22%3A%7B%7D%7D%5D%7D&storeExecuteResponse=true&status=true"
-    ).andReturn({ responseText: executeResponseXml });
+    ).andReturn({ responseText: executeResponseXml, contentType: "text/xml" });
 
     jasmine.Ajax.stubRequest(
       "build/TerriaJS/data/regionMapping.json"
@@ -145,7 +148,7 @@ describe("WebProcessingServiceCatalogFunction", function () {
       let dispose: any;
       job = (await wps.submitJob()) as WebProcessingServiceCatalogFunctionJob;
 
-      await new Promise((resolve, reject) => {
+      await new Promise<void>((resolve, reject) => {
         dispose = reaction(
           () => job.downloadedResults,
           () => {
@@ -193,11 +196,17 @@ describe("WebProcessingServiceCatalogFunction", function () {
     it("polls the statusLocation for the result", async function () {
       jasmine.Ajax.stubRequest(
         "http://example.com/wps?service=WPS&request=Execute&version=1.0.0"
-      ).andReturn({ responseText: pendingExecuteResponseXml });
+      ).andReturn({
+        responseText: pendingExecuteResponseXml,
+        contentType: "text/xml"
+      });
 
       jasmine.Ajax.stubRequest(
         "http://example.com/ows?check_status/123"
-      ).andReturn({ responseText: executeResponseXml });
+      ).andReturn({
+        responseText: executeResponseXml,
+        contentType: "text/xml"
+      });
 
       const job = await wps.submitJob();
 
@@ -211,7 +220,7 @@ describe("WebProcessingServiceCatalogFunction", function () {
       let dispose2: any;
 
       // Wait for job to finish polling, then check if finished
-      await new Promise((resolve, reject) => {
+      await new Promise<void>((resolve, reject) => {
         dispose2 = reaction(
           () => job.refreshEnabled,
           () => {
@@ -234,7 +243,10 @@ describe("WebProcessingServiceCatalogFunction", function () {
       ); // do nothing
       jasmine.Ajax.stubRequest(
         "http://example.com/wps?service=WPS&request=Execute&version=1.0.0"
-      ).andReturn({ responseText: pendingExecuteResponseXml });
+      ).andReturn({
+        responseText: pendingExecuteResponseXml,
+        contentType: "text/xml"
+      });
 
       // Note: we don't stubRequest "http://example.com/ows?check_status/123" here - so an error will be thrown if the job polls for a result
 
@@ -272,11 +284,17 @@ describe("WebProcessingServiceCatalogFunction", function () {
     it("marks the ResultPendingCatalogItem as failed - for polling results", async function () {
       jasmine.Ajax.stubRequest(
         "http://example.com/wps?service=WPS&request=Execute&version=1.0.0"
-      ).andReturn({ responseText: pendingExecuteResponseXml });
+      ).andReturn({
+        responseText: pendingExecuteResponseXml,
+        contentType: "text/xml"
+      });
 
       jasmine.Ajax.stubRequest(
         "http://example.com/ows?check_status/123"
-      ).andReturn({ responseText: failedExecuteResponseXml });
+      ).andReturn({
+        responseText: failedExecuteResponseXml,
+        contentType: "text/xml"
+      });
 
       const job =
         (await wps.submitJob()) as WebProcessingServiceCatalogFunctionJob;
@@ -289,7 +307,7 @@ describe("WebProcessingServiceCatalogFunction", function () {
       let dispose2: any;
 
       // Wait for job to finish polling, then check if failed
-      await new Promise((resolve, reject) => {
+      await new Promise<void>((resolve, reject) => {
         dispose2 = reaction(
           () => job.refreshEnabled,
           () => {
@@ -312,12 +330,15 @@ describe("WebProcessingServiceCatalogFunction", function () {
     it("marks the ResultPendingCatalogItem as failed", async function () {
       jasmine.Ajax.stubRequest(
         "http://example.com/wps?service=WPS&request=Execute&version=1.0.0"
-      ).andReturn({ responseText: failedExecuteResponseXml });
+      ).andReturn({
+        responseText: failedExecuteResponseXml,
+        contentType: "text/xml"
+      });
 
       try {
         const job = await wps.submitJob();
         expect(job).toBeUndefined();
-      } catch (error) {
+      } catch (error: any) {
         expect(error).toBeDefined();
         expect(error instanceof TerriaError).toBeTruthy();
         expect(error.message).toBe(

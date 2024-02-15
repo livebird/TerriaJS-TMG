@@ -8,13 +8,7 @@ import { withTranslation } from "react-i18next";
 
 import Styles from "./panel.scss";
 import Icon from "../../../Styled/Icon";
-function sendEventToDevice(event) {
-  let ifrm = document.createElement("IFRAME");
-  ifrm.setAttribute("src", "js-frame:" + event);
-  document.documentElement.appendChild(ifrm);
-  ifrm.parentNode.removeChild(ifrm);
-  ifrm = null;
-}
+
 const InnerPanel = createReactClass({
   propTypes: {
     /**
@@ -142,11 +136,7 @@ const InnerPanel = createReactClass({
               [Styles.innerCloseBtnForModal]: this.props.showDropdownAsModal
             }
           )}
-          onClick={() => {
-            this.forceClose();
-            sendEventToDevice("menuclose");
-            console.log("Menu close");
-          }}
+          onClick={this.forceClose}
           title={t("general.close")}
           aria-label={t("general.close")}
           showDropdownAsModal={this.props.showDropdownAsModal}
@@ -171,11 +161,7 @@ const InnerPanel = createReactClass({
         >
           <Icon glyph={Icon.GLYPHS.close} />
         </button>
-        <If
-          condition={
-            defined(this.props.caretOffset) && !this.props.showDropdownAsModal
-          }
-        >
+        {defined(this.props.caretOffset) && !this.props.showDropdownAsModal && (
           <span
             className={classNames(Styles.caret, "tjs-sc-InnerPanel__caret")}
             style={{ left: this.props.caretOffset }}
@@ -183,7 +169,7 @@ const InnerPanel = createReactClass({
               background: ${(p) => p.theme.dark};
             `}
           />
-        </If>
+        )}
         <div className={Styles.content}>{this.props.children}</div>
       </div>
     );
