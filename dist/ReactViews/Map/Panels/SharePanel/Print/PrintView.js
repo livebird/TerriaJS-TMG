@@ -1,10 +1,11 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import DOMPurify from "dompurify";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { StyleSheetManager, ThemeProvider } from "styled-components";
-import { terriaTheme } from "../../../../StandardUserInterface/StandardTheme";
-import { useViewState } from "../../../../StandardUserInterface/ViewStateContext";
-import DistanceLegend from "../../../Legend/DistanceLegend";
+import { terriaTheme } from "../../../../StandardUserInterface";
+import { useViewState } from "../../../../Context";
+import { DistanceLegend } from "../../../BottomBar/DistanceLegend";
 import { buildShareLink, buildShortShareLink, canShorten } from "../BuildShareLink";
 import PrintDatasets from "./PrintDatasets";
 import PrintSource from "./PrintSource";
@@ -66,10 +67,19 @@ const styles = `
       padding: 5px;
     }
 
+    .tjs-legend__distanceLegend > label {
+      color: black;
+    }
+
+    .tjs-legend__distanceLegend:hover {
+      background: #fff;
+    }
+
     .tjs-legend__bar {
       border-bottom: 3px solid black;
       border-right: 3px solid black;
       border-left: 3px solid black;
+      margin: 0 auto;
     }
 
     body {
@@ -134,18 +144,7 @@ const PrintView = (props) => {
                 includeStories: false
             }));
     }, [viewState.terria, viewState]);
-    return ReactDOM.createPortal(React.createElement(StyleSheetManager, { target: props.window.document.head },
-        React.createElement(ThemeProvider, { theme: terriaTheme },
-            React.createElement(PrintViewButtons, { window: props.window, screenshot: screenshot }),
-            React.createElement("section", { className: "mapSection" },
-                React.createElement("div", { className: "datasets" },
-                    React.createElement(PrintWorkbench, { workbench: viewState.terria.workbench })),
-                React.createElement("div", { className: "map" }, screenshot ? (React.createElement(PrintViewMap, { screenshot: screenshot },
-                    React.createElement(DistanceLegend, { terria: viewState.terria, scale: getScale(viewState.terria.currentViewer.getContainer()), isPrintMode: true }))) : (React.createElement("div", null, "Loading...")))),
-            React.createElement("section", { className: "PrintView__source" }, shareLink && React.createElement(PrintSource, { link: shareLink })),
-            React.createElement("section", null,
-                React.createElement("h2", null, "Datasets"),
-                React.createElement(PrintDatasets, { items: viewState.terria.workbench.items })))), rootNode.current);
+    return ReactDOM.createPortal(_jsx(StyleSheetManager, { target: props.window.document.head, children: _jsxs(ThemeProvider, { theme: terriaTheme, children: [_jsx(PrintViewButtons, { window: props.window, screenshot: screenshot }), _jsxs("section", { className: "mapSection", children: [_jsx("div", { className: "datasets", children: _jsx(PrintWorkbench, { workbench: viewState.terria.workbench }) }), _jsx("div", { className: "map", children: screenshot ? (_jsx(PrintViewMap, { screenshot: screenshot, children: _jsx(DistanceLegend, { scale: getScale(viewState.terria.currentViewer.getContainer()), isPrintMode: true }) })) : (_jsx("div", { children: "Loading..." })) })] }), _jsx("section", { className: "PrintView__source", children: shareLink && _jsx(PrintSource, { link: shareLink }) }), _jsxs("section", { children: [_jsx("h2", { children: "Datasets" }), _jsx(PrintDatasets, { items: viewState.terria.workbench.items })] })] }) }), rootNode.current);
 };
 export default PrintView;
 //# sourceMappingURL=PrintView.js.map

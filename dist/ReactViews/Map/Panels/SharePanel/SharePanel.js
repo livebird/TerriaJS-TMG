@@ -4,6 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import React from "react";
@@ -44,19 +45,13 @@ let SharePanel = class SharePanel extends React.Component {
     renderContent() {
         const { terria, viewState, t } = this.props;
         if (this.props.catalogShare) {
-            return (React.createElement(Box, { fullWidth: true, column: true, paddedRatio: 3 },
-                React.createElement(Text, { medium: true, textDark: true }, t("clipboard.shareURL")),
-                React.createElement(Spacing, { bottom: 1 }),
-                React.createElement(ShareUrl, { terria: terria, viewState: viewState, includeStories: true, shouldShorten: shouldShorten(terria), theme: "light", inputTheme: "light" })));
+            return (_jsxs(Box, { fullWidth: true, column: true, paddedRatio: 3, children: [_jsx(Text, { medium: true, textDark: true, children: t("clipboard.shareURL") }), _jsx(Spacing, { bottom: 1 }), _jsx(ShareUrl, { terria: terria, viewState: viewState, includeStories: true, shouldShorten: shouldShorten(terria), theme: "light", inputTheme: "light" })] }));
         }
         else if (this.props.storyShare) {
-            return (React.createElement(Box, { fullWidth: true, column: true, paddedRatio: 3 },
-                React.createElement(Text, { medium: true }, t("clipboard.shareURL")),
-                React.createElement(Spacing, { bottom: 1 }),
-                React.createElement(ShareUrl, { terria: terria, viewState: viewState, includeStories: true, shouldShorten: shouldShorten(terria), theme: "dark", inputTheme: "light", rounded: true })));
+            return (_jsxs(Box, { fullWidth: true, column: true, paddedRatio: 3, children: [_jsx(Text, { medium: true, children: t("clipboard.shareURL") }), _jsx(Spacing, { bottom: 1 }), _jsx(ShareUrl, { terria: terria, viewState: viewState, includeStories: true, shouldShorten: shouldShorten(terria), theme: "dark", inputTheme: "light", rounded: true })] }));
         }
         else {
-            return (React.createElement(SharePanelContent, { terria: terria, viewState: viewState, closePanel: this.closePanel }));
+            return (_jsx(SharePanelContent, { terria: terria, viewState: viewState, closePanel: this.closePanel }));
         }
     }
     render() {
@@ -87,16 +82,21 @@ let SharePanel = class SharePanel extends React.Component {
             : storyShare
                 ? t("share.btnStoryShareTitle")
                 : t("share.btnMapShareTitle");
-        return !storyShare ? (React.createElement(MenuPanel, { theme: dropdownTheme, btnText: catalogShareWithoutText ? null : btnText, viewState: this.props.viewState, btnTitle: btnTitle, isOpen: this.state.isOpen, onOpenChanged: this.changeOpenState, showDropdownAsModal: catalogShare, modalWidth: modalWidth, smallScreen: this.props.viewState.useSmallScreenInterface, onDismissed: () => {
+        return !storyShare ? (_jsx(MenuPanel, { theme: dropdownTheme, btnText: catalogShareWithoutText ? null : btnText, viewState: this.props.viewState, btnTitle: btnTitle, isOpen: this.state.isOpen, onOpenChanged: this.changeOpenState, showDropdownAsModal: catalogShare, modalWidth: modalWidth, smallScreen: this.props.viewState.useSmallScreenInterface, onDismissed: () => {
                 if (catalogShare)
                     this.props.viewState.shareModalIsVisible = false;
-            }, onUserClick: this.props.onUserClick, disableCloseOnFocusLoss: this.props.viewState.retainSharePanel }, this.state.isOpen && this.renderContent())) : (React.createElement(StorySharePanel, { btnText: catalogShareWithoutText ? null : btnText, viewState: this.props.viewState, btnTitle: btnTitle, isOpen: this.state.isOpen, onOpenChanged: this.changeOpenState, showDropdownAsModal: storyShare, modalWidth: modalWidth, smallScreen: this.props.viewState.useSmallScreenInterface, btnDisabled: this.props.btnDisabled, onDismissed: () => {
+            }, onUserClick: this.props.onUserClick, disableCloseOnFocusLoss: this.props.viewState.retainSharePanel, children: this.state.isOpen && this.renderContent() })) : (_jsx(StorySharePanel, { btnText: catalogShareWithoutText ? null : btnText, viewState: this.props.viewState, btnTitle: btnTitle, isOpen: this.state.isOpen, onOpenChanged: this.changeOpenState, showDropdownAsModal: storyShare, modalWidth: modalWidth, smallScreen: this.props.viewState.useSmallScreenInterface, btnDisabled: this.props.btnDisabled, onDismissed: () => {
                 if (storyShare)
                     this.props.viewState.shareModalIsVisible = false;
-            }, onUserClick: this.props.onUserClick }, this.state.isOpen && this.renderContent()));
+            }, onUserClick: this.props.onUserClick, children: this.state.isOpen && this.renderContent() }));
     }
 };
-SharePanel.displayName = "SharePanel";
+Object.defineProperty(SharePanel, "displayName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "SharePanel"
+});
 SharePanel = __decorate([
     observer
 ], SharePanel);

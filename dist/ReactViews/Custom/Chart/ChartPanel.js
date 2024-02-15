@@ -5,7 +5,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { computed } from "mobx";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { computed, makeObservable } from "mobx";
 import { observer } from "mobx-react";
 import PropTypes from "prop-types";
 import React from "react";
@@ -21,6 +22,10 @@ import Styles from "./chart-panel.scss";
 import { ChartPanelDownloadButton } from "./ChartPanelDownloadButton";
 const height = 300;
 let ChartPanel = class ChartPanel extends React.Component {
+    constructor(props) {
+        super(props);
+        makeObservable(this);
+    }
     get chartView() {
         return new ChartView(this.props.terria);
     }
@@ -51,7 +56,7 @@ let ChartPanel = class ChartPanel extends React.Component {
         let loader;
         let chart;
         if (isLoading) {
-            loader = React.createElement(Loader, { className: Styles.loader });
+            loader = _jsx(Loader, { className: Styles.loader });
         }
         const items = this.props.terria.workbench.items;
         if (items.length > 0) {
@@ -62,29 +67,30 @@ let ChartPanel = class ChartPanel extends React.Component {
                 message: "Failed to load chart items",
                 importance: -1
             }).raiseError(this.props.terria));
-            chart = (React.createElement(Chart, { terria: this.props.terria, chartItems: chartItems, xAxis: this.chartView.xAxis, height: height - 34 }));
+            chart = (_jsx(Chart, { terria: this.props.terria, chartItems: chartItems, xAxis: this.chartView.xAxis, height: height - 34 }));
         }
         const { t } = this.props;
-        return (React.createElement("div", { className: Styles.holder },
-            React.createElement("div", { className: Styles.inner },
-                React.createElement("div", { className: Styles.chartPanel, style: { height: height } },
-                    React.createElement("div", { className: Styles.body },
-                        React.createElement("div", { className: Styles.header },
-                            React.createElement("label", { className: Styles.sectionLabel }, loader || t("chart.sectionLabel")),
-                            React.createElement(ChartPanelDownloadButton, { chartableItems: chartableCatalogItems }),
-                            React.createElement("button", { type: "button", title: t("chart.closePanel"), className: Styles.btnCloseChartPanel, onClick: () => this.closePanel() },
-                                React.createElement(Icon, { glyph: Icon.GLYPHS.close }))),
-                        React.createElement("div", { className: Styles.chart }, chart))))));
+        return (_jsx("div", { className: Styles.holder, children: _jsx("div", { className: Styles.inner, children: _jsx("div", { className: Styles.chartPanel, style: { height: height }, children: _jsxs("div", { className: Styles.body, children: [_jsxs("div", { className: Styles.header, children: [_jsx("label", { className: Styles.sectionLabel, children: loader || t("chart.sectionLabel") }), _jsx(ChartPanelDownloadButton, { chartableItems: chartableCatalogItems }), _jsx("button", { type: "button", title: t("chart.closePanel"), className: Styles.btnCloseChartPanel, onClick: () => this.closePanel(), children: _jsx(Icon, { glyph: Icon.GLYPHS.close }) })] }), _jsx("div", { className: Styles.chart, children: chart })] }) }) }) }));
     }
 };
-ChartPanel.displayName = "ChartPanel";
-ChartPanel.propTypes = {
-    terria: PropTypes.object.isRequired,
-    onHeightChange: PropTypes.func,
-    viewState: PropTypes.object.isRequired,
-    animationDuration: PropTypes.number,
-    t: PropTypes.func.isRequired
-};
+Object.defineProperty(ChartPanel, "displayName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "ChartPanel"
+});
+Object.defineProperty(ChartPanel, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        terria: PropTypes.object.isRequired,
+        onHeightChange: PropTypes.func,
+        viewState: PropTypes.object.isRequired,
+        animationDuration: PropTypes.number,
+        t: PropTypes.func.isRequired
+    }
+});
 __decorate([
     computed
 ], ChartPanel.prototype, "chartView", null);

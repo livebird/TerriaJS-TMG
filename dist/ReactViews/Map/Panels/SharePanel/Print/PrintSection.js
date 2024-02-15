@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import styled from "styled-components";
 import Box from "../../../../../Styled/Box";
@@ -21,14 +22,7 @@ export const PrintSection = ({ viewState }) => {
         })
             .finally(() => setIsDownloading(false));
     };
-    return (React.createElement(Box, { column: true },
-        React.createElement(TextSpan, { medium: true }, t("share.printTitle")),
-        React.createElement(Explanation, null, t("share.printExplanation")),
-        React.createElement(Box, { gap: true },
-            React.createElement(PrintButton, { primary: true, fullWidth: true, disabled: isDownloading, onClick: downloadMap },
-                React.createElement(TextSpan, { medium: true }, t("share.downloadMap"))),
-            React.createElement(PrintButton, { primary: true, fullWidth: true, onClick: printView },
-                React.createElement(TextSpan, { medium: true }, t("share.printViewButton"))))));
+    return (_jsxs(Box, { column: true, children: [_jsx(TextSpan, { medium: true, children: t("share.printTitle") }), _jsx(Explanation, { children: t("share.printExplanation") }), _jsxs(Box, { gap: true, children: [_jsx(PrintButton, { primary: true, fullWidth: true, disabled: isDownloading, onClick: downloadMap, children: _jsx(TextSpan, { medium: true, children: t("share.downloadMap") }) }), _jsx(PrintButton, { primary: true, fullWidth: true, onClick: printView, children: _jsx(TextSpan, { medium: true, children: t("share.printViewButton") }) })] })] }));
 };
 const PrintButton = styled(Button) `
   border-radius: 4px;

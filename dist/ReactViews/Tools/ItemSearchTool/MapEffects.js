@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import { jsx as _jsx } from "react/jsx-runtime";
+import { useEffect } from "react";
 /**
  * A component that applies some effect on the map.
  *
@@ -6,11 +7,11 @@ import React, { useEffect } from "react";
 const MapEffects = ({ item, results, effect }) => {
     switch (effect.is) {
         case "highlightAll":
-            return React.createElement(HighlightResults, { item: item, results: results });
+            return _jsx(HighlightResults, { item: item, results: results });
         case "highlightSingleResult":
-            return React.createElement(HighlightResults, { item: item, results: effect.result });
+            return _jsx(HighlightResults, { item: item, results: effect.result });
         case "showMatchingOnly":
-            return React.createElement(HideAllResults, { item: item, results: results });
+            return _jsx(HideAllResults, { item: item, results: results });
         case "none":
             return null;
     }

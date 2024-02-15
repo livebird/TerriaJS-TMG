@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, autorun, computed, observable } from "mobx";
+import { action, autorun, computed, observable, makeObservable } from "mobx";
 import ClockRange from "terriajs-cesium/Source/Core/ClockRange";
 import JulianDate from "terriajs-cesium/Source/Core/JulianDate";
 import filterOutUndefined from "../Core/filterOutUndefined";
@@ -20,13 +20,52 @@ import CommonStrata from "./Definition/CommonStrata";
  */
 export default class TimelineStack {
     constructor(terria, clock) {
-        this.terria = terria;
-        this.clock = clock;
+        Object.defineProperty(this, "terria", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: terria
+        });
+        Object.defineProperty(this, "clock", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: clock
+        });
         /**
          * The stratum of each layer in the stack in which to store the current time as the clock ticks.
          */
-        this.tickStratumId = CommonStrata.user;
-        this.items = [];
+        Object.defineProperty(this, "tickStratumId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: CommonStrata.user
+        });
+        Object.defineProperty(this, "items", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "defaultTimeVarying", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_disposeClockAutorun", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_disposeTickSubscription", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
     }
     activate() {
         // Keep the Cesium clock in sync with the top layer's clock.
@@ -97,7 +136,7 @@ export default class TimelineStack {
      * @param item
      */
     addToTop(item) {
-        var currentIndex = this.items.indexOf(item);
+        const currentIndex = this.items.indexOf(item);
         this.items.unshift(item);
         if (currentIndex > -1) {
             this.items.splice(currentIndex, 1);
@@ -110,7 +149,7 @@ export default class TimelineStack {
      * @param item;
      */
     remove(item) {
-        var index = this.items.indexOf(item);
+        const index = this.items.indexOf(item);
         this.items.splice(index, 1);
     }
     /**
@@ -126,7 +165,7 @@ export default class TimelineStack {
      * @param item
      */
     promoteToTop(item) {
-        var currentIndex = this.items.indexOf(item);
+        const currentIndex = this.items.indexOf(item);
         if (currentIndex > -1) {
             this.addToTop(item);
         }

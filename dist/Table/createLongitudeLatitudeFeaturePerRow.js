@@ -6,7 +6,6 @@ import LabelGraphics from "terriajs-cesium/Source/DataSources/LabelGraphics";
 import PointGraphics from "terriajs-cesium/Source/DataSources/PointGraphics";
 import PropertyBag from "terriajs-cesium/Source/DataSources/PropertyBag";
 import HeightReference from "terriajs-cesium/Source/Scene/HeightReference";
-import filterOutUndefined from "../Core/filterOutUndefined";
 import TerriaFeature from "../Models/Feature/Feature";
 import { getFeatureStyle } from "./getFeatureStyle";
 export default function createLongitudeLatitudeFeaturePerRow(style, longitudes, latitudes) {
@@ -17,13 +16,16 @@ export default function createLongitudeLatitudeFeaturePerRow(style, longitudes, 
         return [];
     const tableColumns = style.tableModel.tableColumns;
     const intervals = style.moreThanOneTimeInterval
-        ? (_c = style.timeIntervals) !== null && _c !== void 0 ? _c : [] : [];
+        ? (_c = style.timeIntervals) !== null && _c !== void 0 ? _c : []
+        : [];
     const rowIds = style.tableModel.rowIds;
-    return filterOutUndefined(rowIds.map((rowId) => {
+    const features = [];
+    for (let i = 0; i < rowIds.length; i++) {
+        const rowId = rowIds[i];
         const longitude = longitudes[rowId];
         const latitude = latitudes[rowId];
         if (longitude === null || latitude === null) {
-            return;
+            continue;
         }
         const { pointGraphicsOptions, billboardGraphicsOptions, labelGraphicsOptions, usePointGraphics } = getFeatureStyle(style, rowId);
         const feature = new TerriaFeature({
@@ -53,8 +55,9 @@ export default function createLongitudeLatitudeFeaturePerRow(style, longitudes, 
             feature.availability = new TimeIntervalCollection([timeInterval]);
         feature.properties = new PropertyBag(getRowValues(rowId, tableColumns));
         feature.data = { rowIds: [rowId], type: "terriaFeatureData" };
-        return feature;
-    }));
+        features.push(feature);
+    }
+    return features;
 }
 export function getRowValues(index, tableColumns) {
     const result = {};

@@ -5,8 +5,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import classNames from "classnames";
-import { action, autorun, computed, observable, runInAction } from "mobx";
+import { action, autorun, computed, observable, runInAction, makeObservable } from "mobx";
 import { observer } from "mobx-react";
 import PropTypes from "prop-types";
 import React from "react";
@@ -22,6 +23,16 @@ import MappableTraits from "../../Traits/TraitsClasses/MappableTraits";
 import TerriaViewer from "../../ViewModels/TerriaViewer";
 import Styles from "./data-preview-map.scss";
 class AdaptForPreviewMap extends MappableMixin(CreateModel(MappableTraits)) {
+    constructor(...args) {
+        super(...args);
+        Object.defineProperty(this, "previewed", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
+    }
     async forceLoadMapItems() { }
     // Make all imagery 0 or 100% opacity
     get mapItems() {
@@ -54,9 +65,36 @@ __decorate([
  * @extends {React.Component<Props>}
  */
 let DataPreviewMap = class DataPreviewMap extends React.Component {
+    get previewBadgeState() {
+        var _a, _b, _c, _d, _e, _f, _g;
+        if ((_a = this.props.previewed) === null || _a === void 0 ? void 0 : _a.isLoading)
+            return "loading";
+        if (((_c = (_b = this.props.previewed) === null || _b === void 0 ? void 0 : _b.loadMetadataResult) === null || _c === void 0 ? void 0 : _c.error) ||
+            ((_e = (_d = this.props.previewed) === null || _d === void 0 ? void 0 : _d.loadMapItemsResult) === null || _e === void 0 ? void 0 : _e.error))
+            return "dataPreviewError";
+        if (((_g = (_f = this.props.previewed) === null || _f === void 0 ? void 0 : _f.mapItems) === null || _g === void 0 ? void 0 : _g.length) === 0)
+            return "noPreviewAvailable";
+        return "dataPreview";
+    }
     constructor(props) {
         super(props);
-        this.isZoomedToExtent = false;
+        Object.defineProperty(this, "isZoomedToExtent", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        /**
+         * @type {TerriaViewer}
+         * @readonly
+         */
+        Object.defineProperty(this, "previewViewer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
         /**
          * @param {HTMLElement | null} container
          */
@@ -84,16 +122,6 @@ let DataPreviewMap = class DataPreviewMap extends React.Component {
         // previewViewer.hideTerriaLogo = true;
         // previewViewer.homeView = terria.homeView;
         // previewViewer.initialView = terria.homeView;
-    }
-    get previewBadgeState() {
-        var _a, _b, _c, _d, _e, _f, _g;
-        if ((_a = this.props.previewed) === null || _a === void 0 ? void 0 : _a.isLoading)
-            return "loading";
-        if (((_c = (_b = this.props.previewed) === null || _b === void 0 ? void 0 : _b.loadMetadataResult) === null || _c === void 0 ? void 0 : _c.error) || ((_e = (_d = this.props.previewed) === null || _d === void 0 ? void 0 : _d.loadMapItemsResult) === null || _e === void 0 ? void 0 : _e.error))
-            return "dataPreviewError";
-        if (((_g = (_f = this.props.previewed) === null || _f === void 0 ? void 0 : _f.mapItems) === null || _g === void 0 ? void 0 : _g.length) === 0)
-            return "noPreviewAvailable";
-        return "dataPreview";
     }
     /**
      * @param {HTMLElement} container
@@ -201,21 +229,20 @@ let DataPreviewMap = class DataPreviewMap extends React.Component {
             dataPreview: t("preview.dataPreview"),
             dataPreviewError: t("preview.dataPreviewError")
         };
-        return (React.createElement("div", { className: Styles.map, onClick: this.clickMap },
-            React.createElement(Choose, null,
-                React.createElement(When, { condition: this.props.showMap },
-                    React.createElement("div", { className: classNames(Styles.terriaPreview), ref: this.containerRef })),
-                React.createElement(Otherwise, null,
-                    React.createElement("div", { className: classNames(Styles.terriaPreview, Styles.placeholder) }))),
-            React.createElement("label", { className: Styles.badge }, previewBadgeLabels[this.previewBadgeState])));
+        return (_jsxs("div", { className: Styles.map, onClick: this.clickMap, children: [this.props.showMap ? (_jsx("div", { className: classNames(Styles.terriaPreview), ref: this.containerRef })) : (_jsx("div", { className: classNames(Styles.terriaPreview, Styles.placeholder) })), _jsx("label", { className: Styles.badge, children: previewBadgeLabels[this.previewBadgeState] })] }));
     }
 };
-DataPreviewMap.propTypes = {
-    terria: PropTypes.object.isRequired,
-    previewed: PropTypes.object,
-    showMap: PropTypes.bool,
-    t: PropTypes.func.isRequired
-};
+Object.defineProperty(DataPreviewMap, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        terria: PropTypes.object.isRequired,
+        previewed: PropTypes.object,
+        showMap: PropTypes.bool,
+        t: PropTypes.func.isRequired
+    }
+});
 __decorate([
     observable
 ], DataPreviewMap.prototype, "isZoomedToExtent", void 0);

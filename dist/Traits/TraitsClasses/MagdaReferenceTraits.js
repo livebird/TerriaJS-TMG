@@ -12,6 +12,39 @@ import objectArrayTrait from "../Decorators/objectArrayTrait";
 import primitiveTrait from "../Decorators/primitiveTrait";
 import UrlTraits from "./UrlTraits";
 export default class MagdaReferenceTraits extends mixTraits(CatalogMemberReferenceTraits, UrlTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "recordId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "magdaRecord", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "override", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "distributionFormats", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "addOrOverrideAspects", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({

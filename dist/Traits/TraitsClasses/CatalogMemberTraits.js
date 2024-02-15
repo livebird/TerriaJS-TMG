@@ -13,6 +13,21 @@ import mixTraits from "../mixTraits";
 import ModelTraits from "../ModelTraits";
 import EnumDimensionTraits from "./DimensionTraits";
 export class MetadataUrlTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "url", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "title", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -29,6 +44,15 @@ __decorate([
     })
 ], MetadataUrlTraits.prototype, "title", void 0);
 export class DataUrlTraits extends mixTraits(MetadataUrlTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -48,7 +72,30 @@ __decorate([
 export class InfoSectionTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.show = true;
+        Object.defineProperty(this, "name", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "content", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "contentAsObject", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "show", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
     }
     static isRemoval(infoSection) {
         return infoSection.content === null;
@@ -85,7 +132,24 @@ __decorate([
 export class ShortReportTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.show = true;
+        Object.defineProperty(this, "name", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "content", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "show", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
     }
 }
 __decorate([
@@ -109,29 +173,119 @@ __decorate([
         description: "Indicates if this short report section showing."
     })
 ], ShortReportTraits.prototype, "show", void 0);
-export default class CatalogMemberTraits extends ModelTraits {
+class CatalogMemberTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.info = [];
-        this.infoSectionOrder = [
-            i18next.t("preview.disclaimer"),
-            i18next.t("description.name"),
-            i18next.t("preview.dataDescription"),
-            i18next.t("preview.datasetDescription"),
-            i18next.t("preview.serviceDescription"),
-            i18next.t("preview.resourceDescription"),
-            i18next.t("preview.licence"),
-            i18next.t("preview.accessConstraints"),
-            i18next.t("preview.author"),
-            i18next.t("preview.contact"),
-            i18next.t("preview.created"),
-            i18next.t("preview.modified"),
-            i18next.t("preview.updateFrequency")
-        ];
-        this.isOpenInWorkbench = true;
-        this.isExperiencingIssues = false;
-        this.hideSource = false;
-        this.disableAboutData = false;
+        Object.defineProperty(this, "name", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "description", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "hideDefaultDescription", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "nameInCatalog", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "info", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "infoSectionOrder", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: [
+                i18next.t("preview.disclaimer"),
+                i18next.t("description.name"),
+                i18next.t("preview.dataDescription"),
+                i18next.t("preview.datasetDescription"),
+                i18next.t("preview.serviceDescription"),
+                i18next.t("preview.resourceDescription"),
+                i18next.t("preview.licence"),
+                i18next.t("preview.accessConstraints"),
+                i18next.t("preview.author"),
+                i18next.t("preview.contact"),
+                i18next.t("preview.created"),
+                i18next.t("preview.modified"),
+                i18next.t("preview.updateFrequency")
+            ]
+        });
+        Object.defineProperty(this, "isOpenInWorkbench", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "shortReport", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "shortReportSections", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "isExperiencingIssues", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "hideSource", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "metadataUrls", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "dataUrls", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "dataCustodian", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "modelDimensions", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "disableAboutData", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([
@@ -148,6 +302,13 @@ __decorate([
         description: "The description of the catalog item. Markdown and HTML may be used."
     })
 ], CatalogMemberTraits.prototype, "description", void 0);
+__decorate([
+    primitiveTrait({
+        type: "boolean",
+        name: "Hide default description",
+        description: "If true, then no generic default description will be displayed if `description` is undefined."
+    })
+], CatalogMemberTraits.prototype, "hideDefaultDescription", void 0);
 __decorate([
     primitiveTrait({
         type: "string",
@@ -244,4 +405,5 @@ __decorate([
         description: "Disables the 'About Data' button in the workbench."
     })
 ], CatalogMemberTraits.prototype, "disableAboutData", void 0);
+export default CatalogMemberTraits;
 //# sourceMappingURL=CatalogMemberTraits.js.map

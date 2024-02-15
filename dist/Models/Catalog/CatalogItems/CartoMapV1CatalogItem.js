@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { computed, runInAction } from "mobx";
+import { computed, runInAction, makeObservable, override } from "mobx";
 import Resource from "terriajs-cesium/Source/Core/Resource";
 import UrlTemplateImageryProvider from "terriajs-cesium/Source/Scene/UrlTemplateImageryProvider";
 import isDefined from "../../../Core/isDefined";
@@ -20,16 +20,30 @@ import StratumOrder from "../../Definition/StratumOrder";
 export class CartoLoadableStratum extends LoadableStratum(CartoMapV1CatalogItemTraits) {
     constructor(catalogItem, tileUrl, tileSubdomains) {
         super();
-        this.catalogItem = catalogItem;
-        this.tileUrl = tileUrl;
-        this.tileSubdomains = tileSubdomains;
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogItem
+        });
+        Object.defineProperty(this, "tileUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: tileUrl
+        });
+        Object.defineProperty(this, "tileSubdomains", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: tileSubdomains
+        });
     }
     duplicateLoadableStratum(newModel) {
         return new CartoLoadableStratum(newModel, this.tileUrl, this.tileSubdomains);
     }
     static load(catalogItem) {
-        let queryParameters;
-        queryParameters = {};
+        const queryParameters = {};
         if (catalogItem.auth_token) {
             queryParameters.auth_token = catalogItem.auth_token;
         }
@@ -78,9 +92,18 @@ export class CartoLoadableStratum extends LoadableStratum(CartoMapV1CatalogItemT
         });
     }
 }
-CartoLoadableStratum.stratumName = "cartoLoadable";
+Object.defineProperty(CartoLoadableStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "cartoLoadable"
+});
 StratumOrder.addLoadStratum(CartoLoadableStratum.stratumName);
-export default class CartoMapV1CatalogItem extends MappableMixin(UrlMixin(CatalogMemberMixin(CreateModel(CartoMapV1CatalogItemTraits)))) {
+class CartoMapV1CatalogItem extends MappableMixin(UrlMixin(CatalogMemberMixin(CreateModel(CartoMapV1CatalogItemTraits)))) {
+    constructor(...args) {
+        super(...args);
+        makeObservable(this);
+    }
     get type() {
         return CartoMapV1CatalogItem.type;
     }
@@ -133,12 +156,18 @@ export default class CartoMapV1CatalogItem extends MappableMixin(UrlMixin(Catalo
         });
     }
 }
-CartoMapV1CatalogItem.type = "carto";
+Object.defineProperty(CartoMapV1CatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "carto"
+});
+export default CartoMapV1CatalogItem;
 __decorate([
     computed
 ], CartoMapV1CatalogItem.prototype, "mapItems", null);
 __decorate([
-    computed
+    override
 ], CartoMapV1CatalogItem.prototype, "cacheDuration", null);
 __decorate([
     computed

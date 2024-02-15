@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { action, computed, observable, toJS } from "mobx";
+import { action, computed, observable, toJS, makeObservable } from "mobx";
 import JulianDate from "terriajs-cesium/Source/Core/JulianDate";
 import CzmlDataSource from "terriajs-cesium/Source/DataSources/CzmlDataSource";
 import isDefined from "../../../Core/isDefined";
@@ -27,7 +27,13 @@ import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
 class CzmlTimeVaryingStratum extends LoadableStratum(CzmlCatalogItemTraits) {
     constructor(catalogItem) {
         super();
-        this.catalogItem = catalogItem;
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogItem
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(model) {
         return new CzmlTimeVaryingStratum(model);
@@ -56,7 +62,12 @@ class CzmlTimeVaryingStratum extends LoadableStratum(CzmlCatalogItemTraits) {
         return (_a = this.clock) === null || _a === void 0 ? void 0 : _a.multiplier;
     }
 }
-CzmlTimeVaryingStratum.stratumName = "czmlLoadableStratum";
+Object.defineProperty(CzmlTimeVaryingStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "czmlLoadableStratum"
+});
 __decorate([
     computed
 ], CzmlTimeVaryingStratum.prototype, "clock", null);
@@ -73,7 +84,23 @@ __decorate([
     computed
 ], CzmlTimeVaryingStratum.prototype, "multiplier", null);
 StratumOrder.addLoadStratum(CzmlTimeVaryingStratum.stratumName);
-export default class CzmlCatalogItem extends AutoRefreshingMixin(MappableMixin(UrlMixin(CatalogMemberMixin(CreateModel(CzmlCatalogItemTraits))))) {
+class CzmlCatalogItem extends AutoRefreshingMixin(MappableMixin(UrlMixin(CatalogMemberMixin(CreateModel(CzmlCatalogItemTraits))))) {
+    constructor(...args) {
+        super(...args);
+        Object.defineProperty(this, "_dataSource", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_czmlFile", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
+    }
     get type() {
         return CzmlCatalogItem.type;
     }
@@ -156,7 +183,13 @@ export default class CzmlCatalogItem extends AutoRefreshingMixin(MappableMixin(U
         (_a = this._dataSource) === null || _a === void 0 ? void 0 : _a.process(url);
     }
 }
-CzmlCatalogItem.type = "czml";
+Object.defineProperty(CzmlCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "czml"
+});
+export default CzmlCatalogItem;
 __decorate([
     observable
 ], CzmlCatalogItem.prototype, "_dataSource", void 0);

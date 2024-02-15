@@ -5,29 +5,54 @@ const million = 1000000;
 /**
  * Defines the relative ordering of strata.
  */
-export default class StratumOrder {
+class StratumOrder {
     constructor() {
         /**
          * The priorities of each named stratum. Strata with higher priority values are "above" and override
          * strata with lower priority values.
          */
-        this.priorities = new ObservableMap();
+        Object.defineProperty(this, "priorities", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new ObservableMap()
+        });
         /**
          * The next priority to assign to a default stratum.
          */
-        this.nextDefault = 1 * million;
+        Object.defineProperty(this, "nextDefault", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 1 * million
+        });
         /**
          * The next priority to assign to a load stratum.
          */
-        this.nextLoad = 2 * million;
+        Object.defineProperty(this, "nextLoad", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 2 * million
+        });
         /**
          * The next priority to assign to a definition stratum.
          */
-        this.nextDefinition = 3 * million;
+        Object.defineProperty(this, "nextDefinition", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 3 * million
+        });
         /**
          * The next priority to assign to a user stratum.
          */
-        this.nextUser = 4 * million;
+        Object.defineProperty(this, "nextUser", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 4 * million
+        });
         this.addDefaultStratum(CommonStrata.defaults);
         this.addDefinitionStratum(CommonStrata.underride);
         this.addDefinitionStratum(CommonStrata.definition);
@@ -178,5 +203,11 @@ export default class StratumOrder {
         return StratumOrder.instance.sortBottomToTop(strata);
     }
 }
-StratumOrder.instance = new StratumOrder();
+Object.defineProperty(StratumOrder, "instance", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: new StratumOrder()
+});
+export default StratumOrder;
 //# sourceMappingURL=StratumOrder.js.map

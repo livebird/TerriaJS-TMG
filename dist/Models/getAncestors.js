@@ -11,7 +11,8 @@ export default function getAncestors(member) {
     const result = [];
     // For some reasons without getModelById, the knownContainerUniqueIds is always [],
     // which is why previously it would seem as though the groups don't have ancestors.
-    let currentModel = (member === null || member === void 0 ? void 0 : member.uniqueId) ? member.terria.getModelById(BaseModel, member.uniqueId)
+    let currentModel = (member === null || member === void 0 ? void 0 : member.uniqueId)
+        ? member.terria.getModelById(BaseModel, member.uniqueId)
         : member;
     for (;;) {
         const parentId = currentModel && currentModel.knownContainerUniqueIds.length > 0

@@ -6,7 +6,7 @@ import TerriaError from "../../../Core/TerriaError";
 import xml2json from "../../../ThirdParty/xml2json";
 import { isJsonString } from "../../../Core/Json";
 export function getRectangleFromLayer(layer) {
-    var bbox = layer.WGS84BoundingBox;
+    const bbox = layer.WGS84BoundingBox;
     if (bbox) {
         return {
             west: bbox.westBoundLongitude,
@@ -89,7 +89,7 @@ function getFeatureTypes(json) {
 }
 function getOutputTypes(json) {
     var _a, _b, _c, _d, _e;
-    let outputTypes = (_e = (_d = (_c = (_b = (_a = json.OperationsMetadata) === null || _a === void 0 ? void 0 : _a.Operation) === null || _b === void 0 ? void 0 : _b.find((op) => op.name === "GetFeature")) === null || _c === void 0 ? void 0 : _c.Parameter) === null || _d === void 0 ? void 0 : _d.find((p) => p.name === "outputFormat")) === null || _e === void 0 ? void 0 : _e.Value;
+    const outputTypes = (_e = (_d = (_c = (_b = (_a = json.OperationsMetadata) === null || _a === void 0 ? void 0 : _a.Operation) === null || _b === void 0 ? void 0 : _b.find((op) => op.name === "GetFeature")) === null || _c === void 0 ? void 0 : _c.Parameter) === null || _d === void 0 ? void 0 : _d.find((p) => p.name === "outputFormat")) === null || _e === void 0 ? void 0 : _e.Value;
     if (!isDefined(outputTypes)) {
         return;
     }
@@ -103,7 +103,7 @@ function getOutputTypes(json) {
  */
 function getSrsNames(json) {
     var _a, _b;
-    let layers = (_a = json.FeatureTypeList) === null || _a === void 0 ? void 0 : _a.FeatureType;
+    const layers = (_a = json.FeatureTypeList) === null || _a === void 0 ? void 0 : _a.FeatureType;
     let srsNamesByLayer = [];
     if (Array.isArray(layers)) {
         srsNamesByLayer = layers.map(buildSrsNameObject);
@@ -118,7 +118,7 @@ function getSrsNames(json) {
  * @param layer
  */
 function buildSrsNameObject(layer) {
-    let srsNames = [];
+    const srsNames = [];
     if (isJsonString(layer.DefaultSRS))
         srsNames.push(layer.DefaultSRS);
     if (Array.isArray(layer.OtherSRS))
@@ -130,8 +130,32 @@ function buildSrsNameObject(layer) {
         srsNames.push(layer.OtherSRS);
     return { layerName: layer.Name, srsArray: srsNames };
 }
-export default class WebFeatureServiceCapabilities {
+class WebFeatureServiceCapabilities {
     constructor(xml, json) {
+        Object.defineProperty(this, "service", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "outputTypes", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "featureTypes", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "srsNames", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         this.service = getService(json);
         this.outputTypes = getOutputTypes(json);
         this.featureTypes = getFeatureTypes(json);
@@ -166,17 +190,23 @@ export default class WebFeatureServiceCapabilities {
         return match;
     }
 }
-WebFeatureServiceCapabilities.fromUrl = createTransformer((url) => {
-    return loadXML(url).then(function (capabilitiesXml) {
-        const json = xml2json(capabilitiesXml);
-        if (!defined(json.ServiceIdentification)) {
-            throw new TerriaError({
-                title: "Invalid GetCapabilities",
-                message: `The URL ${url} was retrieved successfully but it does not appear to be a valid Web Feature Service (WFS) GetCapabilities document.` +
-                    `\n\nEither the catalog file has been set up incorrectly, or the server address has changed.`
-            });
-        }
-        return new WebFeatureServiceCapabilities(capabilitiesXml, json);
-    });
+Object.defineProperty(WebFeatureServiceCapabilities, "fromUrl", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: createTransformer((url) => {
+        return loadXML(url).then(function (capabilitiesXml) {
+            const json = xml2json(capabilitiesXml);
+            if (!defined(json.ServiceIdentification)) {
+                throw new TerriaError({
+                    title: "Invalid GetCapabilities",
+                    message: `The URL ${url} was retrieved successfully but it does not appear to be a valid Web Feature Service (WFS) GetCapabilities document.` +
+                        `\n\nEither the catalog file has been set up incorrectly, or the server address has changed.`
+                });
+            }
+            return new WebFeatureServiceCapabilities(capabilitiesXml, json);
+        });
+    })
 });
+export default WebFeatureServiceCapabilities;
 //# sourceMappingURL=WebFeatureServiceCapabilities.js.map

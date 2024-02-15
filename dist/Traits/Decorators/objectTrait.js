@@ -18,7 +18,30 @@ export default function objectTrait(options) {
 export class ObjectTrait extends Trait {
     constructor(id, options, parent) {
         super(id, options, parent);
-        this.decoratorForFlattened = computed.struct;
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "isNullable", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "decoratorForFlattened", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: computed.struct
+        });
+        Object.defineProperty(this, "modelClass", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         this.type = options.type;
         this.isNullable = options.isNullable || false;
         this.modelClass = options.modelClass || traitsClassToModelClass(this.type);

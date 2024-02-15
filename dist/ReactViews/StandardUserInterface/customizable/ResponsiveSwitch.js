@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import PropTypes from "prop-types";
 /**
@@ -7,11 +8,7 @@ import PropTypes from "prop-types";
 export default (LargeScreenComponent, SmallScreenComponent) => {
     // eslint-disable-next-line require-jsdoc
     function ResponsiveSwitch(props) {
-        return (React.createElement(Choose, null,
-            React.createElement(When, { condition: props.smallScreen },
-                React.createElement(SmallScreenComponent, Object.assign({}, props))),
-            React.createElement(Otherwise, null,
-                React.createElement(LargeScreenComponent, Object.assign({}, props)))));
+        return props.smallScreen ? (_jsx(SmallScreenComponent, { ...props })) : (_jsx(LargeScreenComponent, { ...props }));
     }
     ResponsiveSwitch.propTypes = {
         smallScreen: PropTypes.bool

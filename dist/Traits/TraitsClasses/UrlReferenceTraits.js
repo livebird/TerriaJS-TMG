@@ -11,7 +11,12 @@ import UrlTraits from "./UrlTraits";
 export default class UrlReferenceTraits extends mixTraits(CatalogMemberReferenceTraits, UrlTraits) {
     constructor() {
         super(...arguments);
-        this.allowLoad = true;
+        Object.defineProperty(this, "allowLoad", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
     }
 }
 __decorate([

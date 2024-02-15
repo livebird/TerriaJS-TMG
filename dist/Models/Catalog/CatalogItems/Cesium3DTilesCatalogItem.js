@@ -5,13 +5,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { action } from "mobx";
+import { action, makeObservable } from "mobx";
 import BoundingSphere from "terriajs-cesium/Source/Core/BoundingSphere";
 import Cartesian2 from "terriajs-cesium/Source/Core/Cartesian2";
 import Cartographic from "terriajs-cesium/Source/Core/Cartographic";
 import sampleTerrainMostDetailed from "terriajs-cesium/Source/Core/sampleTerrainMostDetailed";
 import PickedFeatures from "../../../Map/PickedFeatures/PickedFeatures";
-import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
 import Cesium3dTilesMixin from "../../../ModelMixins/Cesium3dTilesMixin";
 import FeatureInfoUrlTemplateMixin from "../../../ModelMixins/FeatureInfoUrlTemplateMixin";
 import SearchableItemMixin from "../../../ModelMixins/SearchableItemMixin";
@@ -19,39 +18,50 @@ import Cesium3DTilesCatalogItemTraits from "../../../Traits/TraitsClasses/Cesium
 import CreateModel from "../../Definition/CreateModel";
 // A property name used for tagging a search result feature for highlighting/hiding.
 const SEARCH_RESULT_TAG = "terriajs_search_result";
-export default class Cesium3DTilesCatalogItem extends SearchableItemMixin(FeatureInfoUrlTemplateMixin(Cesium3dTilesMixin(CatalogMemberMixin(CreateModel(Cesium3DTilesCatalogItemTraits))))) {
-    constructor() {
-        super(...arguments);
-        this.type = Cesium3DTilesCatalogItem.type;
+class Cesium3DTilesCatalogItem extends SearchableItemMixin(FeatureInfoUrlTemplateMixin(Cesium3dTilesMixin(CreateModel(Cesium3DTilesCatalogItemTraits)))) {
+    constructor(...args) {
+        super(...args);
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: Cesium3DTilesCatalogItem.type
+        });
         /**
          * Zoom to an item search result.
          */
-        this.zoomToItemSearchResult = action(async (result) => {
-            if (this.terria.cesium === undefined)
-                return;
-            const scene = this.terria.cesium.scene;
-            const camera = scene.camera;
-            const { latitudeDegrees, longitudeDegrees, featureHeight } = result.featureCoordinate;
-            const cartographic = Cartographic.fromDegrees(longitudeDegrees, latitudeDegrees);
-            const [terrainCartographic] = await sampleTerrainMostDetailed(scene.terrainProvider, [cartographic]).catch(() => [cartographic]);
-            if (featureHeight < 20) {
-                // for small features we show a top-down view so that it is visible even
-                // if surrounded by larger features
-                const minViewDistance = 50;
-                // height = terrainHeight + featureHeight + minViewDistance
-                terrainCartographic.height += featureHeight + minViewDistance;
-                const destination = Cartographic.toCartesian(cartographic);
-                // use default orientation which is a top-down view of the feature
-                camera.flyTo({ destination, orientation: undefined });
-            }
-            else {
-                // for tall features we fly to the bounding sphere containing it so that
-                // the whole feature is visible
-                const center = Cartographic.toCartesian(terrainCartographic);
-                const bs = new BoundingSphere(center, featureHeight * 2);
-                camera.flyToBoundingSphere(bs);
-            }
+        Object.defineProperty(this, "zoomToItemSearchResult", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: action(async (result) => {
+                if (this.terria.cesium === undefined)
+                    return;
+                const scene = this.terria.cesium.scene;
+                const camera = scene.camera;
+                const { latitudeDegrees, longitudeDegrees, featureHeight } = result.featureCoordinate;
+                const cartographic = Cartographic.fromDegrees(longitudeDegrees, latitudeDegrees);
+                const [terrainCartographic] = await sampleTerrainMostDetailed(scene.terrainProvider, [cartographic]).catch(() => [cartographic]);
+                if (featureHeight < 20) {
+                    // for small features we show a top-down view so that it is visible even
+                    // if surrounded by larger features
+                    const minViewDistance = 50;
+                    // height = terrainHeight + featureHeight + minViewDistance
+                    terrainCartographic.height += featureHeight + minViewDistance;
+                    const destination = Cartographic.toCartesian(cartographic);
+                    // use default orientation which is a top-down view of the feature
+                    camera.flyTo({ destination, orientation: undefined });
+                }
+                else {
+                    // for tall features we fly to the bounding sphere containing it so that
+                    // the whole feature is visible
+                    const center = Cartographic.toCartesian(terrainCartographic);
+                    const bs = new BoundingSphere(center, featureHeight * 2);
+                    camera.flyToBoundingSphere(bs);
+                }
+            })
         });
+        makeObservable(this);
     }
     get typeName() {
         return i18next.t("models.cesiumTerrain.name3D");
@@ -120,7 +130,7 @@ export default class Cesium3DTilesCatalogItem extends SearchableItemMixin(Featur
      */
     hideFeaturesNotInItemSearchResults(results) {
         const tileset = this.tileset;
-        if (tileset === undefined || results.length == 0) {
+        if (tileset === undefined || results.length === 0) {
             return () => { }; // empty disposer
         }
         const resultIds = new Set(results.map((r) => r.id));
@@ -191,7 +201,13 @@ export default class Cesium3DTilesCatalogItem extends SearchableItemMixin(Featur
         return disposer;
     }
 }
-Cesium3DTilesCatalogItem.type = "3d-tiles";
+Object.defineProperty(Cesium3DTilesCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "3d-tiles"
+});
+export default Cesium3DTilesCatalogItem;
 __decorate([
     action
 ], Cesium3DTilesCatalogItem.prototype, "highlightFeaturesFromItemSearchResults", null);

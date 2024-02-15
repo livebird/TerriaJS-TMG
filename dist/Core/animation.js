@@ -40,7 +40,7 @@ const animationTimeout = (timeoutID) => new Promise((_, reject) => {
  * @returns Promise that will resolve when the element finishes its animation or reject if it is not detected within ANIMATION_DURATION ms
  */
 export const animateEnd = (element) => {
-    let timeoutID = undefined;
+    const timeoutID = undefined;
     return Promise.race([
         transitionEnd(element),
         animationTimeout(timeoutID)

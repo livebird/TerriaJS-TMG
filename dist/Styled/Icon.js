@@ -1,5 +1,5 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import classNames from "classnames";
-import React from "react";
 import styled from "styled-components";
 // Icon
 export const GLYPHS = {
@@ -135,12 +135,13 @@ export const GLYPHS = {
     compareLeftPanel: require("../../wwwroot/images/icons/compare-left-panel.svg"),
     compareRightPanel: require("../../wwwroot/images/icons/compare-right-panel.svg"),
     compareBothPanels: require("../../wwwroot/images/icons/compare-both-panels.svg"),
-    closeCircle: require("../../wwwroot/images/icons/close-circle.svg")
+    closeCircle: require("../../wwwroot/images/icons/close-circle.svg"),
+    plusList: require("../../wwwroot/images/icons/plus-list-20.svg"),
+    minusList: require("../../wwwroot/images/icons/dismiss-20.svg")
 };
 export const Icon = (props) => {
     var _a, _b;
-    return (React.createElement("svg", { viewBox: "0 0 100 100", className: classNames("icon", props.className), style: props.style, transform: `rotate(${(_a = props.rotation) !== null && _a !== void 0 ? _a : 0})` },
-        React.createElement("use", { xlinkHref: "#" + ((_b = props.glyph) === null || _b === void 0 ? void 0 : _b.id) })));
+    return (_jsx("svg", { viewBox: "0 0 100 100", className: classNames("icon", props.className), style: props.style, transform: `rotate(${(_a = props.rotation) !== null && _a !== void 0 ? _a : 0})`, children: _jsx("use", { xlinkHref: "#" + ((_b = props.glyph) === null || _b === void 0 ? void 0 : _b.id) }) }));
 };
 export const StyledIcon = styled(Icon) `
   display: ${(props) => (props.displayInline ? `inline` : `block`)};

@@ -7,6 +7,12 @@ export default class RollbarErrorServiceProvider {
      * Caveat: Rollbar API requests are blocked by some privacy extensions for browsers.
      */
     constructor(configuration) {
+        Object.defineProperty(this, "rollbar", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         this.rollbar = new Rollbar({
             captureUncaught: true,
             captureUnhandledRejections: true,

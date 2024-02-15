@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { action, computed, runInAction } from "mobx";
+import { action, computed, makeObservable, override, runInAction } from "mobx";
 import Mustache from "mustache";
 import DeveloperError from "terriajs-cesium/Source/Core/DeveloperError";
 import JulianDate from "terriajs-cesium/Source/Core/JulianDate";
@@ -13,15 +13,14 @@ import filterOutUndefined from "../../../Core/filterOutUndefined";
 import isDefined from "../../../Core/isDefined";
 import loadWithXhr from "../../../Core/loadWithXhr";
 import TerriaError from "../../../Core/TerriaError";
-import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
 import TableMixin from "../../../ModelMixins/TableMixin";
 import TableAutomaticStylesStratum from "../../../Table/TableAutomaticStylesStratum";
 import TableColumnType from "../../../Table/TableColumnType";
 import xml2json from "../../../ThirdParty/xml2json";
 import SensorObservationServiceCatalogItemTraits from "../../../Traits/TraitsClasses/SensorObservationCatalogItemTraits";
-import TableChartStyleTraits, { TableChartLineStyleTraits } from "../../../Traits/TraitsClasses/TableChartStyleTraits";
-import TablePointSizeStyleTraits from "../../../Traits/TraitsClasses/TablePointSizeStyleTraits";
-import TableStyleTraits from "../../../Traits/TraitsClasses/TableStyleTraits";
+import TableChartStyleTraits, { TableChartLineStyleTraits } from "../../../Traits/TraitsClasses/Table/ChartStyleTraits";
+import TablePointSizeStyleTraits from "../../../Traits/TraitsClasses/Table/PointSizeStyleTraits";
+import TableStyleTraits from "../../../Traits/TraitsClasses/Table/StyleTraits";
 import CommonStrata from "../../Definition/CommonStrata";
 import CreateModel from "../../Definition/CreateModel";
 import createStratumInstance from "../../Definition/createStratumInstance";
@@ -31,7 +30,13 @@ StratumOrder.addLoadStratum(TableAutomaticStylesStratum.stratumName);
 class SosAutomaticStylesStratum extends TableAutomaticStylesStratum {
     constructor(catalogItem) {
         super(catalogItem);
-        this.catalogItem = catalogItem;
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogItem
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(newModel) {
         return new SosAutomaticStylesStratum(newModel);
@@ -73,18 +78,29 @@ class SosAutomaticStylesStratum extends TableAutomaticStylesStratum {
     }
 }
 __decorate([
-    computed
+    override
 ], SosAutomaticStylesStratum.prototype, "activeStyle", null);
 __decorate([
-    computed
+    override
 ], SosAutomaticStylesStratum.prototype, "styles", null);
 __decorate([
-    computed
+    override
 ], SosAutomaticStylesStratum.prototype, "defaultChartStyle", null);
 class GetFeatureOfInterestRequest {
     constructor(catalogItem, requestTemplate) {
-        this.catalogItem = catalogItem;
-        this.requestTemplate = requestTemplate;
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogItem
+        });
+        Object.defineProperty(this, "requestTemplate", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: requestTemplate
+        });
+        makeObservable(this);
     }
     get url() {
         return this.catalogItem.url;
@@ -124,8 +140,19 @@ __decorate([
 ], GetFeatureOfInterestRequest.prototype, "procedures", null);
 class GetObservationRequest {
     constructor(catalogItem, foiIdentifier) {
-        this.catalogItem = catalogItem;
-        this.foiIdentifier = foiIdentifier;
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogItem
+        });
+        Object.defineProperty(this, "foiIdentifier", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: foiIdentifier
+        });
+        makeObservable(this);
     }
     get url() {
         return this.catalogItem.url;
@@ -218,9 +245,10 @@ __decorate([
 __decorate([
     computed
 ], GetObservationRequest.prototype, "temporalFilters", null);
-export default class SensorObservationServiceCatalogItem extends TableMixin(CatalogMemberMixin(CreateModel(SensorObservationServiceCatalogItemTraits))) {
+class SensorObservationServiceCatalogItem extends TableMixin(CreateModel(SensorObservationServiceCatalogItemTraits)) {
     constructor(id, terria, sourceReference) {
         super(id, terria, sourceReference);
+        makeObservable(this);
         this.strata.set(TableAutomaticStylesStratum.stratumName, new SosAutomaticStylesStratum(this));
     }
     get type() {
@@ -342,8 +370,8 @@ export default class SensorObservationServiceCatalogItem extends TableMixin(Cata
                     return;
                 if (!Array.isArray(points))
                     points = [points];
-                var measurements = points.map((point) => point.MeasurementTVP); // TVP = Time value pairs, I think.
-                var featureIdentifier = observation.featureOfInterest["xlink:href"] || "";
+                const measurements = points.map((point) => point.MeasurementTVP); // TVP = Time value pairs, I think.
+                const featureIdentifier = observation.featureOfInterest["xlink:href"] || "";
                 datesCol.push(...measurements.map((measurement) => typeof measurement.time === "object" ? "" : measurement.time));
                 valuesCol.push(...measurements.map((measurement) => typeof measurement.value === "object" ? "" : measurement.value));
                 identifiersCol.push(...measurements.map((_) => featureIdentifier));
@@ -452,13 +480,24 @@ export default class SensorObservationServiceCatalogItem extends TableMixin(Cata
         return this.procedures.find((p) => p.identifier === this.activeTableStyle.id);
     }
 }
-SensorObservationServiceCatalogItem.type = "sos";
-SensorObservationServiceCatalogItem.defaultRequestTemplate = require("./SensorObservationServiceRequestTemplate.xml");
+Object.defineProperty(SensorObservationServiceCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "sos"
+});
+Object.defineProperty(SensorObservationServiceCatalogItem, "defaultRequestTemplate", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: require("./SensorObservationServiceRequestTemplate.xml")
+});
+export default SensorObservationServiceCatalogItem;
 __decorate([
     action
 ], SensorObservationServiceCatalogItem.prototype, "forceLoadTableData", null);
 __decorate([
-    computed
+    override
 ], SensorObservationServiceCatalogItem.prototype, "cacheDuration", null);
 __decorate([
     action
@@ -470,7 +509,7 @@ __decorate([
     computed
 ], SensorObservationServiceCatalogItem.prototype, "valueTitle", null);
 __decorate([
-    computed
+    override
 ], SensorObservationServiceCatalogItem.prototype, "selectableDimensions", null);
 __decorate([
     computed
@@ -479,7 +518,7 @@ __decorate([
     computed
 ], SensorObservationServiceCatalogItem.prototype, "observablesSelector", null);
 __decorate([
-    computed
+    override
 ], SensorObservationServiceCatalogItem.prototype, "selectedObservableId", null);
 __decorate([
     computed
@@ -488,7 +527,7 @@ __decorate([
     computed
 ], SensorObservationServiceCatalogItem.prototype, "selectedProcedure", null);
 function createChartColumn(identifier, name) {
-    const nameAttr = name == undefined ? "" : `name="${name}"`;
+    const nameAttr = name === undefined ? "" : `name="${name}"`;
     // The API that provides the chart data is a SOAP API, and the download button is essentially just a link, so when you click it you get an error page.
     // can-download="false" will disable this broken download button.
     return `<sos-chart identifier="${identifier}" ${nameAttr} can-download="false"></sos-chart>`;
@@ -506,9 +545,9 @@ async function loadSoapBody(item, url, requestTemplate, templateContext) {
     if (responseXml === undefined) {
         return;
     }
-    var json = xml2json(responseXml);
+    const json = xml2json(responseXml);
     if (json.Exception) {
-        var errorMessage = i18next.t("models.sensorObservationService.unknownError");
+        let errorMessage = i18next.t("models.sensorObservationService.unknownError");
         if (json.Exception.ExceptionText) {
             errorMessage = i18next.t("models.sensorObservationService.exceptionMessage", { exceptionText: json.Exception.ExceptionText });
         }
@@ -555,10 +594,11 @@ function addDurationToIso8601(dateIso8601, durationString) {
             // Use addHours on 24 * numdays - on my casual reading of addDays, it needs an integer.
             julianDate = JulianDate.addHours(julianDate, duration * 24, scratchJulianDate);
             break;
-        case "y":
+        case "y": {
             const days = Math.round(duration * 365);
             julianDate = JulianDate.addDays(julianDate, days, scratchJulianDate);
             break;
+        }
         default:
             throw new DeveloperError('Unknown duration type "' + durationString + '" (use s, h, d or y)');
     }
@@ -573,7 +613,7 @@ function addDurationToIso8601(dateIso8601, durationString) {
  */
 function convertObjectToNameValueArray(parameters) {
     return Object.keys(parameters).reduce((result, key) => {
-        var values = parameters[key];
+        let values = parameters[key];
         if (!Array.isArray(values)) {
             values = [values];
         }

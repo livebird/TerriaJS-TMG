@@ -20,8 +20,102 @@ import computeRingWindingOrder from "../Vector/computeRingWindingOrder";
 /** Note this has been deprecated in favour of ProtomapsImageryProvider */
 export default class MapboxVectorTileImageryProvider {
     constructor(options) {
-        this._errorEvent = new CesiumEvent();
-        this._ready = true;
+        Object.defineProperty(this, "_uriTemplate", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_layerName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_subdomains", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_styleFunc", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_tilingScheme", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_tileWidth", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_tileHeight", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_minimumLevel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_maximumLevel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_maximumNativeLevel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_rectangle", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_uniqueIdProp", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_featureInfoFunc", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_errorEvent", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new CesiumEvent()
+        });
+        Object.defineProperty(this, "_ready", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "_credit", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         this._uriTemplate = new URITemplate(options.url);
         this._layerName = options.layerName;
         this._subdomains = defaultValue(options.subdomains, []);
@@ -132,7 +226,7 @@ export default class MapboxVectorTileImageryProvider {
     get tileDiscardPolicy() {
         return undefined;
     }
-    getTileCredits(x, y, level) {
+    getTileCredits(_x, _y, _level) {
         return [];
     }
     _getSubdomain(x, y, level) {

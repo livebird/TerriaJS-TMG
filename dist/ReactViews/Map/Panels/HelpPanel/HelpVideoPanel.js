@@ -4,6 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import PropTypes from "prop-types";
@@ -35,43 +36,40 @@ let HelpVideoPanel = class HelpVideoPanel extends React.Component {
                 !this.props.viewState.showHelpMenu ||
                 this.props.viewState.topElement !== "HelpPanel"
         });
-        return (itemSelected && (React.createElement("div", { className: className },
-            React.createElement(VideoGuide, { viewState: this.props.viewState, videoLink: this.props.videoUrl, background: this.props.placeholderImage, backgroundOpacity: this.props.videoCoverImageOpacity, videoName: HELP_VIDEO_NAME }),
-            React.createElement(Box, { centered: true, fullWidth: true, fullHeight: true, displayInlineBlock: true, paddedHorizontally: 4, paddedVertically: 18, css: `
+        return (itemSelected && (_jsxs("div", { className: className, children: [_jsx(VideoGuide, { viewState: this.props.viewState, videoLink: this.props.videoUrl, background: this.props.placeholderImage, backgroundOpacity: this.props.videoCoverImageOpacity, videoName: HELP_VIDEO_NAME }), _jsxs(Box, { centered: true, fullWidth: true, fullHeight: true, displayInlineBlock: true, paddedHorizontally: 4, paddedVertically: 18, css: `
               overflow: auto;
               overflow-x: hidden;
               overflow-y: auto;
-            `, scroll: true },
-                React.createElement(If, { condition: helpItemType === "videoAndContent" },
-                    this.props.videoUrl && this.props.placeholderImage && (React.createElement("div", { key: "image" },
-                        React.createElement("div", { className: Styles.videoLink, style: {
-                                backgroundImage: `linear-gradient(rgba(0,0,0,0.35),rgba(0,0,0,0.35)), url(${this.props.placeholderImage})`
-                            } },
-                            React.createElement("button", { className: Styles.videoBtn, onClick: () => this.props.viewState.setVideoGuideVisible(HELP_VIDEO_NAME) },
-                                React.createElement(Icon, { glyph: Icon.GLYPHS.play }))),
-                        React.createElement(Spacing, { bottom: 5 }))),
-                    this.props.markdownContent && (React.createElement(StyledHtml, { key: "markdownContent", viewState: this.props.viewState, markdown: this.props.markdownContent }))),
-                React.createElement(If, { condition: helpItemType === "slider" },
-                    React.createElement(SatelliteGuide, { terria: this.props.terria, viewState: this.props.viewState })),
-                React.createElement(If, { condition: helpItemType === "trainer" },
-                    React.createElement(TrainerPane, { content: this.props.content, terria: this.props.terria, viewState: this.props.viewState }))))));
+            `, scroll: true, children: [helpItemType === "videoAndContent" && (_jsxs(_Fragment, { children: [this.props.videoUrl && this.props.placeholderImage && (_jsxs("div", { children: [_jsx("div", { className: Styles.videoLink, style: {
+                                                backgroundImage: `linear-gradient(rgba(0,0,0,0.35),rgba(0,0,0,0.35)), url(${this.props.placeholderImage})`
+                                            }, children: _jsx("button", { className: Styles.videoBtn, onClick: () => this.props.viewState.setVideoGuideVisible(HELP_VIDEO_NAME), children: _jsx(Icon, { glyph: Icon.GLYPHS.play }) }) }), _jsx(Spacing, { bottom: 5 })] }, "image")), this.props.markdownContent && (_jsx(StyledHtml, { viewState: this.props.viewState, markdown: this.props.markdownContent }, "markdownContent"))] })), helpItemType === "slider" && (_jsx(SatelliteGuide, { terria: this.props.terria, viewState: this.props.viewState })), helpItemType === "trainer" && (_jsx(TrainerPane, { content: this.props.content, terria: this.props.terria, viewState: this.props.viewState }))] })] })));
     }
 };
-HelpVideoPanel.displayName = "HelpVideoPanel";
-HelpVideoPanel.propTypes = {
-    terria: PropTypes.object.isRequired,
-    viewState: PropTypes.object.isRequired,
-    content: PropTypes.object.isRequired,
-    itemString: PropTypes.string,
-    paneMode: PropTypes.string,
-    markdownContent: PropTypes.string,
-    videoUrl: PropTypes.string,
-    placeholderImage: PropTypes.string,
-    videoCoverImageOpacity: PropTypes.number,
-    theme: PropTypes.object,
-    t: PropTypes.func.isRequired,
-    i18n: PropTypes.object.isRequired
-};
+Object.defineProperty(HelpVideoPanel, "displayName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "HelpVideoPanel"
+});
+Object.defineProperty(HelpVideoPanel, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        terria: PropTypes.object.isRequired,
+        viewState: PropTypes.object.isRequired,
+        content: PropTypes.object.isRequired,
+        itemString: PropTypes.string,
+        paneMode: PropTypes.string,
+        markdownContent: PropTypes.string,
+        videoUrl: PropTypes.string,
+        placeholderImage: PropTypes.string,
+        videoCoverImageOpacity: PropTypes.number,
+        theme: PropTypes.object,
+        t: PropTypes.func.isRequired,
+        i18n: PropTypes.object.isRequired
+    }
+});
 HelpVideoPanel = __decorate([
     observer
 ], HelpVideoPanel);

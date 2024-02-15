@@ -94,7 +94,7 @@ export const Box = styled.div `
   ${(props) => props.styledPadding && `padding: ${props.styledPadding};`}
 
   ${(props) => props.styledMargin && `margin: ${props.styledMargin};`}
-  
+
   ${(props) => props.backgroundImage &&
     `
       ${props.backgroundBlackOverlay

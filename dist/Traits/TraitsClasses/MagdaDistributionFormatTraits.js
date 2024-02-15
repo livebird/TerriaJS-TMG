@@ -8,6 +8,33 @@ import anyTrait from "../Decorators/anyTrait";
 import ModelTraits from "../ModelTraits";
 import primitiveTrait from "../Decorators/primitiveTrait";
 export default class MagdaDistributionFormatTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "id", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "formatRegex", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "urlRegex", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "definition", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
     static isRemoval(format) {
         return format.definition === null;
     }

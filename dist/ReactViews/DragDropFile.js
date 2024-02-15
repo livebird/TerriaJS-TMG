@@ -4,8 +4,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import classNames from "classnames";
-import { action, runInAction } from "mobx";
+import { action, runInAction, makeObservable } from "mobx";
 import { observer } from "mobx-react";
 import React from "react";
 import { Trans, withTranslation } from "react-i18next";
@@ -16,10 +17,22 @@ import CatalogMemberMixin, { getName } from "../ModelMixins/CatalogMemberMixin";
 import MappableMixin from "../ModelMixins/MappableMixin";
 import addUserFiles from "../Models/Catalog/addUserFiles";
 import Styles from "./drag-drop-file.scss";
-import { withViewState } from "./StandardUserInterface/ViewStateContext";
+import { withViewState } from "./Context";
+import { raiseFileDragDropEvent } from "../ViewModels/FileDragDropListener";
 let DragDropFile = class DragDropFile extends React.Component {
+    constructor(props) {
+        super(props);
+        Object.defineProperty(this, "target", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
+    }
     async handleDrop(e) {
         var _a;
+        e.persist();
         e.preventDefault();
         e.stopPropagation();
         const props = this.props;
@@ -46,8 +59,12 @@ let DragDropFile = class DragDropFile extends React.Component {
                 // Add load all mapable items
                 const mappableItems = addedCatalogItems.filter(MappableMixin.isMixedInto);
                 Result.combine(await Promise.all(mappableItems.map((f) => f.loadMapItems())), "Failed to load uploaded files").raiseError(props.viewState.terria);
+                raiseFileDragDropEvent({
+                    addedItems: mappableItems,
+                    mouseCoordinates: { clientX: e.clientX, clientY: e.clientY }
+                });
                 // Zoom to first item
-                const firstZoomableItem = mappableItems.find((i) => isDefined(i.rectangle));
+                const firstZoomableItem = mappableItems.find((i) => isDefined(i.rectangle) && i.disableZoomTo === false);
                 isDefined(firstZoomableItem) &&
                     runInAction(() => props.viewState.terria.currentViewer.zoomTo(firstZoomableItem, 1));
             }
@@ -79,12 +96,9 @@ let DragDropFile = class DragDropFile extends React.Component {
         this.props.viewState.isDraggingDroppingFile = false;
     }
     render() {
-        return (React.createElement("div", { onDrop: this.handleDrop.bind(this), onDragEnter: this.handleDragEnter.bind(this), onDragOver: this.handleDragOver.bind(this), onDragLeave: this.handleDragLeave.bind(this), onMouseLeave: this.handleMouseLeave.bind(this), className: classNames(Styles.dropZone, {
+        return (_jsx("div", { onDrop: this.handleDrop.bind(this), onDragEnter: this.handleDragEnter.bind(this), onDragOver: this.handleDragOver.bind(this), onDragLeave: this.handleDragLeave.bind(this), onMouseLeave: this.handleMouseLeave.bind(this), className: classNames(Styles.dropZone, {
                 [Styles.isActive]: this.props.viewState.isDraggingDroppingFile
-            }) }, this.props.viewState.isDraggingDroppingFile ? (React.createElement("div", { className: Styles.inner },
-            React.createElement(Trans, { i18nKey: "dragDrop.text" },
-                React.createElement("h3", { className: Styles.heading }, "Drag & Drop"),
-                React.createElement("div", { className: Styles.caption }, "Your data anywhere to view on the map")))) : ("")));
+            }), children: this.props.viewState.isDraggingDroppingFile ? (_jsx("div", { className: Styles.inner, children: _jsxs(Trans, { i18nKey: "dragDrop.text", children: [_jsx("h3", { className: Styles.heading, children: "Drag & Drop" }), _jsx("div", { className: Styles.caption, children: "Your data anywhere to view on the map" })] }) })) : ("") }));
     }
 };
 __decorate([

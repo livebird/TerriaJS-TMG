@@ -4,10 +4,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { computed, runInAction } from "mobx";
+import { computed, runInAction, makeObservable } from "mobx";
 import loadJson from "../../../Core/loadJson";
 import TerriaError from "../../../Core/TerriaError";
-import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
 import GeoJsonMixin, { toFeatureCollection } from "../../../ModelMixins/GeojsonMixin";
 import SocrataMapViewCatalogItemTraits from "../../../Traits/TraitsClasses/SocrataMapViewCatalogItemTraits";
 import CreateModel from "../../Definition/CreateModel";
@@ -18,11 +17,6 @@ import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
  * From the JSON response we get `childViews` - which can be used to generate a URL to fetch GeoJSON
  */
 export class SocrataMapViewStratum extends LoadableStratum(SocrataMapViewCatalogItemTraits) {
-    constructor(catalogItem, view) {
-        super();
-        this.catalogItem = catalogItem;
-        this.view = view;
-    }
     static async load(catalogGroup) {
         var _a;
         if (!catalogGroup.url)
@@ -43,8 +37,29 @@ export class SocrataMapViewStratum extends LoadableStratum(SocrataMapViewCatalog
     duplicateLoadableStratum(model) {
         return new SocrataMapViewStratum(model, this.view);
     }
+    constructor(catalogItem, view) {
+        super();
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogItem
+        });
+        Object.defineProperty(this, "view", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: view
+        });
+        makeObservable(this);
+    }
 }
-SocrataMapViewStratum.stratumName = "socrataMapView";
+Object.defineProperty(SocrataMapViewStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "socrataMapView"
+});
 __decorate([
     computed
 ], SocrataMapViewStratum.prototype, "geojsonUrl", null);
@@ -53,7 +68,7 @@ StratumOrder.addLoadStratum(SocrataMapViewStratum.stratumName);
  * Use the Socrata `views` API to fetch data.
  * This mimics how Socrata portal map visualisation works - it isn't an official API
  */
-export default class SocrataMapViewCatalogItem extends GeoJsonMixin(CatalogMemberMixin(CreateModel(SocrataMapViewCatalogItemTraits))) {
+class SocrataMapViewCatalogItem extends GeoJsonMixin(CreateModel(SocrataMapViewCatalogItemTraits)) {
     get type() {
         return SocrataMapViewCatalogItem.type;
     }
@@ -77,5 +92,11 @@ export default class SocrataMapViewCatalogItem extends GeoJsonMixin(CatalogMembe
         throw TerriaError.from("Failed to fetch geoJSON - no URL was provided");
     }
 }
-SocrataMapViewCatalogItem.type = "socrata-map-item";
+Object.defineProperty(SocrataMapViewCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "socrata-map-item"
+});
+export default SocrataMapViewCatalogItem;
 //# sourceMappingURL=SocrataMapViewCatalogItem.js.map

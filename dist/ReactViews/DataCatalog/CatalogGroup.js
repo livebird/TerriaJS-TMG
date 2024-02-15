@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
@@ -16,11 +17,17 @@ const CatalogGroupButton = styled.button `
     &:focus {
       color: ${props.theme.textLight};
       background-color: ${props.theme.modalHighlight};
+      svg {
+        fill: white;
+      }
     }
     ${props.active &&
     `
         color: ${props.theme.textLight};
         background-color: ${props.theme.modalHighlight};
+        svg {
+          fill: white;
+        }
       `}
     `}
 `;
@@ -31,32 +38,19 @@ const CatalogGroupButton = styled.button `
  */
 function CatalogGroup(props) {
     const { t } = useTranslation();
-    return (React.createElement("li", { className: Styles.root },
-        React.createElement(Text, { fullWidth: true, primary: !props.selected && props.isPrivate },
-            React.createElement(CatalogGroupButton, { type: "button", className: classNames(Styles.btnCatalog, { [Styles.btnCatalogTopLevel]: props.topLevel }, { [Styles.btnIsOpen]: props.open }, { [Styles.isPreviewed]: props.selected }), title: props.title, onClick: props.onClick, active: props.selected },
-                React.createElement(If, { condition: !props.topLevel },
-                    React.createElement("span", { className: Styles.folder }, props.open ? (React.createElement(Icon, { glyph: Icon.GLYPHS.folderOpen })) : (React.createElement(Icon, { glyph: Icon.GLYPHS.folder })))),
-                React.createElement(Box, { justifySpaceBetween: true },
-                    React.createElement(Box, null, props.text),
-                    React.createElement(Box, { centered: true },
-                        props.isPrivate && React.createElement(PrivateIndicator, null),
-                        React.createElement("span", { className: classNames(Styles.caret, {
-                                [Styles.offsetRight]: props.removable
-                            }) }, props.open ? (React.createElement(Icon, { glyph: Icon.GLYPHS.opened })) : (React.createElement(Icon, { glyph: Icon.GLYPHS.closed }))),
-                        React.createElement(If, { condition: props.removable },
-                            React.createElement("button", { type: "button", className: Styles.trashGroup, title: t("dataCatalog.groupRemove"), onClick: props.removeUserAddedData },
-                                React.createElement(Icon, { glyph: Icon.GLYPHS.trashcan }))))))),
-        React.createElement(If, { condition: props.open },
-            React.createElement("ul", { className: classNames(Styles.catalogGroup, {
+    return (_jsxs("li", { className: Styles.root, children: [_jsxs(Text, { fullWidth: true, primary: !props.selected && props.isPrivate, children: [props.displayGroup === true && (_jsx(Box, { children: _jsx("button", { type: "button", 
+                            // TODO: apply unique styles
+                            className: Styles.addRemoveButton, title: props.allItemsLoaded
+                                ? t("models.catalog.removeAll")
+                                : t("models.catalog.addAll"), 
+                            // onClick should call addAll function which I should move out of GroupPreview to separate service file
+                            onClick: props.addRemoveButtonFunction, children: _jsx(Icon, { glyph: props.allItemsLoaded
+                                    ? Icon.GLYPHS.minusList
+                                    : Icon.GLYPHS.plusList }) }) })), _jsxs(CatalogGroupButton, { type: "button", className: classNames(Styles.btnCatalog, { [Styles.btnCatalogTopLevel]: props.topLevel }, { [Styles.btnIsOpen]: props.open }, { [Styles.isPreviewed]: props.selected }), title: props.title, onClick: props.onClick, active: props.selected, children: [!props.topLevel && (_jsx("span", { className: Styles.folder, children: props.open ? (_jsx(Icon, { glyph: Icon.GLYPHS.folderOpen })) : (_jsx(Icon, { glyph: Icon.GLYPHS.folder })) })), _jsxs(Box, { justifySpaceBetween: true, children: [_jsx(Box, { children: props.text }), _jsxs(Box, { centered: true, children: [props.isPrivate && _jsx(PrivateIndicator, {}), _jsx("span", { className: classNames(Styles.caret, {
+                                                    [Styles.offsetRight]: props.removable
+                                                }), children: props.open ? (_jsx(Icon, { glyph: Icon.GLYPHS.opened })) : (_jsx(Icon, { glyph: Icon.GLYPHS.closed })) }), props.removable && (_jsx("button", { type: "button", className: Styles.trashGroup, title: t("dataCatalog.groupRemove"), onClick: props.removeUserAddedData, children: _jsx(Icon, { glyph: Icon.GLYPHS.trashcan }) }))] })] })] })] }), props.open && (_jsxs("ul", { className: classNames(Styles.catalogGroup, {
                     [Styles.catalogGroupLowerLevel]: !props.topLevel
-                }) },
-                React.createElement(Choose, null,
-                    React.createElement(When, { condition: props.loading },
-                        React.createElement("li", { key: "loader" },
-                            React.createElement(Loader, null))),
-                    React.createElement(When, { condition: props.children.length === 0 && props.emptyMessage },
-                        React.createElement("li", { className: classNames(Styles.label, Styles.labelNoResults), key: "empty" }, props.emptyMessage))),
-                props.children))));
+                }), children: [props.loading && (_jsx("li", { children: _jsx(Loader, {}) }, "loader")), !props.loading && props.children.length === 0 && props.emptyMessage && (_jsx("li", { className: classNames(Styles.label, Styles.labelNoResults), children: props.emptyMessage }, "empty")), !props.loading ? props.children : null] }))] }));
 }
 CatalogGroup.propTypes = {
     text: PropTypes.string,
@@ -73,7 +67,10 @@ CatalogGroup.propTypes = {
     ]),
     selected: PropTypes.bool,
     removable: PropTypes.bool,
-    removeUserAddedData: PropTypes.func
+    removeUserAddedData: PropTypes.func,
+    displayGroup: PropTypes.bool,
+    allItemsLoaded: PropTypes.bool,
+    addRemoveButtonFunction: PropTypes.func
 };
 export default observer(CatalogGroup);
 //# sourceMappingURL=CatalogGroup.js.map

@@ -45,10 +45,30 @@ function convertPreSampledProperties(timeProperties) {
  **/
 class PreSampledProperty {
     constructor(type) {
-        this.type = type;
-        this.times = [];
-        this.values = [];
-        this.allValuesAreTheSame = true;
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: type
+        });
+        Object.defineProperty(this, "times", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "values", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "allValuesAreTheSame", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
     }
     getProperty() {
         if (this.allValuesAreTheSame) {
@@ -74,9 +94,24 @@ class PreSampledProperty {
  **/
 class PreSampledPositionProperty {
     constructor() {
-        this.times = [];
-        this.values = [];
-        this.allValuesAreTheSame = true;
+        Object.defineProperty(this, "times", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "values", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "allValuesAreTheSame", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
     }
     getProperty() {
         if (this.allValuesAreTheSame) {
@@ -100,7 +135,11 @@ class PreSampledPositionProperty {
  * Create lat/lon features, one for each id group in the table
  */
 export default function createLongitudeLatitudeFeaturePerId(style) {
-    const features = style.rowGroups.map(([featureId, rowIds]) => createFeature(featureId, rowIds, style));
+    const features = [];
+    for (let i = 0; i < style.rowGroups.length; i++) {
+        const [featureId, rowIds] = style.rowGroups[i];
+        features.push(createFeature(featureId, rowIds, style));
+    }
     return features;
 }
 function createProperty(type, interpolate) {
@@ -123,7 +162,9 @@ function createFeature(featureId, rowIds, style) {
             color: createProperty(Color, interpolate),
             outlineColor: createProperty(Color, interpolate),
             pixelSize: createProperty(Number, interpolate),
-            outlineWidth: createProperty(Number, interpolate)
+            outlineWidth: createProperty(Number, interpolate),
+            scaleByDistance: new TimeIntervalCollectionProperty(),
+            disableDepthTestDistance: new TimeIntervalCollectionProperty()
         }
         : undefined;
     const billboardGraphicsTimeProperties = style.pointStyleMap.traits.enabled
@@ -133,7 +174,9 @@ function createFeature(featureId, rowIds, style) {
             width: createProperty(Number, interpolate),
             color: createProperty(Color, interpolate),
             rotation: createProperty(Number, interpolate),
-            pixelOffset: createProperty(Cartesian2, interpolate)
+            pixelOffset: createProperty(Cartesian2, interpolate),
+            scaleByDistance: new TimeIntervalCollectionProperty(),
+            disableDepthTestDistance: new TimeIntervalCollectionProperty()
         }
         : undefined;
     const pathGraphicsTimeProperties = style.trailStyleMap.traits.enabled
@@ -167,7 +210,11 @@ function createFeature(featureId, rowIds, style) {
             fillColor: createProperty(Color, interpolate),
             outlineColor: createProperty(Color, interpolate),
             outlineWidth: createProperty(Number, interpolate),
-            pixelOffset: createProperty(Cartesian2, interpolate)
+            pixelOffset: createProperty(Cartesian2, interpolate),
+            verticalOrigin: new TimeIntervalCollectionProperty(),
+            horizontalOrigin: new TimeIntervalCollectionProperty(),
+            scaleByDistance: new TimeIntervalCollectionProperty(),
+            disableDepthTestDistance: new TimeIntervalCollectionProperty()
         }
         : undefined;
     const properties = new TimeIntervalCollectionProperty();
@@ -179,12 +226,13 @@ function createFeature(featureId, rowIds, style) {
     const tableColumns = style.tableModel.tableColumns;
     /** use `PointGraphics` or `BillboardGraphics`. This wil be false if any pointTraits.marker !== "point", as then we use images as billboards */
     let usePointGraphicsForId = true;
-    rowIds.forEach((rowId) => {
+    for (let i = 0; i < rowIds.length; i++) {
+        const rowId = rowIds[i];
         const longitude = longitudes[rowId];
         const latitude = latitudes[rowId];
         const interval = timeIntervals[rowId];
         if (longitude === null || latitude === null || !interval) {
-            return;
+            continue;
         }
         addSampleOrInterval(positionProperty, Cartesian3.fromDegrees(longitude, latitude, 0.0), interval);
         const { pointGraphicsOptions, usePointGraphics, pathGraphicsOptions, pathGraphicsPolylineGlowOptions, pathGraphicsSolidColorOptions, labelGraphicsOptions, billboardGraphicsOptions } = getFeatureStyle(style, rowId);
@@ -229,7 +277,7 @@ function createFeature(featureId, rowIds, style) {
         }, interval);
         addSampleOrInterval(description, getRowDescription(rowId, tableColumns), interval);
         availability.addInterval(interval);
-    });
+    }
     const show = calculateShow(availability);
     const feature = new TerriaFeature({
         position: 

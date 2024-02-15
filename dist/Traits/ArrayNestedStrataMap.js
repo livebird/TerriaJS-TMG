@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { computed } from "mobx";
+import { computed, makeObservable } from "mobx";
 import createStratumInstance from "../Models/Definition/createStratumInstance";
 /**
  * A strata map where the strata are obtained from a sub-property of another
@@ -12,12 +12,43 @@ import createStratumInstance from "../Models/Definition/createStratumInstance";
  */
 export default class ArrayNestedStrataMap {
     constructor(parentModel, parentProperty, objectTraits, objectIdProperty, objectId, merge) {
-        this.parentModel = parentModel;
-        this.parentProperty = parentProperty;
-        this.objectTraits = objectTraits;
-        this.objectIdProperty = objectIdProperty;
-        this.objectId = objectId;
-        this.merge = merge;
+        Object.defineProperty(this, "parentModel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: parentModel
+        });
+        Object.defineProperty(this, "parentProperty", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: parentProperty
+        });
+        Object.defineProperty(this, "objectTraits", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: objectTraits
+        });
+        Object.defineProperty(this, "objectIdProperty", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: objectIdProperty
+        });
+        Object.defineProperty(this, "objectId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: objectId
+        });
+        Object.defineProperty(this, "merge", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: merge
+        });
+        makeObservable(this);
     }
     clear() {
         this.parentModel.strata.forEach((value, key) => {
@@ -29,7 +60,7 @@ export default class ArrayNestedStrataMap {
         if (parentValue === undefined) {
             return false;
         }
-        let array = parentValue[this.parentProperty];
+        const array = parentValue[this.parentProperty];
         if (array === undefined) {
             return false;
         }
@@ -90,7 +121,7 @@ export default class ArrayNestedStrataMap {
         const strataTopToBottom = this.parentModel.strataTopToBottom;
         const result = new Map();
         // Find the strata that go into this object.
-        for (let stratumId of strataTopToBottom.keys()) {
+        for (const stratumId of strataTopToBottom.keys()) {
             const stratum = strataTopToBottom.get(stratumId);
             const objectArray = stratum[this.parentProperty];
             if (!objectArray) {

@@ -4,6 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react";
 import PropTypes from "prop-types";
@@ -49,35 +50,26 @@ let MappablePreview = class MappablePreview extends React.Component {
         var _a, _b, _c, _d;
         const { t } = this.props;
         const catalogItem = this.props.previewed;
-        return (React.createElement("div", { className: Styles.root },
-            React.createElement(If, { condition: MappableMixin.isMixedInto(catalogItem) &&
-                    !catalogItem.disablePreview },
-                React.createElement(DataPreviewMap, { terria: this.props.terria, previewed: catalogItem, showMap: !this.props.viewState.explorerPanelAnimating ||
-                        this.props.viewState.useSmallScreenInterface })),
-            React.createElement("button", { type: "button", onClick: this.toggleOnMap.bind(this), className: Styles.btnAdd }, this.props.terria.workbench.contains(catalogItem)
-                ? t("preview.removeFromMap")
-                : t("preview.addToMap")),
-            React.createElement("div", { className: Styles.previewedInfo },
-                React.createElement("div", { className: Styles.titleAndShareWrapper, ref: (component) => (this.refToMeasure = component) },
-                    React.createElement("h3", { className: Styles.h3 }, catalogItem.name),
-                    React.createElement(If, { condition: !catalogItem.hasLocalData &&
-                            !this.props.viewState.useSmallScreenInterface },
-                        React.createElement("div", { className: Styles.shareLinkWrapper },
-                            React.createElement(SharePanel, { catalogShare: true, catalogShareWithoutText: true, modalWidth: this.props.widthFromMeasureElementHOC, terria: this.props.terria, viewState: this.props.viewState })))),
-                React.createElement(If, { condition: (_a = catalogItem.loadMetadataResult) === null || _a === void 0 ? void 0 : _a.error },
-                    React.createElement(WarningBox, { error: (_b = catalogItem.loadMetadataResult) === null || _b === void 0 ? void 0 : _b.error, viewState: this.props.viewState })),
-                React.createElement(If, { condition: (_c = catalogItem.loadMapItemsResult) === null || _c === void 0 ? void 0 : _c.error },
-                    React.createElement(WarningBox, { error: (_d = catalogItem.loadMapItemsResult) === null || _d === void 0 ? void 0 : _d.error, viewState: this.props.viewState })),
-                React.createElement(Description, { item: catalogItem }))));
+        return (_jsxs("div", { className: Styles.root, children: [MappableMixin.isMixedInto(catalogItem) &&
+                    !catalogItem.disablePreview && (_jsx(DataPreviewMap, { terria: this.props.terria, previewed: catalogItem, showMap: !this.props.viewState.explorerPanelAnimating ||
+                        this.props.viewState.useSmallScreenInterface })), _jsx("button", { type: "button", onClick: this.toggleOnMap.bind(this), className: Styles.btnAdd, children: this.props.terria.workbench.contains(catalogItem)
+                        ? t("preview.removeFromMap")
+                        : t("preview.addToMap") }), _jsxs("div", { className: Styles.previewedInfo, children: [_jsxs("div", { className: Styles.titleAndShareWrapper, ref: (component) => (this.refToMeasure = component), children: [_jsx("h3", { className: Styles.h3, children: catalogItem.name }), !catalogItem.hasLocalData &&
+                                    !this.props.viewState.useSmallScreenInterface && (_jsx("div", { className: Styles.shareLinkWrapper, children: _jsx(SharePanel, { catalogShare: true, catalogShareWithoutText: true, modalWidth: this.props.widthFromMeasureElementHOC, terria: this.props.terria, viewState: this.props.viewState }) }))] }), ((_a = catalogItem.loadMetadataResult) === null || _a === void 0 ? void 0 : _a.error) && (_jsx(WarningBox, { error: (_b = catalogItem.loadMetadataResult) === null || _b === void 0 ? void 0 : _b.error, viewState: this.props.viewState })), ((_c = catalogItem.loadMapItemsResult) === null || _c === void 0 ? void 0 : _c.error) && (_jsx(WarningBox, { error: (_d = catalogItem.loadMapItemsResult) === null || _d === void 0 ? void 0 : _d.error, viewState: this.props.viewState })), _jsx(Description, { item: catalogItem })] })] }));
     }
 };
-MappablePreview.propTypes = {
-    previewed: PropTypes.object.isRequired,
-    terria: PropTypes.object.isRequired,
-    viewState: PropTypes.object.isRequired,
-    widthFromMeasureElementHOC: PropTypes.number,
-    t: PropTypes.func.isRequired
-};
+Object.defineProperty(MappablePreview, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        previewed: PropTypes.object.isRequired,
+        terria: PropTypes.object.isRequired,
+        viewState: PropTypes.object.isRequired,
+        widthFromMeasureElementHOC: PropTypes.number,
+        t: PropTypes.func.isRequired
+    }
+});
 MappablePreview = __decorate([
     observer
 ], MappablePreview);

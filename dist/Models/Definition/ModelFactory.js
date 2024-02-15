@@ -1,7 +1,12 @@
 // TODO: ideally this would be Promise-based so that we can defer loading Model classes until they're needed.
 export default class ModelFactory {
     constructor() {
-        this._constructors = new Map();
+        Object.defineProperty(this, "_constructors", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new Map()
+        });
     }
     get constructorsArray() {
         return Array.from(this._constructors);

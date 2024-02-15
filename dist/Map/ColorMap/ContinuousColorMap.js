@@ -3,6 +3,54 @@ import ColorMap from "./ColorMap";
 export default class ContinuousColorMap extends ColorMap {
     constructor(options) {
         super();
+        Object.defineProperty(this, "colorScale", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "nullColor", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "outlierColor", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "minValue", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "maxValue", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "isDiverging", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "colorMapMinValue", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "colorMapMaxValue", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         if (options.minValue === options.maxValue) {
             throw `Minimum and maximum values must be different.`;
         }

@@ -4,8 +4,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import "!!style-loader!css-loader?sourceMap!./sortable.css";
-import { action } from "mobx";
+import { action, makeObservable } from "mobx";
 import { observer } from "mobx-react";
 import React from "react";
 //@ts-ignore
@@ -23,17 +24,19 @@ const StyledUl = styled(Ul) `
   }
 `;
 let WorkbenchList = class WorkbenchList extends React.Component {
+    constructor(props) {
+        super(props);
+        makeObservable(this);
+    }
     onSort(sortedArray, currentDraggingSortData, currentDraggingIndex) {
         this.props.terria.workbench.moveItemToIndex(currentDraggingSortData, currentDraggingIndex);
     }
     render() {
-        return (React.createElement(StyledUl, { overflowY: "auto", overflowX: "hidden", scroll: true, paddedHorizontally: true, fullWidth: true, fullHeight: true, column: true },
-            this.props.terria.showSplitter && (React.createElement(WorkbenchSplitScreen, { terria: this.props.terria })),
-            React.createElement(Sortable, { onSort: this.onSort, direction: "vertical", dynamic: true, css: `
+        return (_jsxs(StyledUl, { overflowY: "auto", overflowX: "hidden", scroll: true, paddedHorizontally: true, fullWidth: true, fullHeight: true, column: true, children: [this.props.terria.showSplitter && (_jsx(WorkbenchSplitScreen, { terria: this.props.terria })), _jsx(Sortable, { onSort: this.onSort, direction: "vertical", dynamic: true, css: `
             width: 100%;
-          ` }, this.props.terria.workbench.items.map((item) => {
-                return (React.createElement(WorkbenchItem, { item: item, sortData: item, key: item.uniqueId, viewState: this.props.viewState }));
-            }))));
+          `, children: this.props.terria.workbench.items.map((item) => {
+                        return (_jsx(WorkbenchItem, { item: item, sortData: item, viewState: this.props.viewState }, item.uniqueId));
+                    }) })] }));
     }
 };
 __decorate([

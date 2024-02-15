@@ -1,7 +1,12 @@
+import { jsx as _jsx } from "react/jsx-runtime";
+import { useTranslation } from "react-i18next";
 import { lab, rgb } from "d3-color";
 import * as d3Scale from "d3-scale-chromatic";
-import React from "react";
 import StandardCssColors from "../../Core/StandardCssColors";
+const Invalid = () => {
+    const { t } = useTranslation();
+    return _jsx("span", { children: t("selectableDimensions.invalid") });
+};
 /* The ramp and swatches functions are adapted from https://observablehq.com/@d3/color-schemes?collection=@d3/d3-scale-chromatic
  *
  * Copyright 2018–2020 Observable, Inc.
@@ -22,7 +27,7 @@ const interpolateWidth = 300;
 const height = 20;
 function ramp(name, n) {
     if (!name)
-        return React.createElement("span", null, "Invalid");
+        return _jsx(Invalid, {});
     let colors;
     /** This could be used to draw text on top of swatches/ramps */
     let dark;
@@ -35,7 +40,7 @@ function ramp(name, n) {
     else {
         const interpolate = d3Scale[`interpolate${name}`];
         if (!interpolate) {
-            return React.createElement("span", null, "Invalid");
+            return _jsx(Invalid, {});
         }
         colors = [];
         dark = lab(interpolate(0)).l < 50;
@@ -44,12 +49,12 @@ function ramp(name, n) {
         }
     }
     if (n && n < 14) {
-        return (React.createElement("svg", { viewBox: `0 0 ${n} 1`, preserveAspectRatio: "none", style: {
+        return (_jsx("svg", { viewBox: `0 0 ${n} 1`, preserveAspectRatio: "none", style: {
                 display: "block",
                 shapeRendering: "crispEdges",
                 height: `${height}px`,
                 maxWidth: "100%"
-            } }, colors.map((c, i) => (React.createElement("rect", { key: i, x: i, width: 1, height: 1, fill: c })))));
+            }, children: colors.map((c, i) => (_jsx("rect", { x: i, width: 1, height: 1, fill: c }, i))) }));
     }
     else {
         const canvas = document.createElement("canvas");
@@ -57,39 +62,38 @@ function ramp(name, n) {
         canvas.height = 1;
         const context = canvas.getContext("2d");
         if (!context)
-            return React.createElement("span", null, "Invalid");
+            return _jsx(Invalid, {});
         canvas.style.width = `${interpolateWidth}px`;
         canvas.style.height = `${height}px`;
         for (let i = 0; i < interpolateWidth; ++i) {
             context.fillStyle = colors[i];
             context.fillRect(i, 0, 1, 1);
         }
-        return (React.createElement("div", { style: { marginTop: "5px" } },
-            React.createElement("img", { style: {
+        return (_jsx("div", { style: { marginTop: "5px" }, children: _jsx("img", { style: {
                     height: `${height}px`,
                     width: "100%",
                     imageRendering: "crisp-edges"
-                }, src: canvas.toDataURL("image/jpeg", 1.0) })));
+                }, src: canvas.toDataURL("image/jpeg", 1.0) }) }));
     }
 }
 function swatches(name) {
     if (!name)
-        return React.createElement("span", null, "Invalid");
+        return _jsx(Invalid, {});
     let colors = d3Scale[`scheme${name}`];
     // Handle custom HighContrast style
     if (!colors && name === "HighContrast") {
         colors = StandardCssColors.highContrast;
     }
     if (!colors)
-        return React.createElement("span", null, "Invalid");
+        return _jsx(Invalid, {});
     const n = colors.length;
     const dark = lab(colors[0]).l < 50;
-    return (React.createElement("svg", { viewBox: `0 0 ${n} 1`, preserveAspectRatio: "none", style: {
+    return (_jsx("svg", { viewBox: `0 0 ${n} 1`, preserveAspectRatio: "none", style: {
             display: "block",
             shapeRendering: "crispEdges",
             height: `${height}px`,
             maxWidth: "100%"
-        } }, colors.map((c, i) => (React.createElement("rect", { key: i, x: i, width: 1, height: 1, fill: c })))));
+        }, children: colors.map((c, i) => (_jsx("rect", { x: i, width: 1, height: 1, fill: c }, i))) }));
 }
 /** numBins = undefined - indicates continuous color scheme */
 export const QuantitativeColorSchemeOptionRenderer = (numBins) => (option) => ramp(option.value, numBins);

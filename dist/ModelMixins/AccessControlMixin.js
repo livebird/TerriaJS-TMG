@@ -4,26 +4,52 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, computed, observable } from "mobx";
+import { action, computed, observable, makeObservable } from "mobx";
 import { BaseModel } from "../Models/Definition/Model";
+/**
+ * API for setting an access type for the model. Note that the intended use of
+ * this mixin is just to flag public and private models differently in the UI
+ * and does not provide any security guarantees.
+ *
+ * The implementation is a bit fluid and maybe that makes it a bit hard to
+ * reason about because we are not strongly typing the possible values for
+ * `accessType`. For use in frontend, we formally recognizes only one acessType
+ * which is "public". All other access type values are treated as "private". The
+ * models overriding this mixin are free to choose any other string valued
+ * access type for their own purpose.
+ */
 function AccessControlMixin(Base) {
-    class Klass extends Base {
+    class _AccessControlMixin extends Base {
+        constructor(...args) {
+            super(...args);
+            Object.defineProperty(this, "_accessType", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            makeObservable(this);
+        }
         get hasAccessControlMixin() {
             return true;
         }
         /**
-         * Returns the accessType for this model, default is public
-         * Models can override this method to return access type differently
+         * Resolve accessType for this model in the following order:
+         *  1. Return the access type that was set on this model by explicitly calling setAccessType()
+         *  2. If this model is referenced by another, return the access type of the referrer
+         *  3. Return the access type of a parent with valid access type
+         *  4. If none of the above works - return "public"
          */
         get accessType() {
-            if (this._accessType)
+            // Return the explicitly set accessType
+            if (this._accessType) {
                 return this._accessType;
+            }
+            // Return the accessType of the referrer.
             if (AccessControlMixin.isMixedInto(this.sourceReference)) {
-                // This item is the target of a reference item, return the accessType
-                // of the reference item.
                 return this.sourceReference.accessType;
             }
-            // Try and return the parents accessType
+            // Try and return any ancestor's accessType
             if (this.knownContainerUniqueIds.length > 0) {
                 const parentId = this.knownContainerUniqueIds[0];
                 const parent = parentId && this.terria.getModelById(BaseModel, parentId);
@@ -31,36 +57,43 @@ function AccessControlMixin(Base) {
                     return parent.accessType;
                 }
             }
-            // default
+            // Default
             return "public";
         }
-        /* TODO: check if we actually need provision to explcitly set accessType */
         setAccessType(accessType) {
             this._accessType = accessType;
         }
+        /**
+         * Returns true if this model public.
+         */
         get isPublic() {
             return this.accessType === "public";
         }
+        /**
+         * Returns true if this model is private.
+         *
+         * Note that any accessType other than "public" is treated as private.
+         */
         get isPrivate() {
             return this.accessType !== "public";
         }
     }
     __decorate([
         observable
-    ], Klass.prototype, "_accessType", void 0);
+    ], _AccessControlMixin.prototype, "_accessType", void 0);
     __decorate([
         computed
-    ], Klass.prototype, "accessType", null);
+    ], _AccessControlMixin.prototype, "accessType", null);
     __decorate([
         action
-    ], Klass.prototype, "setAccessType", null);
+    ], _AccessControlMixin.prototype, "setAccessType", null);
     __decorate([
         computed
-    ], Klass.prototype, "isPublic", null);
+    ], _AccessControlMixin.prototype, "isPublic", null);
     __decorate([
         computed
-    ], Klass.prototype, "isPrivate", null);
-    return Klass;
+    ], _AccessControlMixin.prototype, "isPrivate", null);
+    return _AccessControlMixin;
 }
 (function (AccessControlMixin) {
     function isMixedInto(model) {

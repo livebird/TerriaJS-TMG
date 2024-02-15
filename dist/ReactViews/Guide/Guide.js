@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 /**
  * A generic Guide component, look at
  * `satellite-guidance.js` && `SatelliteGuide.jsx`
@@ -44,11 +45,11 @@ const GuideProgress = (props) => {
         countArray.push(i);
     }
     const currentStep = props.currentStep;
-    return (React.createElement("div", { className: Styles.indicatorWrapper }, countArray.map((count) => {
-        return (React.createElement("div", { key: count, className: classNames(Styles.indicator, {
-                [Styles.indicatorEnabled]: count < currentStep
-            }) }));
-    })));
+    return (_jsx("div", { className: Styles.indicatorWrapper, children: countArray.map((count) => {
+            return (_jsx("div", { className: classNames(Styles.indicator, {
+                    [Styles.indicatorEnabled]: count < currentStep
+                }) }, count));
+        }) }));
 };
 GuideProgress.propTypes = {
     maxStepCount: PropTypes.number.isRequired,
@@ -108,23 +109,9 @@ export const GuidePure = ({ terria, guideKey, hasIntroSlide = false, guideData, 
     const currentStepCount = hasIntroSlide
         ? currentGuideIndex
         : currentGuideIndex + 1;
-    return (React.createElement(Box, { displayInlineBlock: true },
-        React.createElement(Box, { fullWidth: true, styledHeight: "254px", backgroundImage: currentGuide.imageSrc }),
-        React.createElement(Spacing, { bottom: 5 }),
-        React.createElement(Box, { paddedHorizontally: 1, displayInlineBlock: true },
-            React.createElement(Text, { textDark: true, bold: true, subHeading: true }, currentGuide.title),
-            React.createElement(Spacing, { bottom: 5 }),
-            React.createElement(Box, { styledMinHeight: "100px", fullWidth: true },
-                React.createElement(Text, { textDark: true, medium: true }, currentGuide.body)),
-            React.createElement(Spacing, { bottom: 7 }),
-            React.createElement(Box, null,
-                React.createElement(Box, { css: `
+    return (_jsxs(Box, { displayInlineBlock: true, children: [_jsx(Box, { fullWidth: true, styledHeight: "254px", backgroundImage: currentGuide.imageSrc }), _jsx(Spacing, { bottom: 5 }), _jsxs(Box, { paddedHorizontally: 1, displayInlineBlock: true, children: [_jsx(Text, { textDark: true, bold: true, subHeading: true, children: currentGuide.title }), _jsx(Spacing, { bottom: 5 }), _jsx(Box, { styledMinHeight: "100px", fullWidth: true, children: _jsx(Text, { textDark: true, medium: true, children: currentGuide.body }) }), _jsx(Spacing, { bottom: 7 }), _jsxs(Box, { children: [_jsx(Box, { css: `
               margin-right: auto;
-            ` },
-                    React.createElement(GuideProgress, { currentStep: currentStepCount, maxStepCount: maxStepCount })),
-                !hidePrev && (React.createElement(Button, { secondary: true, onClick: () => handlePrev(), styledMinWidth: "94px" }, prevButtonText)),
-                React.createElement(Spacing, { right: 2 }),
-                React.createElement(Button, { primary: true, onClick: () => handleNext(), styledMinWidth: "94px", css: hideNext && `visibility: hidden;` }, nextButtonText)))));
+            `, children: _jsx(GuideProgress, { currentStep: currentStepCount, maxStepCount: maxStepCount }) }), !hidePrev && (_jsx(Button, { secondary: true, onClick: () => handlePrev(), styledMinWidth: "94px", children: prevButtonText })), _jsx(Spacing, { right: 2 }), _jsx(Button, { primary: true, onClick: () => handleNext(), styledMinWidth: "94px", css: hideNext && `visibility: hidden;`, children: nextButtonText })] })] })] }));
 };
 GuidePure.propTypes = {
     terria: PropTypes.object.isRequired,

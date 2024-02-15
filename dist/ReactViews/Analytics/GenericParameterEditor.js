@@ -4,18 +4,23 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import Styles from "./parameter-editors.scss";
-import { action } from "mobx";
+import { action, makeObservable } from "mobx";
 import { observer } from "mobx-react";
 import CommonStrata from "../../Models/Definition/CommonStrata";
 let GenericParameterEditor = class GenericParameterEditor extends React.Component {
+    constructor(props) {
+        super(props);
+        makeObservable(this);
+    }
     onChange(e) {
         this.props.parameter.setValue(CommonStrata.user, e.target.value);
     }
     render() {
         const value = (this.props.parameter.value || "");
-        return (React.createElement("input", { className: Styles.field, type: "text", onChange: this.onChange.bind(this), value: value }));
+        return (_jsx("input", { className: Styles.field, type: "text", onChange: this.onChange.bind(this), value: value }));
     }
 };
 __decorate([

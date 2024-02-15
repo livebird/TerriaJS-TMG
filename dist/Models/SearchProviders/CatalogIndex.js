@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import { Document } from "flexsearch";
-import { action, observable, runInAction } from "mobx";
+import { action, makeObservable, observable, runInAction } from "mobx";
 import { isJsonObject, isJsonString, isJsonStringArray } from "../../Core/Json";
 import loadBlob, { isZip, parseZipJsonBlob } from "../../Core/loadBlob";
 import loadJson from "../../Core/loadJson";
@@ -15,10 +15,44 @@ import updateModelFromJson from "../Definition/updateModelFromJson";
 import SearchResult from "./SearchResult";
 export default class CatalogIndex {
     constructor(terria, url) {
-        this.terria = terria;
-        this.url = url;
+        Object.defineProperty(this, "terria", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: terria
+        });
+        Object.defineProperty(this, "url", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: url
+        });
         /** Map from share key -> id */
-        this.shareKeysMap = observable.map();
+        Object.defineProperty(this, "shareKeysMap", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: observable.map()
+        });
+        Object.defineProperty(this, "_models", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_searchIndex", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        }); // Flex-search document index
+        Object.defineProperty(this, "_loadPromise", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
     }
     get models() {
         return this._models;

@@ -6,7 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import { ApiClient, fromCatalog } from "@opendatasoft/api-client";
 import i18next from "i18next";
-import { action, computed, runInAction } from "mobx";
+import { action, computed, runInAction, makeObservable } from "mobx";
 import URI from "urijs";
 import isDefined from "../../../Core/isDefined";
 import runLater from "../../../Core/runLater";
@@ -22,13 +22,6 @@ import LoadableStratum from "../../Definition/LoadableStratum";
 import StratumOrder from "../../Definition/StratumOrder";
 import OpenDataSoftCatalogItem from "../CatalogItems/OpenDataSoftCatalogItem";
 export class OpenDataSoftCatalogStratum extends LoadableStratum(OpenDataSoftCatalogGroupTraits) {
-    constructor(catalogGroup, facetName, facets, datasets) {
-        super();
-        this.catalogGroup = catalogGroup;
-        this.facetName = facetName;
-        this.facets = facets;
-        this.datasets = datasets;
-    }
     static async load(catalogGroup) {
         var _a, _b, _c;
         if (!catalogGroup.url)
@@ -36,7 +29,7 @@ export class OpenDataSoftCatalogStratum extends LoadableStratum(OpenDataSoftCata
         const client = new ApiClient({
             domain: catalogGroup.url
         });
-        let datasets = [];
+        const datasets = [];
         let facets;
         // If no facetFilters, try to get some facets
         if (catalogGroup.facetFilters &&
@@ -77,6 +70,34 @@ export class OpenDataSoftCatalogStratum extends LoadableStratum(OpenDataSoftCata
     }
     duplicateLoadableStratum(model) {
         return new OpenDataSoftCatalogStratum(model, this.facetName, this.facets, this.datasets);
+    }
+    constructor(catalogGroup, facetName, facets, datasets) {
+        super();
+        Object.defineProperty(this, "catalogGroup", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogGroup
+        });
+        Object.defineProperty(this, "facetName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: facetName
+        });
+        Object.defineProperty(this, "facets", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: facets
+        });
+        Object.defineProperty(this, "datasets", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: datasets
+        });
+        makeObservable(this);
     }
     get members() {
         return [
@@ -166,7 +187,12 @@ export class OpenDataSoftCatalogStratum extends LoadableStratum(OpenDataSoftCata
         return `${this.catalogGroup.uniqueId}/${facet.name}`;
     }
 }
-OpenDataSoftCatalogStratum.stratumName = "openDataSoftCatalog";
+Object.defineProperty(OpenDataSoftCatalogStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "openDataSoftCatalog"
+});
 __decorate([
     computed
 ], OpenDataSoftCatalogStratum.prototype, "members", null);
@@ -177,7 +203,7 @@ __decorate([
     action
 ], OpenDataSoftCatalogStratum.prototype, "createMemberFromDataset", null);
 StratumOrder.addLoadStratum(OpenDataSoftCatalogStratum.stratumName);
-export default class OpenDataSoftCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(OpenDataSoftCatalogGroupTraits)))) {
+class OpenDataSoftCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(OpenDataSoftCatalogGroupTraits)))) {
     get type() {
         return OpenDataSoftCatalogGroup.type;
     }
@@ -196,7 +222,13 @@ export default class OpenDataSoftCatalogGroup extends UrlMixin(GroupMixin(Catalo
         }
     }
 }
-OpenDataSoftCatalogGroup.type = "opendatasoft-group";
+Object.defineProperty(OpenDataSoftCatalogGroup, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "opendatasoft-group"
+});
+export default OpenDataSoftCatalogGroup;
 export function isValidDataset(dataset) {
     return isDefined(dataset) && isDefined(dataset.dataset_id);
 }

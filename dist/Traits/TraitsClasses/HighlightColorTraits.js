@@ -7,6 +7,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 import ModelTraits from "../ModelTraits";
 import primitiveTrait from "../Decorators/primitiveTrait";
 export default class HighlightColorTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "highlightColor", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({

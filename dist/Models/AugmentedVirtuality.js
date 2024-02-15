@@ -4,32 +4,99 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, computed, observable, runInAction } from "mobx";
+import { action, computed, observable, runInAction, makeObservable } from "mobx";
 import CesiumCartesian3 from "terriajs-cesium/Source/Core/Cartesian3";
 import EllipsoidTerrainProvider from "terriajs-cesium/Source/Core/EllipsoidTerrainProvider";
 import CesiumMath from "terriajs-cesium/Source/Core/Math";
 import CesiumMatrix3 from "terriajs-cesium/Source/Core/Matrix3";
 const sampleTerrainMostDetailed = require("terriajs-cesium/Source/Core/sampleTerrainMostDetailed").default;
-export default class AugmentedVirtuality {
+class AugmentedVirtuality {
     constructor(terria) {
-        this.terria = terria;
-        this.manualAlignment = false;
-        this.eventLoopState = {};
-        this.orientationUpdated = false;
-        this.alpha = 0;
-        this.beta = 0;
-        this.gamma = 0;
-        this.realignAlpha = 0;
-        this.realignHeading = 0;
-        this.maximumUpdatesPerSecond = AugmentedVirtuality.DEFAULT_MAXIMUM_UPDATES_PER_SECOND;
+        Object.defineProperty(this, "terria", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: terria
+        });
+        Object.defineProperty(this, "manualAlignment", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "eventLoopState", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {}
+        });
+        Object.defineProperty(this, "orientationUpdated", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "alpha", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
+        Object.defineProperty(this, "beta", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
+        Object.defineProperty(this, "gamma", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
+        Object.defineProperty(this, "realignAlpha", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
+        Object.defineProperty(this, "realignHeading", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
+        Object.defineProperty(this, "lastScreenOrientation", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "maximumUpdatesPerSecond", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: AugmentedVirtuality.DEFAULT_MAXIMUM_UPDATES_PER_SECOND
+        });
         // Set the default height to be the last height so that when we first toggle
         // (and increment) we cycle and go to the first height.
-        this.hoverLevel = AugmentedVirtuality.PRESET_HEIGHTS.length - 1;
+        Object.defineProperty(this, "hoverLevel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: AugmentedVirtuality.PRESET_HEIGHTS.length - 1
+        });
         /**
          * A bound version of `storeOrientation` that makes it easy to pass to
          * add/removeEventListener calls.
          */
-        this.boundStoreOrientation = this.storeOrientation.bind(this);
+        Object.defineProperty(this, "boundStoreOrientation", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: this.storeOrientation.bind(this)
+        });
+        makeObservable(this);
     }
     toggleEnabled() {
         if (this.active) {
@@ -340,14 +407,30 @@ export default class AugmentedVirtuality {
  * updated capped so that we don't consume to much battery life updating to
  * frequently, but responsiveness is still acceptable.
  */
-AugmentedVirtuality.DEFAULT_MAXIMUM_UPDATES_PER_SECOND = 10.0;
+Object.defineProperty(AugmentedVirtuality, "DEFAULT_MAXIMUM_UPDATES_PER_SECOND", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: 10.0
+});
 /**
  * The minimum height that the viewer is allowed to hover at.
  */
-AugmentedVirtuality.MINIMUM_HOVER_HEIGHT = 20.0;
+Object.defineProperty(AugmentedVirtuality, "MINIMUM_HOVER_HEIGHT", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: 20.0
+});
 /* These are the heights that we can toggle through (in meters - above the surface height).
  */
-AugmentedVirtuality.PRESET_HEIGHTS = [1000, 250, 20];
+Object.defineProperty(AugmentedVirtuality, "PRESET_HEIGHTS", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: [1000, 250, 20]
+});
+export default AugmentedVirtuality;
 __decorate([
     observable
 ], AugmentedVirtuality.prototype, "manualAlignment", void 0);

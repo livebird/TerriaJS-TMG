@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import createReactClass from "create-react-class";
 import PropTypes from "prop-types";
@@ -124,34 +125,23 @@ const RegionDataParameterEditor = createReactClass({
         return details.isEntirelyActive;
     },
     render() {
-        return React.createElement("div", { className: Styles.parameterEditor }, this.renderContent());
+        return _jsx("div", { className: Styles.parameterEditor, children: this.renderContent() });
     },
     renderContent() {
         if (this.catalogItemsWithMatchingRegion().length > 0) {
-            return (React.createElement("div", { className: Styles.data },
-                React.createElement("ul", { className: Styles.tree },
-                    React.createElement(For, { each: "catalogItem", index: "i", of: this.catalogItemsWithMatchingRegion() },
-                        React.createElement(CatalogGroup, { key: catalogItem.uniqueId, text: catalogItem.name, topLevel: false, open: this.catalogItemIsOpen(catalogItem), onClick: this.toggleOpenCatalogItem.bind(this, catalogItem), loading: false }, this.renderItemChildren(catalogItem))))));
+            return (_jsx("div", { className: Styles.data, children: _jsx("ul", { className: Styles.tree, children: this.catalogItemsWithMatchingRegion().map((catalogItem, i) => (_jsx(CatalogGroup, { text: catalogItem.name, topLevel: false, open: this.catalogItemIsOpen(catalogItem), onClick: this.toggleOpenCatalogItem.bind(this, catalogItem), loading: false, children: this.renderItemChildren(catalogItem) }, catalogItem.uniqueId))) }) }));
         }
         return (
         // Don't break the lines around the link to csv-geo-au, or whitespace stripping will ruin the formatting in
         // the rendered version.
-        React.createElement("div", { className: Styles.parameterEditorImportantNote },
-            "No characteristics are available because you have not added any data to the map for this region type,",
-            " ",
-            this.regionProvider() ? this.regionProvider().regionType : "None",
-            ". You may use your own data with this analysis by creating a CSV following the",
-            " ",
-            React.createElement("a", { target: "_blank", rel: "noopener noreferrer", href: "https://github.com/TerriaJS/nationalmap/wiki/csv-geo-au" }, "csv-geo-au"),
-            " ",
-            "guidelines and dragging and dropping it onto the map."));
+        _jsxs("div", { className: Styles.parameterEditorImportantNote, children: ["No characteristics are available because you have not added any data to the map for this region type,", " ", this.regionProvider() ? this.regionProvider().regionType : "None", ". You may use your own data with this analysis by creating a CSV following the", " ", _jsx("a", { target: "_blank", rel: "noopener noreferrer", href: "https://github.com/TerriaJS/nationalmap/wiki/csv-geo-au", children: "csv-geo-au" }), " ", "guidelines and dragging and dropping it onto the map."] }));
     },
     renderItemChildren(catalogItem) {
-        return (React.createElement("ul", { className: Styles.tree }, catalogItem.regionMapping.tableStructure.columns.map((column, i) => {
-            if (column.type === VarType.SCALAR) {
-                return (React.createElement(CatalogItem, { key: column.id, onTextClick: this.toggleActive.bind(this, catalogItem, column), selected: this.isActive(catalogItem, column), text: column.name, onBtnClick: this.toggleActive.bind(this, catalogItem, column), btnState: this.isActive(catalogItem, column) ? "remove" : "add" }));
-            }
-        })));
+        return (_jsx("ul", { className: Styles.tree, children: catalogItem.regionMapping.tableStructure.columns.map((column, i) => {
+                if (column.type === VarType.SCALAR) {
+                    return (_jsx(CatalogItem, { onTextClick: this.toggleActive.bind(this, catalogItem, column), selected: this.isActive(catalogItem, column), text: column.name, onBtnClick: this.toggleActive.bind(this, catalogItem, column), btnState: this.isActive(catalogItem, column) ? "remove" : "add" }, column.id));
+                }
+            }) }));
     }
 });
 module.exports = RegionDataParameterEditor;

@@ -1,7 +1,7 @@
 /**
  * A custom component type, e.g. `<chart>`.
  */
-export default class CustomComponent {
+class CustomComponent {
     /**
      * Determine if a given DOM node should be processed by this component. By
      * default, this method returns `true` if the node name matches the
@@ -48,5 +48,11 @@ export default class CustomComponent {
         return this.values.reduce((p, c) => p.concat(c.attributes), []);
     }
 }
-CustomComponent._types = new Map();
+Object.defineProperty(CustomComponent, "_types", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: new Map()
+});
+export default CustomComponent;
 //# sourceMappingURL=CustomComponent.js.map

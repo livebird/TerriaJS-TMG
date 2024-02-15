@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { computed, observable, reaction, runInAction } from "mobx";
+import { computed, makeObservable, observable, override, reaction, runInAction } from "mobx";
 import Cartesian3 from "terriajs-cesium/Source/Core/Cartesian3";
 import Cartographic from "terriajs-cesium/Source/Core/Cartographic";
 import Color from "terriajs-cesium/Source/Core/Color";
@@ -19,6 +19,7 @@ import ConstantPositionProperty from "terriajs-cesium/Source/DataSources/Constan
 import CustomDataSource from "terriajs-cesium/Source/DataSources/CustomDataSource";
 import Entity from "terriajs-cesium/Source/DataSources/Entity";
 import PolylineGlowMaterialProperty from "terriajs-cesium/Source/DataSources/PolylineGlowMaterialProperty";
+import filterOutUndefined from "../Core/filterOutUndefined";
 import isDefined from "../Core/isDefined";
 import DragPoints from "../Map/DragPoints/DragPoints";
 import MappableMixin from "../ModelMixins/MappableMixin";
@@ -28,6 +29,116 @@ import MapInteractionMode from "./MapInteractionMode";
 export default class UserDrawing extends MappableMixin(CreateModel(MappableTraits)) {
     constructor(options) {
         super(createGuid(), options.terria);
+        Object.defineProperty(this, "messageHeader", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "allowPolygon", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "onMakeDialogMessage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "buttonText", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "onPointClicked", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "onPointMoved", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "onDrawingComplete", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "onCleanUp", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "invisible", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        // helper for dragging points around
+        Object.defineProperty(this, "dragHelper", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "pointEntities", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "otherEntities", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "polygon", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "inDrawMode", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "closeLoop", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "disposePickedFeatureSubscription", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "drawRectangle", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "mousePointEntity", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
         /**
          * Text that appears at the top of the dialog when drawmode is active.
          */
@@ -79,13 +190,6 @@ export default class UserDrawing extends MappableMixin(CreateModel(MappableTrait
         this.closeLoop = false;
         this.drawRectangle = defaultValue(options.drawRectangle, false);
         this.invisible = options.invisible;
-        // helper for dragging points around
-        this.dragHelper = new DragPoints(options.terria, (customDataSource) => {
-            if (typeof this.onPointMoved === "function") {
-                this.onPointMoved(customDataSource);
-            }
-            this.prepareToAddNewPoint();
-        });
     }
     forceLoadMapItems() {
         return Promise.resolve();
@@ -101,11 +205,11 @@ export default class UserDrawing extends MappableMixin(CreateModel(MappableTrait
          * SVG element for point drawn when user clicks.
          * http://stackoverflow.com/questions/24869733/how-to-draw-custom-dynamic-billboards-in-cesium-js
          */
-        var svgDataDeclare = "data:image/svg+xml,";
-        var svgPrefix = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="20px" height="20px" xml:space="preserve">';
-        var svgCircle = '<circle cx="10" cy="10" r="5" stroke="rgb(0,170,215)" stroke-width="4" fill="white" /> ';
-        var svgSuffix = "</svg>";
-        var svgString = svgPrefix + svgCircle + svgSuffix;
+        const svgDataDeclare = "data:image/svg+xml,";
+        const svgPrefix = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="20px" height="20px" xml:space="preserve">';
+        const svgCircle = '<circle cx="10" cy="10" r="5" stroke="rgb(0,170,215)" stroke-width="4" fill="white" /> ';
+        const svgSuffix = "</svg>";
+        const svgString = svgPrefix + svgCircle + svgSuffix;
         // create the cesium entity
         return svgDataDeclare + svgString;
     }
@@ -113,6 +217,13 @@ export default class UserDrawing extends MappableMixin(CreateModel(MappableTrait
         return this.getRectangleForShape();
     }
     enterDrawMode() {
+        // Create and setup a new dragHelper
+        this.dragHelper = new DragPoints(this.terria, (customDataSource) => {
+            if (typeof this.onPointMoved === "function") {
+                this.onPointMoved(customDataSource);
+            }
+            this.prepareToAddNewPoint();
+        });
         this.dragHelper.setUp();
         // If we have finished a polygon, don't allow more points to be drawn. In future, perhaps support multiple polygons.
         if (this.inDrawMode || this.closeLoop) {
@@ -157,7 +268,8 @@ export default class UserDrawing extends MappableMixin(CreateModel(MappableTrait
                         if (!point1) {
                             return;
                         }
-                        const point2 = ((_c = (_b = (_a = this.pointEntities.entities.values) === null || _a === void 0 ? void 0 : _a[1]) === null || _b === void 0 ? void 0 : _b.position) === null || _c === void 0 ? void 0 : _c.getValue(time)) || ((_e = (_d = this.mousePointEntity) === null || _d === void 0 ? void 0 : _d.position) === null || _e === void 0 ? void 0 : _e.getValue(time));
+                        const point2 = ((_c = (_b = (_a = this.pointEntities.entities.values) === null || _a === void 0 ? void 0 : _a[1]) === null || _b === void 0 ? void 0 : _b.position) === null || _c === void 0 ? void 0 : _c.getValue(time)) ||
+                            ((_e = (_d = this.mousePointEntity) === null || _d === void 0 ? void 0 : _d.position) === null || _e === void 0 ? void 0 : _e.getValue(time));
                         return (point1 &&
                             point2 &&
                             Rectangle.fromCartographicArray([
@@ -193,7 +305,7 @@ export default class UserDrawing extends MappableMixin(CreateModel(MappableTrait
         this.terria.overlays.add(this);
         // Listen for user clicks on map
         const pickPointMode = this.addMapInteractionMode();
-        this.disposePickedFeatureSubscription = reaction(() => pickPointMode.pickedFeatures, async (pickedFeatures, reaction) => {
+        this.disposePickedFeatureSubscription = reaction(() => pickPointMode.pickedFeatures, async (pickedFeatures, _previousValue, reaction) => {
             if (isDefined(pickedFeatures)) {
                 if (isDefined(pickedFeatures.allFeaturesAvailablePromise)) {
                     await pickedFeatures.allFeaturesAvailablePromise;
@@ -211,7 +323,8 @@ export default class UserDrawing extends MappableMixin(CreateModel(MappableTrait
      * Add new point to list of pointEntities
      */
     addPointToPointEntities(name, position) {
-        var pointEntity = new Entity({
+        var _a;
+        const pointEntity = new Entity({
             name: name,
             position: new ConstantPositionProperty(position),
             billboard: {
@@ -226,12 +339,14 @@ export default class UserDrawing extends MappableMixin(CreateModel(MappableTrait
             this.pointEntities.entities.removeAll();
         }
         this.pointEntities.entities.add(pointEntity);
-        this.dragHelper.updateDraggableObjects(this.pointEntities);
+        (_a = this.dragHelper) === null || _a === void 0 ? void 0 : _a.updateDraggableObjects(this.pointEntities);
         if (isDefined(this.onPointClicked)) {
             this.onPointClicked(this.pointEntities);
         }
     }
     endDrawing() {
+        var _a;
+        (_a = this.dragHelper) === null || _a === void 0 ? void 0 : _a.destroy();
         if (this.disposePickedFeatureSubscription) {
             this.disposePickedFeatureSubscription();
         }
@@ -254,7 +369,7 @@ export default class UserDrawing extends MappableMixin(CreateModel(MappableTrait
                         const points = this.getPointsForShape();
                         if (isDrawingComplete && points) {
                             this.onDrawingComplete({
-                                points,
+                                points: filterOutUndefined(points),
                                 rectangle: this.getRectangleForShape()
                             });
                         }
@@ -264,14 +379,16 @@ export default class UserDrawing extends MappableMixin(CreateModel(MappableTrait
             },
             onEnable: (viewState) => {
                 runInAction(() => (viewState.explorerPanelIsVisible = false));
-                if (this.drawRectangle) {
-                    this.mouseMoveDispose = reaction(() => this.terria.currentViewer.mouseCoords.cartographic, (mouseCoordsCartographic) => {
-                        if (!isDefined(mouseCoordsCartographic))
-                            return;
-                        if (isDefined(this.mousePointEntity)) {
-                            this.mousePointEntity.position = new ConstantPositionProperty(Ellipsoid.WGS84.cartographicToCartesian(mouseCoordsCartographic));
+                if (this.drawRectangle && this.mousePointEntity) {
+                    const scratchPosition = new Cartesian3();
+                    this.mousePointEntity.position = new CallbackProperty(() => {
+                        const cartographicMouseCoords = this.terria.currentViewer.mouseCoords.cartographic;
+                        let mousePosition = undefined;
+                        if (cartographicMouseCoords) {
+                            mousePosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicMouseCoords, scratchPosition);
                         }
-                    });
+                        return mousePosition;
+                    }, false);
                 }
             },
             invisible: this.invisible
@@ -289,7 +406,8 @@ export default class UserDrawing extends MappableMixin(CreateModel(MappableTrait
             this.terria.mapInteractionModeStack.pop();
         });
         const pickPointMode = this.addMapInteractionMode();
-        this.disposePickedFeatureSubscription = reaction(() => pickPointMode.pickedFeatures, async (pickedFeatures, reaction) => {
+        this.disposePickedFeatureSubscription = reaction(() => pickPointMode.pickedFeatures, async (pickedFeatures, _previousValue, reaction) => {
+            var _a;
             if (isDefined(pickedFeatures)) {
                 if (isDefined(pickedFeatures.allFeaturesAvailablePromise)) {
                     await pickedFeatures.allFeaturesAvailablePromise;
@@ -299,13 +417,14 @@ export default class UserDrawing extends MappableMixin(CreateModel(MappableTrait
                     // If existing point was picked, _clickedExistingPoint handles that, and returns true.
                     // getDragCount helps us determine if the point was actually dragged rather than clicked. If it was
                     // dragged, we shouldn't treat it as a clicked-existing-point scenario.
-                    if (this.dragHelper.getDragCount() < 10 &&
+                    if (this.dragHelper &&
+                        this.dragHelper.getDragCount() < 10 &&
                         !this.clickedExistingPoint(pickedFeatures.features)) {
                         // No existing point was picked, so add a new point
                         this.addPointToPointEntities("Another Point", pickedPoint);
                     }
                     else {
-                        this.dragHelper.resetDragCount();
+                        (_a = this.dragHelper) === null || _a === void 0 ? void 0 : _a.resetDragCount();
                     }
                     reaction.dispose();
                     if (this.inDrawMode) {
@@ -398,9 +517,6 @@ export default class UserDrawing extends MappableMixin(CreateModel(MappableTrait
                 container.setAttribute("style", "cursor: auto");
             }
         }
-        if (isDefined(this.mouseMoveDispose)) {
-            this.mouseMoveDispose();
-        }
         // Allow client to clean up too
         if (typeof this.onCleanUp === "function") {
             this.onCleanUp();
@@ -420,7 +536,7 @@ export default class UserDrawing extends MappableMixin(CreateModel(MappableTrait
                 ? this.messageHeader()
                 : this.messageHeader) +
             "</strong></br>";
-        let innerMessage = isDefined(this.onMakeDialogMessage)
+        const innerMessage = isDefined(this.onMakeDialogMessage)
             ? this.onMakeDialogMessage()
             : "";
         if (innerMessage !== "") {
@@ -455,11 +571,13 @@ export default class UserDrawing extends MappableMixin(CreateModel(MappableTrait
     getPointsForShape() {
         if (isDefined(this.pointEntities.entities)) {
             const pos = [];
-            for (var i = 0; i < this.pointEntities.entities.values.length; i++) {
+            for (let i = 0; i < this.pointEntities.entities.values.length; i++) {
                 const obj = this.pointEntities.entities.values[i];
                 if (isDefined(obj.position)) {
                     const position = obj.position.getValue(this.terria.timelineClock.currentTime);
-                    pos.push(position);
+                    if (position !== undefined) {
+                        pos.push(position);
+                    }
                 }
             }
             return pos;
@@ -485,6 +603,6 @@ __decorate([
     computed
 ], UserDrawing.prototype, "mapItems", null);
 __decorate([
-    computed
+    override
 ], UserDrawing.prototype, "cesiumRectangle", null);
 //# sourceMappingURL=UserDrawing.js.map

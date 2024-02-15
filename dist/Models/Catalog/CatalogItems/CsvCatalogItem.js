@@ -5,11 +5,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { computed, runInAction } from "mobx";
+import { computed, makeObservable, override, runInAction } from "mobx";
 import isDefined from "../../../Core/isDefined";
 import TerriaError from "../../../Core/TerriaError";
 import AutoRefreshingMixin from "../../../ModelMixins/AutoRefreshingMixin";
-import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
 import TableMixin from "../../../ModelMixins/TableMixin";
 import UrlMixin from "../../../ModelMixins/UrlMixin";
 import Csv from "../../../Table/Csv";
@@ -27,13 +26,20 @@ import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
 // - ID+time column -> point moves, region changes (continuously?) over time
 // - points, no ID, time -> "blips" with a duration (perhaps provided by another column)
 //
-export default class CsvCatalogItem extends TableMixin(AutoRefreshingMixin(UrlMixin(CatalogMemberMixin(CreateModel(CsvCatalogItemTraits))))) {
-    constructor(id, terria, sourceReference) {
-        super(id, terria, sourceReference);
-        this.strata.set(TableAutomaticStylesStratum.stratumName, new TableAutomaticStylesStratum(this));
-    }
+export default class CsvCatalogItem extends AutoRefreshingMixin(TableMixin(UrlMixin(CreateModel(CsvCatalogItemTraits)))) {
     static get type() {
         return "csv";
+    }
+    constructor(id, terria, sourceReference) {
+        super(id, terria, sourceReference);
+        Object.defineProperty(this, "_csvFile", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
+        this.strata.set(TableAutomaticStylesStratum.stratumName, new TableAutomaticStylesStratum(this));
     }
     get type() {
         return CsvCatalogItem.type;
@@ -132,16 +138,16 @@ __decorate([
     computed
 ], CsvCatalogItem.prototype, "hasLocalData", null);
 __decorate([
-    computed
+    override
 ], CsvCatalogItem.prototype, "_canExportData", null);
 __decorate([
-    computed
+    override
 ], CsvCatalogItem.prototype, "cacheDuration", null);
 __decorate([
     computed
 ], CsvCatalogItem.prototype, "refreshUrl", null);
 __decorate([
-    computed
+    override
 ], CsvCatalogItem.prototype, "refreshInterval", null);
 StratumOrder.addLoadStratum(TableAutomaticStylesStratum.stratumName);
 //# sourceMappingURL=CsvCatalogItem.js.map

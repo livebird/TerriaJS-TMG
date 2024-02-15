@@ -1,8 +1,8 @@
 import Resource from "terriajs-cesium/Source/Core/Resource";
 export default function loadJson(urlOrResource, headers, body, asForm = false) {
-    let responseType = "json";
+    const responseType = "json";
     let jsonPromise;
-    let params = {
+    const params = {
         url: urlOrResource,
         headers: headers
     };

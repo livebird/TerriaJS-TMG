@@ -4,13 +4,29 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { computed } from "mobx";
+import { computed, makeObservable } from "mobx";
 import TableColumnType from "./TableColumnType";
 export default class TableStyleMap {
     constructor(tableModel, styleTraits, key) {
-        this.tableModel = tableModel;
-        this.styleTraits = styleTraits;
-        this.key = key;
+        Object.defineProperty(this, "tableModel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: tableModel
+        });
+        Object.defineProperty(this, "styleTraits", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: styleTraits
+        });
+        Object.defineProperty(this, "key", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: key
+        });
+        makeObservable(this);
     }
     /** Get traits for TableStyleMapSymbolTraits */
     get commonTraits() {
@@ -20,7 +36,9 @@ export default class TableStyleMap {
     get traits() {
         return this.styleTraits[this.key];
     }
-    /** Get all trait values for this TableStyleMapModel */
+    /** Get all trait values for this TableStyleMapModel.
+     * This is a JSON object
+     */
     get traitValues() {
         return this.styleTraits.traits[this.key].toJson(this.traits);
     }
@@ -50,7 +68,9 @@ export default class TableStyleMap {
                     const binStyles = (_b = this.traitValues.bin) !== null && _b !== void 0 ? _b : [];
                     let i;
                     for (i = 0; i < binStyles.length - 1 &&
-                        value > ((_c = binStyles[i].maxValue) !== null && _c !== void 0 ? _c : Infinity); ++i) { }
+                        value > ((_c = binStyles[i].maxValue) !== null && _c !== void 0 ? _c : Infinity); ++i) {
+                        continue;
+                    }
                     return {
                         ...this.traitValues.null,
                         ...((_e = (_d = this.traitValues.bin) === null || _d === void 0 ? void 0 : _d[i]) !== null && _e !== void 0 ? _e : {})

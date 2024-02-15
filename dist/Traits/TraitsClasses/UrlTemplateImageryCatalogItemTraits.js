@@ -16,7 +16,18 @@ import UrlTraits from "./UrlTraits";
 export default class UrlTemplateImageryCatalogItemTraits extends mixTraits(ImageryProviderTraits, LayerOrderingTraits, UrlTraits, MappableTraits, CatalogMemberTraits, LegendOwnerTraits) {
     constructor() {
         super(...arguments);
-        this.subdomains = [];
+        Object.defineProperty(this, "pickFeaturesUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "subdomains", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
     }
 }
 __decorate([

@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import { get as _get } from "lodash-es";
-import { computed, observable, runInAction } from "mobx";
+import { computed, makeObservable, observable, runInAction } from "mobx";
 import { createTransformer } from "mobx-utils";
 import Pbf from "pbf";
 import Cartesian3 from "terriajs-cesium/Source/Core/Cartesian3";
@@ -47,7 +47,13 @@ const Axis = require("terriajs-cesium/Source/Scene/Axis").default;
 class GtfsStratum extends LoadableStratum(GtfsCatalogItemTraits) {
     constructor(_item) {
         super();
-        this._item = _item;
+        Object.defineProperty(this, "_item", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: _item
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(newModel) {
         return new GtfsStratum(newModel);
@@ -59,7 +65,12 @@ class GtfsStratum extends LoadableStratum(GtfsCatalogItemTraits) {
         return createStratumInstance(RectangleTraits, this._item._bbox);
     }
 }
-GtfsStratum.stratumName = "gtfs";
+Object.defineProperty(GtfsStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "gtfs"
+});
 __decorate([
     computed
 ], GtfsStratum.prototype, "rectangle", null);
@@ -68,47 +79,7 @@ StratumOrder.addLoadStratum(GtfsStratum.stratumName);
  * For displaying realtime transport data. See [here](https://developers.google.com/transit/gtfs-realtime/reference/)
  * for the spec.
  */
-export default class GtfsCatalogItem extends MappableMixin(UrlMixin(AutoRefreshingMixin(CatalogMemberMixin(CreateModel(GtfsCatalogItemTraits))))) {
-    constructor(id, terria, sourceReference) {
-        super(id, terria, sourceReference);
-        this._bbox = {
-            west: Infinity,
-            south: Infinity,
-            east: -Infinity,
-            north: -Infinity
-        };
-        /**
-         * Always use the getter to read this. This is a cache for a computed property.
-         *
-         * We cache it because recreating it reactively is computationally expensive, so we modify it reactively instead.
-         */
-        this._dataSource = new DataSource("billboard");
-        this.gtfsFeedEntities = [];
-        this.convertManyFeedEntitiesToBillboardData = createTransformer((feedEntities) => {
-            // Sometimes the feed can contain many records for the same vehicle
-            // so we'll only display the newest record.
-            // Although technically the timestamp property is optional, if none is
-            // present we'll show the record.
-            const vehicleMap = new Map();
-            for (var i = 0; i < feedEntities.length; ++i) {
-                const entity = feedEntities[i];
-                const item = this.convertFeedEntityToBillboardData(entity);
-                if (item && item.position && item.featureInfo) {
-                    const vehicleInfo = item.featureInfo.get("entity").vehicle.vehicle;
-                    if (vehicleMap.has(vehicleInfo.id) && vehicleInfo.timestamp) {
-                        let existingRecord = vehicleMap.get(vehicleInfo.id);
-                        if (existingRecord.timestamp < vehicleInfo.timestamp) {
-                            vehicleMap.set(vehicleInfo.id, item);
-                        }
-                    }
-                    else {
-                        vehicleMap.set(vehicleInfo.id, item);
-                    }
-                }
-            }
-            return [...vehicleMap.values()];
-        });
-    }
+class GtfsCatalogItem extends UrlMixin(AutoRefreshingMixin(MappableMixin(CatalogMemberMixin(CreateModel(GtfsCatalogItemTraits))))) {
     static get type() {
         return "gtfs";
     }
@@ -120,7 +91,7 @@ export default class GtfsCatalogItem extends MappableMixin(UrlMixin(AutoRefreshi
         this._dataSource.entities.suspendEvents();
         // Convert the GTFS protobuf into a more useful shape
         const vehicleData = this.convertManyFeedEntitiesToBillboardData(this.gtfsFeedEntities);
-        for (let data of vehicleData) {
+        for (const data of vehicleData) {
             if (data.sourceId === undefined) {
                 continue;
             }
@@ -184,7 +155,7 @@ export default class GtfsCatalogItem extends MappableMixin(UrlMixin(AutoRefreshi
             }
             if (data.featureInfo !== undefined && data.featureInfo !== null) {
                 entity.properties = new PropertyBag();
-                for (let key of data.featureInfo.keys()) {
+                for (const key of data.featureInfo.keys()) {
                     entity.properties.addProperty(key, data.featureInfo.get(key));
                 }
             }
@@ -257,6 +228,73 @@ export default class GtfsCatalogItem extends MappableMixin(UrlMixin(AutoRefreshi
             return coloredModel;
         });
     }
+    constructor(id, terria, sourceReference) {
+        super(id, terria, sourceReference);
+        Object.defineProperty(this, "disposer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_bbox", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                west: Infinity,
+                south: Infinity,
+                east: -Infinity,
+                north: -Infinity
+            }
+        });
+        /**
+         * Always use the getter to read this. This is a cache for a computed property.
+         *
+         * We cache it because recreating it reactively is computationally expensive, so we modify it reactively instead.
+         */
+        Object.defineProperty(this, "_dataSource", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new DataSource("billboard")
+        });
+        Object.defineProperty(this, "gtfsFeedEntities", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "convertManyFeedEntitiesToBillboardData", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: createTransformer((feedEntities) => {
+                // Sometimes the feed can contain many records for the same vehicle
+                // so we'll only display the newest record.
+                // Although technically the timestamp property is optional, if none is
+                // present we'll show the record.
+                const vehicleMap = new Map();
+                for (let i = 0; i < feedEntities.length; ++i) {
+                    const entity = feedEntities[i];
+                    const item = this.convertFeedEntityToBillboardData(entity);
+                    if (item && item.position && item.featureInfo) {
+                        const vehicleInfo = item.featureInfo.get("entity").vehicle.vehicle;
+                        if (vehicleMap.has(vehicleInfo.id) && vehicleInfo.timestamp) {
+                            const existingRecord = vehicleMap.get(vehicleInfo.id);
+                            if (existingRecord.timestamp < vehicleInfo.timestamp) {
+                                vehicleMap.set(vehicleInfo.id, item);
+                            }
+                        }
+                        else {
+                            vehicleMap.set(vehicleInfo.id, item);
+                        }
+                    }
+                }
+                return [...vehicleMap.values()];
+            })
+        });
+        makeObservable(this);
+    }
     forceLoadMetadata() {
         return Promise.resolve();
     }
@@ -309,12 +347,12 @@ export default class GtfsCatalogItem extends MappableMixin(UrlMixin(AutoRefreshi
         }
     }
     convertFeedEntityToBillboardData(entity) {
-        if (entity.id == undefined) {
+        if (entity.id === undefined) {
             return {};
         }
         let position = undefined;
         let orientation = undefined;
-        let featureInfo = new Map();
+        const featureInfo = new Map();
         if (entity.vehicle !== null &&
             entity.vehicle !== undefined &&
             entity.vehicle.position !== null &&
@@ -330,7 +368,7 @@ export default class GtfsCatalogItem extends MappableMixin(UrlMixin(AutoRefreshi
             orientation = Transforms.headingPitchRollQuaternion(position, HeadingPitchRoll.fromDegrees(entity.vehicle.position.bearing - 90.0, 0.0, 0.0));
         }
         // Add the values that the feature info template gets populated with
-        for (let field of GtfsCatalogItem.FEATURE_INFO_TEMPLATE_FIELDS) {
+        for (const field of GtfsCatalogItem.FEATURE_INFO_TEMPLATE_FIELDS) {
             featureInfo.set(field, prettyPrintGtfsEntityField(field, entity));
         }
         featureInfo.set("entity", entity);
@@ -379,13 +417,19 @@ export default class GtfsCatalogItem extends MappableMixin(UrlMixin(AutoRefreshi
         };
     }
 }
-GtfsCatalogItem.FEATURE_INFO_TEMPLATE_FIELDS = [
-    "route_short_name",
-    "occupancy_status#str",
-    "speed#km",
-    "speed",
-    "bearing"
-];
+Object.defineProperty(GtfsCatalogItem, "FEATURE_INFO_TEMPLATE_FIELDS", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: [
+        "route_short_name",
+        "occupancy_status#str",
+        "speed#km",
+        "speed",
+        "bearing"
+    ]
+});
+export default GtfsCatalogItem;
 __decorate([
     observable
 ], GtfsCatalogItem.prototype, "gtfsFeedEntities", void 0);

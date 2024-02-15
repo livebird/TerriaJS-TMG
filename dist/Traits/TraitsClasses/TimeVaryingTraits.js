@@ -10,8 +10,54 @@ import primitiveTrait from "../Decorators/primitiveTrait";
 export default class TimeVaryingTraits extends mixTraits(CatalogMemberTraits) {
     constructor() {
         super(...arguments);
-        this.initialTimeSource = "now";
-        this.isPaused = true;
+        Object.defineProperty(this, "timeLabel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "currentTime", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "initialTimeSource", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "now"
+        });
+        Object.defineProperty(this, "startTime", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "stopTime", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "multiplier", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "isPaused", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "dateFormat", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([

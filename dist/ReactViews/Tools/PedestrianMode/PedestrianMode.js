@@ -1,13 +1,14 @@
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import { reaction } from "mobx";
 import { observer } from "mobx-react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import Cesium from "../../../Models/Cesium";
 import PositionRightOfWorkbench from "../../Workbench/PositionRightOfWorkbench";
 import DropPedestrianToGround from "./DropPedestrianToGround";
 import MiniMap, { getViewFromScene } from "./MiniMap";
 import MovementControls from "./MovementControls";
-import MeasureTool from "../../Map/Navigation/Items/MeasureTool";
+import { MeasureTool } from "../../Map/MapNavigation/Items";
 // The desired camera height measured from the surface in metres
 export const PEDESTRIAN_HEIGHT = 1.7;
 // Maximum up/down look angle in degrees
@@ -42,13 +43,7 @@ const PedestrianMode = observer((props) => {
                 viewState.closeTool();
         });
     }, []);
-    return (React.createElement(React.Fragment, null,
-        !isDropped && (React.createElement(DropPedestrianToGround, { cesium: cesium, afterDrop: () => setIsDropped(true), onDropCancelled: onDropCancelled, pedestrianHeight: PEDESTRIAN_HEIGHT })),
-        isDropped && (React.createElement(React.Fragment, null,
-            React.createElement(ControlsContainer, { viewState: viewState },
-                React.createElement(MovementControls, { cesium: cesium, onMove: updateView, pedestrianHeight: PEDESTRIAN_HEIGHT, maxVerticalLookAngle: MAX_VERTICAL_LOOK_ANGLE })),
-            React.createElement(MiniMapContainer, { viewState: viewState },
-                React.createElement(MiniMap, { terria: viewState.terria, baseMap: viewState.terria.mainViewer.baseMap, view: view || getViewFromScene(cesium.scene) }))))));
+    return (_jsxs(_Fragment, { children: [!isDropped && (_jsx(DropPedestrianToGround, { cesium: cesium, afterDrop: () => setIsDropped(true), onDropCancelled: onDropCancelled, pedestrianHeight: PEDESTRIAN_HEIGHT })), isDropped && (_jsxs(_Fragment, { children: [_jsx(ControlsContainer, { viewState: viewState, children: _jsx(MovementControls, { cesium: cesium, onMove: updateView, pedestrianHeight: PEDESTRIAN_HEIGHT, maxVerticalLookAngle: MAX_VERTICAL_LOOK_ANGLE }) }), _jsx(MiniMapContainer, { viewState: viewState, children: _jsx(MiniMap, { terria: viewState.terria, baseMap: viewState.terria.mainViewer.baseMap, view: view || getViewFromScene(cesium.scene) }) })] }))] }));
 });
 const ControlsContainer = styled(PositionRightOfWorkbench) `
   width: 140px;

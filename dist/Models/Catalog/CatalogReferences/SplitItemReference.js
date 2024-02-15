@@ -13,7 +13,7 @@ import { BaseModel } from "../../Definition/Model";
  * separately. This reduces share url size and avoids exporting any sensitive
  * data that the traits may have.
  */
-export default class SplitItemReference extends ReferenceMixin(CreateModel(SplitItemReferenceTraits)) {
+class SplitItemReference extends ReferenceMixin(CreateModel(SplitItemReferenceTraits)) {
     get type() {
         return SplitItemReference.type;
     }
@@ -56,5 +56,11 @@ export default class SplitItemReference extends ReferenceMixin(CreateModel(Split
         }
     }
 }
-SplitItemReference.type = "split-reference";
+Object.defineProperty(SplitItemReference, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "split-reference"
+});
+export default SplitItemReference;
 //# sourceMappingURL=SplitItemReference.js.map

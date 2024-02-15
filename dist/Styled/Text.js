@@ -10,6 +10,8 @@ export const Text = styled.div `
   // TODO: themeify family
   font-family: ${(props) => props.theme.fontBase};
 
+  ${(props) => props.mono && `font-family: ${props.theme.fontMono};`}
+
   ${(props) => props.breakWord &&
     `
     overflow-wrap: break-word;
@@ -107,10 +109,6 @@ export const Text = styled.div `
   ${(props) => props.styledFontSize &&
     `
     font-size: ${props.styledFontSize};
-  `}
-  ${(props) => props.styledLineHeight &&
-    `
-    line-height: ${props.styledLineHeight};
   `}
 
   ${(props) => props.highlightLinks &&

@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import { Nav, Menu, MenuLeft, ExperimentalMenu, Feedback } from "./customizable/Groups";
 const GROUP_ELEMENT_TO_KEY_MAPPING = {
@@ -49,7 +50,7 @@ function findKeyForGroupElement(groupElement) {
 function getGroupChildren(isSmallScreen, groupElement) {
     return React.Children.map(groupElement.props.children, (child) => {
         if (typeof child === "string") {
-            return React.createElement("span", null, child);
+            return _jsx("span", { children: child });
         }
         else if (child &&
             child.type.propTypes &&

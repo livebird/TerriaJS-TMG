@@ -4,16 +4,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, computed, observable } from "mobx";
+import { action, computed, observable, makeObservable } from "mobx";
 import GltfMixin from "../../../ModelMixins/GltfMixin";
 import UrlMixin from "../../../ModelMixins/UrlMixin";
 import GltfCatalogItemTraits from "../../../Traits/TraitsClasses/GltfCatalogItemTraits";
 import CommonStrata from "../../Definition/CommonStrata";
 import CreateModel from "../../Definition/CreateModel";
-export default class GltfCatalogItem extends UrlMixin(GltfMixin(CreateModel(GltfCatalogItemTraits))) {
-    constructor() {
-        super(...arguments);
-        this.hasLocalData = false;
+class GltfCatalogItem extends UrlMixin(GltfMixin(CreateModel(GltfCatalogItemTraits))) {
+    constructor(...args) {
+        super(...args);
+        Object.defineProperty(this, "hasLocalData", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        makeObservable(this);
     }
     get type() {
         return GltfCatalogItem.type;
@@ -27,7 +33,13 @@ export default class GltfCatalogItem extends UrlMixin(GltfMixin(CreateModel(Gltf
         this.hasLocalData = true;
     }
 }
-GltfCatalogItem.type = "gltf";
+Object.defineProperty(GltfCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "gltf"
+});
+export default GltfCatalogItem;
 __decorate([
     computed
 ], GltfCatalogItem.prototype, "gltfModelUrl", null);

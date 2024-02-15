@@ -13,8 +13,30 @@ import ImageryProviderTraits from "./ImageryProviderTraits";
 export default class MapboxMapCatalogItemTraits extends mixTraits(ImageryProviderTraits, CatalogMemberTraits, MappableTraits, LegendOwnerTraits) {
     constructor() {
         super(...arguments);
-        this.url = "https://api.mapbox.com/v4/";
-        this.format = "png";
+        Object.defineProperty(this, "url", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "https://api.mapbox.com/v4/"
+        });
+        Object.defineProperty(this, "mapId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "accessToken", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "format", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "png"
+        });
     }
 }
 __decorate([

@@ -4,7 +4,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { observable } from "mobx";
+import { makeObservable, observable } from "mobx";
+import Ellipsoid from "terriajs-cesium/Source/Core/Ellipsoid";
+import ConstantPositionProperty from "terriajs-cesium/Source/DataSources/ConstantPositionProperty";
 import Entity from "terriajs-cesium/Source/DataSources/Entity";
 const customProperties = ["entityCollection", "properties", "data"];
 /** Terria wrapper around Cesium Entity
@@ -14,8 +16,54 @@ const customProperties = ["entityCollection", "properties", "data"];
 export default class TerriaFeature extends Entity {
     constructor(options) {
         super(options);
+        /** This object can be used to pass Terria-specific properties */
+        Object.defineProperty(this, "data", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "cesiumEntity", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "imageryLayer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        /** This comes from Cesium.scene.drillPick
+         * No type provided
+         */
+        Object.defineProperty(this, "cesiumPrimitive", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_cesium3DTileFeature", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         /** Flag if loading featureInfoUrl (see `FeatureInfoUrlTemplateMixin.getFeaturesFromPickResult`) */
-        this.loadingFeatureInfoUrl = false;
+        Object.defineProperty(this, "loadingFeatureInfoUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        makeObservable(this);
         addCustomFeatureProperties(this);
     }
     /**
@@ -49,6 +97,20 @@ export default class TerriaFeature extends Entity {
         }
         return feature;
     }
+    static fromImageryLayerFeatureInfo(imageryFeature) {
+        const feature = new TerriaFeature({
+            id: imageryFeature.name,
+            name: imageryFeature.name,
+            description: imageryFeature.description,
+            properties: imageryFeature.properties
+        });
+        feature.data = imageryFeature.data;
+        feature.imageryLayer = imageryFeature.imageryLayer;
+        if (imageryFeature.position) {
+            feature.position = new ConstantPositionProperty(Ellipsoid.WGS84.cartographicToCartesian(imageryFeature.position));
+        }
+        return feature;
+    }
 }
 __decorate([
     observable
@@ -57,7 +119,9 @@ __decorate([
 // if they're not already there. (In case they are added in a future version of Cesium.)
 function addCustomFeatureProperties(entity) {
     for (let i = 0; i < customProperties.length; i++) {
-        if (entity.propertyNames.indexOf(customProperties[i]) === -1) {
+        const propertyName = customProperties[i];
+        if (entity.propertyNames.indexOf(propertyName) === -1 &&
+            !(propertyName in entity)) {
             entity.addProperty(customProperties[i]);
         }
     }

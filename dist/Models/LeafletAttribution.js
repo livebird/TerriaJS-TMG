@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { runInAction, observable } from "mobx";
+import { runInAction, observable, makeObservable } from "mobx";
 import L from "leaflet";
 export class LeafletAttribution extends L.Control.Attribution {
     constructor(terria) {
@@ -15,6 +15,31 @@ export class LeafletAttribution extends L.Control.Attribution {
             options.prefix = terria.configParameters.leafletAttributionPrefix;
         }
         super(options);
+        Object.defineProperty(this, "_attributions", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "map", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_container", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "dataAttributions", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
         this._attributions = {};
         this.dataAttributions = observable([]);
     }

@@ -12,6 +12,27 @@ import mixTraits from "../mixTraits";
 import DiscretelyTimeVaryingTraits from "./DiscretelyTimeVaryingTraits";
 import SplitterTraits from "./SplitterTraits";
 export class TileCoordinates extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "x", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "y", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "level", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -35,6 +56,15 @@ __decorate([
     })
 ], TileCoordinates.prototype, "level", void 0);
 export class TimeFilterCoordinates extends mixTraits(LatLonHeightTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "tile", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     objectTrait({
@@ -44,6 +74,21 @@ __decorate([
     })
 ], TimeFilterCoordinates.prototype, "tile", void 0);
 export default class TimeFilterTraits extends mixTraits(DiscretelyTimeVaryingTraits, SplitterTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "timeFilterPropertyName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "timeFilterCoordinates", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({

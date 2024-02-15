@@ -4,8 +4,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import createReactClass from "create-react-class";
-import { observable, runInAction } from "mobx";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { makeObservable, observable, runInAction } from "mobx";
 import { observer } from "mobx-react";
 import PropTypes from "prop-types";
 import React from "react";
@@ -31,9 +31,31 @@ class FunctionViewModel {
 }
 class ParameterViewModel {
     constructor(parameter) {
-        this.userValue = undefined;
-        this.isValueValid = true;
-        this.wasEverBlurredWhileInvalid = false;
+        Object.defineProperty(this, "parameter", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "userValue", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "isValueValid", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "wasEverBlurredWhileInvalid", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        makeObservable(this);
         this.parameter = parameter;
     }
 }
@@ -46,25 +68,18 @@ __decorate([
 __decorate([
     observable
 ], ParameterViewModel.prototype, "wasEverBlurredWhileInvalid", void 0);
-const InvokeFunction = observer(createReactClass({
-    displayName: "InvokeFunction",
-    propTypes: {
-        terria: PropTypes.object,
-        previewed: PropTypes.object,
-        viewState: PropTypes.object,
-        t: PropTypes.func.isRequired
-    },
+let InvokeFunction = class InvokeFunction extends React.Component {
     /* eslint-disable-next-line camelcase */
     UNSAFE_componentWillMount() {
         this.parametersViewModel = new FunctionViewModel(this.props.previewed);
-    },
+    }
     /* eslint-disable-next-line camelcase */
     UNSAFE_componentWillUpdate(nextProps, nextState) {
         if (nextProps.previewed !== this.parametersViewModel.catalogFunction) {
             // Clear previous parameters view model, because this is a different catalog function.
             this.parametersViewModel = new FunctionViewModel(nextProps.previewed);
         }
-    },
+    }
     submit() {
         this.props.previewed.submitJob().catch((e) => {
             this.props.terria.raiseErrorToUser(e);
@@ -75,13 +90,13 @@ const InvokeFunction = observer(createReactClass({
             // mobile switch to nowvewing
             this.props.viewState.switchMobileView(this.props.viewState.mobileViewOptions.preview);
         });
-    },
+    }
     getParams() {
         // Key should include the previewed item identifier so that
         // components are refreshed when different previewed items are
         // displayed
-        return this.props.previewed.functionParameters.map((param, i) => (React.createElement(ParameterEditor, { key: param.id + this.props.previewed.uniqueId, parameter: param, viewState: this.props.viewState, previewed: this.props.previewed, parameterViewModel: this.parametersViewModel.getParameter(param) })));
-    },
+        return this.props.previewed.functionParameters.map((param, i) => (_jsx(ParameterEditor, { parameter: param, viewState: this.props.viewState, previewed: this.props.previewed, parameterViewModel: this.parametersViewModel.getParameter(param) }, param.id + this.props.previewed.uniqueId)));
+    }
     validateParameter(parameter) {
         if (!parameter.isValid ||
             !this.parametersViewModel.getParameter(parameter).isValueValid) {
@@ -93,29 +108,35 @@ const InvokeFunction = observer(createReactClass({
             return false;
         }
         return true;
-    },
+    }
     render() {
         var _a, _b;
         if (this.props.previewed.isLoading) {
-            return React.createElement(Loader, null);
+            return _jsx(Loader, {});
         }
         let invalidParameters = false;
         if (defined(this.props.previewed.parameters)) {
-            invalidParameters = !this.props.previewed.functionParameters.every(this.validateParameter);
+            invalidParameters = !this.props.previewed.functionParameters.every(this.validateParameter.bind(this));
         }
         const { t } = this.props;
-        return (React.createElement("div", { className: Styles.invokeFunction },
-            React.createElement("div", { className: Styles.content },
-                React.createElement("h3", null, this.props.previewed.name),
-                React.createElement(If, { condition: (_a = this.props.previewed.loadMetadataResult) === null || _a === void 0 ? void 0 : _a.error },
-                    React.createElement(WarningBox, { error: (_b = this.props.previewed.loadMetadataResult) === null || _b === void 0 ? void 0 : _b.error, viewState: this.props.viewState })),
-                React.createElement("div", { className: Styles.description }, parseCustomMarkdownToReact(this.props.previewed.description, {
-                    catalogItem: this.props.previewed
-                })),
-                this.getParams()),
-            React.createElement("div", { className: Styles.footer },
-                React.createElement("button", { type: "button", className: Styles.btn, onClick: this.submit, disabled: invalidParameters }, t("analytics.runAnalysis")))));
+        return (_jsxs("div", { className: Styles.invokeFunction, children: [_jsxs("div", { className: Styles.content, children: [_jsx("h3", { children: this.props.previewed.name }), ((_a = this.props.previewed.loadMetadataResult) === null || _a === void 0 ? void 0 : _a.error) && (_jsx(WarningBox, { error: (_b = this.props.previewed.loadMetadataResult) === null || _b === void 0 ? void 0 : _b.error, viewState: this.props.viewState })), _jsx("div", { className: Styles.description, children: parseCustomMarkdownToReact(this.props.previewed.description, {
+                                catalogItem: this.props.previewed
+                            }) }), this.getParams()] }), _jsx("div", { className: Styles.footer, children: _jsx("button", { type: "button", className: Styles.btn, onClick: () => this.submit(), disabled: invalidParameters, children: t("analytics.runAnalysis") }) })] }));
     }
-}));
+};
+Object.defineProperty(InvokeFunction, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        terria: PropTypes.object,
+        previewed: PropTypes.object,
+        viewState: PropTypes.object,
+        t: PropTypes.func.isRequired
+    }
+});
+InvokeFunction = __decorate([
+    observer
+], InvokeFunction);
 module.exports = withTranslation()(InvokeFunction);
 //# sourceMappingURL=InvokeFunction.js.map

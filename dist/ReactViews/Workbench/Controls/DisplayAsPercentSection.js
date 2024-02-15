@@ -1,4 +1,4 @@
-import React from "react";
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import { useTranslation } from "react-i18next";
 import Checkbox from "./../../../Styled/Checkbox/Checkbox";
 import { useTheme } from "styled-components";
@@ -13,10 +13,7 @@ const DisplayAsPercentSection = (props) => {
     if (!props.item.canDisplayPercent) {
         return null;
     }
-    return (React.createElement(React.Fragment, null,
-        React.createElement(Spacing, { bottom: 2 }),
-        React.createElement(Checkbox, { id: "workbenchDisplayPercent", isChecked: props.item.displayPercent, onChange: togglePercentage },
-            React.createElement(TextSpan, null, t("workbench.displayPercent")))));
+    return (_jsxs(_Fragment, { children: [_jsx(Spacing, { bottom: 2 }), _jsx(Checkbox, { id: "workbenchDisplayPercent", isChecked: props.item.displayPercent, onChange: togglePercentage, children: _jsx(TextSpan, { children: t("workbench.displayPercent") }) })] }));
 };
 DisplayAsPercentSection.displayName = "DisplayAsPercentSection";
 export default DisplayAsPercentSection;

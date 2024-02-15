@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { computed, runInAction } from "mobx";
+import { computed, runInAction, makeObservable } from "mobx";
 import Color from "terriajs-cesium/Source/Core/Color";
 import URI from "urijs";
 import isDefined from "../../../Core/isDefined";
@@ -14,17 +14,15 @@ import replaceUnderscores from "../../../Core/replaceUnderscores";
 import { networkRequestError } from "../../../Core/TerriaError";
 import featureDataToGeoJson from "../../../Map/PickedFeatures/featureDataToGeoJson";
 import proj4definitions from "../../../Map/Vector/Proj4Definitions";
-import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
 import GeoJsonMixin from "../../../ModelMixins/GeojsonMixin";
-import UrlMixin from "../../../ModelMixins/UrlMixin";
 import ArcGisFeatureServerCatalogItemTraits from "../../../Traits/TraitsClasses/ArcGisFeatureServerCatalogItemTraits";
 import { InfoSectionTraits } from "../../../Traits/TraitsClasses/CatalogMemberTraits";
 import { RectangleTraits } from "../../../Traits/TraitsClasses/MappableTraits";
-import TableColorStyleTraits, { EnumColorTraits } from "../../../Traits/TraitsClasses/TableColorStyleTraits";
-import TableOutlineStyleTraits, { BinOutlineSymbolTraits, EnumOutlineSymbolTraits, OutlineSymbolTraits } from "../../../Traits/TraitsClasses/TableOutlineStyleTraits";
-import TablePointSizeStyleTraits from "../../../Traits/TraitsClasses/TablePointSizeStyleTraits";
-import TablePointStyleTraits, { BinPointSymbolTraits, EnumPointSymbolTraits, PointSymbolTraits } from "../../../Traits/TraitsClasses/TablePointStyleTraits";
-import TableStyleTraits from "../../../Traits/TraitsClasses/TableStyleTraits";
+import TableColorStyleTraits, { EnumColorTraits } from "../../../Traits/TraitsClasses/Table/ColorStyleTraits";
+import TableOutlineStyleTraits, { BinOutlineSymbolTraits, EnumOutlineSymbolTraits, OutlineSymbolTraits } from "../../../Traits/TraitsClasses/Table/OutlineStyleTraits";
+import TablePointSizeStyleTraits from "../../../Traits/TraitsClasses/Table/PointSizeStyleTraits";
+import TablePointStyleTraits, { BinPointSymbolTraits, EnumPointSymbolTraits, PointSymbolTraits } from "../../../Traits/TraitsClasses/Table/PointStyleTraits";
+import TableStyleTraits from "../../../Traits/TraitsClasses/Table/StyleTraits";
 import CreateModel from "../../Definition/CreateModel";
 import createStratumInstance from "../../Definition/createStratumInstance";
 import LoadableStratum from "../../Definition/LoadableStratum";
@@ -34,9 +32,25 @@ const proj4 = require("proj4").default;
 class FeatureServerStratum extends LoadableStratum(ArcGisFeatureServerCatalogItemTraits) {
     constructor(_item, _featureServer, _esriJson) {
         super();
-        this._item = _item;
-        this._featureServer = _featureServer;
-        this._esriJson = _esriJson;
+        Object.defineProperty(this, "_item", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: _item
+        });
+        Object.defineProperty(this, "_featureServer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: _featureServer
+        });
+        Object.defineProperty(this, "_esriJson", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: _esriJson
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(newModel) {
         return new FeatureServerStratum(newModel, this._esriJson);
@@ -46,6 +60,8 @@ class FeatureServerStratum extends LoadableStratum(ArcGisFeatureServerCatalogIte
     }
     static async load(item) {
         if (item.url === undefined) {
+            /* TODO: Should this be returned? */
+            /* eslint-disable-next-line no-new */
             new FeatureServerStratum(item, undefined, undefined);
         }
         const metaUrl = buildMetadataUrl(item);
@@ -75,7 +91,8 @@ class FeatureServerStratum extends LoadableStratum(ArcGisFeatureServerCatalogIte
     }
     get dataCustodian() {
         var _a, _b, _c;
-        if (((_a = this._featureServer) === null || _a === void 0 ? void 0 : _a.documentInfo) && ((_b = this._featureServer) === null || _b === void 0 ? void 0 : _b.documentInfo.Author) &&
+        if (((_a = this._featureServer) === null || _a === void 0 ? void 0 : _a.documentInfo) &&
+            ((_b = this._featureServer) === null || _b === void 0 ? void 0 : _b.documentInfo.Author) &&
             ((_c = this._featureServer) === null || _c === void 0 ? void 0 : _c.documentInfo.Author.length) > 0) {
             return this._featureServer.documentInfo.Author;
         }
@@ -246,7 +263,12 @@ class FeatureServerStratum extends LoadableStratum(ArcGisFeatureServerCatalogIte
         }
     }
 }
-FeatureServerStratum.stratumName = "featureServer";
+Object.defineProperty(FeatureServerStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "featureServer"
+});
 __decorate([
     computed
 ], FeatureServerStratum.prototype, "featureServerData", null);
@@ -278,7 +300,11 @@ __decorate([
     computed
 ], FeatureServerStratum.prototype, "styles", null);
 StratumOrder.addLoadStratum(FeatureServerStratum.stratumName);
-export default class ArcGisFeatureServerCatalogItem extends GeoJsonMixin(UrlMixin(CatalogMemberMixin(CreateModel(ArcGisFeatureServerCatalogItemTraits)))) {
+class ArcGisFeatureServerCatalogItem extends GeoJsonMixin(CreateModel(ArcGisFeatureServerCatalogItemTraits)) {
+    constructor(...args) {
+        super(...args);
+        makeObservable(this);
+    }
     get type() {
         return ArcGisFeatureServerCatalogItem.type;
     }
@@ -309,7 +335,7 @@ export default class ArcGisFeatureServerCatalogItem extends GeoJsonMixin(UrlMixi
         // until we run out of features or hit the limit
         const featuresPerRequest = this.featuresPerRequest;
         const maxFeatures = this.maxFeatures;
-        let combinedEsriLayerJson = await getEsriLayerJson(0);
+        const combinedEsriLayerJson = await getEsriLayerJson(0);
         const mapObjectIds = (features) => features.map((feature) => { var _a; return (_a = feature.attributes.OBJECTID) !== null && _a !== void 0 ? _a : feature.attributes.objectid; });
         const seenIDs = new Set(mapObjectIds(combinedEsriLayerJson.features));
         let currentOffset = 0;
@@ -375,7 +401,13 @@ export default class ArcGisFeatureServerCatalogItem extends GeoJsonMixin(UrlMixi
         return proxyCatalogItemUrl(this, uri.toString());
     }
 }
-ArcGisFeatureServerCatalogItem.type = "esri-featureServer";
+Object.defineProperty(ArcGisFeatureServerCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "esri-featureServer"
+});
+export default ArcGisFeatureServerCatalogItem;
 __decorate([
     computed
 ], ArcGisFeatureServerCatalogItem.prototype, "featureServerData", null);

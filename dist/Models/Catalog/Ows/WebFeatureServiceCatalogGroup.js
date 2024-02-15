@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { action, computed, runInAction } from "mobx";
+import { action, computed, runInAction, makeObservable } from "mobx";
 import containsAny from "../../../Core/containsAny";
 import filterOutUndefined from "../../../Core/filterOutUndefined";
 import isDefined from "../../../Core/isDefined";
@@ -26,11 +26,6 @@ import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
 import WebFeatureServiceCapabilities from "./WebFeatureServiceCapabilities";
 import WebFeatureServiceCatalogItem from "./WebFeatureServiceCatalogItem";
 class GetCapabilitiesStratum extends LoadableStratum(WebFeatureServiceCatalogGroupTraits) {
-    constructor(catalogGroup, capabilities) {
-        super();
-        this.catalogGroup = catalogGroup;
-        this.capabilities = capabilities;
-    }
     static async load(catalogItem) {
         if (catalogItem.getCapabilitiesUrl === undefined) {
             throw networkRequestError({
@@ -40,6 +35,22 @@ class GetCapabilitiesStratum extends LoadableStratum(WebFeatureServiceCatalogGro
         }
         const capabilities = await WebFeatureServiceCapabilities.fromUrl(proxyCatalogItemUrl(catalogItem, catalogItem.getCapabilitiesUrl, catalogItem.getCapabilitiesCacheDuration));
         return new GetCapabilitiesStratum(catalogItem, capabilities);
+    }
+    constructor(catalogGroup, capabilities) {
+        super();
+        Object.defineProperty(this, "catalogGroup", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogGroup
+        });
+        Object.defineProperty(this, "capabilities", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: capabilities
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(model) {
         return new GetCapabilitiesStratum(model, this.capabilities);
@@ -139,7 +150,7 @@ __decorate([
 __decorate([
     action
 ], GetCapabilitiesStratum.prototype, "createMemberFromLayer", null);
-export default class WebFeatureServiceCatalogGroup extends GetCapabilitiesMixin(UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(WebFeatureServiceCatalogGroupTraits))))) {
+class WebFeatureServiceCatalogGroup extends GetCapabilitiesMixin(UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(WebFeatureServiceCatalogGroupTraits))))) {
     get type() {
         return WebFeatureServiceCatalogGroup.type;
     }
@@ -174,5 +185,11 @@ export default class WebFeatureServiceCatalogGroup extends GetCapabilitiesMixin(
         }
     }
 }
-WebFeatureServiceCatalogGroup.type = "wfs-group";
+Object.defineProperty(WebFeatureServiceCatalogGroup, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "wfs-group"
+});
+export default WebFeatureServiceCatalogGroup;
 //# sourceMappingURL=WebFeatureServiceCatalogGroup.js.map

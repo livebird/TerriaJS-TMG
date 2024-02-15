@@ -10,12 +10,84 @@ import L from "leaflet";
 const createGuid = require("terriajs-cesium/Source/Core/createGuid").default;
 const destroyObject = require("terriajs-cesium/Source/Core/destroyObject").default;
 class LeafletDataSource extends DataSource {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "visualizersByDisplayID", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "visualizers", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 /**
  * Visualizes a collection of {@link DataSource} instances in Leaflet.
  */
 export default class LeafletDataSourceDisplay {
     constructor(options) {
+        Object.defineProperty(this, "_displayID", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        // Gets the scene associated with this display.
+        Object.defineProperty(this, "_scene", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        /**
+         * Gets the default data source instance which can be used to
+         * manually create and visualize entities not tied to
+         * a specific data source. This instance is always available
+         * and does not appear in the list dataSources collection.
+         */
+        Object.defineProperty(this, "_defaultDataSource", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        // Gets the collection of data sources to display.
+        Object.defineProperty(this, "_dataSourceCollection", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_visualizersCallback", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_eventHelper", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        // Gets a value indicating whether or not all entities in the data source are ready
+        Object.defineProperty(this, "_ready", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_lastTime", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         this._displayID = createGuid();
         this._scene = options.scene;
         this._dataSourceCollection = options.dataSourceCollection;

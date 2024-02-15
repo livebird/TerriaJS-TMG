@@ -1,3 +1,4 @@
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 // proptypes are in mixin.
 /* eslint react/prop-types:0*/
 import React from "react";
@@ -15,11 +16,7 @@ const MobilePanel = createReactClass({
         };
     },
     render() {
-        return (React.createElement("div", null,
-            React.createElement(MobileMenuItem, { onClick: this.openPanel, caption: this.props.btnText, icon: this.props.mobileIcon }),
-            React.createElement(If, { condition: this.isOpen() },
-                React.createElement("div", { className: Styles.overlay }),
-                React.createElement(InnerPanel, { theme: this.props.theme, caretOffset: "15px", doNotCloseFlag: this.getDoNotCloseFlag(), onDismissed: this.onDismissed, disableCloseOnFocusLoss: this.disableCloseOnFocusLoss }, this.props.children))));
+        return (_jsxs("div", { children: [_jsx(MobileMenuItem, { onClick: this.openPanel, caption: this.props.btnText, icon: this.props.mobileIcon }), this.isOpen() && (_jsxs(_Fragment, { children: [_jsx("div", { className: Styles.overlay }), _jsx(InnerPanel, { theme: this.props.theme, caretOffset: "15px", doNotCloseFlag: this.getDoNotCloseFlag(), onDismissed: this.onDismissed, disableCloseOnFocusLoss: this.disableCloseOnFocusLoss, children: this.props.children })] }))] }));
     }
 });
 export default MobilePanel;

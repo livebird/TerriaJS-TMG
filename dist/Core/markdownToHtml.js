@@ -1,13 +1,13 @@
 "use strict";
-var defined = require("terriajs-cesium/Source/Core/defined").default;
-var MarkdownIt = require("markdown-it");
-var DOMPurify = require("dompurify/dist/purify");
+const defined = require("terriajs-cesium/Source/Core/defined").default;
+const MarkdownIt = require("markdown-it");
+const DOMPurify = require("dompurify/dist/purify");
 import injectTerms from "./injectTerms";
-var md = new MarkdownIt({
+const md = new MarkdownIt({
     html: true,
     linkify: true
 });
-var htmlRegex = /^\s*<[^>]+>/;
+const htmlRegex = /^\s*<[^>]+>/;
 /**
  * Convert a String in markdown format (which includes html) into html format.
  * @param  {String} markdownString String in markdown format.
@@ -23,7 +23,7 @@ function markdownToHtml(markdownString, allowUnsafeHtml = false, domPurifyOption
     // If the text looks like html, don't try to interpret it as Markdown because
     // we'll probably break it in the process.
     // It would wrap non-standard tags such as <collapsible>hi</collapsible> in a <p></p>, which is bad.
-    var unsafeHtml;
+    let unsafeHtml;
     if (htmlRegex.test(markdownString)) {
         unsafeHtml = markdownString;
     }

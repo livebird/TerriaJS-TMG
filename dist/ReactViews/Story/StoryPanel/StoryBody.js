@@ -1,4 +1,4 @@
-import React from "react";
+import { jsx as _jsx } from "react/jsx-runtime";
 import parseCustomHtmlToReact from "../../Custom/parseCustomHtmlToReact";
 import styled from "styled-components";
 import Box from "../../../Styled/Box";
@@ -42,13 +42,38 @@ const StoryContainer = styled(Box).attrs((props) => ({
     hyphens: auto;
   }
 `;
-const StoryBody = ({ isCollapsed, story }) => (React.createElement(React.Fragment, null, story.text && story.text !== "" ? (React.createElement(StoryContainer, { isCollapsed: isCollapsed, column: true },
-    React.createElement(Text, { css: `
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-          `, medium: true }, parseCustomHtmlToReact(story.text, {
-        showExternalLinkWarning: true
-    })))) : null));
+function shouldAddIframeTag(story) {
+    var _a, _b, _c;
+    const parser = new DOMParser();
+    const parsedDocument = parser.parseFromString(story.text, "text/html");
+    const iframes = parsedDocument.getElementsByTagName("iframe");
+    if (iframes.length < 1)
+        return false;
+    let result = true;
+    for (const iframe of iframes) {
+        if (!(((_a = iframe.src) === null || _a === void 0 ? void 0 : _a.startsWith("https://www.youtube.com/embed/")) ||
+            ((_b = iframe.src) === null || _b === void 0 ? void 0 : _b.startsWith("https://www.youtube-nocookie.com/embed/")) ||
+            ((_c = iframe.src) === null || _c === void 0 ? void 0 : _c.startsWith("https://player.vimeo.com/video/")))) {
+            result = false;
+            break;
+        }
+    }
+    return result;
+}
+function sourceBasedParse(story) {
+    if (shouldAddIframeTag(story)) {
+        return parseCustomHtmlToReact(story.text, { showExternalLinkWarning: true }, false, {
+            ADD_TAGS: ["iframe"]
+        });
+    }
+    else {
+        return parseCustomHtmlToReact(story.text, { showExternalLinkWarning: true }, false, {});
+    }
+}
+const StoryBody = ({ isCollapsed, story }) => story.text && story.text !== "" ? (_jsx(StoryContainer, { isCollapsed: isCollapsed, column: true, children: _jsx(Text, { css: `
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        `, medium: true, children: sourceBasedParse(story) }) })) : null;
 export default StoryBody;
 //# sourceMappingURL=StoryBody.js.map

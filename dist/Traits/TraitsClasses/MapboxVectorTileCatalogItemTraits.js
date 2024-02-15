@@ -16,31 +16,87 @@ import UrlTraits from "./UrlTraits";
 export default class MapboxVectorTileCatalogItemTraits extends mixTraits(LayerOrderingTraits, UrlTraits, MappableTraits, CatalogMemberTraits, LegendOwnerTraits, ImageryProviderTraits) {
     constructor() {
         super(...arguments);
-        this.idProperty = "FID";
-        this.maximumNativeZoom = 12;
-        this.maximumZoom = 28;
-        this.minimumZoom = 0;
+        Object.defineProperty(this, "lineColor", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "fillColor", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "layer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "style", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "styleUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "idProperty", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "FID"
+        });
+        Object.defineProperty(this, "nameProperty", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "maximumNativeZoom", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 12
+        });
+        Object.defineProperty(this, "maximumZoom", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 28
+        });
+        Object.defineProperty(this, "minimumZoom", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
     }
 }
 __decorate([
     primitiveTrait({
         type: "string",
         name: "lineColor",
-        description: "This propery exists for backward compatibility. The outline color of the features, specified as a CSS color string. This will only be used if `layer` trait has been set. For more complex styling - see `style` trait."
+        description: "This property exists for backward compatibility. The outline color of the features, specified as a CSS color string. This will only be used if `layer` trait has been set. For more complex styling - see `style` trait."
     })
 ], MapboxVectorTileCatalogItemTraits.prototype, "lineColor", void 0);
 __decorate([
     primitiveTrait({
         type: "string",
         name: "fillColor",
-        description: "This propery exists for backward compatibility. The fill color of the features, specified as a CSS color string. This will only be used if `layer` trait has been set. For more complex styling - see `style` trait."
+        description: "This property exists for backward compatibility. The fill color of the features, specified as a CSS color string. This will only be used if `layer` trait has been set. For more complex styling - see `style` trait."
     })
 ], MapboxVectorTileCatalogItemTraits.prototype, "fillColor", void 0);
 __decorate([
     primitiveTrait({
         type: "string",
         name: "layer",
-        description: "This propery exists for backward compatibility. It can be used to only show a particular layer in the tileset."
+        description: "This property exists for backward compatibility. It can be used to only show a particular layer in the tileset."
     })
 ], MapboxVectorTileCatalogItemTraits.prototype, "layer", void 0);
 __decorate([
@@ -59,6 +115,14 @@ For example:
       "source-layer": "buildings",
       "paint": {
         "fill-color": "black"
+      }
+    },
+    {
+      "type": "line",
+      "source-layer": "buildings",
+      "paint": {
+        "line-color": "red",
+        "line-width": 1
       }
     },
     {

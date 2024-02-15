@@ -11,7 +11,18 @@ import GltfCatalogItemTraits from "./GltfCatalogItemTraits";
 export default class AssImpCatalogItemTraits extends mixTraits(GltfCatalogItemTraits) {
     constructor() {
         super(...arguments);
-        this.urls = [];
+        Object.defineProperty(this, "urls", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "baseUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([

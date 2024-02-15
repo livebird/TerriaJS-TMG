@@ -1,4 +1,5 @@
 "use strict";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import classNames from "classnames";
 import createReactClass from "create-react-class";
 import PropTypes from "prop-types";
@@ -57,24 +58,14 @@ const NotificationWindow = createReactClass({
             width: defined(this.props.width) ? this.props.width : "500px"
         };
         const isStory = type === "story";
-        return (React.createElement("div", { className: classNames(Styles.wrapper, `${type}`) },
-            React.createElement("div", { className: Styles.notification, isStory: isStory, css: `
+        return (_jsx("div", { className: classNames(Styles.wrapper, `${type}`), children: _jsxs("div", { className: Styles.notification, isStory: isStory, css: `
             background: ${(p) => p.isStory ? p.theme.colorPrimary : p.theme.dark};
             a,
             a:visited {
               color: ${(p) => p.theme.primary};
             }
-          ` },
-                React.createElement("div", { className: Styles.inner, style: divStyle },
-                    React.createElement("h3", { className: "title" }, title),
-                    window.location.host === "localhost:3001" &&
-                        title.toLowerCase().indexOf("error") >= 0 && (React.createElement("div", null,
-                        React.createElement("img", { src: "./build/TerriaJS/images/feature.gif" }))),
-                    React.createElement("div", { className: Styles.body }, message)),
-                React.createElement("div", { className: Styles.footer },
-                    React.createElement(If, { condition: denyText },
-                        React.createElement("button", { type: "button", className: Styles.btn, onClick: this.deny }, denyText)),
-                    React.createElement("button", { type: "button", className: Styles.btn, onClick: this.confirm }, confirmText)))));
+          `, children: [_jsxs("div", { className: Styles.inner, style: divStyle, children: [_jsx("h3", { className: "title", children: title }), window.location.host === "localhost:3001" &&
+                                title.toLowerCase().indexOf("error") >= 0 && (_jsx("div", { children: _jsx("img", { src: "./build/TerriaJS/images/feature.gif" }) })), _jsx("div", { className: Styles.body, children: message })] }), _jsxs("div", { className: Styles.footer, children: [denyText && (_jsx("button", { type: "button", className: Styles.btn, onClick: this.deny, children: denyText })), _jsx("button", { type: "button", className: Styles.btn, onClick: this.confirm, children: confirmText })] })] }) }));
     }
 });
 module.exports.default = NotificationWindow;

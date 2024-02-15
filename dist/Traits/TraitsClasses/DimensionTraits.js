@@ -9,6 +9,27 @@ import primitiveTrait from "../Decorators/primitiveTrait";
 import anyTrait from "../Decorators/anyTrait";
 import objectArrayTrait from "../Decorators/objectArrayTrait";
 export class DimensionOptionTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "id", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "name", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "value", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -31,6 +52,45 @@ __decorate([
     })
 ], DimensionOptionTraits.prototype, "value", void 0);
 export default class EnumDimensionTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "id", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "name", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "options", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "selectedId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "allowUndefined", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "disable", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({

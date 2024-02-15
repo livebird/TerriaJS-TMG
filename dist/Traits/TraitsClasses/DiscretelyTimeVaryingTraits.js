@@ -11,10 +11,30 @@ import TimeVaryingTraits from "./TimeVaryingTraits";
 export default class DiscretelyTimeVaryingTraits extends mixTraits(ChartTraits, TimeVaryingTraits) {
     constructor() {
         super(...arguments);
-        this.fromContinuous = "nearest";
-        this.showInChartPanel = false;
-        this.disableDateTimeSelector = false;
-        this.multiplierDefaultDeltaStep = 2;
+        Object.defineProperty(this, "fromContinuous", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "nearest"
+        });
+        Object.defineProperty(this, "showInChartPanel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "disableDateTimeSelector", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "multiplierDefaultDeltaStep", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 2
+        });
     }
 }
 __decorate([

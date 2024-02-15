@@ -4,7 +4,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, computed } from "mobx";
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
+import { action, computed, makeObservable } from "mobx";
 import { observer } from "mobx-react";
 import React from "react";
 //@ts-ignore
@@ -29,6 +30,7 @@ import WorkbenchItemControls from "./Controls/WorkbenchItemControls";
 let WorkbenchItemRaw = class WorkbenchItemRaw extends React.Component {
     constructor(props) {
         super(props);
+        makeObservable(this);
     }
     toggleDisplay() {
         if (!CatalogMemberMixin.isMixedInto(this.props.item))
@@ -51,40 +53,23 @@ let WorkbenchItemRaw = class WorkbenchItemRaw extends React.Component {
         const { item, t } = this.props;
         const isLoading = (CatalogMemberMixin.isMixedInto(item) && item.isLoading) ||
             (ReferenceMixin.isMixedInto(item) && item.isLoadingReference);
-        return (React.createElement(StyledLi, { style: this.props.style, className: this.props.className },
-            React.createElement(Box, { fullWidth: true, justifySpaceBetween: true, padded: true, styledMinHeight: "38px" },
-                React.createElement(Box, { fullWidth: true },
-                    React.createElement(Box, { left: true, fullWidth: true, paddedHorizontally: true, centered: true },
-                        React.createElement(DraggableBox, { onMouseDown: this.props.onMouseDown, onTouchStart: this.props.onTouchStart, title: getPath(item, " → "), fullWidth: true },
-                            !item.isMappable && !isLoading && (React.createElement(BoxSpan, { paddedHorizontally: true, displayInlineBlock: true },
-                                React.createElement(Box, { padded: true },
-                                    React.createElement(StyledIcon, { styledHeight: "18px", light: true, glyph: Icon.GLYPHS.lineChart })))),
-                            MappableMixin.isMixedInto(item) ? (React.createElement(Box, { left: true, verticalCenter: true, css: `
+        return (_jsxs(StyledLi, { style: this.props.style, className: this.props.className, children: [_jsxs(Box, { fullWidth: true, justifySpaceBetween: true, padded: true, styledMinHeight: "38px", children: [_jsx(Box, { fullWidth: true, children: _jsx(Box, { left: true, fullWidth: true, paddedHorizontally: true, centered: true, children: _jsxs(DraggableBox, { onMouseDown: this.props.onMouseDown, onTouchStart: this.props.onTouchStart, title: getPath(item, " → "), fullWidth: true, children: [!item.isMappable && !isLoading && (_jsx(BoxSpan, { paddedHorizontally: true, displayInlineBlock: true, children: _jsx(Box, { padded: true, children: _jsx(StyledIcon, { styledHeight: "18px", light: true, glyph: Icon.GLYPHS.lineChart }) }) })), MappableMixin.isMixedInto(item) ? (_jsx(Box, { left: true, verticalCenter: true, css: `
                       padding-left: 5px;
-                    ` },
-                                React.createElement(Checkbox, { id: "workbenchtoggleVisibility", isChecked: item.show, title: t("workbench.toggleVisibility"), onChange: () => this.toggleVisibility(), css: `
+                    `, children: _jsx(Checkbox, { id: "workbenchtoggleVisibility", isChecked: item.show, title: t("workbench.toggleVisibility"), onChange: () => this.toggleVisibility(), css: `
                         overflow-wrap: anywhere;
-                      `, textProps: { medium: true, fullWidth: true } },
-                                    React.createElement(TextSpan, { medium: true, maxLines: !this.isOpen ? 2 : false, title: getName(item) }, getName(item))))) : (React.createElement(TextSpan, { medium: true, textLight: true, maxLines: !this.isOpen ? 2 : false, title: getName(item), css: `
+                      `, textProps: { medium: true, fullWidth: true }, children: _jsx(TextSpan, { medium: true, maxLines: !this.isOpen ? 2 : false, title: getName(item), children: getName(item) }) }) })) : (_jsx(TextSpan, { medium: true, textLight: true, maxLines: !this.isOpen ? 2 : false, title: getName(item), css: `
                       overflow-wrap: anywhere;
-                    ` }, getName(item)))))),
-                CatalogMemberMixin.isMixedInto(item) ? (React.createElement(Box, { centered: true, paddedHorizontally: true },
-                    React.createElement(RawButton, { onClick: () => this.toggleDisplay() },
-                        item.isPrivate && (React.createElement(BoxSpan, { paddedHorizontally: true },
-                            React.createElement(PrivateIndicator, { inWorkbench: true }))),
-                        React.createElement(BoxSpan, { padded: true }, this.isOpen ? (React.createElement(StyledIcon, { styledHeight: "8px", light: true, glyph: Icon.GLYPHS.opened })) : (React.createElement(StyledIcon, { styledHeight: "8px", light: true, glyph: Icon.GLYPHS.closed })))))) : null),
-            this.isOpen && (React.createElement(React.Fragment, null,
-                React.createElement(Spacing, { bottom: 2, css: `
+                    `, children: getName(item) }))] }) }) }), CatalogMemberMixin.isMixedInto(item) ? (_jsxs(Box, { centered: true, paddedHorizontally: true, children: [item.isPrivate && (_jsx(BoxSpan, { paddedHorizontally: true, children: _jsx(PrivateIndicator, { inWorkbench: true }) })), _jsx(RawButton, { onClick: () => this.toggleDisplay(), children: _jsx(BoxSpan, { padded: true, children: this.isOpen ? (_jsx(StyledIcon, { styledHeight: "8px", light: true, glyph: Icon.GLYPHS.opened })) : (_jsx(StyledIcon, { styledHeight: "8px", light: true, glyph: Icon.GLYPHS.closed })) }) })] })) : null] }), this.isOpen && (_jsxs(_Fragment, { children: [_jsx(Spacing, { bottom: 2, css: `
                 border-top: 1px solid ${this.props.theme.dark};
-              ` }),
-                React.createElement(Box, { column: true, paddedHorizontally: 2 },
-                    React.createElement(WorkbenchItemControls, { item: this.props.item, viewState: this.props.viewState }),
-                    isLoading ? (React.createElement(Box, { paddedVertically: true },
-                        React.createElement(Loader, { light: true }))) : null),
-                React.createElement(Spacing, { bottom: 2 })))));
+              ` }), _jsxs(Box, { column: true, paddedHorizontally: 2, children: [_jsx(WorkbenchItemControls, { item: this.props.item, viewState: this.props.viewState }), isLoading ? (_jsx(Box, { paddedVertically: true, children: _jsx(Loader, { light: true }) })) : null] }), _jsx(Spacing, { bottom: 2 })] }))] }));
     }
 };
-WorkbenchItemRaw.displayName = "WorkbenchItem";
+Object.defineProperty(WorkbenchItemRaw, "displayName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "WorkbenchItem"
+});
 __decorate([
     action.bound
 ], WorkbenchItemRaw.prototype, "toggleDisplay", null);

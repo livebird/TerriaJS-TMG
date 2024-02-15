@@ -1,4 +1,4 @@
-import React from "react";
+import { jsx as _jsx } from "react/jsx-runtime";
 import PropTypes from "prop-types";
 /**
  * Higher-order component that hides element, depending on whether
@@ -9,7 +9,7 @@ export default (WrappedComponent) => {
     // eslint-disable-next-line require-jsdoc
     function WithControlledVisibility({ elementConfig, ...props }) {
         const isVisible = elementConfig ? elementConfig.visible : true;
-        return isVisible ? React.createElement(WrappedComponent, Object.assign({}, props)) : null;
+        return isVisible ? _jsx(WrappedComponent, { ...props }) : null;
     }
     WithControlledVisibility.propTypes = {
         // Extend the wrapped components propTypes

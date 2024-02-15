@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import defaultValue from "terriajs-cesium/Source/Core/defaultValue";
-import { observable } from "mobx";
+import { observable, makeObservable } from "mobx";
 export var UIMode;
 (function (UIMode) {
     UIMode[UIMode["Difference"] = 0] = "Difference";
@@ -15,6 +15,61 @@ export var UIMode;
  */
 export default class MapInteractionMode {
     constructor(options) {
+        Object.defineProperty(this, "onCancel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "buttonText", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "uiMode", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "invisible", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "customUi", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "message", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "messageAsNode", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "pickedFeatures", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "onEnable", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
         /**
          * Gets or sets a callback that is invoked when the user cancels the interaction mode.  If this property is undefined,
          * the interaction mode cannot be canceled.

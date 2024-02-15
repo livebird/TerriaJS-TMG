@@ -11,6 +11,21 @@ import MappableTraits from "./MappableTraits";
 import primitiveTrait from "../Decorators/primitiveTrait";
 import UrlTraits from "./UrlTraits";
 export default class CkanCatalogItemTraits extends mixTraits(UrlTraits, MappableTraits, CkanSharedTraits, CatalogMemberReferenceTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "datasetId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "resourceId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({

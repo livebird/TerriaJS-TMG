@@ -1,9 +1,20 @@
 import FunctionParameter from "./FunctionParameter";
-export default class RegionTypeParameter extends FunctionParameter {
+class RegionTypeParameter extends FunctionParameter {
     constructor() {
         super(...arguments);
-        this.type = "regionType";
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "regionType"
+        });
     }
 }
-RegionTypeParameter.type = "regionType";
+Object.defineProperty(RegionTypeParameter, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "regionType"
+});
+export default RegionTypeParameter;
 //# sourceMappingURL=RegionTypeParameter.js.map

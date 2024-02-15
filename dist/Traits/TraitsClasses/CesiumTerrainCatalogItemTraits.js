@@ -10,6 +10,27 @@ import mixTraits from "../mixTraits";
 import primitiveTrait from "../Decorators/primitiveTrait";
 import UrlTraits from "./UrlTraits";
 export default class CesiumTerrainCatalogItemTraits extends mixTraits(UrlTraits, MappableTraits, CatalogMemberTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "ionAssetId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "ionAccessToken", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "ionServer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({

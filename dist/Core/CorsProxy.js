@@ -1,9 +1,5 @@
 import defined from "terriajs-cesium/Source/Core/defined";
 import URI from "urijs";
-// We want TS to look at the type declared in lib/ThirdParty/terriajs-cesium-extra/index.d.ts
-// and import doesn't allows us to do that, so instead we use require + type casting to ensure
-// we still maintain the type checking, without TS screaming with errors
-const FeatureDetection = require("terriajs-cesium/Source/Core/FeatureDetection").default;
 /**
  * Rewrites URLs so that they're resolved via the TerriaJS-Server proxy rather than going direct. This is most useful
  * for getting around CORS restrictions on services that don't have CORS set up or when using pre-CORS browsers like IE9.
@@ -11,41 +7,70 @@ const FeatureDetection = require("terriajs-cesium/Source/Core/FeatureDetection")
  * tile providers set cache headers to no-cache even for maps that rarely change, resulting in a much slower experience
  * particularly on time-series data).
  */
-export default class CorsProxy {
+class CorsProxy {
     constructor() {
         /**
          * The base URL of the TerriaJS server proxy, to which requests will be appended. In most cases this is the server's
          * host + '/proxy'.
          */
-        this.baseProxyUrl = CorsProxy.DEFAULT_BASE_PROXY_PATH;
+        Object.defineProperty(this, "baseProxyUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: CorsProxy.DEFAULT_BASE_PROXY_PATH
+        });
         /**
          *  Domains that should be proxied for, as set by config files. Stored as an array of hosts - if a TLD is specified,
          * subdomains will also be proxied.
          */
-        this.proxyDomains = undefined;
+        Object.defineProperty(this, "proxyDomains", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
         /**
          * True if we expect that the proxy will proxy any URL - note that if the server isn't set up to do this, having
          * this set to true will just result in a lot of failed AJAX calls
          */
-        this.isOpenProxy = false;
+        Object.defineProperty(this, "isOpenProxy", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
         /**
          * Domains that are known to support CORS, as set by config files.
          */
-        this.corsDomains = [];
+        Object.defineProperty(this, "corsDomains", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
         /**
          * Whether the proxy should be used regardless of whether the domain supports CORS or not. This defaults to true
          * on IE<10.
          */
-        this.alwaysUseProxy = FeatureDetection.isInternetExplorer() &&
-            FeatureDetection.internetExplorerVersion()[0] < 10; // IE versions prior to 10 don't support CORS, so always use the proxy.
+        Object.defineProperty(this, "alwaysUseProxy", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
         /**
          * Whether the page that Terria is running on is HTTPS. This is relevant because calling an HTTP domain from HTTPS
          * results in mixed content warnings and going through the proxy is required to get around this.
          */
-        this.pageIsHttps = typeof window !== "undefined" &&
-            defined(window.location) &&
-            defined(window.location.href) &&
-            new URI(window.location.href).protocol() === "https";
+        Object.defineProperty(this, "pageIsHttps", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: typeof window !== "undefined" &&
+                defined(window.location) &&
+                defined(window.location.href) &&
+                new URI(window.location.href).protocol() === "https"
+        });
     }
     /**
      * Initialises values with config previously loaded from server. This is the recommended way to use this object as it ensures
@@ -83,7 +108,7 @@ export default class CorsProxy {
             return false;
         }
         host = host.toLowerCase();
-        for (var i = 0; i < domains.length; i++) {
+        for (let i = 0; i < domains.length; i++) {
             if (host.match("(^|\\.)" + domains[i] + "$")) {
                 return true;
             }
@@ -103,7 +128,7 @@ export default class CorsProxy {
         return this.getProxyBaseURL(proxyFlag) + resource;
     }
     getProxyBaseURL(proxyFlag) {
-        var flag = proxyFlag === undefined ? "" : "_" + proxyFlag + "/";
+        const flag = proxyFlag === undefined ? "" : "_" + proxyFlag + "/";
         return this.baseProxyUrl + flag;
     }
     /**
@@ -137,8 +162,8 @@ export default class CorsProxy {
             // eg. no url may be passed if all data is embedded
             return false;
         }
-        var uri = new URI(url);
-        var host = uri.host();
+        const uri = new URI(url);
+        const host = uri.host();
         if (host === "") {
             // do not proxy local files
             return false;
@@ -162,5 +187,11 @@ export default class CorsProxy {
         return true;
     }
 }
-CorsProxy.DEFAULT_BASE_PROXY_PATH = "proxy/";
+Object.defineProperty(CorsProxy, "DEFAULT_BASE_PROXY_PATH", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "proxy/"
+});
+export default CorsProxy;
 //# sourceMappingURL=CorsProxy.js.map

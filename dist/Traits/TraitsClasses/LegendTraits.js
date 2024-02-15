@@ -11,10 +11,96 @@ import ModelTraits from "../ModelTraits";
 export class LegendItemTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.maxMultipleTitlesShowed = 10;
-        this.rotation = 0;
-        this.imageHeight = 20;
-        this.imageWidth = 20;
+        Object.defineProperty(this, "title", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "multipleTitles", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "maxMultipleTitlesShowed", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 10
+        });
+        Object.defineProperty(this, "titleAbove", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "titleBelow", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "color", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "outlineColor", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "outlineWidth", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "multipleColors", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "imageUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "marker", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "rotation", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
+        Object.defineProperty(this, "addSpacingAbove", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "imageHeight", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 20
+        });
+        Object.defineProperty(this, "imageWidth", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 20
+        });
     }
 }
 __decorate([
@@ -128,7 +214,42 @@ __decorate([
 export default class LegendTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.imageScaling = 1;
+        Object.defineProperty(this, "title", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "url", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "imageScaling", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 1
+        });
+        Object.defineProperty(this, "urlMimeType", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "items", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "backgroundColor", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([

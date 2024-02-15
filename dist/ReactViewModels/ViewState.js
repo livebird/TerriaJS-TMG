@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, computed, observable, reaction, runInAction } from "mobx";
+import { action, computed, observable, reaction, runInAction, makeObservable } from "mobx";
 import defined from "terriajs-cesium/Source/Core/defined";
 import addedByUser from "../Core/addedByUser";
 import { Category, HelpAction, StoryAction } from "../Core/AnalyticEvents/analyticEvents";
@@ -21,6 +21,7 @@ import { animationDuration } from "../ReactViews/StandardUserInterface/StandardU
 import { defaultTourPoints, RelativePosition } from "./defaultTourPoints";
 import DisclaimerHandler from "./DisclaimerHandler";
 import SearchState from "./SearchState";
+import { getMarkerCatalogItem } from "../Models/LocationMarkerUtils";
 export const DATA_CATALOG_NAME = "data-catalog";
 export const USER_DATA_NAME = "my-data";
 // check showWorkbenchButton delay and transforms
@@ -31,44 +32,316 @@ export const WORKBENCH_RESIZE_ANIMATION_DURATION = 500;
  * the root of the UI and then it can choose to pass either the whole thing or parts down as props to its children.
  */
 export default class ViewState {
-    constructor(options) {
-        this.mobileViewOptions = Object.freeze({
-            data: "data",
-            preview: "preview",
-            nowViewing: "nowViewing",
-            locationSearchResults: "locationSearchResults"
-        });
-        this.relativePosition = RelativePosition;
-        this.explorerPanelIsVisible = false;
-        this.activeTabCategory = DATA_CATALOG_NAME;
-        this.activeTabIdInCategory = undefined;
-        this.isDraggingDroppingFile = false;
-        this.mobileView = null;
-        this.isMapFullScreen = false;
-        this.myDataIsUploadView = true;
-        this.mobileMenuVisible = false;
-        this.explorerPanelAnimating = false;
-        this.topElement = "FeatureInfo";
-        // Map for storing react portal containers created by <PortalContainer> component.
-        this.portals = new Map();
-        this.lastUploadedFiles = [];
-        this.storyBuilderShown = false;
-        // Flesh out later
-        this.showHelpMenu = false;
-        this.showSatelliteGuidance = false;
-        this.showWelcomeMessage = false;
-        this.selectedHelpMenuItem = "";
-        this.helpPanelExpanded = false;
-        this.disclaimerSettings = undefined;
-        this.disclaimerVisible = false;
-        this.videoGuideVisible = "";
-        this.trainerBarVisible = false;
-        this.trainerBarExpanded = false;
-        this.trainerBarShowingAllSteps = false;
-        this.selectedTrainerItem = "";
-        this.currentTrainerItemIndex = 0;
+    get previewedItem() {
+        return this._previewedItem;
+    }
+    setSelectedTrainerItem(trainerItem) {
+        this.selectedTrainerItem = trainerItem;
+    }
+    setTrainerBarVisible(bool) {
+        this.trainerBarVisible = bool;
+    }
+    setTrainerBarShowingAllSteps(bool) {
+        this.trainerBarShowingAllSteps = bool;
+    }
+    setTrainerBarExpanded(bool) {
+        this.trainerBarExpanded = bool;
+        // if collapsing trainer bar, also hide steps
+        if (!bool) {
+            this.trainerBarShowingAllSteps = bool;
+        }
+    }
+    setCurrentTrainerItemIndex(index) {
+        this.currentTrainerItemIndex = index;
         this.currentTrainerStepIndex = 0;
-        this.printWindow = null;
+    }
+    setCurrentTrainerStepIndex(index) {
+        this.currentTrainerStepIndex = index;
+    }
+    setActionBarVisible(visible) {
+        this.isActionBarVisible = visible;
+    }
+    setBottomDockHeight(height) {
+        if (this.bottomDockHeight !== height) {
+            this.bottomDockHeight = height;
+        }
+    }
+    get tourPointsWithValidRefs() {
+        // should viewstate.ts reach into document? seems unavoidable if we want
+        // this to be the true source of tourPoints.
+        // update: well it turns out you can be smarter about it and actually
+        // properly clean up your refs - so we'll leave that up to the UI to
+        // provide valid refs
+        return this.tourPoints
+            .slice()
+            .sort((a, b) => {
+            return a.priority - b.priority;
+        })
+            .filter((tourPoint) => { var _a; return (_a = this.appRefs.get(tourPoint.appRefName)) === null || _a === void 0 ? void 0 : _a.current; });
+    }
+    setTourIndex(index) {
+        this.currentTourIndex = index;
+    }
+    setShowTour(bool) {
+        this.showTour = bool;
+        // If we're enabling the tour, make sure the trainer is collapsed
+        if (bool) {
+            this.setTrainerBarExpanded(false);
+        }
+    }
+    closeTour() {
+        this.currentTourIndex = -1;
+        this.showTour = false;
+    }
+    previousTourPoint() {
+        const currentIndex = this.currentTourIndex;
+        if (currentIndex !== 0) {
+            this.currentTourIndex = currentIndex - 1;
+        }
+    }
+    nextTourPoint() {
+        const totalTourPoints = this.tourPointsWithValidRefs.length;
+        const currentIndex = this.currentTourIndex;
+        if (currentIndex >= totalTourPoints - 1) {
+            this.closeTour();
+        }
+        else {
+            this.currentTourIndex = currentIndex + 1;
+        }
+    }
+    closeCollapsedNavigation() {
+        this.showCollapsedNavigation = false;
+    }
+    updateAppRef(refName, ref) {
+        if (!this.appRefs.get(refName) || this.appRefs.get(refName) !== ref) {
+            this.appRefs.set(refName, ref);
+        }
+    }
+    deleteAppRef(refName) {
+        this.appRefs.delete(refName);
+    }
+    constructor(options) {
+        Object.defineProperty(this, "mobileViewOptions", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: Object.freeze({
+                data: "data",
+                preview: "preview",
+                nowViewing: "nowViewing",
+                locationSearchResults: "locationSearchResults"
+            })
+        });
+        Object.defineProperty(this, "searchState", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "terria", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "relativePosition", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: RelativePosition
+        });
+        Object.defineProperty(this, "_previewedItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "userDataPreviewedItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "explorerPanelIsVisible", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "activeTabCategory", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: DATA_CATALOG_NAME
+        });
+        Object.defineProperty(this, "activeTabIdInCategory", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "isDraggingDroppingFile", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "mobileView", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: null
+        });
+        Object.defineProperty(this, "isMapFullScreen", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "myDataIsUploadView", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "mobileMenuVisible", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "explorerPanelAnimating", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "topElement", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "FeatureInfo"
+        });
+        // Map for storing react portal containers created by <Portal> component.
+        Object.defineProperty(this, "portals", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new Map()
+        });
+        Object.defineProperty(this, "lastUploadedFiles", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "storyBuilderShown", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        // Flesh out later
+        Object.defineProperty(this, "showHelpMenu", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "showSatelliteGuidance", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "showWelcomeMessage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "selectedHelpMenuItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: ""
+        });
+        Object.defineProperty(this, "helpPanelExpanded", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "disclaimerSettings", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "disclaimerVisible", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "videoGuideVisible", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: ""
+        });
+        Object.defineProperty(this, "trainerBarVisible", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "trainerBarExpanded", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "trainerBarShowingAllSteps", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "selectedTrainerItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: ""
+        });
+        Object.defineProperty(this, "currentTrainerItemIndex", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
+        Object.defineProperty(this, "currentTrainerStepIndex", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
+        Object.defineProperty(this, "printWindow", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: null
+        });
+        /**
+         * Toggles ActionBar visibility. Do not set manually, it is
+         * automatically set when rendering <ActionBar>
+         */
+        Object.defineProperty(this, "isActionBarVisible", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
         /**
          * A global list of functions that generate a {@link ViewingControl} option
          * for the given catalog item instance.  This is useful for plugins to extend
@@ -76,23 +349,81 @@ export default class ViewState {
          *
          * Use {@link ViewingControlsMenu.addMenuItem} instead of updating directly.
          */
-        this.globalViewingControlOptions = [];
+        Object.defineProperty(this, "globalViewingControlOptions", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        /**
+         * A global list of hooks for generating input controls for items in the workbench.
+         * The hooks in this list gets called once for each item in shown in the workbench.
+         * This is a mechanism for plugins to extend workbench input controls by adding new ones.
+         *
+         * Use {@link WorkbenchItem.Inputs.addInput} instead of updating directly.
+         */
+        Object.defineProperty(this, "workbenchItemInputGenerators", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        /**
+         * A global list of generator functions for showing buttons in feature info panel.
+         * Use {@link FeatureInfoPanelButton.addButton} instead of updating directly.
+         */
+        Object.defineProperty(this, "featureInfoPanelButtonGenerators", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
         /**
          * Bottom dock state & action
          */
-        this.bottomDockHeight = 0;
+        Object.defineProperty(this, "bottomDockHeight", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
         /**
          * ID of the workbench item whose ViewingControls menu is currently open.
          */
-        this.workbenchItemWithOpenControls = undefined;
-        this.errorProvider = null;
+        Object.defineProperty(this, "workbenchItemWithOpenControls", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "errorProvider", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: null
+        });
         // default value is null, because user has not made decision to show or
         // not show story
         // will be explicitly set to false when user 1. dismiss story
         // notification or 2. close a story
-        this.storyShown = null;
-        this.currentStoryId = 0;
-        this.featurePrompts = [];
+        Object.defineProperty(this, "storyShown", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: null
+        });
+        Object.defineProperty(this, "currentStoryId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
+        Object.defineProperty(this, "featurePrompts", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
         /**
          * we need a layering system for touring the app, but also a way for it to be
          * chopped and changed from a terriamap
@@ -122,52 +453,193 @@ export default class ViewState {
          * ...?
          * }
          *  */
-        this.tourPoints = defaultTourPoints;
-        this.showTour = false;
-        this.appRefs = new Map();
-        this.currentTourIndex = -1;
-        this.showCollapsedNavigation = false;
+        Object.defineProperty(this, "tourPoints", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: defaultTourPoints
+        });
+        Object.defineProperty(this, "showTour", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "appRefs", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new Map()
+        });
+        Object.defineProperty(this, "currentTourIndex", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: -1
+        });
+        Object.defineProperty(this, "showCollapsedNavigation", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
         /**
          * Gets or sets a value indicating whether the small screen (mobile) user interface should be used.
          * @type {Boolean}
          */
-        this.useSmallScreenInterface = false;
+        Object.defineProperty(this, "useSmallScreenInterface", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
         /**
          * Gets or sets a value indicating whether the feature info panel is visible.
          * @type {Boolean}
          */
-        this.featureInfoPanelIsVisible = false;
+        Object.defineProperty(this, "featureInfoPanelIsVisible", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
         /**
          * Gets or sets a value indicating whether the feature info panel is collapsed.
          * When it's collapsed, only the title bar is visible.
          * @type {Boolean}
          */
-        this.featureInfoPanelIsCollapsed = false;
+        Object.defineProperty(this, "featureInfoPanelIsCollapsed", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
         /**
          * True if this is (or will be) the first time the user has added data to the map.
          * @type {Boolean}
          */
-        this.firstTimeAddingData = true;
+        Object.defineProperty(this, "firstTimeAddingData", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
         /**
          * Gets or sets a value indicating whether the feedback form is visible.
          * @type {Boolean}
          */
-        this.feedbackFormIsVisible = false;
+        Object.defineProperty(this, "feedbackFormIsVisible", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
         /**
          * Gets or sets a value indicating whether the catalog's modal share panel
          * is currently visible.
          */
-        this.shareModalIsVisible = false; // Small share modal inside StoryEditor
+        Object.defineProperty(this, "shareModalIsVisible", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        }); // Small share modal inside StoryEditor
         /**
          * Used to indicate that the Share Panel should stay open even if it loses focus.
          * This is used when clicking a help link in the Share Panel - The Help Panel will open, and when it is closed, the Share Panel should still be visible for the user to continue their task.
          */
-        this.retainSharePanel = false; // The large share panel accessed via Share/Print button
+        Object.defineProperty(this, "retainSharePanel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        }); // The large share panel accessed via Share/Print button
+        /**
+         * The currently open tool
+         */
+        Object.defineProperty(this, "currentTool", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "panel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_pickedFeaturesSubscription", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_disclaimerVisibleSubscription", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_isMapFullScreenSubscription", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_showStoriesSubscription", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_mobileMenuSubscription", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_storyPromptSubscription", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_previewedItemIdSubscription", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_locationMarkerSubscription", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_workbenchHasTimeWMSSubscription", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_storyBeforeUnloadSubscription", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_disclaimerHandler", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
         const terria = options.terria;
         this.searchState = new SearchState({
-            terria: terria,
-            catalogSearchProvider: options.catalogSearchProvider,
-            locationSearchProviders: options.locationSearchProviders
+            terria,
+            catalogSearchProvider: options.catalogSearchProvider
         });
         this.errorProvider = options.errorHandlingProvider
             ? options.errorHandlingProvider
@@ -232,6 +704,13 @@ export default class ViewState {
                 }
             }
         });
+        this._locationMarkerSubscription = reaction(() => getMarkerCatalogItem(this.terria), (item) => {
+            if (item) {
+                terria.overlays.add(item);
+                /* dispose subscription after init */
+                this._locationMarkerSubscription();
+            }
+        });
         this._previewedItemIdSubscription = reaction(() => this.terria.previewedItemId, async (previewedItemId) => {
             if (previewedItemId === undefined) {
                 return;
@@ -263,90 +742,6 @@ export default class ViewState {
             }
         });
     }
-    get previewedItem() {
-        return this._previewedItem;
-    }
-    setSelectedTrainerItem(trainerItem) {
-        this.selectedTrainerItem = trainerItem;
-    }
-    setTrainerBarVisible(bool) {
-        this.trainerBarVisible = bool;
-    }
-    setTrainerBarShowingAllSteps(bool) {
-        this.trainerBarShowingAllSteps = bool;
-    }
-    setTrainerBarExpanded(bool) {
-        this.trainerBarExpanded = bool;
-        // if collapsing trainer bar, also hide steps
-        if (!bool) {
-            this.trainerBarShowingAllSteps = bool;
-        }
-    }
-    setCurrentTrainerItemIndex(index) {
-        this.currentTrainerItemIndex = index;
-        this.currentTrainerStepIndex = 0;
-    }
-    setCurrentTrainerStepIndex(index) {
-        this.currentTrainerStepIndex = index;
-    }
-    setBottomDockHeight(height) {
-        if (this.bottomDockHeight !== height) {
-            this.bottomDockHeight = height;
-        }
-    }
-    get tourPointsWithValidRefs() {
-        // should viewstate.ts reach into document? seems unavoidable if we want
-        // this to be the true source of tourPoints.
-        // update: well it turns out you can be smarter about it and actually
-        // properly clean up your refs - so we'll leave that up to the UI to
-        // provide valid refs
-        return this.tourPoints
-            .sort((a, b) => {
-            return a.priority - b.priority;
-        })
-            .filter((tourPoint) => { var _a; return (_a = this.appRefs.get(tourPoint.appRefName)) === null || _a === void 0 ? void 0 : _a.current; });
-    }
-    setTourIndex(index) {
-        this.currentTourIndex = index;
-    }
-    setShowTour(bool) {
-        this.showTour = bool;
-        // If we're enabling the tour, make sure the trainer is collapsed
-        if (bool) {
-            this.setTrainerBarExpanded(false);
-        }
-    }
-    closeTour() {
-        this.currentTourIndex = -1;
-        this.showTour = false;
-    }
-    previousTourPoint() {
-        const currentIndex = this.currentTourIndex;
-        if (currentIndex !== 0) {
-            this.currentTourIndex = currentIndex - 1;
-        }
-    }
-    nextTourPoint() {
-        const totalTourPoints = this.tourPointsWithValidRefs.length;
-        const currentIndex = this.currentTourIndex;
-        if (currentIndex >= totalTourPoints - 1) {
-            this.closeTour();
-        }
-        else {
-            this.currentTourIndex = currentIndex + 1;
-        }
-    }
-    closeCollapsedNavigation() {
-        this.showCollapsedNavigation = false;
-    }
-    updateAppRef(refName, ref) {
-        if (!this.appRefs.get(refName) || this.appRefs.get(refName) !== ref) {
-            this.appRefs.set(refName, ref);
-        }
-    }
-    deleteAppRef(refName) {
-        this.appRefs.delete(refName);
-    }
     dispose() {
         this._pickedFeaturesSubscription();
         this._disclaimerVisibleSubscription();
@@ -356,6 +751,7 @@ export default class ViewState {
         this._storyPromptSubscription();
         this._previewedItemIdSubscription();
         this._workbenchHasTimeWMSSubscription();
+        this._locationMarkerSubscription();
         this._disclaimerHandler.dispose();
         this.searchState.dispose();
     }
@@ -691,7 +1087,16 @@ __decorate([
 ], ViewState.prototype, "printWindow", void 0);
 __decorate([
     observable
+], ViewState.prototype, "isActionBarVisible", void 0);
+__decorate([
+    observable
 ], ViewState.prototype, "globalViewingControlOptions", void 0);
+__decorate([
+    observable
+], ViewState.prototype, "workbenchItemInputGenerators", void 0);
+__decorate([
+    observable
+], ViewState.prototype, "featureInfoPanelButtonGenerators", void 0);
 __decorate([
     action
 ], ViewState.prototype, "setSelectedTrainerItem", null);
@@ -710,6 +1115,9 @@ __decorate([
 __decorate([
     action
 ], ViewState.prototype, "setCurrentTrainerStepIndex", null);
+__decorate([
+    action
+], ViewState.prototype, "setActionBarVisible", null);
 __decorate([
     observable
 ], ViewState.prototype, "bottomDockHeight", void 0);
@@ -743,6 +1151,9 @@ __decorate([
 __decorate([
     observable
 ], ViewState.prototype, "showCollapsedNavigation", void 0);
+__decorate([
+    computed
+], ViewState.prototype, "tourPointsWithValidRefs", null);
 __decorate([
     action
 ], ViewState.prototype, "setTourIndex", null);

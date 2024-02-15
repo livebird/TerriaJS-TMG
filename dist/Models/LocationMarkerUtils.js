@@ -76,4 +76,7 @@ export function getMarkerLocation(terria) {
     }
     return undefined;
 }
+export function getMarkerCatalogItem(terria) {
+    return terria.getModelById(CzmlCatalogItem, MARKER_UNIQUE_ID);
+}
 //# sourceMappingURL=LocationMarkerUtils.js.map

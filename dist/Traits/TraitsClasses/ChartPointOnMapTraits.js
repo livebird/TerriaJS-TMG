@@ -8,6 +8,15 @@ import LatLonHeightTraits from "./LatLonHeightTraits";
 import ModelTraits from "../ModelTraits";
 import objectTrait from "../Decorators/objectTrait";
 export default class ChartPointOnMapTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "chartPointOnMap", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     objectTrait({

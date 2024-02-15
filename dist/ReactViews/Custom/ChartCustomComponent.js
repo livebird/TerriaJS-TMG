@@ -45,6 +45,12 @@ import CustomComponent from "./CustomComponent";
 export default class ChartCustomComponent extends CustomComponent {
     constructor() {
         super(...arguments);
+        Object.defineProperty(this, "chartItemId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         /**
          * For some catalog types, for the chart item to be shareable, it needs to be
          * constructed as a reference to the original item. This method can be
@@ -54,7 +60,41 @@ export default class ChartCustomComponent extends CustomComponent {
          * This method is used only for constructing a chart item to show
          * in the chart panel, not for the feature info panel chart item.
          */
-        this.constructShareableCatalogItem = undefined;
+        Object.defineProperty(this, "constructShareableCatalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        /**
+         * Construct a download URL from the chart body text.
+         * This URL will be used to present a download link when other download
+         * options are not specified for the chart.
+         *
+         * See {@CsvChartCustomComponent} for an example implementation.
+         *
+         * @param body The body string.
+         * @return URL to be passed as `href` for the download link.
+         */
+        Object.defineProperty(this, "constructDownloadUrlFromBody", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        /**
+         * Populate  traits in the supplied catalog item with the values from the body of the component.
+         * Assume it will be run in an action.
+         * @param item
+         * @param attrs
+         * @param sourceIndex
+         */
+        Object.defineProperty(this, "setTraitsFromBody", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
     get attributes() {
         return [
@@ -315,7 +355,7 @@ export default class ChartCustomComponent extends CustomComponent {
 }
 function checkAllPropertyKeys(object, allowedKeys) {
     for (const key in object) {
-        if (object.hasOwnProperty(key)) {
+        if (Object.hasOwnProperty.call(object, key)) {
             if (allowedKeys.indexOf(key) === -1) {
                 console.log("Unknown attribute " + key);
             }

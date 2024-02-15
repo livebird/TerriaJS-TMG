@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { computed, runInAction } from "mobx";
+import { computed, runInAction, makeObservable } from "mobx";
 import URI from "urijs";
 import isDefined from "../../../Core/isDefined";
 import loadJson from "../../../Core/loadJson";
@@ -25,8 +25,18 @@ import StratumOrder from "../../Definition/StratumOrder";
 export class SenapsLocationsStratum extends LoadableStratum(SenapsLocationsCatalogItemTraits) {
     constructor(senapsLocationsCatalogItem, geojsonItem) {
         super();
-        this.senapsLocationsCatalogItem = senapsLocationsCatalogItem;
-        this.geojsonItem = geojsonItem;
+        Object.defineProperty(this, "senapsLocationsCatalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: senapsLocationsCatalogItem
+        });
+        Object.defineProperty(this, "geojsonItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: geojsonItem
+        });
         this.geojsonItem = geojsonItem;
     }
     duplicateLoadableStratum(newModel) {
@@ -34,27 +44,27 @@ export class SenapsLocationsStratum extends LoadableStratum(SenapsLocationsCatal
     }
     static async load(senapsLocationsCatalogItem) {
         const locationsUrl = senapsLocationsCatalogItem._constructLocationsUrl();
+        function addStreamIds(f, index, streamData) {
+            const sd = streamData[index];
+            if (sd.count === 0) {
+                f.properties.hasStreams = false;
+            }
+            else if (sd._embedded !== undefined) {
+                f.properties.streamIds = sd._embedded.streams.map((s) => s.id);
+                f.properties.hasStreams = true;
+            }
+        }
         try {
             const locationsResponse = await loadJson(proxyCatalogItemUrl(senapsLocationsCatalogItem, locationsUrl, "0d"));
             const locations = locationsResponse._embedded.locations;
             const streamPromises = [];
-            for (var i = 0; i < locations.length; i++) {
+            for (let i = 0; i < locations.length; i++) {
                 const location = locations[i];
                 const locationId = location.id;
                 const streamUrl = proxyCatalogItemUrl(senapsLocationsCatalogItem, senapsLocationsCatalogItem._constructStreamsUrl(locationId), "0d");
                 streamPromises.push(loadJson(streamUrl));
             }
             const streamData = await Promise.all(streamPromises);
-            function addStreamIds(f, index) {
-                const sd = streamData[index];
-                if (sd.count === 0) {
-                    f.properties.hasStreams = false;
-                }
-                else if (sd._embedded !== undefined) {
-                    f.properties.streamIds = sd._embedded.streams.map((s) => s.id);
-                    f.properties.hasStreams = true;
-                }
-            }
             const fc = {
                 type: "FeatureCollection",
                 features: locations.map((site, i) => {
@@ -69,7 +79,7 @@ export class SenapsLocationsStratum extends LoadableStratum(SenapsLocationsCatal
                         },
                         geometry: site.geojson
                     };
-                    addStreamIds(f, i);
+                    addStreamIds(f, i, streamData);
                     return f;
                 })
             };
@@ -126,9 +136,18 @@ export class SenapsLocationsStratum extends LoadableStratum(SenapsLocationsCatal
         return this.geojsonItem;
     }
 }
-SenapsLocationsStratum.stratumName = "SenapsLocations";
+Object.defineProperty(SenapsLocationsStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "SenapsLocations"
+});
 StratumOrder.addLoadStratum(SenapsLocationsStratum.stratumName);
 class SenapsLocationsCatalogItem extends MappableMixin(UrlMixin(CatalogMemberMixin(CreateModel(SenapsLocationsCatalogItemTraits)))) {
+    constructor(...args) {
+        super(...args);
+        makeObservable(this);
+    }
     get type() {
         return SenapsLocationsCatalogItem.type;
     }
@@ -167,7 +186,7 @@ class SenapsLocationsCatalogItem extends MappableMixin(UrlMixin(CatalogMemberMix
                 message: i18next.t("models.senaps.missingSenapsBaseUrl")
             });
         }
-        var uri = new URI(`${this.url}/locations`);
+        const uri = new URI(`${this.url}/locations`);
         if (this.locationIdFilter !== undefined) {
             uri.setSearch("id", this.locationIdFilter);
         }
@@ -182,7 +201,7 @@ class SenapsLocationsCatalogItem extends MappableMixin(UrlMixin(CatalogMemberMix
                 message: i18next.t("models.senaps.missingSenapsBaseUrl")
             });
         }
-        var uri = new URI(`${this.url}/streams`);
+        const uri = new URI(`${this.url}/streams`);
         if (this.streamIdFilter !== undefined) {
             uri.setSearch("id", this.streamIdFilter);
         }
@@ -190,7 +209,12 @@ class SenapsLocationsCatalogItem extends MappableMixin(UrlMixin(CatalogMemberMix
         return uri.toString();
     }
 }
-SenapsLocationsCatalogItem.type = "senaps-locations";
+Object.defineProperty(SenapsLocationsCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "senaps-locations"
+});
 __decorate([
     computed
 ], SenapsLocationsCatalogItem.prototype, "geoJsonItem", null);

@@ -14,6 +14,27 @@ import SplitterTraits from "./SplitterTraits";
 import StyleTraits from "./StyleTraits";
 import UrlTraits from "./UrlTraits";
 export default class SenapsLocationsCatalogItemTraits extends mixTraits(SplitterTraits, MappableTraits, CatalogMemberTraits, LegendOwnerTraits, UrlTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "locationIdFilter", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "streamIdFilter", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "style", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({

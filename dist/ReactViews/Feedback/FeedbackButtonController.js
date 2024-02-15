@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, computed } from "mobx";
+import { action, computed, makeObservable } from "mobx";
 import isDefined from "../../Core/isDefined";
 import { GLYPHS } from "../../Styled/Icon";
 import MapNavigationItemController from "../../ViewModels/MapNavigation/MapNavigationItemController";
@@ -12,7 +12,13 @@ export const FEEDBACK_TOOL_ID = "feedback";
 export class FeedbackButtonController extends MapNavigationItemController {
     constructor(viewState) {
         super();
-        this.viewState = viewState;
+        Object.defineProperty(this, "viewState", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: viewState
+        });
+        makeObservable(this);
     }
     get glyph() {
         return GLYPHS.feedback;

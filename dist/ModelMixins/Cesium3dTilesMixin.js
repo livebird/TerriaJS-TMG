@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { action, computed, isObservableArray, observable, runInAction, toJS } from "mobx";
+import { action, computed, isObservableArray, observable, runInAction, toJS, makeObservable, override } from "mobx";
 import Cartesian3 from "terriajs-cesium/Source/Core/Cartesian3";
 import clone from "terriajs-cesium/Source/Core/clone";
 import Color from "terriajs-cesium/Source/Core/Color";
@@ -38,6 +38,10 @@ import ClippingMixin from "./ClippingMixin";
 import MappableMixin from "./MappableMixin";
 import ShadowMixin from "./ShadowMixin";
 class Cesium3dTilesStratum extends LoadableStratum(Cesium3dTilesTraits) {
+    constructor(...args) {
+        super(...args);
+        makeObservable(this);
+    }
     duplicateLoadableStratum(model) {
         return new Cesium3dTilesStratum();
     }
@@ -52,9 +56,21 @@ __decorate([
 StratumOrder.instance.addLoadStratum(Cesium3dTilesStratum.name);
 const DEFAULT_HIGHLIGHT_COLOR = "#ff3f00";
 class ObservableCesium3DTileset extends Cesium3DTileset {
-    constructor() {
-        super(...arguments);
-        this.destroyed = false;
+    constructor(...args) {
+        super(...args);
+        Object.defineProperty(this, "_catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "destroyed", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        makeObservable(this);
     }
     destroy() {
         super.destroy();
@@ -75,16 +91,29 @@ function Cesium3dTilesMixin(Base) {
     class Cesium3dTilesMixin extends ClippingMixin(ShadowMixin(MappableMixin(CatalogMemberMixin(Base)))) {
         constructor(...args) {
             super(...args);
+            Object.defineProperty(this, "tileset", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
             // Just a variable to save the original tileset.root.transform if it exists
-            this.originalRootTransform = Matrix4.IDENTITY.clone();
-            // An observable tracker for tileset.ready
-            this.isTilesetReady = false;
+            Object.defineProperty(this, "originalRootTransform", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: Matrix4.IDENTITY.clone()
+            });
+            makeObservable(this);
             runInAction(() => {
                 this.strata.set(Cesium3dTilesStratum.name, new Cesium3dTilesStratum());
             });
         }
+        get hasCesium3dTilesMixin() {
+            return true;
+        }
         clippingPlanesOriginMatrix() {
-            if (this.tileset && this.isTilesetReady) {
+            if (this.tileset) {
                 // clippingPlanesOriginMatrix is private.
                 // We need it to find the position where cesium centers the clipping plane for the tileset.
                 // See if we can find another way to get it.
@@ -96,9 +125,9 @@ function Cesium3dTilesMixin(Base) {
         }
         async forceLoadMapItems() {
             try {
-                this.loadTileset();
+                await this.loadTileset();
                 if (this.tileset) {
-                    const tileset = await this.tileset.readyPromise;
+                    const tileset = this.tileset;
                     if (tileset.extras !== undefined &&
                         tileset.extras.style !== undefined) {
                         runInAction(() => {
@@ -127,28 +156,50 @@ function Cesium3dTilesMixin(Base) {
             if (!isDefined(resource)) {
                 return;
             }
-            const tileset = new ObservableCesium3DTileset({
-                ...this.optionsObj,
-                url: resource
-            });
-            tileset._catalogItem = this;
-            runLater(action(() => {
-                this.isTilesetReady = tileset.ready;
-            }));
-            if (!tileset.destroyed) {
-                this.tileset = tileset;
-            }
             // Save the original root tile transform and set its value to an identity
             // matrix This lets us control the whole model transformation using just
             // tileset.modelMatrix We later derive a tilset.modelMatrix by combining
             // the root transform and transformation traits in mapItems.
-            tileset.readyPromise.then(action(() => {
-                this.isTilesetReady = tileset.ready;
-                if (tileset.root !== undefined) {
-                    this.originalRootTransform = tileset.root.transform.clone();
-                    tileset.root.transform = Matrix4.IDENTITY.clone();
-                }
-            }));
+            return Promise.resolve(resource).then((resource) => {
+                if (resource === undefined)
+                    return;
+                const tilesetPromise = Cesium3DTileset.fromUrl(resource, {
+                    ...this.optionsObj
+                });
+                return tilesetPromise.then((tileset) => {
+                    // Hackily turn the Cesium3DTileset into an ObservableCesium3DTileset
+                    const anyTileset = tileset;
+                    anyTileset._catalogItem = this;
+                    anyTileset.destroyed = tileset.isDestroyed();
+                    const superDestroy = anyTileset.destroy;
+                    anyTileset.destroy = function () {
+                        superDestroy.call(this);
+                        // TODO: we are running later to prevent this
+                        // modification from happening in some computed up the call chain.
+                        // Figure out why that is happening and fix it.
+                        runLater(() => {
+                            runInAction(() => {
+                                this.destroyed = true;
+                            });
+                        });
+                    };
+                    makeObservable(anyTileset, {
+                        destroyed: observable
+                    });
+                    const observableTileset = anyTileset;
+                    runInAction(() => {
+                        observableTileset._catalogItem = this;
+                        if (!observableTileset.destroyed) {
+                            this.tileset = observableTileset;
+                            if (observableTileset.root !== undefined) {
+                                this.originalRootTransform =
+                                    observableTileset.root.transform.clone();
+                                observableTileset.root.transform = Matrix4.IDENTITY.clone();
+                            }
+                        }
+                    });
+                });
+            });
         }
         /**
          * Computes a new model matrix by combining the given matrix with the
@@ -156,7 +207,7 @@ function Cesium3dTilesMixin(Base) {
          */
         computeModelMatrixFromTransformationTraits(modelMatrix) {
             let scale = Matrix4.getScale(modelMatrix, new Cartesian3());
-            let position = Matrix4.getTranslation(modelMatrix, new Cartesian3());
+            const position = Matrix4.getTranslation(modelMatrix, new Cartesian3());
             let orientation = Quaternion.fromRotationMatrix(Matrix4.getMatrix3(modelMatrix, new Matrix3()));
             const { latitude, longitude, height } = this.origin;
             if (latitude !== undefined && longitude !== undefined) {
@@ -250,7 +301,7 @@ function Cesium3dTilesMixin(Base) {
             if (!isDefined(ionAssetId)) {
                 return;
             }
-            let resource = await IonResource.fromAssetId(ionAssetId, {
+            const resource = await IonResource.fromAssetId(ionAssetId, {
                 accessToken: ionAccessToken || this.terria.configParameters.cesiumIonAccessToken,
                 server: ionServer
             });
@@ -323,7 +374,7 @@ function Cesium3dTilesMixin(Base) {
                         "${opacity}" +
                         "))";
             }
-            else if (typeof style.color == "string") {
+            else if (typeof style.color === "string") {
                 // Check if the color specified is just a css color
                 const cssColor = Color.fromCssColorString(style.color);
                 if (isDefined(cssColor)) {
@@ -345,7 +396,7 @@ function Cesium3dTilesMixin(Base) {
                 (pickResult instanceof Cesium3DTileFeature ||
                     pickResult instanceof Cesium3DTilePointFeature)) {
                 const properties = {};
-                pickResult.getPropertyNames().forEach((name) => {
+                pickResult.getPropertyIds().forEach((name) => {
                     properties[name] = pickResult.getProperty(name);
                 });
                 const result = new TerriaFeature({
@@ -367,27 +418,42 @@ function Cesium3dTilesMixin(Base) {
             if (this.featureIdProperties)
                 return this.featureIdProperties.slice();
             const propretyNamedId = feature
-                .getPropertyNames()
+                .getPropertyIds()
                 .find((name) => name.toLowerCase() === "id");
             return propretyNamedId ? [propretyNamedId] : [];
+        }
+        /**
+         * Returns a selector that can be used for filtering or styling the given
+         * feature.  For this to work, the feature should have a property called
+         * `id` or the catalog item should have the trait `featureIdProperties` defined.
+         *
+         * @returns Selector string or `undefined` when no unique selector can be constructed for the feature
+         */
+        getSelectorForFeature(feature) {
+            const idProperties = this.getIdPropertiesForFeature(feature).sort();
+            if (idProperties.length === 0) {
+                return;
+            }
+            const terms = idProperties.map((p) => `\${${p}} === ${JSON.stringify(feature.getProperty(p))}`);
+            const selector = terms.join(" && ");
+            return selector ? selector : undefined;
+        }
+        setVisibilityForMatchingFeature(expression, visibility) {
+            if (expression) {
+                const style = this.style || {};
+                const show = normalizeShowExpression(style === null || style === void 0 ? void 0 : style.show);
+                show.conditions.unshift([expression, visibility]);
+                this.setTrait(CommonStrata.user, "style", { ...style, show });
+            }
         }
         /**
          * Modifies the style traits to show/hide a 3d tile feature
          *
          */
-        setFeatureVisibility(feature, visibiltiy) {
-            var _a;
-            const idProperties = (_a = this.getIdPropertiesForFeature(feature)) === null || _a === void 0 ? void 0 : _a.sort();
-            if (idProperties.length === 0) {
-                return;
-            }
-            const terms = idProperties.map((p) => `\${${p}} === ${JSON.stringify(feature.getProperty(p))}`);
-            const showExpr = terms.join(" && ");
+        setFeatureVisibility(feature, visibility) {
+            const showExpr = this.getSelectorForFeature(feature);
             if (showExpr) {
-                const style = this.style || {};
-                const show = normalizeShowExpression(style === null || style === void 0 ? void 0 : style.show);
-                show.conditions.unshift([showExpr, visibiltiy]);
-                this.setTrait(CommonStrata.user, "style", { ...style, show });
+                this.setVisibilityForMatchingFeature(showExpr, visibility);
             }
         }
         /**
@@ -483,16 +549,13 @@ function Cesium3dTilesMixin(Base) {
         observable
     ], Cesium3dTilesMixin.prototype, "originalRootTransform", void 0);
     __decorate([
-        observable
-    ], Cesium3dTilesMixin.prototype, "isTilesetReady", void 0);
-    __decorate([
         computed
     ], Cesium3dTilesMixin.prototype, "modelMatrix", null);
     __decorate([
         computed
     ], Cesium3dTilesMixin.prototype, "mapItems", null);
     __decorate([
-        computed
+        override
     ], Cesium3dTilesMixin.prototype, "shortReport", null);
     __decorate([
         computed
@@ -519,10 +582,16 @@ function Cesium3dTilesMixin(Base) {
         action
     ], Cesium3dTilesMixin.prototype, "removeColorExpression", null);
     __decorate([
-        computed
+        override
     ], Cesium3dTilesMixin.prototype, "highlightColor", null);
     return Cesium3dTilesMixin;
 }
+(function (Cesium3dTilesMixin) {
+    function isMixedInto(model) {
+        return model && model.hasCesium3dTilesMixin;
+    }
+    Cesium3dTilesMixin.isMixedInto = isMixedInto;
+})(Cesium3dTilesMixin || (Cesium3dTilesMixin = {}));
 export default Cesium3dTilesMixin;
 function normalizeShowExpression(show) {
     var _a;

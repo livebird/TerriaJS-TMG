@@ -1,5 +1,6 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import { action, autorun, computed } from "mobx";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import Rectangle from "terriajs-cesium/Source/Core/Rectangle";
 import ViewerMode from "../../../Models/ViewerMode";
@@ -34,7 +35,7 @@ const MiniMap = (props) => {
         });
         return disposer;
     }, [miniMapViewer, locationMarker, view]);
-    return React.createElement(MapContainer, { ref: container });
+    return _jsx(MapContainer, { ref: container });
 };
 const MapContainer = styled.div `
   height: 180px;

@@ -4,14 +4,61 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { observable, action } from "mobx";
+import { action, makeObservable, observable } from "mobx";
 import defaultValue from "terriajs-cesium/Source/Core/defaultValue";
 import defined from "terriajs-cesium/Source/Core/defined";
 import GroupMixin from "../../ModelMixins/GroupMixin";
 export default class SearchResult {
     constructor(options) {
-        this.isOpen = false;
-        this.type = "search_result";
+        Object.defineProperty(this, "name", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "tooltip", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "isImportant", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "clickAction", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "isOpen", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "search_result"
+        });
+        Object.defineProperty(this, "location", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
         this.name = defaultValue(options.name, "Unknown");
         this.tooltip = options.tooltip;
         this.isImportant = defaultValue(options.isImportant, false);

@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { action, runInAction } from "mobx";
 import { observer } from "mobx-react";
 import React, { useEffect } from "react";
@@ -6,7 +7,7 @@ import Button from "../../Styled/Button";
 import { StyledIcon } from "../../Styled/Icon";
 import { addTerriaScrollbarStyles } from "../../Styled/mixins";
 import Text from "../../Styled/Text";
-import Portal from "../StandardUserInterface/Portal";
+import { PortalChild } from "../StandardUserInterface/Portal";
 import { PanelButton } from "./Panel";
 export const WorkflowPanelPortalId = "workflow-panel-portal";
 /** Wraps component in Portal, adds TitleBar, ErrorBoundary and Footer (PanelButton) */
@@ -16,26 +17,25 @@ const WorkflowPanel = observer((props) => {
         runInAction(() => {
             viewState.terria.isWorkflowPanelActive = true;
         });
-        return () => runInAction(() => {
-            viewState.terria.isWorkflowPanelActive = false;
-        });
-    });
-    return (React.createElement(Portal, { viewState: viewState, id: WorkflowPanelPortalId },
-        React.createElement(Container, { className: viewState.topElement === "WorkflowPanel" ? "top-element" : "", onClick: action(() => {
+        return () => {
+            runInAction(() => {
+                viewState.terria.isWorkflowPanelActive = false;
+            });
+        };
+    }, []);
+    return (_jsx(PortalChild, { viewState: viewState, portalId: WorkflowPanelPortalId, children: _jsxs(Container, { className: viewState.topElement === "WorkflowPanel" ? "top-element" : "", onClick: action(() => {
                 viewState.topElement = "WorkflowPanel";
-            }) },
-            React.createElement(TitleBar, null,
-                React.createElement(Icon, { glyph: props.icon }),
-                React.createElement(Title, null, props.title),
-                React.createElement(CloseButton, { onClick: props.onClose }, props.closeButtonText)),
-            React.createElement(Content, null,
-                React.createElement(ErrorBoundary, { viewState: viewState }, props.children)),
-            props.footer ? (React.createElement(PanelButton, { onClick: props.footer.onClick, title: props.footer.buttonText })) : null)));
+            }), children: [_jsxs(TitleBar, { children: [_jsx(Icon, { glyph: props.icon }), _jsx(Title, { children: props.title }), _jsx(CloseButton, { onClick: props.onClose, children: props.closeButtonText })] }), _jsx(Content, { children: _jsx(ErrorBoundary, { viewState: viewState, children: props.children }) }), props.footer ? (_jsx(PanelButton, { onClick: props.footer.onClick, title: props.footer.buttonText })) : null] }) }));
 });
 class ErrorBoundary extends React.Component {
     constructor() {
         super(...arguments);
-        this.state = { hasError: false };
+        Object.defineProperty(this, "state", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: { hasError: false }
+        });
     }
     static getDerivedStateFromError() {
         return { hasError: true };
@@ -44,7 +44,7 @@ class ErrorBoundary extends React.Component {
         this.props.viewState.terria.raiseErrorToUser(error);
     }
     render() {
-        return this.state.hasError ? (React.createElement(Error, null, "An error occurred when running the workflow. Please try re-loading the app if the error persists.")) : (this.props.children);
+        return this.state.hasError ? (_jsx(Error, { children: "An error occurred when running the workflow. Please try re-loading the app if the error persists." })) : (this.props.children);
     }
 }
 const Container = styled.div `

@@ -1,28 +1,24 @@
+# Update .prettierignore whenever this file changes
+docs/
 node_modules/
-dist/
 .idea/
-wwwroot/build/
-wwwroot/doc/
+build/
+error.log
+output.log
 npm-debug.log
-version.js
-wwwroot/init/nm.json
-datasources/00_National_Data_Sets.json
 .DS_Store
-.localized
-.sass-cache
-/terriajs.pid
-/terriajs-server.log
+terria.lib.js
+terriajs-server.log
+terriajs.pid
+/wwwroot/doc/
+/wwwroot/schema/
+/wwwroot/user-guide/
+/coverage/
+package-lock.json
+*.swp
+dist
+.history/
+ts-out/
 
-/wwwroot/editor/
-/error.log
-/error.log
-/output.log
-privateserverconfig.json
-wwwroot/privateconfig.json
-deploy/packages/
-deploy/work/
-packages/
-pancake/
-dist/
-*.rar
-buildprocess/
+# Catalog index generation files
+catalog-index*.json

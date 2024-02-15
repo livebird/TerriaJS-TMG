@@ -1,13 +1,13 @@
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import i18next from "i18next";
 import { runInAction } from "mobx";
-import React from "react";
 import isDefined from "../../Core/isDefined";
 import Collapsible from "../Custom/Collapsible/Collapsible";
 import parseCustomMarkdownToReact from "../Custom/parseCustomMarkdownToReact";
 import Text, { TextSpan } from "../../Styled/Text";
 import { RawButton } from "../../Styled/Button";
 import Spacing from "../../Styled/Spacing";
-export const shareConvertNotification = (messages) => (viewState) => {
+export const shareConvertNotification = (messages) => function shareConvertNotification(viewState) {
     const messagesForPath = {};
     messages === null || messages === void 0 ? void 0 : messages.forEach((message) => {
         var _a;
@@ -31,26 +31,12 @@ export const shareConvertNotification = (messages) => (viewState) => {
         });
         viewState.terria.notificationState.dismissCurrentNotification();
     };
-    return (React.createElement(React.Fragment, null,
-        React.createElement(Text, null, parseCustomMarkdownToReact(i18next.t("share.convertNotificationMessage"))),
-        React.createElement(RawButton, { fullWidth: true, onClick: showHelp, css: `
+    return (_jsxs(_Fragment, { children: [_jsx(Text, { children: parseCustomMarkdownToReact(i18next.t("share.convertNotificationMessage")) }), _jsx(RawButton, { fullWidth: true, onClick: showHelp, css: `
             text-align: left;
-          ` },
-            React.createElement(TextSpan, { textLight: true, bold: true, medium: true }, parseCustomMarkdownToReact(i18next.t("share.convertNotificationHelp")))),
-        React.createElement(RawButton, { fullWidth: true, onClick: showFeedback, css: `
+          `, children: _jsx(TextSpan, { textLight: true, bold: true, medium: true, children: parseCustomMarkdownToReact(i18next.t("share.convertNotificationHelp")) }) }), _jsx(RawButton, { fullWidth: true, onClick: showFeedback, css: `
             text-align: left;
-          ` },
-            React.createElement(TextSpan, { textLight: true, bold: true, medium: true }, parseCustomMarkdownToReact(i18next.t("share.convertNotificationFeedback")))),
-        React.createElement(Spacing, { bottom: 2 }),
-        React.createElement(Collapsible, { btnRight: true, title: i18next.t("share.convertNotificationWarningsTitle"), titleTextProps: { large: true }, bodyBoxProps: { padded: true } },
-            rootMessages && (React.createElement(React.Fragment, null,
-                React.createElement("ul", null, rootMessages.map((message) => (React.createElement("li", null, message)))),
-                React.createElement(Spacing, { bottom: 1 }))),
-            Object.entries(messagesForPath).map(([path, messages]) => (React.createElement(React.Fragment, null,
-                React.createElement(Spacing, { bottom: 1 }),
-                React.createElement(Collapsible, { btnRight: true, title: path && path !== ""
-                        ? path
-                        : i18next.t("share.convertNotificationWarningsTitle") },
-                    React.createElement("ul", null, messages.map((message) => (React.createElement("li", null, message)))))))))));
+          `, children: _jsx(TextSpan, { textLight: true, bold: true, medium: true, children: parseCustomMarkdownToReact(i18next.t("share.convertNotificationFeedback")) }) }), _jsx(Spacing, { bottom: 2 }), _jsxs(Collapsible, { btnRight: true, title: i18next.t("share.convertNotificationWarningsTitle"), titleTextProps: { large: true }, bodyBoxProps: { padded: true }, children: [rootMessages && (_jsxs(_Fragment, { children: [_jsx("ul", { children: rootMessages.map((message, i) => (_jsx("li", { children: message }, i))) }), _jsx(Spacing, { bottom: 1 })] })), Object.entries(messagesForPath).map(([path, messages]) => (_jsxs(_Fragment, { children: [_jsx(Spacing, { bottom: 1 }), _jsx(Collapsible, { btnRight: true, title: path && path !== ""
+                                    ? path
+                                    : i18next.t("share.convertNotificationWarningsTitle"), children: _jsx("ul", { children: messages.map((message, i) => (_jsx("li", { children: message }, i))) }) })] })))] })] }));
 };
 //# sourceMappingURL=shareConvertNotification.js.map

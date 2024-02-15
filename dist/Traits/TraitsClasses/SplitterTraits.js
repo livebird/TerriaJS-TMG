@@ -10,8 +10,18 @@ import primitiveTrait from "../Decorators/primitiveTrait";
 export default class SplitterTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.splitDirection = SplitDirection.NONE;
-        this.disableSplitter = false;
+        Object.defineProperty(this, "splitDirection", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: SplitDirection.NONE
+        });
+        Object.defineProperty(this, "disableSplitter", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
     }
 }
 __decorate([

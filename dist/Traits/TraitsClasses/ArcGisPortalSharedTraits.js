@@ -8,6 +8,15 @@ import objectArrayTrait from "../Decorators/objectArrayTrait";
 import ArcGisPortalItemFormatTraits from "./ArcGisPortalItemFormatTraits";
 import mixTraits from "../mixTraits";
 export default class ArcGisPortalSharedTraits extends mixTraits() {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "supportedFormats", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     objectArrayTrait({

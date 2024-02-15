@@ -42,7 +42,7 @@ export default function upsertModelFromJson(factory, terria, parentId, stratumNa
                 message: i18next.t("models.catalog.idForMatchingErrorMessage")
             }));
         }
-        let id = (parentId || "") + "/" + localId;
+        const id = (parentId || "") + "/" + localId;
         let idIncrement = 1;
         uniqueId = id;
         model = terria.getModelById(BaseModel, uniqueId);

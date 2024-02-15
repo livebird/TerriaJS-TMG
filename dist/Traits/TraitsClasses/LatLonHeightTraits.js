@@ -12,6 +12,27 @@ import primitiveTrait from "../Decorators/primitiveTrait";
 import ModelTraits from "../ModelTraits";
 const cartoScratch = new Cartographic();
 export default class LatLonHeightTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "latitude", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "longitude", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "height", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
     static setFromCartesian(model, stratumName, position) {
         const cartographic = Cartographic.fromCartesian(position, undefined, cartoScratch);
         const latitude = CesiumMath.toDegrees(cartographic.latitude);

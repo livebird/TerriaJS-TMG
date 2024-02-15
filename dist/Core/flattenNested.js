@@ -10,8 +10,8 @@ export default function flattenNested(array) {
     return flattenNestedLoop(array, []);
 }
 function flattenNestedLoop(array, result) {
-    for (var i = 0; i < array.length; i++) {
-        var value = array[i];
+    for (let i = 0; i < array.length; i++) {
+        const value = array[i];
         if (Array.isArray(value)) {
             flattenNestedLoop(value, result);
         }

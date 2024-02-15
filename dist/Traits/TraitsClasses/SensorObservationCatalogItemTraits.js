@@ -10,9 +10,36 @@ import primitiveArrayTrait from "../Decorators/primitiveArrayTrait";
 import primitiveTrait from "../Decorators/primitiveTrait";
 import mixTraits from "../mixTraits";
 import ModelTraits from "../ModelTraits";
-import TableTraits from "./TableTraits";
+import TableTraits from "./Table/TableTraits";
 import UrlTraits from "./UrlTraits";
 export class ObservablePropertyTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "identifier", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "title", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "units", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "defaultDuration", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -47,14 +74,96 @@ export class ProcedureTraits extends mixTraits(ObservablePropertyTraits) {
 export default class SensorObservationCatalogItemTraits extends mixTraits(TableTraits, UrlTraits) {
     constructor() {
         super(...arguments);
-        this.requestSizeLimit = 200;
-        this.requestNumberLimit = 3;
-        this.observableProperties = [];
-        this.filterByProcedures = true;
-        this.procedures = [];
-        this.proceduresName = i18next.t("models.sensorObservationService.procedure");
-        this.observablePropertiesName = i18next.t("models.sensorObservationService.property");
-        this.showAsChart = false;
+        Object.defineProperty(this, "requestSizeLimit", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 200
+        });
+        Object.defineProperty(this, "requestNumberLimit", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 3
+        });
+        Object.defineProperty(this, "requestTemplate", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "observableProperties", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "filterByProcedures", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "procedures", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "proceduresName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: i18next.t("models.sensorObservationService.procedure")
+        });
+        Object.defineProperty(this, "observablePropertiesName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: i18next.t("models.sensorObservationService.property")
+        });
+        Object.defineProperty(this, "stationIdWhitelist", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "stationIdBlacklist", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "startDate", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "endDate", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "showAsChart", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "chartFeatureOfInterestIdentifier", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "selectedObservableId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([

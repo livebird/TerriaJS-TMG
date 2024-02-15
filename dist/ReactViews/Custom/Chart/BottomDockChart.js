@@ -4,14 +4,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { createElement as _createElement } from "react";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { observer } from "mobx-react";
-import { action, computed, observable } from "mobx";
+import { action, computed, observable, makeObservable } from "mobx";
 import { AxisLeft, AxisBottom } from "@visx/axis";
 import { RectClipPath } from "@visx/clip-path";
 import { localPoint } from "@visx/event";
 import { GridRows } from "@visx/grid";
 import { Group } from "@visx/group";
-import { withParentSize } from "@vx/responsive";
+import { withParentSize } from "@visx/responsive";
 import { scaleLinear, scaleTime } from "@visx/scale";
 import { Line } from "@visx/shape";
 import PropTypes from "prop-types";
@@ -32,26 +34,52 @@ const defaultGridColor = "#efefef";
 const labelColor = "#efefef";
 let BottomDockChart = class BottomDockChart extends React.Component {
     render() {
-        return (React.createElement(Chart, Object.assign({}, this.props, { width: Math.max(chartMinWidth, this.props.width || this.props.parentWidth) })));
+        return (_jsx(Chart, { ...this.props, width: Math.max(chartMinWidth, this.props.width || this.props.parentWidth) }));
     }
 };
-BottomDockChart.propTypes = {
-    terria: PropTypes.object.isRequired,
-    parentWidth: PropTypes.number,
-    width: PropTypes.number,
-    height: PropTypes.number,
-    chartItems: PropTypes.array.isRequired,
-    xAxis: PropTypes.object.isRequired,
-    margin: PropTypes.object
-};
-BottomDockChart.defaultProps = {
-    parentWidth: 0
-};
+Object.defineProperty(BottomDockChart, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        terria: PropTypes.object.isRequired,
+        parentWidth: PropTypes.number,
+        width: PropTypes.number,
+        height: PropTypes.number,
+        chartItems: PropTypes.array.isRequired,
+        xAxis: PropTypes.object.isRequired,
+        margin: PropTypes.object
+    }
+});
+Object.defineProperty(BottomDockChart, "defaultProps", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        parentWidth: 0
+    }
+});
 BottomDockChart = __decorate([
     observer
 ], BottomDockChart);
 export default withParentSize(BottomDockChart);
 let Chart = class Chart extends React.Component {
+    constructor(props) {
+        super(props);
+        Object.defineProperty(this, "zoomedXScale", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "mouseCoords", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
+    }
     get chartItems() {
         return sortChartItemsByType(this.props.chartItems)
             .map((chartItem) => {
@@ -178,42 +206,36 @@ let Chart = class Chart extends React.Component {
     render() {
         const { height, xAxis, terria } = this.props;
         if (this.chartItems.length === 0)
-            return React.createElement("div", { className: Styles.empty }, "No data available");
-        return (React.createElement(ZoomX, { surface: "#zoomSurface", initialScale: this.initialXScale, scaleExtent: [1, Infinity], translateExtent: [
+            return _jsx("div", { className: Styles.empty, children: "No data available" });
+        return (_jsxs(ZoomX, { surface: "#zoomSurface", initialScale: this.initialXScale, scaleExtent: [1, Infinity], translateExtent: [
                 [0, 0],
                 [Infinity, Infinity]
-            ], onZoom: (zoomedScale) => this.setZoomedXScale(zoomedScale) },
-            React.createElement(Legends, { width: this.plotWidth, chartItems: this.chartItems }),
-            React.createElement("div", { style: { position: "relative" } },
-                React.createElement("svg", { width: "100%", height: height, onMouseMove: this.setMouseCoordsFromEvent.bind(this), onMouseLeave: () => this.setMouseCoords(undefined) },
-                    React.createElement(Group, { left: this.adjustedMargin.left, top: this.adjustedMargin.top },
-                        React.createElement(RectClipPath, { id: "plotClip", width: this.plotWidth, height: this.plotHeight }),
-                        React.createElement(XAxis, { top: this.plotHeight + 1, scale: this.xScale, label: xAxis.units || (xAxis.scale === "time" && "Date") }),
-                        React.createElement(For, { each: "y", index: "i", of: this.yAxes },
-                            React.createElement(YAxis, Object.assign({}, y, { key: `y-axis-${y.units}`, color: this.yAxes.length > 1 ? y.color : defaultGridColor, offset: i * 50 }))),
-                        React.createElement(For, { each: "y", index: "i", of: this.yAxes },
-                            React.createElement(GridRows, { key: `grid-${y.units}`, width: this.plotWidth, height: this.plotHeight, scale: y.scale, numTicks: 4, stroke: this.yAxes.length > 1 ? y.color : defaultGridColor, lineStyle: { opacity: 0.3 } })),
-                        React.createElement("svg", { id: "zoomSurface", clipPath: "url(#plotClip)", pointerEvents: "all" },
-                            React.createElement("rect", { width: this.plotWidth, height: this.plotHeight, fill: "transparent" }),
-                            this.cursorX && (React.createElement(Cursor, { x: this.cursorX, stroke: defaultGridColor })),
-                            React.createElement(Plot, { chartItems: this.chartItems, initialScales: this.initialScales, zoomedScales: this.zoomedScales })))),
-                React.createElement(Tooltip, Object.assign({}, this.tooltip)),
-                React.createElement(PointsOnMap, { terria: terria, chartItems: this.chartItems }))));
+            ], onZoom: (zoomedScale) => this.setZoomedXScale(zoomedScale), children: [_jsx(Legends, { width: this.plotWidth, chartItems: this.chartItems }), _jsxs("div", { style: { position: "relative" }, children: [_jsx("svg", { width: "100%", height: height, onMouseMove: this.setMouseCoordsFromEvent.bind(this), onMouseLeave: () => this.setMouseCoords(undefined), children: _jsxs(Group, { left: this.adjustedMargin.left, top: this.adjustedMargin.top, children: [_jsx(RectClipPath, { id: "plotClip", width: this.plotWidth, height: this.plotHeight }), _jsx(XAxis, { top: this.plotHeight + 1, scale: this.xScale, label: xAxis.units || (xAxis.scale === "time" && "Date") }), this.yAxes.map((y, i) => (_createElement(YAxis, { ...y, key: `y-axis-${y.units}`, color: this.yAxes.length > 1 ? y.color : defaultGridColor, offset: i * 50 }))), this.yAxes.map((y, i) => (_jsx(GridRows, { width: this.plotWidth, height: this.plotHeight, scale: y.scale, numTicks: 4, stroke: this.yAxes.length > 1 ? y.color : defaultGridColor, lineStyle: { opacity: 0.3 } }, `grid-${y.units}`))), _jsxs("svg", { id: "zoomSurface", clipPath: "url(#plotClip)", pointerEvents: "all", children: [_jsx("rect", { width: this.plotWidth, height: this.plotHeight, fill: "transparent" }), this.cursorX && (_jsx(Cursor, { x: this.cursorX, stroke: defaultGridColor })), _jsx(Plot, { chartItems: this.chartItems, initialScales: this.initialScales, zoomedScales: this.zoomedScales })] })] }) }), _jsx(Tooltip, { ...this.tooltip }), _jsx(PointsOnMap, { terria: terria, chartItems: this.chartItems })] })] }));
     }
 };
-Chart.propTypes = {
-    terria: PropTypes.object.isRequired,
-    width: PropTypes.number,
-    height: PropTypes.number,
-    chartItems: PropTypes.array.isRequired,
-    xAxis: PropTypes.object.isRequired,
-    margin: PropTypes.object
-};
-Chart.defaultProps = {
-    margin: { left: 20, right: 30, top: 10, bottom: 50 }
-};
+Object.defineProperty(Chart, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        terria: PropTypes.object.isRequired,
+        width: PropTypes.number,
+        height: PropTypes.number,
+        chartItems: PropTypes.array.isRequired,
+        xAxis: PropTypes.object.isRequired,
+        margin: PropTypes.object
+    }
+});
+Object.defineProperty(Chart, "defaultProps", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        margin: { left: 20, right: 30, top: 10, bottom: 50 }
+    }
+});
 __decorate([
-    observable
+    observable.ref
 ], Chart.prototype, "zoomedXScale", void 0);
 __decorate([
     observable
@@ -267,6 +289,10 @@ Chart = __decorate([
     observer
 ], Chart);
 let Plot = class Plot extends React.Component {
+    constructor(props) {
+        super(props);
+        makeObservable(this);
+    }
     get chartRefs() {
         return this.props.chartItems.map((_) => React.createRef());
     }
@@ -282,29 +308,34 @@ let Plot = class Plot extends React.Component {
         return chartItems.map((chartItem, i) => {
             switch (chartItem.type) {
                 case "line":
-                    return (React.createElement(LineChart, { key: chartItem.key, ref: this.chartRefs[i], id: sanitizeIdString(chartItem.key), chartItem: chartItem, scales: initialScales[i] }));
+                    return (_jsx(LineChart, { ref: this.chartRefs[i], id: sanitizeIdString(chartItem.key), chartItem: chartItem, scales: initialScales[i] }, chartItem.key));
                 case "momentPoints": {
                     // Find a basis item to stick the points on, if we can't find one, we
                     // vertically center the points
                     const basisItemIndex = chartItems.findIndex((item) => (item.type === "line" || item.type === "lineAndPoint") &&
                         item.xAxis.scale === "time");
-                    return (React.createElement(MomentPointsChart, { key: chartItem.key, ref: this.chartRefs[i], id: sanitizeIdString(chartItem.key), chartItem: chartItem, scales: initialScales[i], basisItem: chartItems[basisItemIndex], basisItemScales: initialScales[basisItemIndex], glyph: chartItem.glyphStyle }));
+                    return (_jsx(MomentPointsChart, { ref: this.chartRefs[i], id: sanitizeIdString(chartItem.key), chartItem: chartItem, scales: initialScales[i], basisItem: chartItems[basisItemIndex], basisItemScales: initialScales[basisItemIndex], glyph: chartItem.glyphStyle }, chartItem.key));
                 }
                 case "momentLines": {
-                    return (React.createElement(MomentLinesChart, { key: chartItem.key, ref: this.chartRefs[i], id: sanitizeIdString(chartItem.key), chartItem: chartItem, scales: initialScales[i] }));
+                    return (_jsx(MomentLinesChart, { ref: this.chartRefs[i], id: sanitizeIdString(chartItem.key), chartItem: chartItem, scales: initialScales[i] }, chartItem.key));
                 }
                 case "lineAndPoint": {
-                    return (React.createElement(LineAndPointChart, { key: chartItem.key, ref: this.chartRefs[i], id: sanitizeIdString(chartItem.key), chartItem: chartItem, scales: initialScales[i], glyph: chartItem.glyphStyle }));
+                    return (_jsx(LineAndPointChart, { ref: this.chartRefs[i], id: sanitizeIdString(chartItem.key), chartItem: chartItem, scales: initialScales[i], glyph: chartItem.glyphStyle }, chartItem.key));
                 }
             }
         });
     }
 };
-Plot.propTypes = {
-    chartItems: PropTypes.array.isRequired,
-    initialScales: PropTypes.array.isRequired,
-    zoomedScales: PropTypes.array.isRequired
-};
+Object.defineProperty(Plot, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        chartItems: PropTypes.array.isRequired,
+        initialScales: PropTypes.array.isRequired,
+        zoomedScales: PropTypes.array.isRequired
+    }
+});
 __decorate([
     computed
 ], Plot.prototype, "chartRefs", null);
@@ -314,7 +345,7 @@ Plot = __decorate([
 class XAxis extends React.PureComponent {
     render() {
         const { scale, ...restProps } = this.props;
-        return (React.createElement(AxisBottom, Object.assign({ stroke: "#efefef", tickStroke: "#efefef", tickLabelProps: () => ({
+        return (_jsx(AxisBottom, { stroke: "#efefef", tickStroke: "#efefef", tickLabelProps: () => ({
                 fill: "#efefef",
                 textAnchor: "middle",
                 fontSize: 12,
@@ -328,18 +359,23 @@ class XAxis extends React.PureComponent {
             // .nice() rounds the scale so that the aprox beginning and
             // aprox end labels are shown
             // See: https://stackoverflow.com/questions/21753126/d3-js-starting-and-ending-tick
-            scale: scale.nice() }, restProps)));
+            scale: scale.nice(), ...restProps }));
     }
 }
-XAxis.propTypes = {
-    top: PropTypes.number.isRequired,
-    scale: PropTypes.func.isRequired,
-    label: PropTypes.string.isRequired
-};
+Object.defineProperty(XAxis, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        top: PropTypes.number.isRequired,
+        scale: PropTypes.func.isRequired,
+        label: PropTypes.string.isRequired
+    }
+});
 class YAxis extends React.PureComponent {
     render() {
         const { scale, color, units, offset } = this.props;
-        return (React.createElement(AxisLeft, { key: `y-axis-${units}`, left: offset, scale: scale, numTicks: 4, stroke: color, tickStroke: color, label: units || "", labelOffset: 10, labelProps: {
+        return (_jsx(AxisLeft, { left: offset, scale: scale, numTicks: 4, stroke: color, tickStroke: color, label: units || "", labelOffset: 10, labelProps: {
                 fill: color,
                 textAnchor: "middle",
                 fontSize: 12,
@@ -349,26 +385,36 @@ class YAxis extends React.PureComponent {
                 textAnchor: "end",
                 fontSize: 10,
                 fontFamily: "Arial"
-            }) }));
+            }) }, `y-axis-${units}`));
     }
 }
-YAxis.propTypes = {
-    scale: PropTypes.func.isRequired,
-    color: PropTypes.string.isRequired,
-    units: PropTypes.string,
-    offset: PropTypes.number.isRequired
-};
+Object.defineProperty(YAxis, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        scale: PropTypes.func.isRequired,
+        color: PropTypes.string.isRequired,
+        units: PropTypes.string,
+        offset: PropTypes.number.isRequired
+    }
+});
 class Cursor extends React.PureComponent {
     render() {
         const { x, ...rest } = this.props;
-        return React.createElement(Line, Object.assign({ from: { x, y: 0 }, to: { x, y: 1000 } }, rest));
+        return _jsx(Line, { from: { x, y: 0 }, to: { x, y: 1000 }, ...rest });
     }
 }
-Cursor.propTypes = {
-    x: PropTypes.number.isRequired
-};
+Object.defineProperty(Cursor, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        x: PropTypes.number.isRequired
+    }
+});
 function PointsOnMap({ chartItems, terria }) {
-    return chartItems.map((chartItem) => chartItem.pointOnMap && (React.createElement(PointOnMap, { key: `point-on-map-${chartItem.key}`, terria: terria, color: chartItem.getColor(), point: chartItem.pointOnMap })));
+    return chartItems.map((chartItem) => chartItem.pointOnMap && (_jsx(PointOnMap, { terria: terria, color: chartItem.getColor(), point: chartItem.pointOnMap }, `point-on-map-${chartItem.key}`)));
 }
 /**
  * Calculates a combined domain of all chartItems.

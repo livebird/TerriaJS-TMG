@@ -2,7 +2,7 @@
 var defined = require("terriajs-cesium/Source/Core/defined").default;
 var CesiumDragPoints = require("./CesiumDragPoints");
 var LeafletDragPoints = require("./LeafletDragPoints");
-var ViewerMode = require("../../Models/ViewerMode");
+var ViewerMode = require("../../Models/ViewerMode").default;
 /**
  * Callback for when a point is moved.
  * @callback PointMovedCallback
@@ -38,6 +38,12 @@ DragPoints.prototype.setUp = function () {
     }
 };
 /**
+ * Destroy drag points helper. The instance becomes unusable after calling destroy.
+ */
+DragPoints.prototype.destroy = function () {
+    this._dragPointsHelper.destroy();
+};
+/**
  * The drag count is an indication of how long the user dragged for. If it's really small, perhaps the user clicked,
  * but a mousedown/mousemove/mouseup event trio was triggered anyway. It solves a problem where in leaflet the click
  * event triggers even if the point has been dragged because it lets us determine whether the point was really dragged.
@@ -70,7 +76,7 @@ DragPoints.prototype._createDragPointsHelper = function (pointMovedCallback) {
     if (defined(this._dragPointsHelper)) {
         this._dragPointsHelper.destroy();
     }
-    if (this._terria.viewerMode === ViewerMode.Leaflet) {
+    if (this._terria.mainViewer.viewerMode === ViewerMode.Leaflet) {
         this._dragPointsHelper = new LeafletDragPoints(this._terria, pointMovedCallback);
     }
     else {

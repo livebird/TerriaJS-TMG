@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { computed, runInAction } from "mobx";
+import { computed, runInAction, makeObservable, override } from "mobx";
 import RequestErrorEvent from "terriajs-cesium/Source/Core/RequestErrorEvent";
 import Resource from "terriajs-cesium/Source/Core/Resource";
 import filterOutUndefined from "../../../Core/filterOutUndefined";
@@ -28,6 +28,7 @@ export default class SdmxJsonCatalogItem extends TableMixin(UrlMixin(CreateModel
     }
     constructor(id, terria, sourceReference) {
         super(id, terria, sourceReference);
+        makeObservable(this);
         this.strata.set(TableAutomaticStylesStratum.stratumName, new TableAutomaticStylesStratum(this));
     }
     async forceLoadMetadata() {
@@ -162,19 +163,19 @@ export default class SdmxJsonCatalogItem extends TableMixin(UrlMixin(CreateModel
     }
 }
 __decorate([
-    computed
+    override
 ], SdmxJsonCatalogItem.prototype, "cacheDuration", null);
 __decorate([
     computed
 ], SdmxJsonCatalogItem.prototype, "sdmxSelectableDimensions", null);
 __decorate([
-    computed
+    override
 ], SdmxJsonCatalogItem.prototype, "selectableDimensions", null);
 __decorate([
     computed
 ], SdmxJsonCatalogItem.prototype, "baseUrl", null);
 __decorate([
-    computed
+    override
 ], SdmxJsonCatalogItem.prototype, "url", null);
 StratumOrder.addLoadStratum(TableAutomaticStylesStratum.stratumName);
 //# sourceMappingURL=SdmxJsonCatalogItem.js.map

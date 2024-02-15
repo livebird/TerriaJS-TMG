@@ -4,8 +4,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import hoistStatics from "hoist-non-react-statics";
-import { action, computed, observable, reaction, runInAction } from "mobx";
+import { action, computed, observable, reaction, runInAction, makeObservable } from "mobx";
 import { observer } from "mobx-react";
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
@@ -35,9 +36,43 @@ import { GLYPHS, StyledIcon } from "../../../Styled/Icon";
 import Loader from "../../Loader";
 import DatePicker from "./DatePicker";
 import LocationPicker from "./LocationPicker";
-import { CLOSE_TOOL_ID } from "../../Map/Navigation/registerMapNavigations";
+import { CLOSE_TOOL_ID } from "../../Map/MapNavigation/registerMapNavigations";
 const dateFormat = require("dateformat");
 let DiffTool = class DiffTool extends React.Component {
+    constructor(props) {
+        super(props);
+        Object.defineProperty(this, "leftItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "rightItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "userSelectedSourceItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "splitterItemsDisposer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "originalSettings", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
+    }
     get sourceItem() {
         return this.userSelectedSourceItem || this.props.sourceItem;
     }
@@ -55,7 +90,9 @@ let DiffTool = class DiffTool extends React.Component {
                 this.rightItem = rightItem;
             });
         }
-        catch { }
+        catch {
+            /* eslint-disable-line no-empty */
+        }
     }
     removeSplitterItems() {
         this.leftItem && removeSplitItem(this.leftItem);
@@ -108,13 +145,18 @@ let DiffTool = class DiffTool extends React.Component {
     }
     render() {
         if (this.leftItem && this.rightItem) {
-            return (React.createElement(Main, Object.assign({}, this.props, { theme: this.props.theme, terria: this.props.viewState.terria, sourceItem: this.sourceItem, changeSourceItem: this.changeSourceItem, leftItem: this.leftItem, rightItem: this.rightItem })));
+            return (_jsx(Main, { ...this.props, theme: this.props.theme, terria: this.props.viewState.terria, sourceItem: this.sourceItem, changeSourceItem: this.changeSourceItem, leftItem: this.leftItem, rightItem: this.rightItem }));
         }
         else
             return null;
     }
 };
-DiffTool.toolName = "Image Difference";
+Object.defineProperty(DiffTool, "toolName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "Image Difference"
+});
 __decorate([
     observable
 ], DiffTool.prototype, "leftItem", void 0);
@@ -148,10 +190,37 @@ DiffTool = __decorate([
 let Main = class Main extends React.Component {
     constructor(props) {
         super(props);
-        this._locationPickError = false;
-        this._isPickingNewLocation = false;
-        this.openLeftDatePickerButton = React.createRef();
-        this.openRightDatePickerButton = React.createRef();
+        Object.defineProperty(this, "location", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_locationPickError", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "_isPickingNewLocation", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "openLeftDatePickerButton", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: React.createRef()
+        });
+        Object.defineProperty(this, "openRightDatePickerButton", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: React.createRef()
+        });
+        makeObservable(this);
     }
     get locationPickerMessages() {
         const t = this.props.t;
@@ -207,7 +276,10 @@ let Main = class Main extends React.Component {
         return this.diffItem.diffStyleId;
     }
     get availableDiffStyles() {
-        return filterOutUndefined(this.diffItem.availableDiffStyles.map((diffStyleId) => { var _a, _b, _c; return (_c = (_b = (_a = this.diffItem.styleSelectableDimensions) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.options) === null || _c === void 0 ? void 0 : _c.find((style) => style.id === diffStyleId); }));
+        return filterOutUndefined(this.diffItem.availableDiffStyles.map((diffStyleId) => {
+            var _a, _b, _c;
+            return (_c = (_b = (_a = this.diffItem.styleSelectableDimensions) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.options) === null || _c === void 0 ? void 0 : _c.find((style) => style.id === diffStyleId);
+        }));
     }
     get leftDate() {
         return this.props.leftItem.currentDiscreteJulianDate;
@@ -322,22 +394,24 @@ let Main = class Main extends React.Component {
             }
         }
     }
-    async componentDidMount() {
-        if (this.location === undefined) {
-            const { latitude, longitude, height } = this.diffItem.timeFilterCoordinates;
-            if (latitude !== undefined && longitude !== undefined) {
-                this.location = {
-                    latitude,
-                    longitude,
-                    height
-                };
-                // remove any active search location marker to avoid showing two markers
-                removeMarker(this.props.terria);
+    componentDidMount() {
+        runInAction(() => {
+            if (this.location === undefined) {
+                const { latitude, longitude, height } = this.diffItem.timeFilterCoordinates;
+                if (latitude !== undefined && longitude !== undefined) {
+                    this.location = {
+                        latitude,
+                        longitude,
+                        height
+                    };
+                    // remove any active search location marker to avoid showing two markers
+                    removeMarker(this.props.terria);
+                }
+                else {
+                    this.setLocationFromActiveSearch();
+                }
             }
-            else {
-                await this.setLocationFromActiveSearch();
-            }
-        }
+        });
     }
     // i want to restructure the render so that there's 2 distinct "showing diff"
     // or not states, right now intertwining them means way too many conditionals
@@ -348,95 +422,22 @@ let Main = class Main extends React.Component {
         const isShowingDiff = this.diffItem.isShowingDiff;
         const datesSelected = this.leftDate && this.rightDate;
         const isReadyToGenerateDiff = this.location && datesSelected && this.diffStyle !== undefined;
-        return (React.createElement(Text, { large: true },
-            React.createElement(DiffAccordion, { viewState: viewState, t: t },
-                React.createElement(MainPanel, { isMapFullScreen: viewState.isMapFullScreen, styledMaxHeight: `calc(100vh - ${viewState.bottomDockHeight}px - 150px)` },
-                    isShowingDiff && (React.createElement(React.Fragment, null,
-                        React.createElement(Box, { centered: true, left: true },
-                            React.createElement(BackButton, { css: `
+        return (_jsxs(Text, { large: true, children: [_jsx(DiffAccordion, { viewState: viewState, t: t, children: _jsxs(MainPanel, { isMapFullScreen: viewState.isMapFullScreen, styledMaxHeight: `calc(100vh - ${viewState.bottomDockHeight}px - 150px)`, children: [isShowingDiff && (_jsxs(_Fragment, { children: [_jsx(Box, { centered: true, left: true, children: _jsx(BackButton, { css: `
                       color: ${theme.textLight};
                       border-color: ${theme.textLight};
-                    `, transparentBg: true, onClick: this.resetTool },
-                                React.createElement(BoxSpan, { centered: true },
-                                    React.createElement(StyledIcon, { css: "transform:rotate(90deg);", light: true, styledWidth: "16px", glyph: GLYPHS.arrowDown }),
-                                    React.createElement(TextSpan, { noFontSize: true }, t("general.back"))))),
-                        React.createElement(Spacing, { bottom: 3 }),
-                        React.createElement(Text, { medium: true, textLight: true }, t("diffTool.differenceResultsTitle")),
-                        React.createElement(Spacing, { bottom: 2 }))),
-                    React.createElement(Text, { textLight: true }, t("diffTool.instructions.paneDescription")),
-                    React.createElement(Spacing, { bottom: 3 }),
-                    React.createElement(LocationAndDatesDisplayBox, null,
-                        React.createElement(Box, null,
-                            React.createElement(Text, { medium: true },
-                                t("diffTool.labels.area"),
-                                ":"),
-                            React.createElement("div", null,
-                                React.createElement(Text, { medium: true, textLightDimmed: !this.location }, this.location
-                                    ? t("diffTool.locationDisplay.locationSelected.title")
-                                    : t("diffTool.locationDisplay.noLocationSelected.title")),
-                                React.createElement(Text, { light: true, textLight: true, small: true }, this.location
-                                    ? t("diffTool.locationDisplay.locationSelected.description")
-                                    : t("diffTool.locationDisplay.noLocationSelected.description")))),
-                        React.createElement(Box, null,
-                            React.createElement(Text, { medium: true },
-                                t("diffTool.labels.dates"),
-                                ":"),
-                            React.createElement(Box, { column: true, alignItemsFlexStart: true },
-                                this.leftDate && (React.createElement(Text, { large: true },
-                                    "(A) ",
-                                    dateFormat(this.leftDate, "dd/mm/yyyy"))),
-                                !this.leftDate && (React.createElement(RawButton, { ref: this.openLeftDatePickerButton },
-                                    React.createElement(TextSpan, { isLink: true, small: true }, t("diffTool.instructions.setDateA")))),
-                                React.createElement(Spacing, { bottom: 1 }),
-                                this.rightDate && (React.createElement(Text, { large: true },
-                                    "(B) ",
-                                    dateFormat(this.rightDate, "dd/mm/yyyy"))),
-                                !this.rightDate && (React.createElement(RawButton, { ref: this.openRightDatePickerButton },
-                                    React.createElement(TextSpan, { isLink: true, small: true }, t("diffTool.instructions.setDateB")))),
-                                isShowingDiff === false && this.leftDate && this.rightDate && (React.createElement(RawButton, { onClick: this.unsetDates },
-                                    React.createElement(TextSpan, { isLink: true, small: true }, t("diffTool.instructions.changeDates"))))))),
-                    !isShowingDiff && (React.createElement(React.Fragment, null,
-                        React.createElement(Spacing, { bottom: 4 }),
-                        React.createElement(Selector, { viewState: viewState, value: sourceItem.uniqueId, onChange: this.changeSourceItem, label: t("diffTool.labels.sourceDataset") },
-                            React.createElement("option", { disabled: true }, "Select source item"),
-                            this.diffableItemsInWorkbench.map((item) => (React.createElement("option", { key: item.uniqueId, value: item.uniqueId }, item.name)))))),
-                    !isShowingDiff && (React.createElement(React.Fragment, null,
-                        React.createElement(Spacing, { bottom: 4 }),
-                        React.createElement(Selector, { viewState: viewState, spacingBottom: true, value: this.previewStyle, onChange: this.changePreviewStyle, label: t("diffTool.labels.previewStyle") },
-                            React.createElement("option", { disabled: true, value: "" }, t("diffTool.choosePreview")), (_c = (_b = (_a = this.diffItem.styleSelectableDimensions) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.options) === null || _c === void 0 ? void 0 :
-                            _c.map((style) => (React.createElement("option", { key: style.id, value: style.id }, style.name)))),
-                        this.previewLegendUrl && (React.createElement(React.Fragment, null,
-                            React.createElement(Spacing, { bottom: 2 }),
-                            React.createElement(LegendImage, { width: "100%", src: this.previewLegendUrl }))))),
-                    React.createElement(Spacing, { bottom: 2 }),
-                    React.createElement(Selector, { viewState: viewState, value: this.diffStyle || "", onChange: this.changeDiffStyle, label: t("diffTool.labels.differenceOutput") },
-                        React.createElement("option", { disabled: true, value: "" }, t("diffTool.chooseDifference")),
-                        this.availableDiffStyles.map((style) => (React.createElement("option", { key: style.id, value: style.id }, style.name)))),
-                    isShowingDiff && this.diffLegendUrl && (React.createElement(React.Fragment, null,
-                        React.createElement(LegendImage, { width: "100%", src: this.diffLegendUrl }),
-                        React.createElement(Spacing, { bottom: 4 }))),
-                    !isShowingDiff && (React.createElement(React.Fragment, null,
-                        React.createElement(Spacing, { bottom: 4 }),
-                        React.createElement(GenerateButton, { onClick: this.generateDiff, disabled: !isReadyToGenerateDiff, "aria-describedby": "TJSDifferenceDisabledButtonPrompt" },
-                            React.createElement(TextSpan, { large: true }, t("diffTool.labels.generateDiffButtonText"))),
-                        !isReadyToGenerateDiff && (React.createElement(React.Fragment, null,
-                            React.createElement(Spacing, { bottom: 3 }),
-                            React.createElement(Text, { small: true, light: true, textLight: true, id: "TJSDifferenceDisabledButtonPrompt" }, t("diffTool.labels.disabledButtonPrompt")),
-                            React.createElement(Spacing, { bottom: 4 }))))))),
-            isShowingDiff && (React.createElement(CloseDifferenceButton, { primary: true, rounded: true, textProps: {
-                    semiBold: true,
-                    extraLarge: true
-                }, theme: theme, activeStyles: true, onClick: this.resetTool, renderIcon: () => (React.createElement(StyledIcon, { light: true, styledWidth: "13px", glyph: GLYPHS.closeLight })), iconProps: {
-                    css: `margin-right: 10px;`
-                } }, "Close")),
-            !isShowingDiff && (React.createElement(LocationPicker, { terria: terria, location: this.location, onPicking: this.onUserPickingLocation, onPicked: this.onUserPickLocation })),
-            !isShowingDiff &&
-                ReactDOM.createPortal(
-                // Bottom Panel
-                React.createElement(Box, { centered: true, fullWidth: true, flexWrap: true, backgroundColor: theme.dark },
-                    React.createElement(DatePicker, { heading: t("diffTool.labels.dateComparisonA"), item: this.props.leftItem, externalOpenButton: this.openLeftDatePickerButton, onDateSet: () => this.showItem(this.props.leftItem) }),
-                    React.createElement(AreaFilterSelection, { t: t, location: this.location, isPickingNewLocation: this._isPickingNewLocation }),
-                    React.createElement(DatePicker, { heading: t("diffTool.labels.dateComparisonB"), item: this.props.rightItem, externalOpenButton: this.openRightDatePickerButton, onDateSet: () => this.showItem(this.props.rightItem) })), document.getElementById("TJS-BottomDockLastPortal"))));
+                    `, transparentBg: true, onClick: this.resetTool, children: _jsxs(BoxSpan, { centered: true, children: [_jsx(StyledIcon, { css: "transform:rotate(90deg);", light: true, styledWidth: "16px", glyph: GLYPHS.arrowDown }), _jsx(TextSpan, { noFontSize: true, children: t("general.back") })] }) }) }), _jsx(Spacing, { bottom: 3 }), _jsx(Text, { medium: true, textLight: true, children: t("diffTool.differenceResultsTitle") }), _jsx(Spacing, { bottom: 2 })] })), _jsx(Text, { textLight: true, children: t("diffTool.instructions.paneDescription") }), _jsx(Spacing, { bottom: 3 }), _jsxs(LocationAndDatesDisplayBox, { children: [_jsxs(Box, { children: [_jsxs(Text, { medium: true, children: [t("diffTool.labels.area"), ":"] }), _jsxs("div", { children: [_jsx(Text, { medium: true, textLightDimmed: !this.location, children: this.location
+                                                            ? t("diffTool.locationDisplay.locationSelected.title")
+                                                            : t("diffTool.locationDisplay.noLocationSelected.title") }), _jsx(Text, { light: true, textLight: true, small: true, children: this.location
+                                                            ? t("diffTool.locationDisplay.locationSelected.description")
+                                                            : t("diffTool.locationDisplay.noLocationSelected.description") })] })] }), _jsxs(Box, { children: [_jsxs(Text, { medium: true, children: [t("diffTool.labels.dates"), ":"] }), _jsxs(Box, { column: true, alignItemsFlexStart: true, children: [this.leftDate && (_jsxs(Text, { large: true, children: ["(A) ", dateFormat(this.leftDate, "dd/mm/yyyy")] })), !this.leftDate && (_jsx(RawButton, { ref: this.openLeftDatePickerButton, children: _jsx(TextSpan, { isLink: true, small: true, children: t("diffTool.instructions.setDateA") }) })), _jsx(Spacing, { bottom: 1 }), this.rightDate && (_jsxs(Text, { large: true, children: ["(B) ", dateFormat(this.rightDate, "dd/mm/yyyy")] })), !this.rightDate && (_jsx(RawButton, { ref: this.openRightDatePickerButton, children: _jsx(TextSpan, { isLink: true, small: true, children: t("diffTool.instructions.setDateB") }) })), isShowingDiff === false && this.leftDate && this.rightDate && (_jsx(RawButton, { onClick: this.unsetDates, children: _jsx(TextSpan, { isLink: true, small: true, children: t("diffTool.instructions.changeDates") }) }))] })] })] }), !isShowingDiff && (_jsxs(_Fragment, { children: [_jsx(Spacing, { bottom: 4 }), _jsxs(Selector, { viewState: viewState, value: sourceItem.uniqueId, onChange: this.changeSourceItem, label: t("diffTool.labels.sourceDataset"), children: [_jsx("option", { disabled: true, children: "Select source item" }), this.diffableItemsInWorkbench.map((item) => (_jsx("option", { value: item.uniqueId, children: item.name }, item.uniqueId)))] })] })), !isShowingDiff && (_jsxs(_Fragment, { children: [_jsx(Spacing, { bottom: 4 }), _jsxs(Selector, { viewState: viewState, spacingBottom: true, value: this.previewStyle, onChange: this.changePreviewStyle, label: t("diffTool.labels.previewStyle"), children: [_jsx("option", { disabled: true, value: "", children: t("diffTool.choosePreview") }), (_c = (_b = (_a = this.diffItem.styleSelectableDimensions) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.options) === null || _c === void 0 ? void 0 : _c.map((style) => (_jsx("option", { value: style.id, children: style.name }, style.id)))] }), this.previewLegendUrl && (_jsxs(_Fragment, { children: [_jsx(Spacing, { bottom: 2 }), _jsx(LegendImage, { width: "100%", src: this.previewLegendUrl })] }))] })), _jsx(Spacing, { bottom: 2 }), _jsxs(Selector, { viewState: viewState, value: this.diffStyle || "", onChange: this.changeDiffStyle, label: t("diffTool.labels.differenceOutput"), children: [_jsx("option", { disabled: true, value: "", children: t("diffTool.chooseDifference") }), this.availableDiffStyles.map((style) => (_jsx("option", { value: style.id, children: style.name }, style.id)))] }), isShowingDiff && this.diffLegendUrl && (_jsxs(_Fragment, { children: [_jsx(LegendImage, { width: "100%", src: this.diffLegendUrl }), _jsx(Spacing, { bottom: 4 })] })), !isShowingDiff && (_jsxs(_Fragment, { children: [_jsx(Spacing, { bottom: 4 }), _jsx(GenerateButton, { onClick: this.generateDiff, disabled: !isReadyToGenerateDiff, "aria-describedby": "TJSDifferenceDisabledButtonPrompt", children: _jsx(TextSpan, { large: true, children: t("diffTool.labels.generateDiffButtonText") }) }), !isReadyToGenerateDiff && (_jsxs(_Fragment, { children: [_jsx(Spacing, { bottom: 3 }), _jsx(Text, { small: true, light: true, textLight: true, id: "TJSDifferenceDisabledButtonPrompt", children: t("diffTool.labels.disabledButtonPrompt") }), _jsx(Spacing, { bottom: 4 })] }))] }))] }) }), isShowingDiff && (_jsx(CloseDifferenceButton, { primary: true, rounded: true, textProps: {
+                        semiBold: true,
+                        extraLarge: true
+                    }, theme: theme, activeStyles: true, onClick: this.resetTool, renderIcon: () => (_jsx(StyledIcon, { light: true, styledWidth: "13px", glyph: GLYPHS.closeLight })), iconProps: {
+                        css: `margin-right: 10px;`
+                    }, children: "Close" })), !isShowingDiff && (_jsx(LocationPicker, { terria: terria, location: this.location, onPicking: this.onUserPickingLocation, onPicked: this.onUserPickLocation })), !isShowingDiff &&
+                    ReactDOM.createPortal(
+                    // Bottom Panel
+                    _jsxs(Box, { centered: true, fullWidth: true, flexWrap: true, backgroundColor: theme.dark, children: [_jsx(DatePicker, { heading: t("diffTool.labels.dateComparisonA"), item: this.props.leftItem, externalOpenButton: this.openLeftDatePickerButton, onDateSet: () => this.showItem(this.props.leftItem) }), _jsx(AreaFilterSelection, { t: t, location: this.location, isPickingNewLocation: this._isPickingNewLocation }), _jsx(DatePicker, { heading: t("diffTool.labels.dateComparisonB"), item: this.props.rightItem, externalOpenButton: this.openRightDatePickerButton, onDateSet: () => this.showItem(this.props.rightItem) })] }), document.getElementById("TJS-BottomDockLastPortal"))] }));
     }
 };
 __decorate([
@@ -514,9 +515,6 @@ __decorate([
 __decorate([
     action
 ], Main.prototype, "setLocationFromActiveSearch", null);
-__decorate([
-    action
-], Main.prototype, "componentDidMount", null);
 Main = __decorate([
     observer
 ], Main);
@@ -527,23 +525,10 @@ const DiffAccordion = (props) => {
     const [showChildren, setShowChildren] = useState(true);
     const { t, viewState } = props;
     const theme = useTheme();
-    return (React.createElement(DiffAccordionWrapper, { isMapFullScreen: viewState.isMapFullScreen, column: true },
-        React.createElement(DiffAccordionToggle, { paddedVertically: true, paddedHorizontally: 2, centered: true, justifySpaceBetween: true, backgroundColor: theme.colorSecondary },
-            React.createElement(Box, { centered: true },
-                React.createElement(StyledIcon, { styledWidth: "20px", light: true, glyph: GLYPHS.difference }),
-                React.createElement(Spacing, { right: 1 }),
-                React.createElement(Text, { textLight: true, semiBold: true, 
-                    // font-size is non standard with what we have so far in terria,
-                    // lineheight as well to hit nonstandard paddings
-                    styledFontSize: "17px", styledLineHeight: "30px" }, t("diffTool.title"))),
-            React.createElement(Box, { centered: true, css: "margin-right:-5px;" },
-                React.createElement(RawButton, { onClick: () => viewState.closeTool() },
-                    React.createElement(TextSpan, { textLight: true, small: true, semiBold: true, uppercase: true }, t("diffTool.exit"))),
-                React.createElement(Spacing, { right: 4 }),
-                React.createElement(RawButton, { onClick: () => setShowChildren(!showChildren) },
-                    React.createElement(BoxSpan, { paddedRatio: 1, centered: true },
-                        React.createElement(StyledIcon, { styledWidth: "12px", light: true, glyph: showChildren ? GLYPHS.opened : GLYPHS.closed }))))),
-        showChildren && props.children));
+    return (_jsxs(DiffAccordionWrapper, { isMapFullScreen: viewState.isMapFullScreen, column: true, children: [_jsxs(DiffAccordionToggle, { paddedVertically: true, paddedHorizontally: 2, centered: true, justifySpaceBetween: true, backgroundColor: theme.colorSecondary, children: [_jsxs(Box, { centered: true, children: [_jsx(StyledIcon, { styledWidth: "20px", light: true, glyph: GLYPHS.difference }), _jsx(Spacing, { right: 1 }), _jsx(Text, { textLight: true, semiBold: true, 
+                                // font-size is non standard with what we have so far in terria,
+                                // lineheight as well to hit nonstandard paddings
+                                styledFontSize: "17px", styledLineHeight: "30px", children: t("diffTool.title") })] }), _jsxs(Box, { centered: true, css: "margin-right:-5px;", children: [_jsx(RawButton, { onClick: () => viewState.closeTool(), children: _jsx(TextSpan, { textLight: true, small: true, semiBold: true, uppercase: true, children: t("diffTool.exit") }) }), _jsx(Spacing, { right: 4 }), _jsx(RawButton, { onClick: () => setShowChildren(!showChildren), children: _jsx(BoxSpan, { paddedRatio: 1, centered: true, children: _jsx(StyledIcon, { styledWidth: "12px", light: true, glyph: showChildren ? GLYPHS.opened : GLYPHS.closed }) }) })] })] }), showChildren && props.children] }));
 };
 const DiffAccordionWrapper = styled(Box).attrs({
     column: true,
@@ -555,7 +540,9 @@ const DiffAccordionWrapper = styled(Box).attrs({
   left: 0px;
   min-height: 220px;
   // background: ${(p) => p.theme.dark};
-  margin-left: ${(props) => props.isMapFullScreen ? 16 : parseInt(props.theme.workbenchWidth) + 40}px;
+  margin-left: ${(props) => props.isMapFullScreen
+    ? 16
+    : parseInt(props.theme.workbenchWidth, 10) + 40}px;
   transition: margin-left 0.25s;
 `;
 const MainPanel = styled(Box).attrs({
@@ -574,7 +561,6 @@ const CloseDifferenceButton = styled(Button) `
   left: 50%;
   transform: translateX(-50%);
   top: 18px;
-
   padding: 0 20px;
 `;
 const GenerateButton = styled(Button).attrs({
@@ -582,15 +568,10 @@ const GenerateButton = styled(Button).attrs({
     splitter: true,
     fullWidth: true
 }) ``;
-const Selector = (props) => (React.createElement(Box, { fullWidth: true, column: true },
-    React.createElement("label", null,
-        React.createElement(Text, { textLight: true, css: "p {margin: 0;}" }, parseCustomMarkdownToReactWithOptions(`${props.label}:`, {
-            injectTermsAsTooltips: true,
-            tooltipTerms: props.viewState.terria.configParameters.helpContentTerms
-        })),
-        React.createElement(Spacing, { bottom: 1 }),
-        React.createElement(Select, Object.assign({}, props), props.children),
-        props.spacingBottom && React.createElement(Spacing, { bottom: 2 }))));
+const Selector = (props) => (_jsx(Box, { fullWidth: true, column: true, children: _jsxs("label", { children: [_jsx(Text, { textLight: true, css: "p {margin: 0;}", children: parseCustomMarkdownToReactWithOptions(`${props.label}:`, {
+                    injectTermsAsTooltips: true,
+                    tooltipTerms: props.viewState.terria.configParameters.helpContentTerms
+                }) }), _jsx(Spacing, { bottom: 1 }), _jsx(Select, { ...props, children: props.children }), props.spacingBottom && _jsx(Spacing, { bottom: 2 })] }) }));
 const AreaFilterSelection = (props) => {
     const { t, location, isPickingNewLocation } = props;
     let locationText = "-";
@@ -600,23 +581,16 @@ const AreaFilterSelection = (props) => {
         });
         locationText = `${longitude} ${latitude}`;
     }
-    return (React.createElement(Box, { column: true, centered: true, styledMinWidth: "230px", css: `
+    return (_jsxs(Box, { column: true, centered: true, styledMinWidth: "230px", css: `
         @media (max-width: ${(props) => props.theme.md}px) {
           width: 100%;
         }
-      ` },
-        React.createElement(Box, { centered: true },
-            React.createElement(StyledIcon, { light: true, styledWidth: "16px", glyph: GLYPHS.location2 }),
-            React.createElement(Spacing, { right: 2 }),
-            React.createElement(Text, { textLight: true, extraLarge: true }, t("diffTool.labels.areaFilterSelection"))),
-        React.createElement(Spacing, { bottom: 3 }),
-        React.createElement(Box, { styledMinHeight: "40px" }, isPickingNewLocation ? (React.createElement(Text, { textLight: true, extraExtraLarge: true, bold: true, 
-            // Using legacy Loader.jsx means we override at a higher level to inherit
-            // this fills tyle
-            css: `
+      `, children: [_jsxs(Box, { centered: true, children: [_jsx(StyledIcon, { light: true, styledWidth: "16px", glyph: GLYPHS.location2 }), _jsx(Spacing, { right: 2 }), _jsx(Text, { textLight: true, extraLarge: true, children: t("diffTool.labels.areaFilterSelection") })] }), _jsx(Spacing, { bottom: 3 }), _jsx(Box, { styledMinHeight: "40px", children: isPickingNewLocation ? (_jsx(Text, { textLight: true, extraExtraLarge: true, bold: true, 
+                    // Using legacy Loader.jsx means we override at a higher level to inherit
+                    // this fills tyle
+                    css: `
               fill: ${({ theme }) => theme.textLight};
-            ` },
-            React.createElement(Loader, { light: true, message: `Querying ${location ? "new" : ""} position...` }))) : (React.createElement(Text, { textLight: true, bold: true, heading: true, textAlignCenter: true }, locationText)))));
+            `, children: _jsx(Loader, { light: true, message: `Querying ${location ? "new" : ""} position...` }) })) : (_jsx(Text, { textLight: true, bold: true, heading: true, textAlignCenter: true, children: locationText })) })] }));
 };
 const LocationAndDatesDisplayBox = styled(Box).attrs({
     column: true,
@@ -634,13 +608,13 @@ const LocationAndDatesDisplayBox = styled(Box).attrs({
   }
 `;
 const LegendImage = function (props) {
-    return (React.createElement("img", Object.assign({}, props, { 
+    return (_jsx("img", { ...props, 
         // Show the legend only if it loads successfully, so we start out hidden
         style: { display: "none", marginTop: "4px" }, 
         // @ts-ignore
         onLoad: (e) => (e.target.style.display = "block"), 
         // @ts-ignore
-        onError: (e) => (e.target.style.display = "none") })));
+        onError: (e) => (e.target.style.display = "none") }));
 };
 async function createSplitItem(sourceItem, splitDirection) {
     const terria = sourceItem.terria;
@@ -682,7 +656,10 @@ function setDefaultDiffStyle(item) {
     if (item.diffStyleId !== undefined) {
         return;
     }
-    const availableStyles = filterOutUndefined(item.availableDiffStyles.map((diffStyleId) => { var _a, _b, _c; return (_c = (_b = (_a = item.styleSelectableDimensions) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.options) === null || _c === void 0 ? void 0 : _c.find((style) => style.id === diffStyleId); }));
+    const availableStyles = filterOutUndefined(item.availableDiffStyles.map((diffStyleId) => {
+        var _a, _b, _c;
+        return (_c = (_b = (_a = item.styleSelectableDimensions) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.options) === null || _c === void 0 ? void 0 : _c.find((style) => style.id === diffStyleId);
+    }));
     if (availableStyles.length === 1) {
         item.setTrait(CommonStrata.user, "diffStyleId", availableStyles[0].id);
     }

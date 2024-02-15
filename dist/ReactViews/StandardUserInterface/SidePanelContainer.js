@@ -1,6 +1,6 @@
 import { action } from "mobx";
 import styled from "styled-components";
-import { withViewState } from "./ViewStateContext";
+import { withViewState } from "../Context";
 const SidePanelContainer = styled.div.attrs(({ viewState }) => ({
     className: viewState.topElement === "SidePanel" ? "top-element" : "",
     onClick: action(() => {

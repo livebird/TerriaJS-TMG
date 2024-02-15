@@ -11,6 +11,21 @@ import mixTraits from "../mixTraits";
 import ModelTraits from "../ModelTraits";
 import UrlTraits from "./UrlTraits";
 export class QueryParamTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "name", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "value", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -34,9 +49,36 @@ __decorate([
 export default class ApiRequestTraits extends mixTraits(UrlTraits) {
     constructor() {
         super(...arguments);
-        this.queryParameters = [];
-        this.updateQueryParameters = [];
-        this.postRequestDataAsFormData = false;
+        Object.defineProperty(this, "queryParameters", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "updateQueryParameters", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "requestData", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "postRequestDataAsFormData", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "responseDataPath", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([
@@ -72,7 +114,7 @@ __decorate([
     primitiveTrait({
         name: "Response data path",
         type: "string",
-        description: "Path to relevent data in JSON response."
+        description: "Path to relevant data in JSON response. eg: `some.user.name`, `some.users[0].name` or `some.users[].name`"
     })
 ], ApiRequestTraits.prototype, "responseDataPath", void 0);
 //# sourceMappingURL=ApiRequestTraits.js.map

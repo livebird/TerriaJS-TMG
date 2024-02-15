@@ -4,6 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx } from "react/jsx-runtime";
 import { observer } from "mobx-react";
 import { Line } from "@visx/shape";
 import PropTypes from "prop-types";
@@ -23,18 +24,23 @@ let MomentLines = class MomentLines extends React.Component {
     render() {
         const { id, chartItem, scales } = this.props;
         const baseKey = `moment-line-${chartItem.categoryName}-${chartItem.name}`;
-        return (React.createElement("g", { id: id }, chartItem.points.map((p, i) => {
-            const x = scales.x(p.x);
-            const y = scales.y(0);
-            return (React.createElement(Line, { key: `${baseKey}-${i}`, from: { x, y: 0 }, to: { x, y }, stroke: chartItem.getColor(), strokeWidth: 3, opacity: p.isSelected ? 1.0 : 0.3, pointerEvents: "all", cursor: "pointer", onClick: () => chartItem.onClick(p) }));
-        })));
+        return (_jsx("g", { id: id, children: chartItem.points.map((p, i) => {
+                const x = scales.x(p.x);
+                const y = scales.y(0);
+                return (_jsx(Line, { from: { x, y: 0 }, to: { x, y }, stroke: chartItem.getColor(), strokeWidth: 3, opacity: p.isSelected ? 1.0 : 0.3, pointerEvents: "all", cursor: "pointer", onClick: () => chartItem.onClick(p) }, `${baseKey}-${i}`));
+            }) }));
     }
 };
-MomentLines.propTypes = {
-    id: PropTypes.string.isRequired,
-    chartItem: PropTypes.object.isRequired,
-    scales: PropTypes.object.isRequired
-};
+Object.defineProperty(MomentLines, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        id: PropTypes.string.isRequired,
+        chartItem: PropTypes.object.isRequired,
+        scales: PropTypes.object.isRequired
+    }
+});
 MomentLines = __decorate([
     observer
 ], MomentLines);

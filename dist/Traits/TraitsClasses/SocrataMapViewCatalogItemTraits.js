@@ -9,6 +9,21 @@ import mixTraits from "../mixTraits";
 import CatalogMemberTraits from "./CatalogMemberTraits";
 import { GeoJsonTraits } from "./GeoJsonTraits";
 export default class SocrataMapViewCatalogItemTraits extends mixTraits(GeoJsonTraits, CatalogMemberTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "geojsonUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "resourceId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({

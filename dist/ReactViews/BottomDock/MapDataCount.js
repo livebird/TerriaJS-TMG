@@ -1,4 +1,4 @@
-import React from "react";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { observer } from "mobx-react";
 import Icon, { StyledIcon } from "../../Styled/Icon";
 import ButtonAsLabel from "../../Styled/ButtonAsLabel";
@@ -27,17 +27,7 @@ const MapDataCount = observer(function (props) {
             count: numberOfDatasets
         })
         : t("countDatasets.noMapDataEnabled");
-    return (
-    // Should we even provide a wrapper Box? makes sense not to, but most of the
-    // components as they stand come with their own "wrapper" via scss
-    // <Box styledMinHeight="72px">
-    React.createElement(Box, null,
-        React.createElement(ButtonAsLabel, { light: hasMapData },
-            React.createElement(Spacing, { right: 1 }),
-            React.createElement(StyledIcon, { glyph: hasMapData ? Icon.GLYPHS.mapDataActive : Icon.GLYPHS.mapDataInactive, light: !hasMapData, dark: hasMapData, styledWidth: "20px" }),
-            React.createElement(Spacing, { right: 2 }),
-            React.createElement(Text, { semiBold: true }, mapDataText),
-            React.createElement(Spacing, { right: 3 }))));
+    return (_jsx(Box, { css: "flex-shrink 0.5;", children: _jsxs(ButtonAsLabel, { light: hasMapData, children: [_jsx(Spacing, { right: 1 }), _jsx(StyledIcon, { glyph: hasMapData ? Icon.GLYPHS.mapDataActive : Icon.GLYPHS.mapDataInactive, light: !hasMapData, dark: hasMapData, styledWidth: "20px" }), _jsx(Spacing, { right: 2 }), _jsx(Text, { semiBold: true, children: mapDataText }), _jsx(Spacing, { right: 3 })] }) }));
 });
 export default withControlledVisibility(MapDataCount);
 //# sourceMappingURL=MapDataCount.js.map

@@ -13,6 +13,21 @@ import primitiveTrait from "../Decorators/primitiveTrait";
 import UrlTraits from "./UrlTraits";
 import LegendOwnerTraits from "./LegendOwnerTraits";
 export class RefineTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "name", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "value", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -31,7 +46,18 @@ __decorate([
 export default class OpenDataSoftCatalogGroupTraits extends mixTraits(UrlTraits, CatalogMemberTraits, LegendOwnerTraits, GroupTraits) {
     constructor() {
         super(...arguments);
-        this.flatten = false;
+        Object.defineProperty(this, "flatten", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "facetFilters", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([

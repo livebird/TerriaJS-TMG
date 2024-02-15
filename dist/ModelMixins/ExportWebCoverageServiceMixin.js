@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { computed, runInAction } from "mobx";
+import { computed, runInAction, makeObservable } from "mobx";
 import CesiumMath from "terriajs-cesium/Source/Core/Math";
 import RequestErrorEvent from "terriajs-cesium/Source/Core/RequestErrorEvent";
 import URI from "urijs";
@@ -36,11 +36,6 @@ import filterOutUndefined from "../Core/filterOutUndefined";
  * Note: not currently used
  */
 class WebCoverageServiceCapabilitiesStratum extends LoadableStratum(ExportWebCoverageServiceTraits) {
-    constructor(catalogItem, capabilities) {
-        super();
-        this.catalogItem = catalogItem;
-        this.capabilities = capabilities;
-    }
     static async load(catalogItem) {
         var _a, _b, _c, _d, _e, _f, _g, _h;
         if (!catalogItem.linkedWcsUrl)
@@ -70,21 +65,36 @@ class WebCoverageServiceCapabilitiesStratum extends LoadableStratum(ExportWebCov
             crs
         });
     }
+    constructor(catalogItem, capabilities) {
+        super();
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogItem
+        });
+        Object.defineProperty(this, "capabilities", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: capabilities
+        });
+    }
     duplicateLoadableStratum(model) {
         return new WebCoverageServiceCapabilitiesStratum(model, this.capabilities);
     }
 }
-WebCoverageServiceCapabilitiesStratum.stratumName = "wcsCapabilitiesStratum";
+Object.defineProperty(WebCoverageServiceCapabilitiesStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "wcsCapabilitiesStratum"
+});
 /** Call WCS DescribeCoverage for a specific coverageId to get:
  * - Native CRS
  * - Native format
  */
 class WebCoverageServiceDescribeCoverageStratum extends LoadableStratum(ExportWebCoverageServiceTraits) {
-    constructor(catalogItem, coverage) {
-        super();
-        this.catalogItem = catalogItem;
-        this.coverage = coverage;
-    }
     static async load(catalogItem) {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
         if (!catalogItem.linkedWcsUrl)
@@ -116,6 +126,22 @@ class WebCoverageServiceDescribeCoverageStratum extends LoadableStratum(ExportWe
             nativeCrs
         });
     }
+    constructor(catalogItem, coverage) {
+        super();
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogItem
+        });
+        Object.defineProperty(this, "coverage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: coverage
+        });
+        makeObservable(this);
+    }
     get linkedWcsParameters() {
         return createStratumInstance(WebCoverageServiceParameterTraits, {
             outputCrs: this.coverage.nativeCrs,
@@ -126,16 +152,32 @@ class WebCoverageServiceDescribeCoverageStratum extends LoadableStratum(ExportWe
         return new WebCoverageServiceDescribeCoverageStratum(model, this.coverage);
     }
 }
-WebCoverageServiceDescribeCoverageStratum.stratumName = "wcsDescribeCoverageStratum";
+Object.defineProperty(WebCoverageServiceDescribeCoverageStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "wcsDescribeCoverageStratum"
+});
 __decorate([
     computed
 ], WebCoverageServiceDescribeCoverageStratum.prototype, "linkedWcsParameters", null);
 function ExportWebCoverageServiceMixin(Base) {
     class ExportWebCoverageServiceMixin extends ExportableMixin(Base) {
-        constructor() {
-            super(...arguments);
-            this._wcsCapabilitiesLoader = new AsyncLoader(this.loadWcsCapabilities.bind(this));
-            this._wcsDescribeCoverageLoader = new AsyncLoader(this.loadWcsDescribeCoverage.bind(this));
+        constructor(...args) {
+            super(...args);
+            Object.defineProperty(this, "_wcsCapabilitiesLoader", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: new AsyncLoader(this.loadWcsCapabilities.bind(this))
+            });
+            Object.defineProperty(this, "_wcsDescribeCoverageLoader", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: new AsyncLoader(this.loadWcsDescribeCoverage.bind(this))
+            });
+            makeObservable(this);
         }
         get isLoadingWcsMetadata() {
             return (this._wcsCapabilitiesLoader.isLoading ||
@@ -319,6 +361,7 @@ function ExportWebCoverageServiceMixin(Base) {
                             xml.documentElement.localName === "ExceptionReport") {
                             const message = (_e = (_d = (_c = xml.getElementsByTagName("ServiceException")) === null || _c === void 0 ? void 0 : _c[0]) === null || _d === void 0 ? void 0 : _d.innerHTML) !== null && _e !== void 0 ? _e : (_g = (_f = xml.getElementsByTagName("ows:ExceptionText")) === null || _f === void 0 ? void 0 : _f[0]) === null || _g === void 0 ? void 0 : _g.innerHTML;
                             if (isDefined(message)) {
+                                /* eslint-disable-next-line no-ex-assign */
                                 error = message;
                             }
                         }

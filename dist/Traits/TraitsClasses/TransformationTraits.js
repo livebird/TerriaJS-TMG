@@ -10,6 +10,27 @@ import LatLonHeightTraits from "./LatLonHeightTraits";
 import HeadingPitchRollTraits from "./HeadingPitchRollTraits";
 import primitiveTrait from "../Decorators/primitiveTrait";
 export default class TransformationTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "origin", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "rotation", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "scale", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     objectTrait({

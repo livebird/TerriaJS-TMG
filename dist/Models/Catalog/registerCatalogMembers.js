@@ -135,9 +135,9 @@ export default function registerCatalogMembers() {
     // We try to convert zipped shapefiles to geojson
     UrlToCatalogMemberMapping.register(matchesExtension("zip"), ShapefileCatalogItem.type);
     // These items work by trying to match a URL, then loading the data. If it fails, they move on.
-    UrlToCatalogMemberMapping.register(matchesUrl(/\/wms|\=wms/i), WebMapServiceCatalogGroup.type, true);
-    UrlToCatalogMemberMapping.register(matchesUrl(/\/wfs|\=wfs/i), WebFeatureServiceCatalogGroup.type, true);
-    UrlToCatalogMemberMapping.register(matchesUrl(/\/wmts|\=wmts/i), WebMapTileServiceCatalogGroup.type, true);
+    UrlToCatalogMemberMapping.register(matchesUrl(/\/wms|=wms/i), WebMapServiceCatalogGroup.type, true);
+    UrlToCatalogMemberMapping.register(matchesUrl(/\/wfs|=wfs/i), WebFeatureServiceCatalogGroup.type, true);
+    UrlToCatalogMemberMapping.register(matchesUrl(/\/wmts|=wmts/i), WebMapTileServiceCatalogGroup.type, true);
     UrlToCatalogMemberMapping.register(matchesUrl(/\/arcgis\/rest\/.*\/MapServer\/\d+\b/i), ArcGisMapServerCatalogItem.type, true);
     UrlToCatalogMemberMapping.register(matchesUrl(/\/arcgis\/rest\/.*\/MapServer(\/.*)?$/i), ArcGisMapServerCatalogGroup.type, true);
     UrlToCatalogMemberMapping.register(matchesUrl(/\/arcgis\/rest\/.*\/FeatureServer\/\d+\b/i), ArcGisFeatureServerCatalogItem.type, true);
@@ -162,7 +162,7 @@ function matchesUrl(regex) {
     return /./.test.bind(regex);
 }
 export function matchesExtension(extension) {
-    var regex = new RegExp("\\." + extension + "$", "i");
+    const regex = new RegExp("\\." + extension + "$", "i");
     return function (url) {
         return Boolean(url.match(regex));
     };

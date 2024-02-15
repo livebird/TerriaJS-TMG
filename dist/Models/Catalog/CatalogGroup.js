@@ -2,7 +2,7 @@ import CatalogMemberMixin from "../../ModelMixins/CatalogMemberMixin";
 import GroupMixin from "../../ModelMixins/GroupMixin";
 import CatalogGroupTraits from "../../Traits/TraitsClasses/CatalogGroupTraits";
 import CreateModel from "../Definition/CreateModel";
-export default class CatalogGroup extends GroupMixin(CatalogMemberMixin(CreateModel(CatalogGroupTraits))) {
+class CatalogGroup extends GroupMixin(CatalogMemberMixin(CreateModel(CatalogGroupTraits))) {
     get type() {
         return CatalogGroup.type;
     }
@@ -10,5 +10,11 @@ export default class CatalogGroup extends GroupMixin(CatalogMemberMixin(CreateMo
         return Promise.resolve();
     }
 }
-CatalogGroup.type = "group";
+Object.defineProperty(CatalogGroup, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "group"
+});
+export default CatalogGroup;
 //# sourceMappingURL=CatalogGroup.js.map

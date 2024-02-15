@@ -1,4 +1,5 @@
 "use strict";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 // proptypes are in mixin
 /* eslint react/prop-types:0*/
 import React from "react";
@@ -73,24 +74,17 @@ const DropdownPanel = createReactClass({
         else {
             iconGlyph = this.props.theme.icon;
         }
-        return (React.createElement("div", { className: classNames(Styles.panel, this.props.theme.outer) },
-            React.createElement("button", { onClick: this.openWithUserClick, type: "button", className: classNames(Styles.button, this.props.theme.btn, {
-                    [Styles.buttonForModalDropdown]: this.props.showDropdownAsModal
-                }), title: this.props.btnTitle, ref: this.props.btnRef || ((element) => (this.buttonElement = element)), isOpen: this.isOpen(), css: `
+        return (_jsxs("div", { className: classNames(Styles.panel, this.props.theme.outer), children: [_jsxs("button", { onClick: this.openWithUserClick, type: "button", className: classNames(Styles.button, this.props.theme.btn, {
+                        [Styles.buttonForModalDropdown]: this.props.showDropdownAsModal
+                    }), title: this.props.btnTitle, ref: this.props.btnRef || ((element) => (this.buttonElement = element)), isOpen: this.isOpen(), css: `
             ${(p) => p.isOpen &&
-                    `&:not(.foo) {
+                        `&:not(.foo) {
                 background: ${p.theme.colorPrimary};
                 svg {
                   fill: ${p.theme.textLight};
                 }
               }`}
-          ` },
-                React.createElement(If, { condition: this.props.theme.icon },
-                    React.createElement(Icon, { glyph: iconGlyph })),
-                React.createElement(If, { condition: this.props.btnText },
-                    React.createElement("span", null, this.props.btnText))),
-            React.createElement(If, { condition: this.isOpen() },
-                React.createElement(InnerPanel, { showDropdownInCenter: this.props.showDropdownInCenter, showDropdownAsModal: this.props.showDropdownAsModal, modalWidth: this.props.modalWidth, onDismissed: this.onDismissed, innerRef: this.onInnerMounted, doNotCloseFlag: this.getDoNotCloseFlag(), theme: this.props.theme, caretOffset: this.state.caretOffset, dropdownOffset: this.state.dropdownOffset, disableCloseOnFocusLoss: this.props.disableCloseOnFocusLoss }, this.props.children))));
+          `, children: [this.props.theme.icon && _jsx(Icon, { glyph: iconGlyph }), this.props.btnText && _jsx("span", { children: this.props.btnText })] }), this.isOpen() && (_jsx(InnerPanel, { showDropdownInCenter: this.props.showDropdownInCenter, showDropdownAsModal: this.props.showDropdownAsModal, modalWidth: this.props.modalWidth, onDismissed: this.onDismissed, innerRef: this.onInnerMounted, doNotCloseFlag: this.getDoNotCloseFlag(), theme: this.props.theme, caretOffset: this.state.caretOffset, dropdownOffset: this.state.dropdownOffset, disableCloseOnFocusLoss: this.props.disableCloseOnFocusLoss, children: this.props.children }))] }));
     }
 });
 export default DropdownPanel;

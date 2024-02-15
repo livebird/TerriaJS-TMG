@@ -6,7 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import i18next from "i18next";
 import L from "leaflet";
-import { autorun, computed, observable } from "mobx";
+import { autorun, computed, observable, makeObservable } from "mobx";
 import Cartesian2 from "terriajs-cesium/Source/Core/Cartesian2";
 import Cartographic from "terriajs-cesium/Source/Core/Cartographic";
 import CesiumCredit from "terriajs-cesium/Source/Core/Credit";
@@ -17,18 +17,28 @@ import TileProviderError from "terriajs-cesium/Source/Core/TileProviderError";
 import WebMercatorTilingScheme from "terriajs-cesium/Source/Core/WebMercatorTilingScheme";
 import SplitDirection from "terriajs-cesium/Source/Scene/SplitDirection";
 import isDefined from "../../Core/isDefined";
-import pollToPromise from "../../Core/pollToPromise";
 import TerriaError from "../../Core/TerriaError";
 import getUrlForImageryTile from "../ImageryProvider/getUrlForImageryTile";
-// We want TS to look at the type declared in lib/ThirdParty/terriajs-cesium-extra/index.d.ts
-// and import doesn't allows us to do that, so instead we use require + type casting to ensure
-// we still maintain the type checking, without TS screaming with errors
-const FeatureDetection = require("terriajs-cesium/Source/Core/FeatureDetection").default;
 const swScratch = new Cartographic();
 const neScratch = new Cartographic();
 const swTileCoordinatesScratch = new Cartesian2();
 const neTileCoordinatesScratch = new Cartesian2();
 class Credit extends CesiumCredit {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "_shownInLeaflet", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_shownInLeafletLastUpdate", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 export default class ImageryProviderLeafletTileLayer extends L.TileLayer {
     constructor(leaflet, imageryProvider, options = {}) {
@@ -38,16 +48,85 @@ export default class ImageryProviderLeafletTileLayer extends L.TileLayer {
                 ? imageryProvider._leafletUpdateInterval
                 : 100
         });
-        this.leaflet = leaflet;
-        this.imageryProvider = imageryProvider;
-        this.tileSize = 256;
-        this.errorEvent = new CesiumEvent();
-        this.initialized = false;
-        this._usable = false;
-        this._zSubtract = 0;
-        this._previousCredits = [];
-        this.splitDirection = SplitDirection.NONE;
-        this.splitPosition = 0.5;
+        Object.defineProperty(this, "leaflet", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: leaflet
+        });
+        Object.defineProperty(this, "imageryProvider", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: imageryProvider
+        });
+        Object.defineProperty(this, "tileSize", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 256
+        });
+        Object.defineProperty(this, "errorEvent", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new CesiumEvent()
+        });
+        Object.defineProperty(this, "initialized", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "_usable", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "_delayedUpdate", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_zSubtract", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
+        Object.defineProperty(this, "_requestImageError", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_previousCredits", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "_leafletUpdateInterval", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "splitDirection", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: SplitDirection.NONE
+        });
+        Object.defineProperty(this, "splitPosition", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0.5
+        });
+        makeObservable(this);
         this.imageryProvider = imageryProvider;
         // Handle splitter rection (and disposing reaction)
         let disposeSplitterReaction;
@@ -150,7 +229,11 @@ export default class ImageryProviderLeafletTileLayer extends L.TileLayer {
                 y: coords.y,
                 level: level
             });
-            this._requestImageError = TileProviderError.handleError(this._requestImageError, this.imageryProvider, this.imageryProvider.errorEvent, message, coords.x, coords.y, level, doRequest, e);
+            this._requestImageError = TileProviderError.reportError(this._requestImageError, // TODO: Cesium type definitions incorrectly forbid undefined
+            this.imageryProvider, this.imageryProvider.errorEvent, message, coords.x, coords.y, level, e
+            // TODO: bring terriajs-cesium retry logic to cesium
+            //doRequest
+            );
         });
         return tile;
     }
@@ -165,16 +248,7 @@ export default class ImageryProviderLeafletTileLayer extends L.TileLayer {
     _getLevelFromZ(tilePoint) {
         return tilePoint.z - this._zSubtract;
     }
-    _update() {
-        if (!this.imageryProvider.ready) {
-            if (!this._delayedUpdate) {
-                this._delayedUpdate = setTimeout(() => {
-                    this._delayedUpdate = undefined;
-                    this._update();
-                }, this._leafletUpdateInterval);
-            }
-            return;
-        }
+    _update(...args) {
         if (!this.initialized) {
             this.initialized = true;
             // Cancel the existing delayed update, if any.
@@ -216,7 +290,7 @@ export default class ImageryProviderLeafletTileLayer extends L.TileLayer {
             }, this._leafletUpdateInterval);
         }
         if (this._usable) {
-            L.TileLayer.prototype._update.apply(this, arguments);
+            L.TileLayer.prototype._update.apply(this, args);
             this._updateAttribution();
         }
     }
@@ -277,23 +351,18 @@ export default class ImageryProviderLeafletTileLayer extends L.TileLayer {
         }
         this._previousCredits = nextCredits;
     }
-    getFeaturePickingCoords(map, longitudeRadians, latitudeRadians) {
+    async getFeaturePickingCoords(map, longitudeRadians, latitudeRadians) {
         const ll = new Cartographic(CesiumMath.negativePiToPi(longitudeRadians), latitudeRadians, 0.0);
         const level = Math.round(map.getZoom());
-        return pollToPromise(() => {
-            return this.imageryProvider.ready;
-        }).then(() => {
-            const tilingScheme = this.imageryProvider.tilingScheme;
-            const coords = tilingScheme.positionToTileXY(ll, level);
-            return {
-                x: coords.x,
-                y: coords.y,
-                level: level
-            };
-        });
+        const tilingScheme = this.imageryProvider.tilingScheme;
+        const coords = tilingScheme.positionToTileXY(ll, level);
+        return {
+            x: coords.x,
+            y: coords.y,
+            level: level
+        };
     }
     async pickFeatures(x, y, level, longitudeRadians, latitudeRadians) {
-        await pollToPromise(() => this.imageryProvider.ready);
         try {
             return await this.imageryProvider.pickFeatures(x, y, level, longitudeRadians, latitudeRadians);
         }

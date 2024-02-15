@@ -74,15 +74,6 @@ import TerriaError, { parseOverrides } from "./TerriaError";
  * ```
  */
 export default class Result {
-    constructor(value, error) {
-        this.value = value;
-        this._error = error
-            ? // Create TerriaError if error is TerriaErrorOptions
-                error instanceof TerriaError
-                    ? error
-                    : new TerriaError(error)
-            : undefined;
-    }
     /** Convenience constructor to return a Result with an error.
      *
      * This accepts same arguments as `TerriaError.from`
@@ -101,6 +92,27 @@ export default class Result {
      */
     static combine(results, errorOverrides) {
         return new Result(results.map((r) => r.value), TerriaError.combine(results.map((r) => r.error), errorOverrides));
+    }
+    constructor(value, error) {
+        Object.defineProperty(this, "value", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_error", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        this.value = value;
+        this._error = error
+            ? // Create TerriaError if error is TerriaErrorOptions
+                error instanceof TerriaError
+                    ? error
+                    : new TerriaError(error)
+            : undefined;
     }
     get error() {
         return this._error;

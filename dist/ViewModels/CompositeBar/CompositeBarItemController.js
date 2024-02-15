@@ -4,36 +4,67 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { computed, observable, action } from "mobx";
+import { makeObservable, observable, runInAction } from "mobx";
 import React from "react";
 export class CompositeBarItemController {
     constructor() {
-        this.itemRef = React.createRef();
+        Object.defineProperty(this, "itemRef", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: React.createRef()
+        });
         /**
          * Whether this item is disabled
          * @private
          */
-        this._disabled = false;
+        Object.defineProperty(this, "_disabled", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
         /**
          * Whether this item is collapsed
          * @private
          */
-        this._collapsed = false;
+        Object.defineProperty(this, "_collapsed", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
         /**
          * Whether this item is active
          * @protected
          */
-        this._active = false;
+        Object.defineProperty(this, "_active", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
         /**
          * Whether this item is pinned, if item is pinned it will be always visible on screen.
          * @private
          */
-        this._pinned = false;
+        Object.defineProperty(this, "_pinned", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
         /**
          * Whether this item is visible on the screen.
          * @private
          */
-        this._visible = true;
+        Object.defineProperty(this, "_visible", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        makeObservable(this);
     }
     get id() {
         return CompositeBarItemController.id;
@@ -88,40 +119,24 @@ export class CompositeBarItemController {
         return this._visible;
     }
     setVisible(v) {
-        this._visible = v;
+        runInAction(() => {
+            this._visible = v;
+        });
     }
 }
 __decorate([
     observable
 ], CompositeBarItemController.prototype, "_disabled", void 0);
 __decorate([
-    computed
-], CompositeBarItemController.prototype, "disabled", null);
-__decorate([
     observable
 ], CompositeBarItemController.prototype, "_collapsed", void 0);
-__decorate([
-    computed
-], CompositeBarItemController.prototype, "collapsed", null);
 __decorate([
     observable
 ], CompositeBarItemController.prototype, "_active", void 0);
 __decorate([
-    computed
-], CompositeBarItemController.prototype, "active", null);
-__decorate([
     observable
 ], CompositeBarItemController.prototype, "_pinned", void 0);
 __decorate([
-    computed
-], CompositeBarItemController.prototype, "pinned", null);
-__decorate([
     observable
 ], CompositeBarItemController.prototype, "_visible", void 0);
-__decorate([
-    computed
-], CompositeBarItemController.prototype, "visible", null);
-__decorate([
-    action
-], CompositeBarItemController.prototype, "setVisible", null);
 //# sourceMappingURL=CompositeBarItemController.js.map

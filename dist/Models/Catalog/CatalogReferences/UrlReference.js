@@ -8,12 +8,12 @@ import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
 import updateModelFromJson from "../../Definition/updateModelFromJson";
 const urlRecordStratum = "url-record";
 StratumOrder.addDefaultStratum(urlRecordStratum);
-export default class UrlReference extends UrlMixin(ReferenceMixin(CreateModel(UrlReferenceTraits))) {
-    constructor(id, terria, sourceReference, strata) {
-        super(id, terria, sourceReference, strata);
-    }
+class UrlReference extends UrlMixin(ReferenceMixin(CreateModel(UrlReferenceTraits))) {
     get type() {
         return UrlReference.type;
+    }
+    constructor(id, terria, sourceReference, strata) {
+        super(id, terria, sourceReference, strata);
     }
     forceLoadReference(previousTarget) {
         if (this.url === undefined || this.uniqueId === undefined) {
@@ -56,10 +56,21 @@ export default class UrlReference extends UrlMixin(ReferenceMixin(CreateModel(Ur
         }
     }
 }
-UrlReference.type = "url-reference";
+Object.defineProperty(UrlReference, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "url-reference"
+});
+export default UrlReference;
 export class UrlMapping {
     constructor() {
-        this.mapping = [];
+        Object.defineProperty(this, "mapping", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
     }
     register(matcher, type, requiresLoad) {
         this.mapping.push({
@@ -70,4 +81,19 @@ export class UrlMapping {
     }
 }
 export const UrlToCatalogMemberMapping = new UrlMapping();
+/**
+ * Register a url handler for a specific catalog member type.
+ *
+ * When a user uploads a url or drags-n-drops a particular file, the matchers
+ * are tried in order and when there is a match we try and create a catalog
+ * member of that type.
+ *
+ * @param catalogMemberType The type string identifying the catalog member
+ * @param matcher The matcher definition
+ * @param requiresLoad Should be set to `true` if in addition to URL matching we must also try and load
+ *    the item successfully for it to be a valid match. Eg WMS/WFS groups that require enumeration.
+ */
+export function registerUrlHandlerForCatalogMemberType(catalogMemberType, matcher, requiresLoad) {
+    UrlToCatalogMemberMapping.register(matcher, catalogMemberType, requiresLoad);
+}
 //# sourceMappingURL=UrlReference.js.map

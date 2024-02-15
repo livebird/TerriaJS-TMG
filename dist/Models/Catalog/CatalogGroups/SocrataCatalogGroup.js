@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { action, computed, runInAction } from "mobx";
+import { action, computed, runInAction, makeObservable } from "mobx";
 import URI from "urijs";
 import isDefined from "../../../Core/isDefined";
 import loadJson from "../../../Core/loadJson";
@@ -27,12 +27,6 @@ import GeoJsonCatalogItem from "../CatalogItems/GeoJsonCatalogItem";
 import SocrataMapViewCatalogItem from "../CatalogItems/SocrataMapViewCatalogItem";
 import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
 export class SocrataCatalogStratum extends LoadableStratum(SocrataCatalogGroupTraits) {
-    constructor(catalogGroup, facets, results) {
-        super();
-        this.catalogGroup = catalogGroup;
-        this.facets = facets;
-        this.results = results;
-    }
     static async load(catalogGroup) {
         var _a, _b;
         if (!catalogGroup.url)
@@ -77,6 +71,28 @@ export class SocrataCatalogStratum extends LoadableStratum(SocrataCatalogGroupTr
     }
     duplicateLoadableStratum(model) {
         return new SocrataCatalogStratum(model, this.facets, this.results);
+    }
+    constructor(catalogGroup, facets, results) {
+        super();
+        Object.defineProperty(this, "catalogGroup", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogGroup
+        });
+        Object.defineProperty(this, "facets", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: facets
+        });
+        Object.defineProperty(this, "results", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: results
+        });
+        makeObservable(this);
     }
     get members() {
         // If we only have one facet, return it's children instead of a single facet group
@@ -219,7 +235,12 @@ export class SocrataCatalogStratum extends LoadableStratum(SocrataCatalogGroupTr
             : this.catalogGroup.uniqueId}/${result.resource.id}`;
     }
 }
-SocrataCatalogStratum.stratumName = "socrataCatalog";
+Object.defineProperty(SocrataCatalogStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "socrataCatalog"
+});
 __decorate([
     computed
 ], SocrataCatalogStratum.prototype, "members", null);
@@ -230,7 +251,7 @@ __decorate([
     action
 ], SocrataCatalogStratum.prototype, "createItemFromResult", null);
 StratumOrder.addLoadStratum(SocrataCatalogStratum.stratumName);
-export default class SocrataCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(SocrataCatalogGroupTraits)))) {
+class SocrataCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(SocrataCatalogGroupTraits)))) {
     get type() {
         return SocrataCatalogGroup.type;
     }
@@ -256,5 +277,11 @@ export default class SocrataCatalogGroup extends UrlMixin(GroupMixin(CatalogMemb
         }
     }
 }
-SocrataCatalogGroup.type = "socrata-group";
+Object.defineProperty(SocrataCatalogGroup, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "socrata-group"
+});
+export default SocrataCatalogGroup;
 //# sourceMappingURL=SocrataCatalogGroup.js.map

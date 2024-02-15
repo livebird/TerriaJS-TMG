@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, runInAction } from "mobx";
+import { action, runInAction, makeObservable } from "mobx";
 import JulianDate from "terriajs-cesium/Source/Core/JulianDate";
 import Resource from "terriajs-cesium/Source/Core/Resource";
 import ConstantProperty from "terriajs-cesium/Source/DataSources/ConstantProperty";
@@ -17,6 +17,10 @@ import MappableMixin from "./MappableMixin";
 import TimeVarying from "./TimeVarying";
 function FeatureInfoUrlTemplateMixin(Base) {
     class FeatureInfoUrlTemplateMixin extends Base {
+        constructor(...args) {
+            super(...args);
+            makeObservable(this);
+        }
         get hasFeatureInfoUrlTemplateMixin() {
             return true;
         }

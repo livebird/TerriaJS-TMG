@@ -6,13 +6,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import * as geoJsonMerge from "@mapbox/geojson-merge";
 import i18next from "i18next";
-import { computed } from "mobx";
+import { computed, makeObservable } from "mobx";
 import * as shp from "shpjs";
 import isDefined from "../../../Core/isDefined";
 import { isJsonObject } from "../../../Core/Json";
 import loadBlob, { isZip } from "../../../Core/loadBlob";
 import TerriaError from "../../../Core/TerriaError";
-import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
 import GeoJsonMixin from "../../../ModelMixins/GeojsonMixin";
 import ShapefileCatalogItemTraits from "../../../Traits/TraitsClasses/ShapefileCatalogItemTraits";
 import CreateModel from "../../Definition/CreateModel";
@@ -22,7 +21,17 @@ export function isJsonArrayOrDeepArrayOfObjects(value) {
     return (Array.isArray(value) &&
         value.every((child) => isJsonObject(child) || isJsonArrayOrDeepArrayOfObjects(child)));
 }
-class ShapefileCatalogItem extends GeoJsonMixin(CatalogMemberMixin(CreateModel(ShapefileCatalogItemTraits))) {
+class ShapefileCatalogItem extends GeoJsonMixin(CreateModel(ShapefileCatalogItemTraits)) {
+    constructor(...args) {
+        super(...args);
+        Object.defineProperty(this, "_file", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
+    }
     get type() {
         return ShapefileCatalogItem.type;
     }
@@ -57,7 +66,12 @@ class ShapefileCatalogItem extends GeoJsonMixin(CatalogMemberMixin(CreateModel(S
         throw TerriaError.from("Failed to load shapefile - no URL of file has been defined");
     }
 }
-ShapefileCatalogItem.type = "shp";
+Object.defineProperty(ShapefileCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "shp"
+});
 __decorate([
     computed
 ], ShapefileCatalogItem.prototype, "hasLocalData", null);

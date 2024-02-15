@@ -6,7 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import i18next from "i18next";
 import { flatten } from "lodash-es";
-import { action, computed, runInAction } from "mobx";
+import { action, computed, runInAction, makeObservable } from "mobx";
 import URI from "urijs";
 import filterOutUndefined from "../../../Core/filterOutUndefined";
 import isDefined from "../../../Core/isDefined";
@@ -37,12 +37,6 @@ function toArray(val) {
     return Array.isArray(val) ? val : [val];
 }
 class CswStratum extends LoadableStratum(CswCatalogGroupTraits) {
-    constructor(catalogGroup, metadataGroups, records) {
-        super();
-        this.catalogGroup = catalogGroup;
-        this.metadataGroups = metadataGroups;
-        this.records = records;
-    }
     static async load(catalogGroup) {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         if (catalogGroup.url === undefined) {
@@ -154,10 +148,10 @@ class CswStratum extends LoadableStratum(CswCatalogGroupTraits) {
             records.push(...((_d = (_c = json === null || json === void 0 ? void 0 : json.SearchResults) === null || _c === void 0 ? void 0 : _c.Record) !== null && _d !== void 0 ? _d : []));
             // Get next start position - or stop pageing
             const nextRecord = typeof ((_e = json === null || json === void 0 ? void 0 : json.SearchResults) === null || _e === void 0 ? void 0 : _e.nextRecord) === "string"
-                ? parseInt((_g = (_f = json === null || json === void 0 ? void 0 : json.SearchResults) === null || _f === void 0 ? void 0 : _f.nextRecord) !== null && _g !== void 0 ? _g : "0")
+                ? parseInt((_g = (_f = json === null || json === void 0 ? void 0 : json.SearchResults) === null || _f === void 0 ? void 0 : _f.nextRecord) !== null && _g !== void 0 ? _g : "0", 10)
                 : (_h = json === null || json === void 0 ? void 0 : json.SearchResults) === null || _h === void 0 ? void 0 : _h.nextRecord;
             const numberOfRecordsMatched = typeof ((_j = json === null || json === void 0 ? void 0 : json.SearchResults) === null || _j === void 0 ? void 0 : _j.numberOfRecordsMatched) === "string"
-                ? parseInt((_l = (_k = json === null || json === void 0 ? void 0 : json.SearchResults) === null || _k === void 0 ? void 0 : _k.numberOfRecordsMatched) !== null && _l !== void 0 ? _l : "0")
+                ? parseInt((_l = (_k = json === null || json === void 0 ? void 0 : json.SearchResults) === null || _k === void 0 ? void 0 : _k.numberOfRecordsMatched) !== null && _l !== void 0 ? _l : "0", 10)
                 : (_m = json === null || json === void 0 ? void 0 : json.SearchResults) === null || _m === void 0 ? void 0 : _m.numberOfRecordsMatched;
             if (!isDefined(nextRecord) ||
                 nextRecord === 0 ||
@@ -176,6 +170,28 @@ class CswStratum extends LoadableStratum(CswCatalogGroupTraits) {
             });
         }
         return new CswStratum(catalogGroup, metadataGroups, records);
+    }
+    constructor(catalogGroup, metadataGroups, records) {
+        super();
+        Object.defineProperty(this, "catalogGroup", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogGroup
+        });
+        Object.defineProperty(this, "metadataGroups", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: metadataGroups
+        });
+        Object.defineProperty(this, "records", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: records
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(model) {
         return new CswStratum(model, this.metadataGroups, this.records);
@@ -363,7 +379,12 @@ class CswStratum extends LoadableStratum(CswCatalogGroupTraits) {
         ];
     }
 }
-CswStratum.stratumName = "CswStratum";
+Object.defineProperty(CswStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "CswStratum"
+});
 __decorate([
     computed
 ], CswStratum.prototype, "members", null);
@@ -414,7 +435,7 @@ function addMetadataGroups(keys, index, group, separator, queryField) {
 // find groups that the record belongs to
 function findGroup(metadataGroups, record) {
     var _a;
-    for (var i = 0; i < metadataGroups.length; i++) {
+    for (let i = 0; i < metadataGroups.length; i++) {
         const group = metadataGroups[i];
         if (group.field) {
             const fields = filterOutUndefined((_a = toArray(record[group.field])) !== null && _a !== void 0 ? _a : []);
@@ -434,7 +455,7 @@ function findGroup(metadataGroups, record) {
 function matchValue(value, recordValue, regex) {
     if (isDefined(regex) && regex) {
         // regular expression so parse it and check string against it
-        var regExp = new RegExp(value);
+        const regExp = new RegExp(value);
         return regExp.test(recordValue);
     }
     else {
@@ -442,7 +463,7 @@ function matchValue(value, recordValue, regex) {
     }
 }
 StratumOrder.addLoadStratum(CswStratum.stratumName);
-export default class CswCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(CswCatalogGroupTraits)))) {
+class CswCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(CswCatalogGroupTraits)))) {
     get type() {
         return CswCatalogGroup.type;
     }
@@ -461,5 +482,11 @@ export default class CswCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberMi
         }
     }
 }
-CswCatalogGroup.type = "csw-group";
+Object.defineProperty(CswCatalogGroup, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "csw-group"
+});
+export default CswCatalogGroup;
 //# sourceMappingURL=CswCatalogGroup.js.map

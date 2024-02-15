@@ -5,13 +5,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import debounce from "lodash-es/debounce";
-import { observable, action, runInAction } from "mobx";
+import { action, makeObservable, observable, runInAction } from "mobx";
+import Cartesian3 from "terriajs-cesium/Source/Core/Cartesian3";
 import Cartographic from "terriajs-cesium/Source/Core/Cartographic";
 import EllipsoidTerrainProvider from "terriajs-cesium/Source/Core/EllipsoidTerrainProvider";
+import CesiumEvent from "terriajs-cesium/Source/Core/Event";
 import Intersections2D from "terriajs-cesium/Source/Core/Intersections2D";
 import CesiumMath from "terriajs-cesium/Source/Core/Math";
+import Ray from "terriajs-cesium/Source/Core/Ray";
 import isDefined from "../Core/isDefined";
 import JSEarthGravityModel1996 from "../Map/Vector/EarthGravityModel1996";
+import pickTriangle from "../Map/Cesium/pickTriangle";
 import prettifyCoordinates from "../Map/Vector/prettifyCoordinates";
 import prettifyProjection from "../Map/Vector/prettifyProjection";
 // TypeScript 3.6.3 can't tell JSEarthGravityModel1996 is a class and reports
@@ -20,9 +24,119 @@ import prettifyProjection from "../Map/Vector/prettifyProjection";
 class EarthGravityModel1996 extends JSEarthGravityModel1996 {
 }
 const sampleTerrainMostDetailed = require("terriajs-cesium/Source/Core/sampleTerrainMostDetailed").default;
+const scratchRay = new Ray();
+const scratchV0 = new Cartographic();
+const scratchV1 = new Cartographic();
+const scratchV2 = new Cartographic();
+const scratchIntersection = new Cartographic();
+const scratchBarycentric = new Cartesian3();
+const scratchCartographic = new Cartographic();
+const pickedTriangleScratch = {
+    tile: undefined,
+    intersection: new Cartesian3(),
+    v0: new Cartesian3(),
+    v1: new Cartesian3(),
+    v2: new Cartesian3()
+};
 export default class MouseCoords {
     constructor() {
-        this.useProjection = false;
+        Object.defineProperty(this, "geoidModel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "proj4Projection", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "projectionUnits", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "proj4longlat", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "accurateSamplingDebounceTime", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "debounceSampleAccurateHeight", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "tileRequestInFlight", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "elevation", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "utmZone", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "latitude", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "longitude", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "north", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "east", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "cartographic", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "useProjection", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "updateEvent", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new CesiumEvent()
+        });
+        makeObservable(this);
         this.geoidModel = new EarthGravityModel1996(require("file-loader!../../wwwroot/data/WW15MGH.DAC"));
         this.proj4Projection = "+proj=utm +ellps=GRS80 +units=m +no_defs";
         this.projectionUnits = "m";
@@ -34,6 +148,7 @@ export default class MouseCoords {
     }
     toggleUseProjection() {
         this.useProjection = !this.useProjection;
+        this.updateEvent.raiseEvent();
     }
     updateCoordinatesFromCesium(terria, position) {
         if (!terria.cesium) {
@@ -41,22 +156,24 @@ export default class MouseCoords {
         }
         const scene = terria.cesium.scene;
         const camera = scene.camera;
-        const pickRay = camera.getPickRay(position);
+        const pickRay = camera.getPickRay(position, scratchRay);
         const globe = scene.globe;
-        const pickedTriangle = globe.pickTriangle(pickRay, scene);
+        const pickedTriangle = isDefined(pickRay)
+            ? pickTriangle(pickRay, scene, true, pickedTriangleScratch)
+            : undefined;
         if (isDefined(pickedTriangle)) {
             // Get a fast, accurate-ish height every time the mouse moves.
             const ellipsoid = globe.ellipsoid;
-            const v0 = ellipsoid.cartesianToCartographic(pickedTriangle.v0);
-            const v1 = ellipsoid.cartesianToCartographic(pickedTriangle.v1);
-            const v2 = ellipsoid.cartesianToCartographic(pickedTriangle.v2);
-            const intersection = ellipsoid.cartesianToCartographic(pickedTriangle.intersection);
+            const v0 = ellipsoid.cartesianToCartographic(pickedTriangle.v0, scratchV0);
+            const v1 = ellipsoid.cartesianToCartographic(pickedTriangle.v1, scratchV1);
+            const v2 = ellipsoid.cartesianToCartographic(pickedTriangle.v2, scratchV2);
+            const intersection = ellipsoid.cartesianToCartographic(pickedTriangle.intersection, scratchIntersection);
             let errorBar;
             if (globe.terrainProvider instanceof EllipsoidTerrainProvider) {
-                intersection.height = undefined;
+                intersection.height = 0;
             }
             else {
-                const barycentric = Intersections2D.computeBarycentricCoordinates(intersection.longitude, intersection.latitude, v0.longitude, v0.latitude, v1.longitude, v1.latitude, v2.longitude, v2.latitude);
+                const barycentric = Intersections2D.computeBarycentricCoordinates(intersection.longitude, intersection.latitude, v0.longitude, v0.latitude, v1.longitude, v1.latitude, v2.longitude, v2.latitude, scratchBarycentric);
                 if (barycentric.x >= -1e-15 &&
                     barycentric.y >= -1e-15 &&
                     barycentric.z >= -1e-15) {
@@ -88,6 +205,7 @@ export default class MouseCoords {
                 this.north = undefined;
                 this.east = undefined;
             });
+            this.updateEvent.raiseEvent();
         }
     }
     updateCoordinatesFromLeaflet(terria, mouseMoveEvent) {
@@ -95,12 +213,11 @@ export default class MouseCoords {
             return;
         }
         const latLng = terria.leaflet.map.mouseEventToLatLng(mouseMoveEvent);
-        const coordinates = Cartographic.fromDegrees(latLng.lng, latLng.lat);
-        coordinates.height = undefined;
+        const coordinates = Cartographic.fromDegrees(latLng.lng, latLng.lat, 0, scratchCartographic);
         this.cartographicToFields(coordinates);
     }
     cartographicToFields(coordinates, errorBar) {
-        this.cartographic = Cartographic.clone(coordinates);
+        this.cartographic = Cartographic.clone(coordinates, scratchCartographic);
         const latitude = CesiumMath.toDegrees(coordinates.latitude);
         const longitude = CesiumMath.toDegrees(coordinates.longitude);
         if (this.useProjection) {
@@ -116,6 +233,7 @@ export default class MouseCoords {
         this.latitude = prettyCoordinate.latitude;
         this.longitude = prettyCoordinate.longitude;
         this.elevation = prettyCoordinate.elevation;
+        this.updateEvent.raiseEvent();
     }
     sampleAccurateHeight(terrainProvider, position) {
         if (this.tileRequestInFlight) {
@@ -150,31 +268,16 @@ export default class MouseCoords {
 }
 __decorate([
     observable
-], MouseCoords.prototype, "elevation", void 0);
-__decorate([
-    observable
-], MouseCoords.prototype, "utmZone", void 0);
-__decorate([
-    observable
-], MouseCoords.prototype, "latitude", void 0);
-__decorate([
-    observable
-], MouseCoords.prototype, "longitude", void 0);
-__decorate([
-    observable
-], MouseCoords.prototype, "north", void 0);
-__decorate([
-    observable
-], MouseCoords.prototype, "east", void 0);
-__decorate([
-    observable
-], MouseCoords.prototype, "cartographic", void 0);
-__decorate([
-    observable
 ], MouseCoords.prototype, "useProjection", void 0);
 __decorate([
-    action
+    action.bound
 ], MouseCoords.prototype, "toggleUseProjection", null);
+__decorate([
+    action
+], MouseCoords.prototype, "updateCoordinatesFromCesium", null);
+__decorate([
+    action
+], MouseCoords.prototype, "updateCoordinatesFromLeaflet", null);
 __decorate([
     action
 ], MouseCoords.prototype, "cartographicToFields", null);

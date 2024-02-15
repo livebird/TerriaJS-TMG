@@ -1,5 +1,11 @@
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import classNames from "classnames";
-import createReactClass from "create-react-class";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react";
 import PropTypes from "prop-types";
@@ -11,14 +17,7 @@ import MappableMixin from "../../ModelMixins/MappableMixin";
 import Styles from "./tabs.scss";
 import DataCatalogTab from "./Tabs/DataCatalogTab";
 import MyDataTab from "./Tabs/MyDataTab/MyDataTab";
-const Tabs = observer(createReactClass({
-    displayName: "Tabs",
-    propTypes: {
-        terria: PropTypes.object.isRequired,
-        viewState: PropTypes.object.isRequired,
-        tabs: PropTypes.array,
-        t: PropTypes.func.isRequired
-    },
+let Tabs = class Tabs extends React.Component {
     async onFileAddFinished(files) {
         const file = files.find((f) => MappableMixin.isMixedInto(f));
         if (file) {
@@ -27,11 +26,16 @@ const Tabs = observer(createReactClass({
                 result.raiseError(this.props.terria);
             }
             else {
-                this.props.terria.currentViewer.zoomTo(file, 1);
+                if (!file.disableZoomTo) {
+                    this.props.terria.currentViewer.zoomTo(file, 1);
+                }
             }
         }
         this.props.viewState.myDataIsUploadView = false;
-    },
+    }
+    async onUrlAddFinished() {
+        this.props.viewState.openAddData();
+    }
     getTabs() {
         const { t } = this.props;
         // This can be passed in as prop
@@ -42,7 +46,7 @@ const Tabs = observer(createReactClass({
             title: "my-data",
             name: t("addData.myData"),
             category: "my-data",
-            panel: (React.createElement(MyDataTab, { terria: this.props.terria, viewState: this.props.viewState, onFileAddFinished: (files) => this.onFileAddFinished(files) }))
+            panel: (_jsx(MyDataTab, { terria: this.props.terria, viewState: this.props.viewState, onFileAddFinished: (files) => this.onFileAddFinished(files), onUrlAddFinished: () => this.onUrlAddFinished() }))
         };
         if (this.props.terria.configParameters.tabbedCatalog) {
             return [].concat(this.props.terria.catalog.group.memberModels
@@ -52,7 +56,7 @@ const Tabs = observer(createReactClass({
                 title: `data-catalog-${member.name}`,
                 category: "data-catalog",
                 idInCategory: member.uniqueId,
-                panel: (React.createElement(DataCatalogTab, { terria: this.props.terria, viewState: this.props.viewState, items: member.memberModels || [member], searchPlaceholder: t("addData.searchPlaceholderWhole") }))
+                panel: (_jsx(DataCatalogTab, { terria: this.props.terria, viewState: this.props.viewState, items: member.memberModels || [member], searchPlaceholder: t("addData.searchPlaceholderWhole") }))
             })), [myDataTab]);
         }
         else {
@@ -61,12 +65,12 @@ const Tabs = observer(createReactClass({
                     name: t("addData.dataCatalogue"),
                     title: "data-catalog",
                     category: "data-catalog",
-                    panel: (React.createElement(DataCatalogTab, { terria: this.props.terria, viewState: this.props.viewState, items: this.props.terria.catalog.group.memberModels, searchPlaceholder: t("addData.searchPlaceholder") }))
+                    panel: (_jsx(DataCatalogTab, { terria: this.props.terria, viewState: this.props.viewState, items: this.props.terria.catalog.group.memberModels, searchPlaceholder: t("addData.searchPlaceholder") }))
                 },
                 myDataTab
             ];
         }
-    },
+    }
     async activateTab(category, idInCategory) {
         runInAction(() => {
             this.props.viewState.activeTabCategory = category;
@@ -83,26 +87,34 @@ const Tabs = observer(createReactClass({
                 }
             }
         });
-    },
+    }
     render() {
         const tabs = this.getTabs();
         const sameCategory = tabs.filter((t) => t.category === this.props.viewState.activeTabCategory);
         const currentTab = sameCategory.filter((t) => t.idInCategory === this.props.viewState.activeTabIdInCategory)[0] ||
             sameCategory[0] ||
             tabs[0];
-        return (React.createElement("div", { className: Styles.tabs },
-            React.createElement("ul", { className: Styles.tabList, role: "tablist", css: `
-              background-color: ${(p) => p.theme.colorPrimary};
-            ` },
-                React.createElement(For, { each: "item", index: "i", of: tabs },
-                    React.createElement("li", { key: i, id: "tablist--" + item.title, className: Styles.tabListItem, role: "tab", "aria-controls": "panel--" + item.title, "aria-selected": item === currentTab },
-                        React.createElement(ButtonTab, { type: "button", onClick: this.activateTab.bind(this, item.category, item.idInCategory), className: classNames(Styles.btnTab, {
+        return (_jsxs("div", { className: Styles.tabs, children: [_jsx("ul", { className: Styles.tabList, role: "tablist", css: `
+            background-color: ${(p) => p.theme.colorPrimary};
+          `, children: tabs.map((item, i) => (_jsx("li", { id: "tablist--" + item.title, className: Styles.tabListItem, role: "tab", "aria-controls": "panel--" + item.title, "aria-selected": item === currentTab, children: _jsx(ButtonTab, { type: "button", onClick: this.activateTab.bind(this, item.category, item.idInCategory), className: classNames(Styles.btnTab, {
                                 [Styles.btnSelected]: item === currentTab
-                            }), isCurrent: item === currentTab }, item.name)))),
-            React.createElement("section", { key: currentTab.title, id: "panel--" + currentTab.title, className: classNames(Styles.tabPanel, Styles.isActive), "aria-labelledby": "tablist--" + currentTab.title, role: "tabpanel", tabIndex: "0" },
-                React.createElement("div", { className: Styles.panelContent }, currentTab.panel))));
+                            }), isCurrent: item === currentTab, children: item.name }) }, i))) }), _jsx("section", { id: "panel--" + currentTab.title, className: classNames(Styles.tabPanel, Styles.isActive), "aria-labelledby": "tablist--" + currentTab.title, role: "tabpanel", tabIndex: "0", children: _jsx("div", { className: Styles.panelContent, children: currentTab.panel }) }, currentTab.title)] }));
     }
-}));
+};
+Object.defineProperty(Tabs, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        terria: PropTypes.object.isRequired,
+        viewState: PropTypes.object.isRequired,
+        tabs: PropTypes.array,
+        t: PropTypes.func.isRequired
+    }
+});
+Tabs = __decorate([
+    observer
+], Tabs);
 const ButtonTab = styled.button `
   ${(props) => `
     background: transparent;

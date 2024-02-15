@@ -5,19 +5,19 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import { uniq } from "lodash-es";
-import { action, computed, runInAction } from "mobx";
-import clone from "terriajs-cesium/Source/Core/clone";
+import { action, computed, makeObservable, runInAction } from "mobx";
 import DeveloperError from "terriajs-cesium/Source/Core/DeveloperError";
+import clone from "terriajs-cesium/Source/Core/clone";
 import AsyncLoader from "../Core/AsyncLoader";
+import { isJsonNumber, isJsonString } from "../Core/Json";
+import Result from "../Core/Result";
 import filterOutUndefined from "../Core/filterOutUndefined";
 import flatten from "../Core/flatten";
 import isDefined from "../Core/isDefined";
-import { isJsonNumber, isJsonString } from "../Core/Json";
-import Result from "../Core/Result";
 import CatalogMemberFactory from "../Models/Catalog/CatalogMemberFactory";
 import CommonStrata from "../Models/Definition/CommonStrata";
-import hasTraits from "../Models/Definition/hasTraits";
 import { BaseModel } from "../Models/Definition/Model";
+import hasTraits from "../Models/Definition/hasTraits";
 import ModelReference from "../Traits/ModelReference";
 import { ItemPropertiesTraits } from "../Traits/TraitsClasses/ItemPropertiesTraits";
 import CatalogMemberMixin, { getName } from "./CatalogMemberMixin";
@@ -26,10 +26,16 @@ const naturalSort = require("javascript-natural-sort");
 naturalSort.insensitive = true;
 const MERGED_GROUP_ID_PREPEND = "__merged__";
 function GroupMixin(Base) {
-    class Klass extends Base {
-        constructor() {
-            super(...arguments);
-            this._memberLoader = new AsyncLoader(this.forceLoadMembers.bind(this));
+    class _GroupMixin extends Base {
+        constructor(...args) {
+            super(...args);
+            Object.defineProperty(this, "_memberLoader", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: new AsyncLoader(this.forceLoadMembers.bind(this))
+            });
+            makeObservable(this);
         }
         get isGroup() {
             return true;
@@ -60,26 +66,26 @@ function GroupMixin(Base) {
             if (members === undefined) {
                 return [];
             }
+            const includeMemberRegex = this.includeMembersRegex
+                ? new RegExp(this.includeMembersRegex, "i")
+                : undefined;
             const models = filterOutUndefined(members.map((id) => {
+                var _a, _b;
                 if (!ModelReference.isRemoved(id)) {
                     const model = this.terria.getModelById(BaseModel, id);
-                    if (this.mergedExcludeMembers.length == 0) {
-                        return model;
-                    }
-                    // Get model name and apply excludeMembers
+                    // Get model name, apply includeMemberRegex and excludeMembers
                     const modelName = CatalogMemberMixin.isMixedInto(model)
-                        ? model.name
+                        ? (_a = model.name) === null || _a === void 0 ? void 0 : _a.toLowerCase().trim()
                         : undefined;
+                    const modelId = (_b = model === null || model === void 0 ? void 0 : model.uniqueId) === null || _b === void 0 ? void 0 : _b.toLowerCase().trim();
                     if (model &&
+                        // Does includeMemberRegex match model ID or model name
+                        (!includeMemberRegex ||
+                            (modelId && includeMemberRegex.test(modelId)) ||
+                            (modelName && includeMemberRegex.test(modelName))) &&
                         // Does excludeMembers not include model ID
-                        !this.mergedExcludeMembers.find((name) => {
-                            var _a;
-                            return ((_a = model.uniqueId) === null || _a === void 0 ? void 0 : _a.toLowerCase().trim()) ===
-                                name.toLowerCase().trim();
-                        }) &&
-                        // Does excludeMembers not include model name
-                        (!modelName ||
-                            !this.mergedExcludeMembers.find((name) => modelName.toLowerCase().trim() === name.toLowerCase().trim())))
+                        !this.mergedExcludeMembers.find((name) => modelId === name.toLowerCase().trim() ||
+                            (modelName && modelName === name.toLowerCase().trim())))
                         return model;
                 }
             }));
@@ -304,38 +310,38 @@ function GroupMixin(Base) {
     }
     __decorate([
         computed
-    ], Klass.prototype, "mergedExcludeMembers", null);
+    ], _GroupMixin.prototype, "mergedExcludeMembers", null);
     __decorate([
         computed
-    ], Klass.prototype, "memberModels", null);
+    ], _GroupMixin.prototype, "memberModels", null);
     __decorate([
         action
-    ], Klass.prototype, "toggleOpen", null);
+    ], _GroupMixin.prototype, "toggleOpen", null);
     __decorate([
         action
-    ], Klass.prototype, "mergeGroupMembersByName", null);
+    ], _GroupMixin.prototype, "mergeGroupMembersByName", null);
     __decorate([
         action
-    ], Klass.prototype, "refreshKnownContainerUniqueIds", null);
+    ], _GroupMixin.prototype, "refreshKnownContainerUniqueIds", null);
     __decorate([
         action
-    ], Klass.prototype, "addItemPropertiesToMembers", null);
+    ], _GroupMixin.prototype, "addItemPropertiesToMembers", null);
     __decorate([
         action
-    ], Klass.prototype, "addShareKeysToMembers", null);
+    ], _GroupMixin.prototype, "addShareKeysToMembers", null);
     __decorate([
         action
-    ], Klass.prototype, "add", null);
+    ], _GroupMixin.prototype, "add", null);
     __decorate([
         action
-    ], Klass.prototype, "addMembersFromJson", null);
+    ], _GroupMixin.prototype, "addMembersFromJson", null);
     __decorate([
         action
-    ], Klass.prototype, "moveMemberToIndex", null);
+    ], _GroupMixin.prototype, "moveMemberToIndex", null);
     __decorate([
         action
-    ], Klass.prototype, "remove", null);
-    return Klass;
+    ], _GroupMixin.prototype, "remove", null);
+    return _GroupMixin;
 }
 (function (GroupMixin) {
     function isMixedInto(model) {

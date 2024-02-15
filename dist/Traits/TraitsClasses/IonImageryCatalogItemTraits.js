@@ -12,6 +12,27 @@ import primitiveTrait from "../Decorators/primitiveTrait";
 import ImageryProviderTraits from "./ImageryProviderTraits";
 import LegendOwnerTraits from "./LegendOwnerTraits";
 export default class IonImageryCatalogItemTraits extends mixTraits(ImageryProviderTraits, LayerOrderingTraits, MappableTraits, CatalogMemberTraits, LegendOwnerTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "ionAssetId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "ionAccessToken", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "ionServer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({

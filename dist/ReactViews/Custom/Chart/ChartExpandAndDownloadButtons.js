@@ -4,8 +4,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import classNames from "classnames";
-import { action, observable, runInAction } from "mobx";
+import { action, observable, runInAction, makeObservable } from "mobx";
 import { observer } from "mobx-react";
 import React from "react";
 import { withTranslation } from "react-i18next";
@@ -16,9 +17,15 @@ import UrlTraits from "../../../Traits/TraitsClasses/UrlTraits";
 import Styles from "./chart-expand-and-download-buttons.scss";
 const Dropdown = require("../../Generic/Dropdown");
 let ChartExpandAndDownloadButtons = class ChartExpandAndDownloadButtons extends React.Component {
-    constructor() {
-        super(...arguments);
-        this.sourceItems = [];
+    constructor(props) {
+        super(props);
+        Object.defineProperty(this, "sourceItems", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        makeObservable(this);
     }
     expandButton() {
         this.expandItem(this.sourceItems.length - 1);
@@ -53,7 +60,9 @@ let ChartExpandAndDownloadButtons = class ChartExpandAndDownloadButtons extends 
             try {
                 terria.addModel(itemToExpand);
             }
-            catch { }
+            catch {
+                /* eslint-disable-line no-empty */
+            }
             (await workbench.add(itemToExpand)).raiseError(terria, undefined, true);
         });
     }
@@ -75,17 +84,17 @@ let ChartExpandAndDownloadButtons = class ChartExpandAndDownloadButtons extends 
             return null;
         }
         // The downloads and download names default to the sources and source names if not defined.
-        let downloads = filterOutUndefined(this.props.downloads ||
+        const downloads = filterOutUndefined(this.props.downloads ||
             this.sourceItems.map((item) => hasTraits(item, UrlTraits, "url") ? item.url : undefined));
         const { sourceNames, canDownload, raiseToTitle, t } = this.props;
         if (sourceNames && sourceNames.length > 0) {
             const downloadNames = this.props.downloadNames || sourceNames;
-            return (React.createElement(ExpandAndDownloadDropdowns, { sourceNames: sourceNames, canDownload: canDownload, downloads: downloadNames.map((name, i) => ({
+            return (_jsx(ExpandAndDownloadDropdowns, { sourceNames: sourceNames, canDownload: canDownload, downloads: downloadNames.map((name, i) => ({
                     name,
                     href: downloads[i]
                 })), onExpand: this.expandDropdown, raiseToTitle: raiseToTitle, t: t }));
         }
-        return (React.createElement(ExpandAndDownloadButtons, { onExpand: this.expandButton, downloadUrl: canDownload && downloads.length > 0 ? downloads[0] : undefined, t: t }));
+        return (_jsx(ExpandAndDownloadButtons, { onExpand: this.expandButton, downloadUrl: canDownload && downloads.length > 0 ? downloads[0] : undefined, t: t }));
     }
 };
 __decorate([
@@ -111,18 +120,12 @@ const ExpandAndDownloadDropdowns = function (props) {
         ...expandDropdownTheme,
         button: classNames(Styles.btnSmall, Styles.btnDownload)
     };
-    return (React.createElement("div", { className: classNames(Styles.chartExpand, {
+    return (_jsx("div", { className: classNames(Styles.chartExpand, {
             [Styles.raiseToTitle]: props.raiseToTitle
-        }) },
-        React.createElement("div", { className: Styles.chartDropdownButton },
-            React.createElement(Dropdown, { selectOption: props.onExpand, options: props.sourceNames.map((name) => ({ name })), theme: expandDropdownTheme }, props.t("chart.expand") + " ▾"),
-            props.canDownload && (React.createElement(Dropdown, { options: props.downloads, theme: downloadDropdownTheme }, props.t("chart.download") + " ▾")))));
+        }), children: _jsxs("div", { className: Styles.chartDropdownButton, children: [_jsx(Dropdown, { selectOption: props.onExpand, options: props.sourceNames.map((name) => ({ name })), theme: expandDropdownTheme, children: props.t("chart.expand") + " ▾" }), props.canDownload && (_jsx(Dropdown, { options: props.downloads, theme: downloadDropdownTheme, children: props.t("chart.download") + " ▾" }))] }) }));
 };
 const ExpandAndDownloadButtons = function (props) {
-    return (React.createElement("div", { className: Styles.chartExpand },
-        React.createElement("button", { type: "button", className: Styles.btnChartExpand, onClick: props.onExpand }, props.t("chart.expand")),
-        props.downloadUrl && (React.createElement("a", { download: true, className: classNames(Styles.btnSmall, Styles.aDownload), href: props.downloadUrl },
-            React.createElement(Icon, { glyph: Icon.GLYPHS.download })))));
+    return (_jsxs("div", { className: Styles.chartExpand, children: [_jsx("button", { type: "button", className: Styles.btnChartExpand, onClick: props.onExpand, children: props.t("chart.expand") }), props.downloadUrl && (_jsx("a", { download: true, className: classNames(Styles.btnSmall, Styles.aDownload), href: props.downloadUrl, children: _jsx(Icon, { glyph: Icon.GLYPHS.download }) }))] }));
 };
 export default withTranslation()(ChartExpandAndDownloadButtons);
 //# sourceMappingURL=ChartExpandAndDownloadButtons.js.map

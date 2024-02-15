@@ -4,7 +4,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, toJS } from "mobx";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { action, toJS, makeObservable } from "mobx";
 import { observer } from "mobx-react";
 import React from "react";
 import Sortable from "react-anything-sortable";
@@ -24,7 +25,7 @@ import measureElement from "../HOCs/measureElement";
 import VideoGuide from "../Map/Panels/HelpPanel/VideoGuide";
 import { getShareData } from "../Map/Panels/SharePanel/BuildShareLink";
 import SharePanel from "../Map/Panels/SharePanel/SharePanel";
-import { withViewState } from "../StandardUserInterface/ViewStateContext";
+import { withViewState } from "../Context";
 import Story from "./Story";
 import Styles from "./story-builder.scss";
 import StoryEditor from "./StoryEditor.jsx";
@@ -33,59 +34,117 @@ const STORY_VIDEO = "storyVideo";
 let StoryBuilder = class StoryBuilder extends React.Component {
     constructor(props) {
         super(props);
-        this.storiesWrapperRef = React.createRef();
-        this.removeStory = (index, story) => {
-            this.setState({
-                isSharing: false,
-                isRemoving: true,
-                storyToRemove: story,
-                storyRemoveIndex: index
-            });
-        };
-        this.toggleRemoveDialog = () => {
-            this.setState({
-                isSharing: false,
-                isRemoving: !this.state.isRemoving,
-                storyToRemove: undefined,
-                storyRemoveIndex: undefined
-            });
-        };
-        this.resetReCaptureStatus = () => {
-            this.setState({
-                recaptureSuccessId: undefined
-            });
-        };
-        this.closeShareRemoving = () => {
-            this.setState({
-                isRemoving: false,
-                isSharing: false
-            });
-        };
-        this.runStories = () => {
-            this.closeShareRemoving();
-            this.props.viewState.runStories();
-        };
-        this.toggleSharePanel = () => {
-            this.setState({
-                isRemoving: false,
-                isSharing: !this.state.isSharing
-            });
-        };
-        this.onClickCapture = () => {
-            this.setState({
-                editingMode: true,
-                currentStory: undefined
-            });
-        };
-        this.hideStoryBuilder = () => {
-            this.props.viewState.toggleStoryBuilder();
-            this.props.viewState.terria.currentViewer.notifyRepaintRequired();
-            // Allow any animations to finish, then trigger a resize.
-            setTimeout(function () {
-                triggerResize();
-            }, this.props.animationDuration || 1);
-            this.props.viewState.toggleFeaturePrompt("story", false, true);
-        };
+        Object.defineProperty(this, "storiesWrapperRef", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: React.createRef()
+        });
+        Object.defineProperty(this, "refToMeasure", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "clearRecaptureSuccessTimeout", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "removeStory", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: (index, story) => {
+                this.setState({
+                    isSharing: false,
+                    isRemoving: true,
+                    storyToRemove: story,
+                    storyRemoveIndex: index
+                });
+            }
+        });
+        Object.defineProperty(this, "toggleRemoveDialog", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: () => {
+                this.setState({
+                    isSharing: false,
+                    isRemoving: !this.state.isRemoving,
+                    storyToRemove: undefined,
+                    storyRemoveIndex: undefined
+                });
+            }
+        });
+        Object.defineProperty(this, "resetReCaptureStatus", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: () => {
+                this.setState({
+                    recaptureSuccessId: undefined
+                });
+            }
+        });
+        Object.defineProperty(this, "closeShareRemoving", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: () => {
+                this.setState({
+                    isRemoving: false,
+                    isSharing: false
+                });
+            }
+        });
+        Object.defineProperty(this, "runStories", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: () => {
+                this.closeShareRemoving();
+                this.props.viewState.runStories();
+            }
+        });
+        Object.defineProperty(this, "toggleSharePanel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: () => {
+                this.setState({
+                    isRemoving: false,
+                    isSharing: !this.state.isSharing
+                });
+            }
+        });
+        Object.defineProperty(this, "onClickCapture", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: () => {
+                this.setState({
+                    editingMode: true,
+                    currentStory: undefined
+                });
+            }
+        });
+        Object.defineProperty(this, "hideStoryBuilder", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: () => {
+                this.props.viewState.toggleStoryBuilder();
+                this.props.viewState.terria.currentViewer.notifyRepaintRequired();
+                // Allow any animations to finish, then trigger a resize.
+                setTimeout(function () {
+                    triggerResize();
+                }, this.props.animationDuration || 1);
+                this.props.viewState.toggleFeaturePrompt("story", false, true);
+            }
+        });
+        makeObservable(this);
         this.state = {
             editingMode: false,
             currentStory: undefined,
@@ -198,30 +257,21 @@ let StoryBuilder = class StoryBuilder extends React.Component {
     renderIntro() {
         var _a;
         const { t } = this.props;
-        return (React.createElement(Box, { column: true },
-            React.createElement(VideoGuide
-            /*
-            // @ts-ignore */
-            , { 
+        return (_jsxs(Box, { column: true, children: [_jsx(VideoGuide
                 /*
                 // @ts-ignore */
-                viewState: this.props.viewState, videoLink: ((_a = this.props.viewState.terria.configParameters.storyVideo) === null || _a === void 0 ? void 0 : _a.videoUrl) ||
-                    "https://www.youtube-nocookie.com/embed/fbiQawV8IYY", background: dataStoriesImg, videoName: STORY_VIDEO }),
-            React.createElement(StoryButton, { title: t("story.gettingStartedTitle"), btnText: t("story.gettingStarted"), onClick: () => {
-                    this.props.viewState.setVideoGuideVisible(STORY_VIDEO);
-                } },
-                React.createElement(StyledIcon, { glyph: Icon.GLYPHS.play, light: true, styledWidth: "20px" })),
-            React.createElement(Spacing, { bottom: 2 }),
-            React.createElement(CaptureScene, { disabled: this.state.isRemoving, onClickCapture: this.onClickCapture })));
+                , { 
+                    /*
+                    // @ts-ignore */
+                    viewState: this.props.viewState, videoLink: ((_a = this.props.viewState.terria.configParameters.storyVideo) === null || _a === void 0 ? void 0 : _a.videoUrl) ||
+                        "https://www.youtube-nocookie.com/embed/fbiQawV8IYY", background: dataStoriesImg, videoName: STORY_VIDEO }), _jsx(StoryButton, { title: t("story.gettingStartedTitle"), btnText: t("story.gettingStarted"), onClick: () => {
+                        this.props.viewState.setVideoGuideVisible(STORY_VIDEO);
+                    }, children: _jsx(StyledIcon, { glyph: Icon.GLYPHS.play, light: true, styledWidth: "20px" }) }), _jsx(Spacing, { bottom: 2 }), _jsx(CaptureScene, { disabled: this.state.isRemoving, onClickCapture: this.onClickCapture })] }));
     }
     renderPlayShare(hasStories) {
         var _a;
         const { t } = this.props;
-        return (React.createElement(Box, { justifySpaceBetween: true },
-            React.createElement(StoryButton, { fullWidth: true, disabled: this.state.editingMode || !hasStories, title: t("story.preview"), btnText: t("story.play"), onClick: this.runStories },
-                React.createElement(StyledIcon, { glyph: Icon.GLYPHS.playStory, light: true, styledWidth: "20px" })),
-            React.createElement(Spacing, { right: 1 }),
-            React.createElement(SharePanel, { storyShare: true, btnDisabled: this.state.editingMode || !hasStories, terria: this.props.viewState.terria, viewState: this.props.viewState, modalWidth: ((_a = this.props.widthFromMeasureElementHOC) !== null && _a !== void 0 ? _a : 100) - 22, onUserClick: this.toggleSharePanel })));
+        return (_jsxs(Box, { justifySpaceBetween: true, children: [_jsx(StoryButton, { fullWidth: true, disabled: this.state.editingMode || !hasStories, title: t("story.preview"), btnText: t("story.play"), onClick: this.runStories, children: _jsx(StyledIcon, { glyph: Icon.GLYPHS.playStory, light: true, styledWidth: "20px" }) }), _jsx(Spacing, { right: 1 }), _jsx(SharePanel, { storyShare: true, btnDisabled: this.state.editingMode || !hasStories, terria: this.props.viewState.terria, viewState: this.props.viewState, modalWidth: ((_a = this.props.widthFromMeasureElementHOC) !== null && _a !== void 0 ? _a : 100) - 22, onUserClick: this.toggleSharePanel })] }));
     }
     openMenu(storyId) {
         this.setState({
@@ -236,55 +286,24 @@ let StoryBuilder = class StoryBuilder extends React.Component {
                 ? this.state.storyToRemove.title
                 : t("story.untitledScene")
             : "";
-        return (React.createElement(Box, { displayInlineBlock: true },
-            React.createElement(BadgeBar, { label: t("story.badgeBarLabel"), badge: this.props.viewState.terria.stories.length },
-                React.createElement(RawButton, { type: "button", onClick: this.toggleRemoveDialog, textLight: true, className: Styles.removeButton },
-                    React.createElement(Icon, { glyph: Icon.GLYPHS.remove }),
-                    " ",
-                    t("story.removeAllStories"))),
-            React.createElement(Spacing, { bottom: 2 }),
-            React.createElement(Box, { column: true, paddedHorizontally: 2 },
-                this.state.isRemoving && (React.createElement(RemoveDialog, { theme: this.props.theme, text: this.state.storyToRemove ? (React.createElement(Text, { textLight: true, large: true },
-                        React.createElement(Trans, { i18nKey: "story.removeStoryDialog", i18n: i18n },
-                            "Are you sure you wish to delete",
-                            React.createElement(TextSpan, { textLight: true, large: true, bold: true }, { storyName }),
-                            "?"))) : (React.createElement(Text, { textLight: true, large: true }, t("story.removeAllStoriesDialog", {
-                        count: this.props.viewState.terria.stories.length
-                    }))), onConfirm: this.removeAction, closeDialog: this.toggleRemoveDialog })),
-                React.createElement(Box, { column: true, position: "static", css: `
+        return (_jsxs(Box, { displayInlineBlock: true, children: [_jsx(BadgeBar, { label: t("story.badgeBarLabel"), badge: this.props.viewState.terria.stories.length, children: _jsxs(RawButton, { type: "button", onClick: this.toggleRemoveDialog, textLight: true, className: Styles.removeButton, children: [_jsx(Icon, { glyph: Icon.GLYPHS.remove }), " ", t("story.removeAllStories")] }) }), _jsx(Spacing, { bottom: 2 }), _jsxs(Box, { column: true, paddedHorizontally: 2, children: [this.state.isRemoving && (_jsx(RemoveDialog, { theme: this.props.theme, text: this.state.storyToRemove ? (_jsx(Text, { textLight: true, large: true, children: _jsxs(Trans, { i18nKey: "story.removeStoryDialog", i18n: i18n, children: ["Are you sure you wish to delete", _jsx(TextSpan, { textLight: true, large: true, bold: true, children: { storyName } }), "?"] }) })) : (_jsx(Text, { textLight: true, large: true, children: t("story.removeAllStoriesDialog", {
+                                    count: this.props.viewState.terria.stories.length
+                                }) })), onConfirm: this.removeAction, closeDialog: this.toggleRemoveDialog })), _jsxs(Box, { column: true, position: "static", css: `
               ${(this.state.isRemoving || this.state.isSharing) &&
-                        `opacity: 0.3`}
-            ` },
-                    React.createElement(Box, { column: true, scroll: true, overflowY: "auto", styledMaxHeight: "calc(100vh - 283px)", position: "static", ref: this.storiesWrapperRef, css: `
+                                `opacity: 0.3`}
+            `, children: [_jsx(Box, { column: true, scroll: true, overflowY: "auto", styledMaxHeight: "calc(100vh - 283px)", position: "static", ref: this.storiesWrapperRef, css: `
                 margin-right: -10px;
-              ` },
-                        React.createElement(Sortable, { onSort: this.onSort, direction: "vertical", dynamic: true, css: `
+              `, children: _jsx(Sortable, { onSort: this.onSort, direction: "vertical", dynamic: true, css: `
                   position: static;
                   margin-right: 10px;
-                ` }, stories.map((story, index) => (React.createElement(Story, { key: `${story.id}`, story: story, sortData: story, deleteStory: () => this.removeStory(index, story), recaptureStory: () => this.recaptureScene(story), recaptureStorySuccessful: Boolean(story.id === this.state.recaptureSuccessId), viewStory: () => this.viewStory(index), menuOpen: this.state.storyWithOpenMenuId === story.id, openMenu: () => this.openMenu(story.id), closeMenu: () => this.openMenu(undefined), editStory: () => this.editStory(story), parentRef: this.storiesWrapperRef }))))),
-                    React.createElement(Spacing, { bottom: 2 }),
-                    React.createElement(CaptureScene, { disabled: this.state.isRemoving, onClickCapture: this.onClickCapture })),
-                React.createElement(Spacing, { bottom: 2 }))));
+                `, children: stories.map((story, index) => (_jsx(Story, { story: story, sortData: story, deleteStory: () => this.removeStory(index, story), recaptureStory: () => this.recaptureScene(story), recaptureStorySuccessful: Boolean(story.id === this.state.recaptureSuccessId), viewStory: () => this.viewStory(index), menuOpen: this.state.storyWithOpenMenuId === story.id, openMenu: () => this.openMenu(story.id), closeMenu: () => this.openMenu(undefined), editStory: () => this.editStory(story), parentRef: this.storiesWrapperRef }, `${story.id}`))) }) }), _jsx(Spacing, { bottom: 2 }), _jsx(CaptureScene, { disabled: this.state.isRemoving, onClickCapture: this.onClickCapture })] }), _jsx(Spacing, { bottom: 2 })] })] }));
     }
     render() {
         const { t } = this.props;
         const hasStories = this.props.viewState.terria.stories.length > 0;
-        return (React.createElement(Panel, { ref: (component) => (this.refToMeasure = component), isVisible: this.props.isVisible, isHidden: !this.props.isVisible, styledWidth: "320px", styledMinWidth: "320px", charcoalGreyBg: true, column: true },
-            React.createElement(Box, { right: true },
-                React.createElement(RawButton, { css: `
+        return (_jsxs(Panel, { ref: (component) => (this.refToMeasure = component), isVisible: this.props.isVisible, isHidden: !this.props.isVisible, styledWidth: "320px", styledMinWidth: "320px", charcoalGreyBg: true, column: true, children: [_jsx(Box, { right: true, children: _jsx(RawButton, { css: `
               padding: 15px;
-            `, onClick: this.hideStoryBuilder },
-                    React.createElement(StyledIcon, { styledWidth: "16px", fillColor: this.props.theme.textLightDimmed, opacity: 0.5, glyph: Icon.GLYPHS.closeLight }))),
-            React.createElement(Box, { centered: true, paddedHorizontally: 2, displayInlineBlock: true },
-                React.createElement(Text, { bold: true, extraExtraLarge: true, textLight: true }, t("story.panelTitle")),
-                React.createElement(Spacing, { bottom: 2 }),
-                React.createElement(Text, { medium: true, color: this.props.theme.textLightDimmed, highlightLinks: true }, t("story.panelBody")),
-                React.createElement(Spacing, { bottom: 3 }),
-                !hasStories && this.renderIntro(),
-                hasStories && this.renderPlayShare(hasStories)),
-            React.createElement(Spacing, { bottom: 2 }),
-            hasStories && this.renderStories(this.state.editingMode),
-            this.state.editingMode && (React.createElement(StoryEditor, { removeStory: this.removeStory, exitEditingMode: () => this.setState({ editingMode: false }), story: this.state.currentStory, saveStory: this.onSave, terria: this.props.viewState.terria }))));
+            `, onClick: this.hideStoryBuilder, children: _jsx(StyledIcon, { styledWidth: "16px", fillColor: this.props.theme.textLightDimmed, opacity: 0.5, glyph: Icon.GLYPHS.closeLight }) }) }), _jsxs(Box, { centered: true, paddedHorizontally: 2, displayInlineBlock: true, children: [_jsx(Text, { bold: true, extraExtraLarge: true, textLight: true, children: t("story.panelTitle") }), _jsx(Spacing, { bottom: 2 }), _jsx(Text, { medium: true, color: this.props.theme.textLightDimmed, highlightLinks: true, children: t("story.panelBody") }), _jsx(Spacing, { bottom: 3 }), !hasStories && this.renderIntro(), hasStories && this.renderPlayShare(hasStories)] }), _jsx(Spacing, { bottom: 2 }), hasStories && this.renderStories(this.state.editingMode), this.state.editingMode && (_jsx(StoryEditor, { removeStory: this.removeStory, exitEditingMode: () => this.setState({ editingMode: false }), story: this.state.currentStory, saveStory: this.onSave, terria: this.props.viewState.terria }))] }));
     }
 };
 __decorate([
@@ -330,35 +349,28 @@ const Panel = styled(Box) `
 `;
 const CaptureScene = (props) => {
     const { t } = useTranslation();
-    return (React.createElement(StoryButton, { title: t("story.captureSceneTitle"), btnText: t("story.captureScene"), onClick: props.onClickCapture, disabled: props.disabled, fullWidth: true },
-        React.createElement(StyledIcon, { glyph: Icon.GLYPHS.story, light: true, styledWidth: "20px" })));
+    return (_jsx(StoryButton, { title: t("story.captureSceneTitle"), btnText: t("story.captureScene"), onClick: props.onClickCapture, disabled: props.disabled, fullWidth: true, children: _jsx(StyledIcon, { glyph: Icon.GLYPHS.story, light: true, styledWidth: "20px" }) }));
 };
 export const StoryButton = (props) => {
     const { btnText, ...rest } = props;
-    return (React.createElement(Button, Object.assign({ primary: true, renderIcon: props.children && (() => props.children), textProps: {
+    return (_jsx(Button, { primary: true, renderIcon: props.children && (() => props.children), textProps: {
             large: true
-        } }, rest), btnText ? btnText : ""));
+        }, ...rest, children: btnText ? btnText : "" }));
 };
 const RemoveDialog = (props) => {
     const { t } = useTranslation();
-    return (React.createElement(Box, { backgroundColor: props.theme.darkWithOverlay, position: "absolute", rounded: true, paddedVertically: 3, paddedHorizontally: 2, column: true, css: `
+    return (_jsxs(Box, { backgroundColor: props.theme.darkWithOverlay, position: "absolute", rounded: true, paddedVertically: 3, paddedHorizontally: 2, column: true, css: `
         width: calc(100% - 20px);
-      ` },
-        props.text,
-        React.createElement(Spacing, { bottom: 2 }),
-        React.createElement(Box, null,
-            React.createElement(Button, { denyButton: true, rounded: true, fullWidth: true, textProps: {
-                    large: true,
-                    semiBold: true
-                }, onClick: props.closeDialog }, t("general.cancel")),
-            React.createElement(Spacing, { right: 2 }),
-            React.createElement(Button, { primary: true, fullWidth: true, textProps: {
-                    large: true,
-                    semiBold: true
-                }, onClick: () => {
-                    props.onConfirm();
-                    props.closeDialog();
-                } }, t("general.confirm")))));
+      `, children: [props.text, _jsx(Spacing, { bottom: 2 }), _jsxs(Box, { children: [_jsx(Button, { denyButton: true, rounded: true, fullWidth: true, textProps: {
+                            large: true,
+                            semiBold: true
+                        }, onClick: props.closeDialog, children: t("general.cancel") }), _jsx(Spacing, { right: 2 }), _jsx(Button, { primary: true, fullWidth: true, textProps: {
+                            large: true,
+                            semiBold: true
+                        }, onClick: () => {
+                            props.onConfirm();
+                            props.closeDialog();
+                        }, children: t("general.confirm") })] })] }));
 };
 export default withViewState(withTranslation()(withTheme(measureElement(StoryBuilder))));
 //# sourceMappingURL=StoryBuilder.js.map

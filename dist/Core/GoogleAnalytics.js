@@ -1,49 +1,57 @@
 "use strict";
-/*global ga*/
-var defaultValue = require("terriajs-cesium/Source/Core/defaultValue").default;
-var defined = require("terriajs-cesium/Source/Core/defined").default;
-const i18next = require("i18next").default;
-var GoogleAnalytics = function () {
-    this.key = undefined;
-    this.options = undefined;
-};
-GoogleAnalytics.prototype.start = function (configParameters) {
-    this.key = configParameters.googleAnalyticsKey;
-    this.options = configParameters.googleAnalyticsOptions;
-    if (process.env.NODE_ENV === "development") {
-        console.log(i18next.t("core.googleAnalytics.logEnabledOnDevelopment"));
+import i18next from "i18next";
+import ReactGA from "react-ga4";
+import isDefined from "./isDefined";
+export default class GoogleAnalytics {
+    constructor() {
+        Object.defineProperty(this, "key", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "options", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
     }
-};
-GoogleAnalytics.prototype.logEvent = function (category, action, label, value) {
-    initializeGoogleAnalytics(this);
-    ga("send", "event", category, action, label, value);
-};
-function initializeGoogleAnalytics(that) {
-    if (defined(window.ga)) {
-        return;
+    start(configParameters) {
+        this.key = configParameters.googleAnalyticsKey;
+        this.options = configParameters.googleAnalyticsOptions;
+        if (process.env.NODE_ENV === "development") {
+            console.log(i18next.t("core.googleAnalytics.logEnabledOnDevelopment"));
+        }
+        initializeGoogleAnalytics(this);
     }
-    if (!defined(that.key)) {
-        console.log(i18next.t("core.googleAnalytics.log"));
-        window.ga = function () { };
-        return;
+    logEvent(category, action, label, value) {
+        const fieldObject = {
+            hitType: "event",
+            eventCategory: category,
+            eventAction: action
+        };
+        if (label) {
+            fieldObject.eventLabel = label;
+        }
+        if (isDefined(value)) {
+            fieldObject.value = value;
+        }
+        ReactGA.send(fieldObject);
     }
-    (function (i, s, o, g, r, a, m) {
-        i["GoogleAnalyticsObject"] = r;
-        i[r] =
-            i[r] ||
-                function () {
-                    (i[r].q = i[r].q || []).push(arguments);
-                };
-        i[r].l = 1 * new Date();
-        a = s.createElement(o);
-        m = s.getElementsByTagName(o)[0];
-        a.async = 1;
-        a.src = g;
-        m.parentNode.insertBefore(a, m);
-    })(window, document, "script", "https://www.google-analytics.com/analytics.js", "ga");
-    ga("create", that.key, defaultValue(that.options, "auto"));
-    ga("set", "anonymizeIp", true);
-    ga("send", "pageview");
 }
-module.exports = GoogleAnalytics;
+function initializeGoogleAnalytics(that) {
+    var _a;
+    if (!isDefined(that.key)) {
+        console.log(i18next.t("core.googleAnalytics.log"));
+        return;
+    }
+    ReactGA.initialize(that.key, {
+        gaOptions: { anonymizeIp: true, ...((_a = that.options) !== null && _a !== void 0 ? _a : {}) },
+        gtagOptions: {
+            send_page_view: false
+        }
+    });
+    ReactGA.send({ hitType: "pageview" });
+}
 //# sourceMappingURL=GoogleAnalytics.js.map

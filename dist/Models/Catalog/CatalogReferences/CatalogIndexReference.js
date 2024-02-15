@@ -15,10 +15,15 @@ import { BaseModel } from "../../Definition/Model";
  *
  * When `loadReference` is called, it will attempt to load all parent models first (using `memberKnownContainerUniqueIds`)
  */
-export default class CatalogIndexReference extends ReferenceMixin(CreateModel(CatalogIndexReferenceTraits)) {
+class CatalogIndexReference extends ReferenceMixin(CreateModel(CatalogIndexReferenceTraits)) {
     constructor() {
         super(...arguments);
-        this.weakReference = true;
+        Object.defineProperty(this, "weakReference", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
     }
     get type() {
         return CatalogIndexReference.type;
@@ -56,8 +61,12 @@ export default class CatalogIndexReference extends ReferenceMixin(CreateModel(Ca
                     errors.push(TerriaError.from(`Failed to find containerID ${containerId}`));
                 }
                 if (ReferenceMixin.isMixedInto(container)) {
-                    (await container.loadReference()).pushErrorTo(errors, `Failed to load reference ${container.uniqueId}`);
-                    container = (_a = container.target) !== null && _a !== void 0 ? _a : container;
+                    // Recursively load references up to a depth of 5. This is so that we
+                    // correctly resolve the final target item when we have a chain of
+                    // references like: MagdaReference -> TerriaReference -> ... -> SomeItem
+                    // We limit to a depth of 5 to avoid looping forever.
+                    (await container.recursivelyLoadReference(5)).pushErrorTo(errors, `Failed to load reference ${container.uniqueId}`);
+                    container = (_a = container.nestedTarget) !== null && _a !== void 0 ? _a : container;
                 }
                 if (GroupMixin.isMixedInto(container)) {
                     (await container.loadMembers()).pushErrorTo(errors, `Failed to load group ${container.uniqueId}`);
@@ -81,5 +90,11 @@ export default class CatalogIndexReference extends ReferenceMixin(CreateModel(Ca
         throw (_c = TerriaError.combine(errors, parentErrorMessage)) !== null && _c !== void 0 ? _c : parentErrorMessage;
     }
 }
-CatalogIndexReference.type = "catalog-index-reference";
+Object.defineProperty(CatalogIndexReference, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "catalog-index-reference"
+});
+export default CatalogIndexReference;
 //# sourceMappingURL=CatalogIndexReference.js.map

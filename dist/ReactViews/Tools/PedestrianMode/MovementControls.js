@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import styled from "styled-components";
 import Box from "../../../Styled/Box";
@@ -19,16 +20,7 @@ const MovementControls = (props) => {
         const detach = movementsController.activate();
         return detach;
     }, [props.cesium]);
-    return (React.createElement(React.Fragment, null,
-        React.createElement(Container, null,
-            React.createElement(Title, null,
-                React.createElement(Text, { medium: true }, t("pedestrianMode.controls.title")),
-                React.createElement(MinimizeMaximizeButton, { onClick: toggleMaximized, maximized: isMaximized })),
-            isMaximized && (React.createElement(Body, null,
-                React.createElement("img", { alt: "Mouse controls", src: mouseControlsImage }),
-                React.createElement("img", { alt: "Direction controls", src: wasdControlsImage }),
-                React.createElement(Spacing, { bottom: 1 }),
-                React.createElement("img", { alt: "Height controls", src: heightControlsImage }))))));
+    return (_jsxs(Container, { children: [_jsxs(Title, { children: [_jsx(Text, { medium: true, children: t("pedestrianMode.controls.title") }), _jsx(MinimizeMaximizeButton, { onClick: toggleMaximized, maximized: isMaximized })] }), isMaximized && (_jsxs(Body, { children: [_jsx("img", { alt: "Mouse controls", src: mouseControlsImage }), _jsx("img", { alt: "Direction controls", src: wasdControlsImage }), _jsx(Spacing, { bottom: 1 }), _jsx("img", { alt: "Height controls", src: heightControlsImage })] }))] }));
 };
 const backgroundColor = "#ffffff";
 const Container = styled.div `
@@ -45,7 +37,7 @@ const Title = styled(Box).attrs({
   border-bottom: 1px solid #c0c0c0;
 `;
 const MinimizeMaximizeButton = styled(Button).attrs((props) => ({
-    renderIcon: () => (React.createElement(ButtonIcon, { glyph: props.maximized ? Icon.GLYPHS.minimize : Icon.GLYPHS.maximize }))
+    renderIcon: () => (_jsx(ButtonIcon, { glyph: props.maximized ? Icon.GLYPHS.minimize : Icon.GLYPHS.maximize }))
 })) `
   padding: 0;
   margin: 0;

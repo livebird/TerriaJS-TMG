@@ -14,7 +14,24 @@ import TransformationTraits from "./TransformationTraits";
 export default class GltfTraits extends mixTraits(MappableTraits, TransformationTraits, ShadowTraits, CatalogMemberTraits, LegendOwnerTraits) {
     constructor() {
         super(...arguments);
-        this.heightReference = "NONE";
+        Object.defineProperty(this, "upAxis", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "forwardAxis", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "heightReference", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "NONE"
+        });
     }
 }
 __decorate([

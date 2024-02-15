@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { computed } from "mobx";
+import { computed, makeObservable, override } from "mobx";
 import filterOutUndefined from "../../../Core/filterOutUndefined";
 import isDefined from "../../../Core/isDefined";
 import CatalogFunctionMixin from "../../../ModelMixins/CatalogFunctionMixin";
@@ -170,13 +170,16 @@ export const ALGORITHMS = [
     // ["Poisson Linear", false],
     // ["Ridge Regressor", false]
 ];
-export default class YDYRCatalogFunction extends CatalogFunctionMixin(CreateModel(YDYRCatalogFunctionTraits)) {
-    constructor() {
-        super(...arguments);
-        this.typeName = "YourDataYourRegions";
+class YDYRCatalogFunction extends CatalogFunctionMixin(CreateModel(YDYRCatalogFunctionTraits)) {
+    constructor(...args) {
+        super(...args);
+        makeObservable(this);
     }
     get type() {
         return YDYRCatalogFunction.type;
+    }
+    get typeName() {
+        return "YourDataYourRegions";
     }
     async createJob(id) {
         return new YDYRCatalogFunctionJob(id, this.terria);
@@ -282,8 +285,6 @@ ${DATASETS.map((d) => `\n- ${d.title}`)}`
         const possibleValues = ((_a = this.selectedTableCatalogMember) === null || _a === void 0 ? void 0 : _a.tableColumns.filter((col) => col.type === TableColumnType.scalar).map((col) => {
             return { id: col.name };
         })) || [];
-        if (possibleValues.length === 0) {
-        }
         return new EnumerationParameter(this, {
             id: "Data Column",
             description: "The data source field which contains the values for the data to be converted.",
@@ -338,7 +339,10 @@ ${DATASETS.map((d) => `\n- ${d.title}`)}`
     }
     get submitWarning() {
         var _a, _b, _c;
-        if (this.inputLayers.isValid && ((_a = this.regionColumn) === null || _a === void 0 ? void 0 : _a.isValid) && ((_b = this.dataColumn) === null || _b === void 0 ? void 0 : _b.isValid) && ((_c = this.availableRegions) === null || _c === void 0 ? void 0 : _c.isValid)) {
+        if (this.inputLayers.isValid &&
+            ((_a = this.regionColumn) === null || _a === void 0 ? void 0 : _a.isValid) &&
+            ((_b = this.dataColumn) === null || _b === void 0 ? void 0 : _b.isValid) &&
+            ((_c = this.availableRegions) === null || _c === void 0 ? void 0 : _c.isValid)) {
             return new InfoParameter(this, {
                 id: "dataWarning",
                 name: "Warning",
@@ -377,9 +381,15 @@ ${DATASETS.map((d) => `\n- ${d.title}`)}`
         ]);
     }
 }
-YDYRCatalogFunction.type = "ydyr";
+Object.defineProperty(YDYRCatalogFunction, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "ydyr"
+});
+export default YDYRCatalogFunction;
 __decorate([
-    computed
+    override
 ], YDYRCatalogFunction.prototype, "description", null);
 __decorate([
     computed

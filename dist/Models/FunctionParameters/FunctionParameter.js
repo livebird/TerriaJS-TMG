@@ -4,14 +4,49 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { computed, runInAction } from "mobx";
+import { computed, runInAction, makeObservable } from "mobx";
 import combine from "terriajs-cesium/Source/Core/combine";
 import isDefined from "../../Core/isDefined";
 import omit from "lodash-es/omit";
 export default class FunctionParameter {
     constructor(catalogFunction, options) {
-        this.catalogFunction = catalogFunction;
-        this.isFunctionParameter = true;
+        Object.defineProperty(this, "catalogFunction", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogFunction
+        });
+        Object.defineProperty(this, "isFunctionParameter", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "id", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "name", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "description", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "isRequired", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
         this.id = options.id;
         this.name = options.name || this.id;
         this.description = options.description || "";

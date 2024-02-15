@@ -10,9 +10,18 @@ import mixTraits from "../mixTraits";
 import EnumDimensionTraits from "./DimensionTraits";
 import LegendOwnerTraits from "./FeatureInfoTraits";
 import SdmxCommonTraits from "./SdmxCommonTraits";
-import TableTraits from "./TableTraits";
+import TableTraits from "./Table/TableTraits";
 import UrlTraits from "./UrlTraits";
 export class SdmxDimensionTraits extends mixTraits(EnumDimensionTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "position", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -22,6 +31,33 @@ __decorate([
     })
 ], SdmxDimensionTraits.prototype, "position", void 0);
 export default class SdmxCatalogItemTraits extends mixTraits(SdmxCommonTraits, UrlTraits, TableTraits, LegendOwnerTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "dataflowId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "agencyId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "unitMeasure", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "dimensions", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({

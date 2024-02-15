@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { forwardRef, memo, useCallback, useState } from "react";
 import { useUID } from "react-uid";
 import { TextSpan } from "../Text";
@@ -29,7 +30,7 @@ const Checkbox = memo(forwardRef(function Checkbox(props, ref) {
         }
         return child;
     });
-    return (React.createElement(TextSpan, Object.assign({ as: "label", title: title, htmlFor: `checkbox-${id}`, className: className, css: `
+    return (_jsxs(TextSpan, { as: "label", title: title, htmlFor: `checkbox-${id}`, className: className, css: `
           display: flex;
           flex-shrink: 0;
           align-items: center;
@@ -48,11 +49,7 @@ const Checkbox = memo(forwardRef(function Checkbox(props, ref) {
             `
             cursor: not-allowed;
           `}
-        ` }, textProps),
-        React.createElement(HiddenCheckbox, { disabled: isDisabled, checked: isChecked, onChange: onChange, value: value, name: name, id: `checkbox-${id}`, ref: ref }),
-        React.createElement(CheckboxIcon, { isIndeterminate: isIndeterminate, isChecked: isChecked, isDisabled: isDisabled }),
-        React.createElement(SpacingSpan, { right: 1 }),
-        childrenWithProps));
+        `, ...textProps, children: [_jsx(HiddenCheckbox, { disabled: isDisabled, checked: isChecked, onChange: onChange, value: value, name: name, id: `checkbox-${id}`, ref: ref }), _jsx(CheckboxIcon, { isIndeterminate: isIndeterminate, isChecked: isChecked, isDisabled: isDisabled }), _jsx(SpacingSpan, { right: 1 }), childrenWithProps] }));
 }));
 Checkbox.displayName = "Checkbox";
 export default Checkbox;

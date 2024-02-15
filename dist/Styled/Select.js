@@ -1,32 +1,6 @@
-/**
- * sample usage:
- *
-
-<Select>
-  <option>one</option>
-  <option>two</option>
-  <option>three</option>
-</Select>
-
-or if you need padding, box needed as select comes with zero padding
-<Box paddedRatio={1}>
-  <Select>
-    <option>one</option>
-    <option>two</option>
-    <option>three</option>
-  </Select>
-</Box>
-
-or with overrides on icon
-<Select dropdownIconProps={{fillColor: props.theme.textLight}}>
-  <option>one</option>
-  <option>two</option>
-  <option>three</option>
-</Select>
- */
-import React from "react";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import styled, { useTheme } from "styled-components";
-const Box = require("./Box").default;
+import Box from "./Box";
 import { GLYPHS, StyledIcon } from "./Icon";
 const StyledSelect = styled.select `
   -moz-appearance: none;
@@ -71,15 +45,11 @@ const LeftIconPositioning = styled.div `
 const Select = (props) => {
     const { leftIcon, children, boxProps, dropdownIconProps, paddingForLeftIcon, ...rest } = props;
     const theme = useTheme();
-    return (React.createElement(Box, Object.assign({ fullWidth: true }, boxProps),
-        leftIcon && React.createElement(LeftIconPositioning, null, leftIcon()),
-        React.createElement(StyledSelect, Object.assign({ leftIcon: leftIcon, paddingForLeftIcon: paddingForLeftIcon }, rest), children),
-        React.createElement(ArrowPositioning, null,
-            React.createElement(StyledIcon
-            // light bg needs dark icon
-            , Object.assign({ 
+    return (_jsxs(Box, { fullWidth: true, ...boxProps, children: [leftIcon && _jsx(LeftIconPositioning, { children: leftIcon() }), _jsx(StyledSelect, { leftIcon: leftIcon, paddingForLeftIcon: paddingForLeftIcon, ...rest, children: children }), _jsx(ArrowPositioning, { children: _jsx(StyledIcon
                 // light bg needs dark icon
-                fillColor: props.light ? theme.textBlack : theme.textLight, styledWidth: "16px", glyph: GLYPHS.arrowDown }, dropdownIconProps)))));
+                , { 
+                    // light bg needs dark icon
+                    fillColor: props.light ? theme.textBlack : theme.textLight, styledWidth: "16px", glyph: GLYPHS.arrowDown, ...dropdownIconProps }) })] }));
 };
 export default Select;
 //# sourceMappingURL=Select.js.map

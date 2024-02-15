@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import createReactClass from "create-react-class";
 import PropTypes from "prop-types";
 import React from "react";
@@ -52,9 +53,7 @@ const LineParameterEditor = createReactClass({
     },
     render() {
         const { t } = this.props;
-        return (React.createElement("div", null,
-            React.createElement("input", { className: Styles.field, type: "text", onChange: this.setValueFromText, value: getDisplayValue(this.props.parameter.value) }),
-            React.createElement("button", { type: "button", onClick: this.selectLineOnMap, className: Styles.btnSelector }, t("analytics.clickToDrawLine"))));
+        return (_jsxs("div", { children: [_jsx("input", { className: Styles.field, type: "text", onChange: this.setValueFromText, value: getDisplayValue(this.props.parameter.value) }), _jsx("button", { type: "button", onClick: this.selectLineOnMap, className: Styles.btnSelector, children: t("analytics.clickToDrawLine") })] }));
     }
 });
 /**

@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { action, computed, observable, runInAction, toJS, when } from "mobx";
+import { action, computed, observable, runInAction, toJS, when, makeObservable } from "mobx";
 import { createTransformer } from "mobx-utils";
 import buildModuleUrl from "terriajs-cesium/Source/Core/buildModuleUrl";
 import Clock from "terriajs-cesium/Source/Core/Clock";
@@ -18,13 +18,14 @@ import RequestScheduler from "terriajs-cesium/Source/Core/RequestScheduler";
 import RuntimeError from "terriajs-cesium/Source/Core/RuntimeError";
 import SplitDirection from "terriajs-cesium/Source/Scene/SplitDirection";
 import URI from "urijs";
-import { Category, LaunchAction } from "../Core/AnalyticEvents/analyticEvents";
+import { Category, LaunchAction, DataSourceAction } from "../Core/AnalyticEvents/analyticEvents";
 import AsyncLoader from "../Core/AsyncLoader";
 import ConsoleAnalytics from "../Core/ConsoleAnalytics";
 import CorsProxy from "../Core/CorsProxy";
 import ensureSuffix from "../Core/ensureSuffix";
 import filterOutUndefined from "../Core/filterOutUndefined";
 import getDereferencedIfExists from "../Core/getDereferencedIfExists";
+import getPath from "../Core/getPath";
 import GoogleAnalytics from "../Core/GoogleAnalytics";
 import hashEntity from "../Core/hashEntity";
 import instanceOf from "../Core/instanceOf";
@@ -69,161 +70,468 @@ import Internationalization from "./Internationalization";
 import NoViewer from "./NoViewer";
 import { defaultRelatedMaps } from "./RelatedMaps";
 import CatalogIndex from "./SearchProviders/CatalogIndex";
+import { SearchBarModel } from "./SearchProviders/SearchBarModel";
 import TimelineStack from "./TimelineStack";
 import { isViewerMode, setViewerMode } from "./ViewerMode";
 import Workbench from "./Workbench";
 export default class Terria {
+    get baseMapContrastColor() {
+        var _a, _b;
+        return ((_b = (_a = this.baseMapsModel.baseMapItems.find((basemap) => {
+            var _a, _b, _c;
+            return isDefined((_a = basemap.item) === null || _a === void 0 ? void 0 : _a.uniqueId) &&
+                ((_b = basemap.item) === null || _b === void 0 ? void 0 : _b.uniqueId) === ((_c = this.mainViewer.baseMap) === null || _c === void 0 ? void 0 : _c.uniqueId);
+        })) === null || _a === void 0 ? void 0 : _a.contrastColor) !== null && _b !== void 0 ? _b : "#ffffff");
+    }
+    get previewedItemId() {
+        return this._previewedItemId;
+    }
     constructor(options = {}) {
         var _a, _b;
-        this.models = observable.map();
+        Object.defineProperty(this, "models", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: observable.map()
+        });
         /** Map from share key -> id */
-        this.shareKeysMap = observable.map();
+        Object.defineProperty(this, "shareKeysMap", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: observable.map()
+        });
         /** Map from id -> share keys */
-        this.modelIdShareKeysMap = observable.map();
+        Object.defineProperty(this, "modelIdShareKeysMap", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: observable.map()
+        });
         /** Base URL for the Terria app. Used for SPA routes */
-        this.appBaseHref = typeof document !== "undefined" ? document.baseURI : "/";
+        Object.defineProperty(this, "appBaseHref", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: typeof document !== "undefined" ? document.baseURI : "/"
+        });
         /** Base URL to Terria resources */
-        this.baseUrl = "build/TerriaJS/";
-        this.tileLoadProgressEvent = new CesiumEvent();
-        this.indeterminateTileLoadProgressEvent = new CesiumEvent();
-        this.workbench = new Workbench();
-        this.overlays = new Workbench();
-        this.catalog = new Catalog(this);
-        this.baseMapsModel = new BaseMapsModel("basemaps", this);
-        this.timelineClock = new Clock({ shouldAnimate: false });
-        this.elements = observable.map();
-        this.mainViewer = new TerriaViewer(this, computed(() => filterOutUndefined(this.overlays.items
-            .map((item) => (MappableMixin.isMixedInto(item) ? item : undefined))
-            .concat(this.workbench.items.map((item) => MappableMixin.isMixedInto(item) ? item : undefined)))));
-        this.appName = "TerriaJS App";
-        this.supportEmail = "info@terria.io";
+        Object.defineProperty(this, "baseUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "build/TerriaJS/"
+        });
+        /**
+         * Base URL used by Cesium to link to images and other static assets.
+         * This can be customized by passing `options.cesiumBaseUrl`
+         * Default value is constructed relative to `Terria.baseUrl`.
+         */
+        Object.defineProperty(this, "cesiumBaseUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "tileLoadProgressEvent", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new CesiumEvent()
+        });
+        Object.defineProperty(this, "indeterminateTileLoadProgressEvent", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new CesiumEvent()
+        });
+        Object.defineProperty(this, "workbench", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new Workbench()
+        });
+        Object.defineProperty(this, "overlays", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new Workbench()
+        });
+        Object.defineProperty(this, "catalog", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new Catalog(this)
+        });
+        Object.defineProperty(this, "baseMapsModel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new BaseMapsModel("basemaps", this)
+        });
+        Object.defineProperty(this, "searchBarModel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new SearchBarModel(this)
+        });
+        Object.defineProperty(this, "timelineClock", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new Clock({ shouldAnimate: false })
+        });
+        // readonly overrides: any = overrides; // TODO: add options.functionOverrides like in master
+        Object.defineProperty(this, "catalogIndex", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "elements", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: observable.map()
+        });
+        Object.defineProperty(this, "mainViewer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new TerriaViewer(this, computed(() => filterOutUndefined(this.overlays.items
+                .map((item) => (MappableMixin.isMixedInto(item) ? item : undefined))
+                .concat(this.workbench.items.map((item) => MappableMixin.isMixedInto(item) ? item : undefined)))))
+        });
+        Object.defineProperty(this, "appName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "TerriaJS App"
+        });
+        Object.defineProperty(this, "supportEmail", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "info@terria.io"
+        });
         /**
          * Gets or sets the {@link this.corsProxy} used to determine if a URL needs to be proxied and to proxy it if necessary.
          * @type {CorsProxy}
          */
-        this.corsProxy = new CorsProxy();
+        Object.defineProperty(this, "corsProxy", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new CorsProxy()
+        });
+        /**
+         * Gets or sets the instance to which to report Google Analytics-style log events.
+         * If a global `ga` function is defined, this defaults to `GoogleAnalytics`.  Otherwise, it defaults
+         * to `ConsoleAnalytics`.
+         */
+        Object.defineProperty(this, "analytics", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         /**
          * Gets the stack of layers active on the timeline.
          */
-        this.timelineStack = new TimelineStack(this, this.timelineClock);
-        this.configParameters = {
-            appName: "TerriaJS App",
-            supportEmail: "info@terria.io",
-            defaultMaximumShownFeatureInfos: 100,
-            catalogIndexUrl: undefined,
-            regionMappingDefinitionsUrl: undefined,
-            regionMappingDefinitionsUrls: ["build/TerriaJS/data/regionMapping.json"],
-            proj4ServiceBaseUrl: "proj4def/",
-            corsProxyBaseUrl: "proxy/",
-            proxyableDomainsUrl: "proxyabledomains/",
-            serverConfigUrl: "serverconfig/",
-            shareUrl: "share",
-            feedbackUrl: undefined,
-            initFragmentPaths: ["init/"],
-            storyEnabled: true,
-            interceptBrowserPrint: true,
-            tabbedCatalog: false,
-            useCesiumIonTerrain: true,
-            cesiumTerrainUrl: undefined,
-            cesiumTerrainAssetId: undefined,
-            cesiumIonAccessToken: undefined,
-            useCesiumIonBingImagery: undefined,
-            bingMapsKey: undefined,
-            hideTerriaLogo: false,
-            brandBarElements: undefined,
-            brandBarSmallElements: undefined,
-            displayOneBrand: 0,
-            disableMyLocation: undefined,
-            disableSplitter: undefined,
-            disablePedestrianMode: false,
-            experimentalFeatures: undefined,
-            magdaReferenceHeaders: undefined,
-            locationSearchBoundingBox: undefined,
-            googleAnalyticsKey: undefined,
-            errorService: undefined,
-            globalDisclaimer: undefined,
-            theme: {},
-            showWelcomeMessage: false,
-            welcomeMessageVideo: {
-                videoTitle: "Getting started with the map",
-                videoUrl: "https://www.youtube-nocookie.com/embed/FjSxaviSLhc",
-                placeholderImage: "https://img.youtube.com/vi/FjSxaviSLhc/maxresdefault.jpg"
-            },
-            storyVideo: {
-                videoUrl: "https://www.youtube-nocookie.com/embed/fbiQawV8IYY"
-            },
-            showInAppGuides: false,
-            helpContent: [],
-            helpContentTerms: defaultTerms,
-            languageConfiguration: undefined,
-            customRequestSchedulerLimits: undefined,
-            persistViewerMode: true,
-            openAddData: false,
-            feedbackPreamble: "translate#feedback.feedbackPreamble",
-            feedbackPostamble: undefined,
-            feedbackMinLength: 0,
-            leafletAttributionPrefix: undefined,
-            extraCreditLinks: [
-                // Default credit links (shown at the bottom of the Cesium map)
-                {
-                    text: "map.extraCreditLinks.dataAttribution",
-                    url: "about.html#data-attribution"
+        Object.defineProperty(this, "timelineStack", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new TimelineStack(this, this.timelineClock)
+        });
+        Object.defineProperty(this, "configParameters", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                appName: "TerriaJS App",
+                supportEmail: "info@terria.io",
+                defaultMaximumShownFeatureInfos: 100,
+                catalogIndexUrl: undefined,
+                regionMappingDefinitionsUrl: undefined,
+                regionMappingDefinitionsUrls: ["build/TerriaJS/data/regionMapping.json"],
+                proj4ServiceBaseUrl: "proj4def/",
+                corsProxyBaseUrl: "proxy/",
+                proxyableDomainsUrl: "proxyabledomains/",
+                serverConfigUrl: "serverconfig/",
+                shareUrl: "share",
+                feedbackUrl: undefined,
+                initFragmentPaths: ["init/"],
+                storyEnabled: true,
+                interceptBrowserPrint: true,
+                tabbedCatalog: false,
+                useCesiumIonTerrain: true,
+                cesiumTerrainUrl: undefined,
+                cesiumTerrainAssetId: undefined,
+                cesiumIonAccessToken: undefined,
+                useCesiumIonBingImagery: undefined,
+                bingMapsKey: undefined,
+                hideTerriaLogo: false,
+                brandBarElements: undefined,
+                brandBarSmallElements: undefined,
+                displayOneBrand: 0,
+                disableMyLocation: undefined,
+                disableSplitter: undefined,
+                disablePedestrianMode: false,
+                experimentalFeatures: undefined,
+                magdaReferenceHeaders: undefined,
+                locationSearchBoundingBox: undefined,
+                googleAnalyticsKey: undefined,
+                errorService: undefined,
+                globalDisclaimer: undefined,
+                theme: {},
+                showWelcomeMessage: false,
+                welcomeMessageVideo: {
+                    videoTitle: "Getting started with the map",
+                    videoUrl: "https://www.youtube-nocookie.com/embed/FjSxaviSLhc",
+                    placeholderImage: "https://img.youtube.com/vi/FjSxaviSLhc/maxresdefault.jpg"
                 },
-                { text: "map.extraCreditLinks.disclaimer", url: "about.html#disclaimer" }
-            ],
-            printDisclaimer: undefined,
-            storyRouteUrlPrefix: undefined,
-            enableConsoleAnalytics: undefined,
-            googleAnalyticsOptions: undefined,
-            relatedMaps: defaultRelatedMaps,
-            aboutButtonHrefUrl: "about.html",
-            plugins: undefined
-        };
-        this.allowFeatureInfoRequests = true;
+                storyVideo: {
+                    videoUrl: "https://www.youtube-nocookie.com/embed/fbiQawV8IYY"
+                },
+                showInAppGuides: false,
+                helpContent: [],
+                helpContentTerms: defaultTerms,
+                languageConfiguration: undefined,
+                customRequestSchedulerLimits: undefined,
+                persistViewerMode: true,
+                openAddData: false,
+                feedbackPreamble: "translate#feedback.feedbackPreamble",
+                feedbackPostamble: undefined,
+                feedbackMinLength: 0,
+                leafletAttributionPrefix: undefined,
+                extraCreditLinks: [
+                    // Default credit links (shown at the bottom of the Cesium map)
+                    {
+                        text: "map.extraCreditLinks.dataAttribution",
+                        url: "about.html#data-attribution"
+                    },
+                    { text: "map.extraCreditLinks.disclaimer", url: "about.html#disclaimer" }
+                ],
+                printDisclaimer: undefined,
+                storyRouteUrlPrefix: undefined,
+                enableConsoleAnalytics: undefined,
+                googleAnalyticsOptions: undefined,
+                relatedMaps: defaultRelatedMaps,
+                aboutButtonHrefUrl: "about.html",
+                plugins: undefined,
+                searchBarConfig: undefined,
+                searchProviders: []
+            }
+        });
+        Object.defineProperty(this, "pickedFeatures", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "selectedFeature", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "allowFeatureInfoRequests", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
         /**
          * Gets or sets the stack of map interactions modes.  The mode at the top of the stack
          * (highest index) handles click interactions with the map
          */
-        this.mapInteractionModeStack = [];
-        this.isWorkflowPanelActive = false;
-        this.userProperties = new Map();
-        this.initSources = [];
-        this._initSourceLoader = new AsyncLoader(this.forceLoadInitSources.bind(this));
+        Object.defineProperty(this, "mapInteractionModeStack", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "isWorkflowPanelActive", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        /** Gets or sets the active SelectableDimensionWorkflow, if defined, then the workflow will be displayed using `WorkflowPanel` */
+        Object.defineProperty(this, "selectableDimensionWorkflow", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        /**
+         * Flag for zooming to workbench items after all init sources have been loaded.
+         *
+         * This is automatically enabled when your init file has the following settings:
+         * ```
+         *    {"initialCamera": {"focusWorkbenchItems": true}}
+         * ```
+         */
+        Object.defineProperty(this, "focusWorkbenchItemsAfterLoadingInitSources", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "userProperties", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new Map()
+        });
+        Object.defineProperty(this, "initSources", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "_initSourceLoader", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new AsyncLoader(this.forceLoadInitSources.bind(this))
+        });
+        Object.defineProperty(this, "serverConfig", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        }); // TODO
+        Object.defineProperty(this, "shareDataService", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         /* Splitter controls */
-        this.showSplitter = false;
-        this.splitPosition = 0.5;
-        this.splitPositionVertical = 0.5;
-        this.terrainSplitDirection = SplitDirection.NONE;
-        this.depthTestAgainstTerrainEnabled = false;
-        this.stories = [];
-        this.storyPromptShown = 0; // Story Prompt modal will be rendered when this property changes. See StandardUserInterface, section regarding sui.notifications. Ideally move this to ViewState.
+        Object.defineProperty(this, "showSplitter", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "splitPosition", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0.5
+        });
+        Object.defineProperty(this, "splitPositionVertical", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0.5
+        });
+        Object.defineProperty(this, "terrainSplitDirection", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: SplitDirection.NONE
+        });
+        Object.defineProperty(this, "depthTestAgainstTerrainEnabled", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "stories", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "storyPromptShown", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        }); // Story Prompt modal will be rendered when this property changes. See StandardUserInterface, section regarding sui.notifications. Ideally move this to ViewState.
+        /**
+         * Gets or sets the ID of the catalog member that is currently being
+         * previewed. This is observed in ViewState. It is used to open "Add data" if a catalog member is open in a share link.
+         * This should stay private - use viewState.viewCatalogMember() instead
+         */
+        Object.defineProperty(this, "_previewedItemId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         /**
          * Base ratio for maximumScreenSpaceError
          * @type {number}
          */
-        this.baseMaximumScreenSpaceError = 2;
+        Object.defineProperty(this, "baseMaximumScreenSpaceError", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 2
+        });
         /**
          * Model to use for map navigation
          */
-        this.mapNavigationModel = new MapNavigationModel(this);
+        Object.defineProperty(this, "mapNavigationModel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new MapNavigationModel(this)
+        });
         /**
          * Gets or sets whether to use the device's native resolution (sets cesium.viewer.resolutionScale to a ratio of devicePixelRatio)
          * @type {boolean}
          */
-        this.useNativeResolution = false;
+        Object.defineProperty(this, "useNativeResolution", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
         /**
          * Whether we think all references in the catalog have been loaded
          * @type {boolean}
          */
-        this.catalogReferencesLoaded = false;
-        this.notificationState = new NotificationState();
-        this.developmentEnv = ((_a = process === null || process === void 0 ? void 0 : process.env) === null || _a === void 0 ? void 0 : _a.NODE_ENV) === "development";
+        Object.defineProperty(this, "catalogReferencesLoaded", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "augmentedVirtuality", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "notificationState", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new NotificationState()
+        });
+        Object.defineProperty(this, "developmentEnv", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: ((_a = process === null || process === void 0 ? void 0 : process.env) === null || _a === void 0 ? void 0 : _a.NODE_ENV) === "development"
+        });
         /**
          * An error service instance. The instance can be configured by setting the
          * `errorService` config parameter. Here we initialize it to stub provider so
          * that the `terria.errorService` always exists.
          */
-        this.errorService = new StubErrorServiceProvider();
+        Object.defineProperty(this, "errorService", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new StubErrorServiceProvider()
+        });
+        makeObservable(this);
         if (options.appBaseHref) {
             this.appBaseHref = new URL(options.appBaseHref, typeof document !== "undefined" ? document.baseURI : "/").toString();
         }
@@ -242,17 +550,6 @@ export default class Terria {
                 this.analytics = new ConsoleAnalytics();
             }
         }
-    }
-    get baseMapContrastColor() {
-        var _a, _b;
-        return ((_b = (_a = this.baseMapsModel.baseMapItems.find((basemap) => {
-            var _a, _b, _c;
-            return isDefined((_a = basemap.item) === null || _a === void 0 ? void 0 : _a.uniqueId) &&
-                ((_b = basemap.item) === null || _b === void 0 ? void 0 : _b.uniqueId) === ((_c = this.mainViewer.baseMap) === null || _c === void 0 ? void 0 : _c.uniqueId);
-        })) === null || _a === void 0 ? void 0 : _a.contrastColor) !== null && _b !== void 0 ? _b : "#ffffff");
-    }
-    get previewedItemId() {
-        return this._previewedItemId;
     }
     /** Raise error to user.
      *
@@ -346,7 +643,7 @@ export default class Terria {
         return this.shareKeysMap.get(shareKey);
     }
     getModelByIdOrShareKey(type, id) {
-        let model = this.getModelById(type, id);
+        const model = this.getModelById(type, id);
         if (model) {
             return model;
         }
@@ -507,6 +804,10 @@ export default class Terria {
         this.baseMapsModel
             .initializeDefaultBaseMaps()
             .catchError((error) => this.raiseErrorToUser(TerriaError.from(error, "Failed to load default basemaps")));
+        this.searchBarModel
+            .updateModelConfig(this.configParameters.searchBarConfig)
+            .initializeSearchProviders(this.configParameters.searchProviders)
+            .catchError((error) => this.raiseErrorToUser(TerriaError.from(error, "Failed to initialize searchProviders")));
         if (typeof options.beforeRestoreAppState === "function") {
             try {
                 await options.beforeRestoreAppState();
@@ -522,6 +823,37 @@ export default class Terria {
             (await this.updateApplicationUrl(options.applicationUrl.href)).raiseError(this);
         }
         this.loadPersistedMapSettings();
+    }
+    /**
+     * Zoom to workbench items if `focusWorkbenchItemsAfterLoadingInitSources` is `true`.
+     *
+     * Note that the current behaviour is to zoom to the first item of the
+     * workbench, however in the future we should modify it to zoom to a view
+     * which shows all the workbench items.
+     *
+     * If a Cesium or Leaflet viewer is not available,
+     * we wait for it to load before triggering the zoom.
+     */
+    async doZoomToWorkbenchItems() {
+        if (!this.focusWorkbenchItemsAfterLoadingInitSources) {
+            return;
+        }
+        // TODO: modify this to zoom to a view that shows all workbench items
+        // instead of just zooming to the first workbench item!
+        const firstMappableItem = this.workbench.items.find((item) => MappableMixin.isMixedInto(item));
+        if (firstMappableItem) {
+            // When the app loads, Cesium/Leaflet viewers are loaded
+            // asynchronously. Until they become available, a stub viewer called
+            // `NoViewer` is used. `NoViewer` does not implement zooming to mappable
+            // items. So here wait for a valid viewer to become available before
+            // attempting to zoom to the mappable item.
+            const isViewerAvailable = () => this.currentViewer.type !== NoViewer.type;
+            // Note: In some situations the following use of when() can result in
+            // a hanging promise if a valid viewer never becomes available,
+            // for eg: when react is not rendered - `currentViewer` will always be `NoViewer`.
+            await when(isViewerAvailable);
+            await this.currentViewer.zoomTo(firstMappableItem, 0.0);
+        }
     }
     loadPersistedMapSettings() {
         var _a;
@@ -602,6 +934,13 @@ export default class Terria {
         const uri = new URI(newUrl);
         const hash = uri.fragment();
         const hashProperties = queryToObject(hash);
+        function checkSegments(urlSegments, customRoute) {
+            // Accept /${customRoute}/:some-id/ or /${customRoute}/:some-id
+            return (((urlSegments.length === 3 && urlSegments[2] === "") ||
+                urlSegments.length === 2) &&
+                urlSegments[0] === customRoute &&
+                urlSegments[1].length > 0);
+        }
         try {
             await interpretHash(this, hashProperties, this.userProperties, new URI(newUrl).filename("").query("").hash(""));
             if (!this.appBaseHref.endsWith("/")) {
@@ -609,13 +948,6 @@ export default class Terria {
             }
             // /catalog/ and /story/ routes
             if (newUrl.startsWith(this.appBaseHref)) {
-                function checkSegments(urlSegments, customRoute) {
-                    // Accept /${customRoute}/:some-id/ or /${customRoute}/:some-id
-                    return (((urlSegments.length === 3 && urlSegments[2] === "") ||
-                        urlSegments.length === 2) &&
-                        urlSegments[0] === customRoute &&
-                        urlSegments[1].length > 0);
-                }
                 const pageUrl = new URL(newUrl);
                 // Find relative path from baseURI to documentURI excluding query and hash
                 // then split into url segments
@@ -658,7 +990,7 @@ export default class Terria {
     }
     updateParameters(parameters) {
         Object.entries(parameters).forEach(([key, value]) => {
-            if (this.configParameters.hasOwnProperty(key)) {
+            if (Object.hasOwnProperty.call(this.configParameters, key)) {
                 this.configParameters[key] = value;
             }
         });
@@ -760,6 +1092,10 @@ export default class Terria {
                 this.loadPersistedOrInitBaseMap();
             }
         });
+        // Zoom to workbench items if any of the init sources specifically requested it
+        if (this.focusWorkbenchItemsAfterLoadingInitSources) {
+            this.doZoomToWorkbenchItems();
+        }
         if (errors.length > 0) {
             // Note - this will get wrapped up in a Result object because it is called in AsyncLoader
             throw TerriaError.combine(errors, {
@@ -898,7 +1234,7 @@ export default class Terria {
         }
     }
     async applyInitData({ initData, replaceStratum = false, canUnsetFeaturePickingState = false }) {
-        var _a;
+        var _a, _b;
         const errors = [];
         initData = toJS(initData);
         const stratumId = typeof initData.stratum === "string"
@@ -951,8 +1287,27 @@ export default class Terria {
             this.loadHomeCamera(initData.homeCamera);
         }
         if (isJsonObject(initData.initialCamera)) {
-            const initialCamera = CameraView.fromJson(initData.initialCamera);
-            this.currentViewer.zoomTo(initialCamera, 2.0);
+            // When initialCamera is set:
+            // - try to construct a CameraView and zoom to it
+            // - otherwise, if `initialCamera.focusWorkbenchItems` is `true` flag it
+            //   so that we can zoom after the workbench items are loaded.
+            // - If there are multiple initSources, the setting from the last source takes effect
+            try {
+                const initialCamera = CameraView.fromJson(initData.initialCamera);
+                this.currentViewer.zoomTo(initialCamera, 2.0);
+                // reset in case this was enabled by a previous initSource
+                this.focusWorkbenchItemsAfterLoadingInitSources = false;
+            }
+            catch (error) {
+                // Not a CameraView but does it specify focusWorkbenchItems?
+                if (typeof initData.initialCamera.focusWorkbenchItems === "boolean") {
+                    this.focusWorkbenchItemsAfterLoadingInitSources =
+                        initData.initialCamera.focusWorkbenchItems;
+                }
+                else {
+                    throw error;
+                }
+            }
         }
         if (isJsonBoolean(initData.showSplitter)) {
             this.showSplitter = initData.showSplitter;
@@ -1015,7 +1370,7 @@ export default class Terria {
         }));
         const newItems = [];
         // Maintain the model order in the workbench.
-        while (true) {
+        for (;;) {
             const model = newItemsRaw.shift();
             if (model) {
                 await this.pushAndLoadMapItems(model, newItems, errors);
@@ -1024,6 +1379,11 @@ export default class Terria {
                 break;
             }
         }
+        newItems.forEach((item) => {
+            var _a;
+            // fire the google analytics event
+            (_a = this.analytics) === null || _a === void 0 ? void 0 : _a.logEvent(Category.dataSource, DataSourceAction.addFromShareOrInit, getPath(item));
+        });
         runInAction(() => (this.workbench.items = newItems));
         // For ids that don't correspond to models resolve an id by share keys
         const timelineWithShareKeysResolved = new Set(filterOutUndefined(timeline.map((modelId) => {
@@ -1063,6 +1423,9 @@ export default class Terria {
                 this.pickedFeatures = undefined;
                 this.selectedFeature = undefined;
             });
+        }
+        if (((_b = initData.settings) === null || _b === void 0 ? void 0 : _b.shortenShareUrls) !== undefined) {
+            this.setLocalProperty("shortenShareUrls", initData.settings.shortenShareUrls);
         }
         if (errors.length > 0)
             throw TerriaError.combine(errors, {
@@ -1144,7 +1507,7 @@ export default class Terria {
         this.setupInitializationUrls(baseUri, (_b = config.aspects) === null || _b === void 0 ? void 0 : _b["terria-config"]);
         /** Load up rest of terria catalog if one is inlined in terria-init */
         if ((_c = config.aspects) === null || _c === void 0 ? void 0 : _c["terria-init"]) {
-            const { catalog, ...rest } = initObj;
+            const { catalog } = initObj;
             this.initSources.push({
                 name: `Magda map-config aspect terria-init from ${configUrl}`,
                 errorSeverity: TerriaErrorSeverity.Error,
@@ -1157,7 +1520,7 @@ export default class Terria {
     async loadPickedFeatures(pickedFeatures) {
         var _a, _b;
         let vectorFeatures = [];
-        let featureIndex = {};
+        const featureIndex = {};
         if (Array.isArray(pickedFeatures.entities)) {
             // Build index of terria features by a hash of their properties.
             const relevantItems = this.workbench.items.filter((item) => hasTraits(item, MappableTraits, "show") &&
@@ -1231,7 +1594,7 @@ export default class Terria {
             // SecurityError can arise if 3rd party cookies are blocked in Chrome and we're served in an iFrame
             return null;
         }
-        var v = window.localStorage.getItem(this.appName + "." + key);
+        const v = window.localStorage.getItem(this.appName + "." + key);
         if (v === "true") {
             return true;
         }

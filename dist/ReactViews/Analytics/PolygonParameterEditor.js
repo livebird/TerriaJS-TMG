@@ -1,6 +1,13 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var PolygonParameterEditor_1;
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
-import createReactClass from "create-react-class";
 import PropTypes from "prop-types";
 import defined from "terriajs-cesium/Source/Core/defined";
 import Styles from "./parameter-editors.scss";
@@ -11,27 +18,32 @@ import { withTranslation } from "react-i18next";
 import { observer } from "mobx-react";
 import { runInAction } from "mobx";
 import CommonStrata from "../../Models/Definition/CommonStrata";
-const PolygonParameterEditor = observer(createReactClass({
-    displayName: "PolygonParameterEditor",
-    propTypes: {
+let PolygonParameterEditor = PolygonParameterEditor_1 = class PolygonParameterEditor extends React.Component {
+    setValueFromText(e) {
+        PolygonParameterEditor_1.setValueFromText(e, this.props.parameter);
+    }
+    selectPolygonOnMap() {
+        selectOnMap(this.props.previewed.terria, this.props.viewState, this.props.parameter);
+    }
+    render() {
+        const { t } = this.props;
+        return (_jsxs("div", { children: [_jsx("input", { className: Styles.field, type: "text", onChange: this.setValueFromText.bind(this), value: getDisplayValue(this.props.parameter.value) }), _jsx("button", { type: "button", onClick: this.selectPolygonOnMap.bind(this), className: Styles.btnSelector, children: t("analytics.clickToDrawPolygon") })] }));
+    }
+};
+Object.defineProperty(PolygonParameterEditor, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
         previewed: PropTypes.object,
         parameter: PropTypes.object,
         viewState: PropTypes.object,
         t: PropTypes.func.isRequired
-    },
-    setValueFromText(e) {
-        PolygonParameterEditor.setValueFromText(e, this.props.parameter);
-    },
-    selectPolygonOnMap() {
-        selectOnMap(this.props.previewed.terria, this.props.viewState, this.props.parameter);
-    },
-    render() {
-        const { t } = this.props;
-        return (React.createElement("div", null,
-            React.createElement("input", { className: Styles.field, type: "text", onChange: this.setValueFromText, value: getDisplayValue(this.props.parameter.value) }),
-            React.createElement("button", { type: "button", onClick: this.selectPolygonOnMap, className: Styles.btnSelector }, t("analytics.clickToDrawPolygon"))));
     }
-}));
+});
+PolygonParameterEditor = PolygonParameterEditor_1 = __decorate([
+    observer
+], PolygonParameterEditor);
 /**
  * Triggered when user types value directly into field.
  * @param {String} e Text that user has entered manually.

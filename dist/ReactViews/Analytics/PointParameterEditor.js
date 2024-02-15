@@ -1,4 +1,5 @@
 "use strict";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import createReactClass from "create-react-class";
 import PropTypes from "prop-types";
@@ -49,11 +50,7 @@ const PointParameterEditor = createReactClass({
             parameterViewModel.wasEverBlurredWhileInvalid;
         const style = showErrorMessage ? Styles.fieldInvalid : Styles.field;
         const { t } = this.props;
-        return (React.createElement("div", null,
-            React.createElement(If, { condition: showErrorMessage },
-                React.createElement("div", { className: Styles.warningText }, t("analytics.enterValidCoords"))),
-            React.createElement("input", { className: style, type: "text", onChange: this.inputOnChange, onBlur: this.inputOnBlur, value: this.getDisplayValue(), placeholder: "131.0361, -25.3450" }),
-            React.createElement("button", { type: "button", onClick: this.selectPointOnMap, className: Styles.btnSelector }, t("analytics.selectLocation"))));
+        return (_jsxs("div", { children: [showErrorMessage && (_jsx("div", { className: Styles.warningText, children: t("analytics.enterValidCoords") })), _jsx("input", { className: style, type: "text", onChange: this.inputOnChange, onBlur: this.inputOnBlur, value: this.getDisplayValue(), placeholder: "131.0361, -25.3450" }), _jsx("button", { type: "button", onClick: this.selectPointOnMap, className: Styles.btnSelector, children: t("analytics.selectLocation") })] }));
     }
 });
 /**
@@ -77,7 +74,7 @@ PointParameterEditor.setValueFromText = function (e, parameter) {
     // common errors like trying to specify degrees/minutes/seconds or
     // specifying W or E rather than using positive or negative numbers
     // for longitude.
-    if (/[^\d\s\.,+-]/.test(text)) {
+    if (/[^\d\s.,+-]/.test(text)) {
         return false;
     }
     const coordinates = text.split(",");

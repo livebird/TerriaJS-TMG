@@ -9,7 +9,30 @@ import primitiveTrait from "../Decorators/primitiveTrait";
 export class MinMaxLevelTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.hideLayerAfterMinScaleDenominator = false;
+        Object.defineProperty(this, "maxScaleDenominator", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "minScaleDenominator", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "hideLayerAfterMinScaleDenominator", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "scaleWorkbenchInfo", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([

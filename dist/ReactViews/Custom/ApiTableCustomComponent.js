@@ -15,7 +15,8 @@ export default class ApiTableChartCustomComponent extends ChartCustomComponent {
         // This differs from other custom in that if a catalog item with the same id has already been created, it'll return that rather than a new one
         // This is required for the `updateModelFromJson` call in `setTraitsFromAttrs` to work
         const existingModel = id
-            ? (_a = context.terria) === null || _a === void 0 ? void 0 : _a.getModelById(ApiTableCatalogItem, id) : undefined;
+            ? (_a = context.terria) === null || _a === void 0 ? void 0 : _a.getModelById(ApiTableCatalogItem, id)
+            : undefined;
         if (terria && existingModel === undefined) {
             return new ApiTableCatalogItem(id, terria);
         }

@@ -52,12 +52,12 @@ CesiumDragPoints.prototype.setUp = function () {
     }
     if (!defined(this._terria.cesium) ||
         !defined(this._terria.cesium.scene) ||
-        !defined(this._terria.cesium.viewer)) {
+        !defined(this._terria.cesium.cesiumWidget)) {
         // Test context or something has gone *so* badly wrong
         return;
     }
     this._scene = this._terria.cesium.scene;
-    this._viewer = this._terria.cesium.viewer;
+    this._viewer = this._terria.cesium.cesiumWidget;
     this._mouseHandler = new ScreenSpaceEventHandler(this._scene.canvas, false);
     var that = this;
     // Mousedown event. This is called for all mousedown events, not just mousedown on entity events like the Leaflet

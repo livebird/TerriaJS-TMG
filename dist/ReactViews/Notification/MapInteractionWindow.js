@@ -5,15 +5,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsxs as _jsxs, jsx as _jsx } from "react/jsx-runtime";
 import classNames from "classnames";
-import { observable, reaction } from "mobx";
+import { observable, reaction, makeObservable } from "mobx";
 import { observer } from "mobx-react";
 import React from "react";
 import styled from "styled-components";
 import isDefined from "../../Core/isDefined";
 import { UIMode } from "../../Models/MapInteractionMode";
 import parseCustomHtmlToReact from "../Custom/parseCustomHtmlToReact";
-import { withViewState } from "../StandardUserInterface/ViewStateContext";
+import { withViewState } from "../Context";
 import Styles from "./map-interaction-window.scss";
 const MapInteractionWindowWrapper = styled.div `
   ${(props) => props.isDiffTool &&
@@ -31,9 +32,27 @@ const MapInteractionWindowWrapper = styled.div `
   `}
 `;
 let MapInteractionWindow = class MapInteractionWindow extends React.Component {
-    constructor() {
-        super(...arguments);
-        this.displayName = "MapInteractionWindow";
+    constructor(props) {
+        super(props);
+        Object.defineProperty(this, "displayName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "MapInteractionWindow"
+        });
+        Object.defineProperty(this, "disposeMapInteractionObserver", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "currentInteractionMode", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
     }
     componentWillUnmount() {
         var _a;
@@ -89,17 +108,12 @@ let MapInteractionWindow = class MapInteractionWindow extends React.Component {
             [Styles.isActive]: isActive
         });
         const isDiffTool = ((_a = this.currentInteractionMode) === null || _a === void 0 ? void 0 : _a.uiMode) === UIMode.Difference;
-        return (React.createElement(MapInteractionWindowWrapper, { className: windowClass, "aria-hidden": !isActive, isDiffTool: isDiffTool },
-            React.createElement("div", { className: classNames({
-                    [Styles.content]: !isDiffTool
-                }) },
-                isDefined(this.currentInteractionMode) &&
-                    parseCustomHtmlToReact(this.currentInteractionMode.message()),
-                isDefined(this.currentInteractionMode) &&
-                    this.currentInteractionMode.messageAsNode()),
-            typeof ((_b = this.currentInteractionMode) === null || _b === void 0 ? void 0 : _b.customUi) === "function" &&
-                this.currentInteractionMode.customUi(),
-            ((_c = this.currentInteractionMode) === null || _c === void 0 ? void 0 : _c.onCancel) && (React.createElement("button", { type: "button", onClick: this.currentInteractionMode.onCancel, className: Styles.btn }, this.currentInteractionMode.buttonText))));
+        return (_jsxs(MapInteractionWindowWrapper, { className: windowClass, "aria-hidden": !isActive, isDiffTool: isDiffTool, children: [_jsxs("div", { className: classNames({
+                        [Styles.content]: !isDiffTool
+                    }), children: [isDefined(this.currentInteractionMode) &&
+                            parseCustomHtmlToReact(this.currentInteractionMode.message()), isDefined(this.currentInteractionMode) &&
+                            this.currentInteractionMode.messageAsNode()] }), typeof ((_b = this.currentInteractionMode) === null || _b === void 0 ? void 0 : _b.customUi) === "function" &&
+                    this.currentInteractionMode.customUi(), ((_c = this.currentInteractionMode) === null || _c === void 0 ? void 0 : _c.onCancel) && (_jsx("button", { type: "button", onClick: this.currentInteractionMode.onCancel, className: Styles.btn, children: this.currentInteractionMode.buttonText }))] }));
     }
 };
 __decorate([

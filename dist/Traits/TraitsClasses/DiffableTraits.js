@@ -11,8 +11,36 @@ import TimeFilterTraits from "./TimeFilterTraits";
 export default class DiffableTraits extends mixTraits(TimeFilterTraits) {
     constructor() {
         super(...arguments);
-        this.availableDiffStyles = [];
-        this.isShowingDiff = false;
+        Object.defineProperty(this, "availableDiffStyles", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "isShowingDiff", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "firstDiffDate", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "secondDiffDate", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "diffStyleId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([

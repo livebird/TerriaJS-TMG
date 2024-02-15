@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { action, computed, runInAction } from "mobx";
+import { action, computed, runInAction, makeObservable } from "mobx";
 import containsAny from "../../../Core/containsAny";
 import filterOutUndefined from "../../../Core/filterOutUndefined";
 import isDefined from "../../../Core/isDefined";
@@ -29,11 +29,6 @@ import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
 import WebMapServiceCapabilities from "./WebMapServiceCapabilities";
 import WebMapServiceCatalogItem from "./WebMapServiceCatalogItem";
 class GetCapabilitiesStratum extends LoadableStratum(WebMapServiceCatalogGroupTraits) {
-    constructor(catalogGroup, capabilities) {
-        super();
-        this.catalogGroup = catalogGroup;
-        this.capabilities = capabilities;
-    }
     static async load(catalogItem) {
         if (catalogItem.getCapabilitiesUrl === undefined) {
             throw new TerriaError({
@@ -43,6 +38,22 @@ class GetCapabilitiesStratum extends LoadableStratum(WebMapServiceCatalogGroupTr
         }
         const capabilities = await WebMapServiceCapabilities.fromUrl(proxyCatalogItemUrl(catalogItem, catalogItem.getCapabilitiesUrl, catalogItem.getCapabilitiesCacheDuration));
         return new GetCapabilitiesStratum(catalogItem, capabilities);
+    }
+    constructor(catalogGroup, capabilities) {
+        super();
+        Object.defineProperty(this, "catalogGroup", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogGroup
+        });
+        Object.defineProperty(this, "capabilities", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: capabilities
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(model) {
         return new GetCapabilitiesStratum(model, this.capabilities);
@@ -115,9 +126,9 @@ class GetCapabilitiesStratum extends LoadableStratum(WebMapServiceCatalogGroupTr
     createMembersFromLayers() {
         this.topLevelLayers.forEach((layer) => this.createMemberFromLayer(layer));
     }
-    createMemberFromLayer(layer) {
+    createMemberFromLayer(layer, parentLayerId) {
         var _a;
-        const layerId = this.getLayerId(layer);
+        const layerId = this.getLayerId(layer, parentLayerId);
         if (!layerId) {
             return;
         }
@@ -131,7 +142,7 @@ class GetCapabilitiesStratum extends LoadableStratum(WebMapServiceCatalogGroupTr
             else {
                 members = [layer.Layer];
             }
-            members.forEach((member) => this.createMemberFromLayer(member));
+            members.forEach((member) => this.createMemberFromLayer(member, layerId));
             // Create group
             const existingModel = this.catalogGroup.terria.getModelById(CatalogGroup, layerId);
             let model;
@@ -140,7 +151,7 @@ class GetCapabilitiesStratum extends LoadableStratum(WebMapServiceCatalogGroupTr
                 try {
                     // Sometimes WMS Layers have duplicate names
                     // At the moment we ignore duplicate layers
-                    this.catalogGroup.terria.addModel(model, this.getLayerShareKeys(layer));
+                    this.catalogGroup.terria.addModel(model, this.getLayerShareKeys(layer, layerId));
                 }
                 catch (e) {
                     TerriaError.from(e, "Failed to add CatalogGroup").log();
@@ -151,7 +162,7 @@ class GetCapabilitiesStratum extends LoadableStratum(WebMapServiceCatalogGroupTr
                 model = existingModel;
             }
             model.setTrait(CommonStrata.definition, "name", layer.Title);
-            model.setTrait(CommonStrata.definition, "members", filterOutUndefined(members.map((member) => this.getLayerId(member))));
+            model.setTrait(CommonStrata.definition, "members", filterOutUndefined(members.map((member) => this.getLayerId(member, layerId))));
             // Set group `info` trait if applicable
             if (layer &&
                 layer.Abstract &&
@@ -176,7 +187,7 @@ class GetCapabilitiesStratum extends LoadableStratum(WebMapServiceCatalogGroupTr
             try {
                 // Sometimes WMS Layers have duplicate names
                 // At the moment we ignore duplicate layers
-                this.catalogGroup.terria.addModel(model, this.getLayerShareKeys(layer));
+                this.catalogGroup.terria.addModel(model, this.getLayerShareKeys(layer, layerId));
             }
             catch (e) {
                 TerriaError.from(e, "Failed to add WebMapServiceCatalogItem").log();
@@ -211,21 +222,25 @@ class GetCapabilitiesStratum extends LoadableStratum(WebMapServiceCatalogGroupTr
         }
         model.createGetCapabilitiesStratumFromParent(this.capabilities);
     }
-    getLayerId(layer) {
+    getLayerId(layer, parentLayerId) {
         var _a;
-        if (!isDefined(this.catalogGroup.uniqueId)) {
+        if (!isDefined(this.catalogGroup.uniqueId) && !isDefined(parentLayerId)) {
             return;
         }
-        return `${this.catalogGroup.uniqueId}/${(_a = layer.Name) !== null && _a !== void 0 ? _a : layer.Title}`;
+        return `${parentLayerId !== null && parentLayerId !== void 0 ? parentLayerId : this.catalogGroup.uniqueId}/${(_a = layer.Name) !== null && _a !== void 0 ? _a : layer.Title}`;
     }
     /** For backward-compatibility.
-     * If layer.Name is defined, we will use it to create layer autoID (see `this.getLayerId`).
-     * Previously we used layer.Title, so we now add it as a shareKey
+     * Previously we have used the following IDs
+     * - `WMS Group Catalog ID/WMS Layer Name` - regardless of nesting
+     * - `WMS Group Catalog ID/WMS Layer Title`
      */
-    getLayerShareKeys(layer) {
+    getLayerShareKeys(layer, layerId) {
+        const shareKeys = [];
+        if (layerId !== `${this.catalogGroup.uniqueId}/${layer.Name}`)
+            shareKeys.push(`${this.catalogGroup.uniqueId}/${layer.Name}`);
         if (isDefined(layer.Name) && layer.Title !== layer.Name)
-            return [`${this.catalogGroup.uniqueId}/${layer.Title}`];
-        return [];
+            shareKeys.push(`${this.catalogGroup.uniqueId}/${layer.Title}`);
+        return shareKeys;
     }
 }
 __decorate([
@@ -254,7 +269,7 @@ __decorate([
  *   "url": "https://ows.services.dea.ga.gov.au",
  * }
  */
-export default class WebMapServiceCatalogGroup extends GetCapabilitiesMixin(UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(WebMapServiceCatalogGroupTraits))))) {
+class WebMapServiceCatalogGroup extends GetCapabilitiesMixin(UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(WebMapServiceCatalogGroupTraits))))) {
     get type() {
         return WebMapServiceCatalogGroup.type;
     }
@@ -268,7 +283,7 @@ export default class WebMapServiceCatalogGroup extends GetCapabilitiesMixin(UrlM
         }
     }
     async forceLoadMembers() {
-        let getCapabilitiesStratum = (this.strata.get(GetCapabilitiesMixin.getCapabilitiesStratumName));
+        const getCapabilitiesStratum = (this.strata.get(GetCapabilitiesMixin.getCapabilitiesStratumName));
         if (getCapabilitiesStratum !== undefined) {
             await runLater(() => getCapabilitiesStratum.createMembersFromLayers());
         }
@@ -289,5 +304,11 @@ export default class WebMapServiceCatalogGroup extends GetCapabilitiesMixin(UrlM
         }
     }
 }
-WebMapServiceCatalogGroup.type = "wms-group";
+Object.defineProperty(WebMapServiceCatalogGroup, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "wms-group"
+});
+export default WebMapServiceCatalogGroup;
 //# sourceMappingURL=WebMapServiceCatalogGroup.js.map

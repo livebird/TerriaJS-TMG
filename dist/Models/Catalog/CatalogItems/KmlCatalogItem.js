@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { computed } from "mobx";
+import { computed, makeObservable, override } from "mobx";
 import Ellipsoid from "terriajs-cesium/Source/Core/Ellipsoid";
 import JulianDate from "terriajs-cesium/Source/Core/JulianDate";
 import PolygonHierarchy from "terriajs-cesium/Source/Core/PolygonHierarchy";
@@ -23,6 +23,22 @@ import CreateModel from "../../Definition/CreateModel";
 import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
 const kmzRegex = /\.kmz$/i;
 class KmlCatalogItem extends MappableMixin(UrlMixin(CatalogMemberMixin(CreateModel(KmlCatalogItemTraits)))) {
+    constructor(...args) {
+        super(...args);
+        Object.defineProperty(this, "_dataSource", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_kmlFile", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
+    }
     get type() {
         return KmlCatalogItem.type;
     }
@@ -131,12 +147,17 @@ class KmlCatalogItem extends MappableMixin(UrlMixin(CatalogMemberMixin(CreateMod
         }
     }
 }
-KmlCatalogItem.type = "kml";
+Object.defineProperty(KmlCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "kml"
+});
 __decorate([
     computed
 ], KmlCatalogItem.prototype, "hasLocalData", null);
 __decorate([
-    computed
+    override
 ], KmlCatalogItem.prototype, "cacheDuration", null);
 __decorate([
     computed

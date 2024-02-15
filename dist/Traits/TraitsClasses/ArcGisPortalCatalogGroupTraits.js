@@ -6,39 +6,65 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import anyTrait from "../Decorators/anyTrait";
 import primitiveTrait from "../Decorators/primitiveTrait";
+import { traitClass } from "../Trait";
 import mixTraits from "../mixTraits";
 import ArcGisPortalSharedTraits from "./ArcGisPortalSharedTraits";
 import CatalogMemberTraits from "./CatalogMemberTraits";
 import GroupTraits from "./GroupTraits";
 import LegendOwnerTraits from "./LegendOwnerTraits";
 import UrlTraits from "./UrlTraits";
-export default class ArcGisPortalCatalogGroupTraits extends mixTraits(GroupTraits, UrlTraits, CatalogMemberTraits, LegendOwnerTraits, ArcGisPortalSharedTraits) {
+let ArcGisPortalCatalogGroupTraits = class ArcGisPortalCatalogGroupTraits extends mixTraits(GroupTraits, UrlTraits, CatalogMemberTraits, LegendOwnerTraits, ArcGisPortalSharedTraits) {
     constructor() {
         super(...arguments);
-        this.searchParams = {
-            q: `(type:"Scene Service" OR
+        Object.defineProperty(this, "searchParams", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                q: `(type:"Scene Service" OR
          type:"Feature Service" OR
          type:"Map Service" OR
          type:"WMS" OR
          type:"WFS" OR
          type:"KML")`,
-            sortField: "title"
-        };
-        this.groupSearchParams = {
-            q: `orgid:0123456789ABCDEF
+                sortField: "title"
+            }
+        });
+        Object.defineProperty(this, "groupSearchParams", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                q: `orgid:0123456789ABCDEF
        (access:private OR access:org)
        -owner:esri_nav
        -owner:esri_livingatlas
        -owner:esri_boundaries
        -owner:esri_demographics
       `,
-            searchUserAccess: "groupMember"
-        };
-        this.groupBy = "none";
-        this.ungroupedTitle = "Ungrouped";
-        this.hideEmptyGroups = true;
+                searchUserAccess: "groupMember"
+            }
+        });
+        Object.defineProperty(this, "groupBy", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "none"
+        });
+        Object.defineProperty(this, "ungroupedTitle", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "Ungrouped"
+        });
+        Object.defineProperty(this, "hideEmptyGroups", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
     }
-}
+};
 __decorate([
     anyTrait({
         name: "Search Parameters",
@@ -81,4 +107,27 @@ __decorate([
         description: `If a group has no items don't display it in the catalog`
     })
 ], ArcGisPortalCatalogGroupTraits.prototype, "hideEmptyGroups", void 0);
+ArcGisPortalCatalogGroupTraits = __decorate([
+    traitClass({
+        description: `Creates a group with members from ArcGIS server portal.
+
+  <strong>Note:</strong> 
+  <br>The following example will</br>
+  <li>Request datasets of specific types only.</li>
+  <li>Organise members in subgroups according to their categories.</li>
+  <li>Sort members according to their titles.</li>`,
+        example: {
+            url: "https://portal.spatial.nsw.gov.au/portal",
+            type: "arcgis-portal-group",
+            groupBy: "portalCategories",
+            name: "NSW Spatial Portal Categories",
+            searchParams: {
+                q: '(type:"Map Service" OR type:"WMS" OR type:"KML")',
+                sortField: "title"
+            },
+            id: "some id"
+        }
+    })
+], ArcGisPortalCatalogGroupTraits);
+export default ArcGisPortalCatalogGroupTraits;
 //# sourceMappingURL=ArcGisPortalCatalogGroupTraits.js.map

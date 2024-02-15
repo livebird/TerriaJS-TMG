@@ -1,3 +1,4 @@
+import { jsxs as _jsxs, jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import createReactClass from "create-react-class";
 import PropTypes from "prop-types";
@@ -85,19 +86,7 @@ const ColorScaleRangeSection = createReactClass({
             return null;
         }
         const { t } = this.props;
-        return (React.createElement("form", { className: Styles.colorscalerange, onSubmit: this.updateRange },
-            React.createElement("div", { className: Styles.title },
-                t("workbench.colorScaleRange"),
-                " "),
-            React.createElement("label", { htmlFor: "rangeMax" },
-                t("workbench.rangeMax"),
-                " "),
-            React.createElement("input", { className: Styles.field, type: "text", name: "rangeMax", value: this.state.maxRange, onChange: this.changeRangeMax }),
-            React.createElement("label", { htmlFor: "rangeMin" },
-                t("workbench.rangeMin"),
-                " "),
-            React.createElement("input", { className: Styles.field, type: "text", name: "rangeMin", value: this.state.minRange, onChange: this.changeRangeMin }),
-            React.createElement("button", { type: "submit", title: t("workbench.colorScaleUpdateRange"), className: Styles.btn }, t("workbench.colorScaleUpdateRange"))));
+        return (_jsxs("form", { className: Styles.colorscalerange, onSubmit: this.updateRange, children: [_jsxs("div", { className: Styles.title, children: [t("workbench.colorScaleRange"), " "] }), _jsxs("label", { htmlFor: "rangeMax", children: [t("workbench.rangeMax"), " "] }), _jsx("input", { className: Styles.field, type: "text", name: "rangeMax", value: this.state.maxRange, onChange: this.changeRangeMax }), _jsxs("label", { htmlFor: "rangeMin", children: [t("workbench.rangeMin"), " "] }), _jsx("input", { className: Styles.field, type: "text", name: "rangeMin", value: this.state.minRange, onChange: this.changeRangeMin }), _jsx("button", { type: "submit", title: t("workbench.colorScaleUpdateRange"), className: Styles.btn, children: t("workbench.colorScaleUpdateRange") })] }));
     }
 });
 export default withTranslation()(ColorScaleRangeSection);

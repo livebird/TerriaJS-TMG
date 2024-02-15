@@ -12,6 +12,33 @@ import OpacityTraits from "./OpacityTraits";
 import SplitterTraits from "./SplitterTraits";
 import FeaturePickingTraits from "./FeaturePickingTraits";
 export class TileErrorHandlingTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "thresholdBeforeDisablingItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "treat403AsError", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "treat404AsError", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "ignoreUnknownTileErrors", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -44,15 +71,53 @@ __decorate([
 export default class ImageryProviderTraits extends mixTraits(FeaturePickingTraits, OpacityTraits, SplitterTraits) {
     constructor() {
         super(...arguments);
-        this.tileErrorHandlingOptions = {
-            thresholdBeforeDisablingItem: 5,
-            treat403AsError: true,
-            treat404AsError: false,
-            ignoreUnknownTileErrors: false
-        };
-        this.clipToRectangle = true;
-        this.tileWidth = 256;
-        this.tileHeight = 256;
+        Object.defineProperty(this, "leafletUpdateInterval", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "tileErrorHandlingOptions", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                thresholdBeforeDisablingItem: 5,
+                treat403AsError: true,
+                treat404AsError: false,
+                ignoreUnknownTileErrors: false
+            }
+        });
+        Object.defineProperty(this, "clipToRectangle", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "minimumLevel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "maximumLevel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "tileWidth", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 256
+        });
+        Object.defineProperty(this, "tileHeight", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 256
+        });
     }
 }
 __decorate([

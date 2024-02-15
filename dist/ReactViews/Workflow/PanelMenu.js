@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { GLYPHS, StyledIcon } from "../../Styled/Icon";
 import Text from "../../Styled/Text";
@@ -21,12 +22,7 @@ export const PanelMenu = ({ options }) => {
         setIsOpen(false);
         onSelect(event);
     };
-    return (React.createElement(PanelMenuContainer, null,
-        React.createElement(PanelMenuButton, { isOpen: isOpen, onClick: () => setIsOpen(true) },
-            React.createElement(StyledIcon, { glyph: GLYPHS.menuDotted })),
-        isOpen && (React.createElement("ul", null, options.map(({ text, onSelect, disabled }) => (React.createElement("li", { key: text },
-            React.createElement(PanelMenuItem, { onClick: (e) => handleClick(onSelect, e), disabled: disabled },
-                React.createElement(Text, { noWrap: true, medium: true, textLight: true }, text)))))))));
+    return (_jsxs(PanelMenuContainer, { children: [_jsx(PanelMenuButton, { isOpen: isOpen, onClick: () => setIsOpen(true), children: _jsx(StyledIcon, { glyph: GLYPHS.menuDotted }) }), isOpen && (_jsx("ul", { children: options.map(({ text, onSelect, disabled }) => (_jsx("li", { children: _jsx(PanelMenuItem, { onClick: (e) => handleClick(onSelect, e), disabled: disabled, children: _jsx(Text, { noWrap: true, medium: true, textLight: true, children: text }) }) }, text))) }))] }));
 };
 const PanelMenuContainer = styled.div `
   position: relative;

@@ -15,8 +15,18 @@ export default class EnumIndex {
      * @param values An object mapping an enum value string to the value definition.
      */
     constructor(values) {
-        this.values = values;
-        this.type = IndexType.enum;
+        Object.defineProperty(this, "values", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: values
+        });
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: IndexType.enum
+        });
     }
     /**
      * Load an enum index.

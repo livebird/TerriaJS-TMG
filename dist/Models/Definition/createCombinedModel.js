@@ -8,7 +8,7 @@ import { BaseModel } from "./Model";
 import DeveloperError from "terriajs-cesium/Source/Core/DeveloperError";
 import traitsClassToModelClass from "../../Traits/traitsClassToModelClass";
 import createStratumInstance from "./createStratumInstance";
-import { computed, decorate } from "mobx";
+import { computed, makeObservable } from "mobx";
 export default function createCombinedModel(top, bottom, ModelClass) {
     if (top.TraitsClass !== bottom.TraitsClass) {
         throw new DeveloperError("The two models in createCombinedModel must have the same TraitsClass.");
@@ -33,8 +33,19 @@ export function extractBottomModel(model) {
 }
 class CombinedStrata {
     constructor(top, bottom) {
-        this.top = top;
-        this.bottom = bottom;
+        Object.defineProperty(this, "top", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: top
+        });
+        Object.defineProperty(this, "bottom", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: bottom
+        });
+        makeObservable(this);
     }
     clear() {
         this.top.strata.clear();
@@ -78,7 +89,7 @@ class CombinedStrata {
     get strata() {
         const result = new Map();
         // Add the strata fro the top
-        for (let key of this.top.strata.keys()) {
+        for (const key of this.top.strata.keys()) {
             const topStratum = this.top.strata.get(key);
             const bottomStratum = this.bottom.strata.get(key);
             if (topStratum !== undefined && bottomStratum !== undefined) {
@@ -94,7 +105,7 @@ class CombinedStrata {
             }
         }
         // Add any strata that are only in the bottom
-        for (let key of this.bottom.strata.keys()) {
+        for (const key of this.bottom.strata.keys()) {
             if (this.top.strata.has(key)) {
                 continue;
             }
@@ -157,7 +168,13 @@ function createCombinedStratum(TraitsClass, top, bottom) {
         decorators[traitName] = trait.decoratorForFlattened || computed;
     });
     decorate(result, decorators);
+    makeObservable(result);
     return result;
+}
+function decorate(target, decorators) {
+    Object.entries(decorators).forEach(([prop, decorator]) => {
+        decorator(target, prop);
+    });
 }
 function unwrapCombinedStratumFromModel(value) {
     const nestedTop = value.strata.get("top");

@@ -18,15 +18,7 @@ import DeveloperError from "terriajs-cesium/Source/Core/DeveloperError";
  * @constructor
  * @param corsProxy A proxy to allow the region providers to make AJAX calls safely.
  */
-export default class RegionProviderList {
-    constructor(corsProxy) {
-        this.corsProxy = corsProxy;
-        /**
-         * List of RegionProviders, once loaded from file.
-         * @type {RegionProvider[]}
-         */
-        this.regionProviders = [];
-    }
+class RegionProviderList {
     /**
      * Returns a promise for a RegionProviderList instantiated from this url. Previous loads are cached.
      */
@@ -37,6 +29,24 @@ export default class RegionProviderList {
             });
         }
         return RegionProviderList.metaList[url];
+    }
+    constructor(corsProxy) {
+        Object.defineProperty(this, "corsProxy", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: corsProxy
+        });
+        /**
+         * List of RegionProviders, once loaded from file.
+         * @type {RegionProvider[]}
+         */
+        Object.defineProperty(this, "regionProviders", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
     }
     /**
      * Initialises from the already-retrieved contents of a JSON file.
@@ -122,5 +132,11 @@ export default class RegionProviderList {
     }
 }
 /* A static dictionary of promises to RegionProviderLists */
-RegionProviderList.metaList = {};
+Object.defineProperty(RegionProviderList, "metaList", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {}
+});
+export default RegionProviderList;
 //# sourceMappingURL=RegionProviderList.js.map

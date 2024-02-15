@@ -1,4 +1,5 @@
 "use strict";
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import PropTypes from "prop-types";
 import createGuid from "terriajs-cesium/Source/Core/createGuid";
@@ -68,7 +69,7 @@ class Timer extends React.PureComponent {
         document.removeEventListener(visibilityChange, this.handleVisibilityChange);
     }
     render() {
-        return (React.createElement("div", { id: this.containerId, className: Styles.timer, title: this.props.tooltipText }));
+        return (_jsx("div", { id: this.containerId, className: Styles.timer, title: this.props.tooltipText }));
     }
 }
 Timer.propTypes = {

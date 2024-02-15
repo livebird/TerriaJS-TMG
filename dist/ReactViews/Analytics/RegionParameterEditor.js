@@ -1,4 +1,5 @@
 "use strict";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import createReactClass from "create-react-class";
 import PropTypes from "prop-types";
@@ -16,9 +17,7 @@ const RegionParameterEditor = createReactClass({
         RegionParameterEditor.selectOnMap(this.props.viewState, this.props.parameter, this.props.previewed);
     },
     render() {
-        return (React.createElement("div", null,
-            React.createElement("input", { className: Styles.field, type: "text", readOnly: true, value: getDisplayValue(this.props.parameter.value, this.props.parameter) }),
-            React.createElement("button", { type: "button", onClick: this.selectRegionOnMap, className: Styles.btnSelector }, "Select region")));
+        return (_jsxs("div", { children: [_jsx("input", { className: Styles.field, type: "text", readOnly: true, value: getDisplayValue(this.props.parameter.value, this.props.parameter) }), _jsx("button", { type: "button", onClick: this.selectRegionOnMap, className: Styles.btnSelector, children: "Select region" })] }));
     }
 });
 /**
@@ -39,7 +38,7 @@ RegionParameterEditor.selectOnMap = function (viewState, parameter, previewed) {
         },
         buttonText: "Done",
         customUi: function Done() {
-            return (React.createElement(RegionPicker, { className: Styles.parameterEditor, previewed: previewed, parameter: parameter }));
+            return (_jsx(RegionPicker, { className: Styles.parameterEditor, previewed: previewed, parameter: parameter }));
         }
     });
     terria.mapInteractionModeStack.push(pickPointMode);

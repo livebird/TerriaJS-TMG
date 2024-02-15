@@ -3,7 +3,7 @@ import CkanSharedTraits from "../../../Traits/TraitsClasses/CkanSharedTraits";
 import createStratumInstance from "../../Definition/createStratumInstance";
 import LoadableStratum from "../../Definition/LoadableStratum";
 import StratumOrder from "../../Definition/StratumOrder";
-export default class CkanDefaultFormatsStratum extends LoadableStratum(CkanSharedTraits) {
+class CkanDefaultFormatsStratum extends LoadableStratum(CkanSharedTraits) {
     duplicateLoadableStratum(newModel) {
         return new CkanDefaultFormatsStratum();
     }
@@ -79,6 +79,12 @@ export default class CkanDefaultFormatsStratum extends LoadableStratum(CkanShare
         ].map((format) => createStratumInstance(CkanResourceFormatTraits, format));
     }
 }
-CkanDefaultFormatsStratum.stratumName = "ckanDefaultFormats";
+Object.defineProperty(CkanDefaultFormatsStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "ckanDefaultFormats"
+});
+export default CkanDefaultFormatsStratum;
 StratumOrder.addDefaultStratum(CkanDefaultFormatsStratum.stratumName);
 //# sourceMappingURL=CkanDefaultFormatsStratum.js.map

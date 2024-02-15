@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import debounce from "lodash-es/debounce";
 const getDisplayName = (WrappedComponent) => {
@@ -26,7 +27,18 @@ const measureElement = (WrappedComponent, verbose = true) => {
     class MeasureElement extends React.Component {
         constructor(props) {
             super(props);
-            this.wrappedComponent = React.createRef();
+            Object.defineProperty(this, "wrappedComponent", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: React.createRef()
+            });
+            Object.defineProperty(this, "checkAndUpdateSizingWithDebounce", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
             this.state = {
                 width: null,
                 height: null
@@ -52,11 +64,13 @@ const measureElement = (WrappedComponent, verbose = true) => {
             const refToUse = this.wrappedComponent.current.refToMeasure;
             const widthFromRef = refToUse
                 ? "current" in refToUse
-                    ? (_a = refToUse.current) === null || _a === void 0 ? void 0 : _a.clientWidth : refToUse.clientWidth
+                    ? (_a = refToUse.current) === null || _a === void 0 ? void 0 : _a.clientWidth
+                    : refToUse.clientWidth
                 : undefined;
             const heightFromRef = refToUse
                 ? "current" in refToUse
-                    ? (_b = refToUse.current) === null || _b === void 0 ? void 0 : _b.clientHeight : refToUse.clientHeight
+                    ? (_b = refToUse.current) === null || _b === void 0 ? void 0 : _b.clientHeight
+                    : refToUse.clientHeight
                 : undefined;
             const newWidth = widthFromRef || 0;
             const newHeight = heightFromRef || 0;
@@ -81,10 +95,15 @@ const measureElement = (WrappedComponent, verbose = true) => {
             }
         }
         render() {
-            return (React.createElement(WrappedComponent, Object.assign({}, this.props, { ref: this.wrappedComponent, widthFromMeasureElementHOC: this.state.width, heightFromMeasureElementHOC: this.state.height })));
+            return (_jsx(WrappedComponent, { ...this.props, ref: this.wrappedComponent, widthFromMeasureElementHOC: this.state.width, heightFromMeasureElementHOC: this.state.height }));
         }
     }
-    MeasureElement.displayName = `MeasureElement(${getDisplayName(WrappedComponent)})`;
+    Object.defineProperty(MeasureElement, "displayName", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: `MeasureElement(${getDisplayName(WrappedComponent)})`
+    });
     return MeasureElement;
 };
 export default measureElement;

@@ -1,4 +1,5 @@
 "use strict";
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 // proptypes are in mixin
 /* eslint react/prop-types:0*/
 import createReactClass from "create-react-class";
@@ -51,16 +52,12 @@ const StorySharePanel = createReactClass({
         this.onDismissed();
     },
     render() {
-        return (React.createElement(React.Fragment, null,
-            React.createElement(Button, { fullWidth: true, disabled: this.props.btnDisabled, title: this.props.btnTitle, primary: true, renderIcon: () => (React.createElement(StyledIcon, { glyph: Icon.GLYPHS.share, light: true, styledWidth: "20px" })), textProps: {
-                    large: true
-                }, onClick: this.openWithUserClick }, this.props.btnText ? this.props.btnText : ""),
-            React.createElement(If, { condition: this.isOpen() },
-                React.createElement("div", { css: `
+        return (_jsxs(_Fragment, { children: [_jsx(Button, { fullWidth: true, disabled: this.props.btnDisabled, title: this.props.btnTitle, primary: true, renderIcon: () => (_jsx(StyledIcon, { glyph: Icon.GLYPHS.share, light: true, styledWidth: "20px" })), textProps: {
+                        large: true
+                    }, onClick: this.openWithUserClick, children: this.props.btnText ? this.props.btnText : "" }), this.isOpen() && (_jsx("div", { css: `
               margin-top: 35px;
               font-family: ${(p) => p.theme.fontBase};
-            ` },
-                    React.createElement(InnerPanel, { showDropdownAsModal: this.props.showDropdownAsModal, modalWidth: this.props.modalWidth, onDismissed: this.onClose, innerRef: this.onInnerMounted, doNotCloseFlag: this.getDoNotCloseFlag(), theme: this.props.theme, caretOffset: this.state.caretOffset, dropdownOffset: this.state.dropdownOffset }, this.props.children)))));
+            `, children: _jsx(InnerPanel, { showDropdownAsModal: this.props.showDropdownAsModal, modalWidth: this.props.modalWidth, onDismissed: this.onClose, innerRef: this.onInnerMounted, doNotCloseFlag: this.getDoNotCloseFlag(), theme: this.props.theme, caretOffset: this.state.caretOffset, dropdownOffset: this.state.dropdownOffset, children: this.props.children }) }))] }));
     }
 });
 export default StorySharePanel;

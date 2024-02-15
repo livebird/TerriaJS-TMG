@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { action, computed, observable } from "mobx";
+import { action, computed, observable, makeObservable } from "mobx";
 import filterOutUndefined from "../Core/filterOutUndefined";
 import Result from "../Core/Result";
 import TerriaError, { TerriaErrorSeverity } from "../Core/TerriaError";
@@ -22,7 +22,13 @@ const supportsReordering = (model) => hasTraits(model, LayerOrderingTraits, "sup
     model.supportsReordering;
 export default class Workbench {
     constructor() {
-        this._items = observable.array();
+        Object.defineProperty(this, "_items", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: observable.array()
+        });
+        makeObservable(this);
     }
     /**
      * Gets or sets the list of items on the workbench.
@@ -31,7 +37,9 @@ export default class Workbench {
         return this._items.map(dereferenceModel);
     }
     set items(items) {
-        this._items.spliceWithArray(0, this._items.length, items.slice());
+        // Run items through a set to remove duplicates.
+        const setItems = new Set(items);
+        this._items.spliceWithArray(0, this._items.length, Array.from(setItems).slice());
     }
     /**
      * Gets the unique IDs of the items in the workbench.
@@ -52,7 +60,8 @@ export default class Workbench {
         return this._items.some((item) => {
             var _a;
             return item.type === "wms" &&
-                TimeFilterMixin.isMixedInto(item) && ((_a = item.discreteTimesAsSortedJulianDates) === null || _a === void 0 ? void 0 : _a.length);
+                TimeFilterMixin.isMixedInto(item) &&
+                ((_a = item.discreteTimesAsSortedJulianDates) === null || _a === void 0 ? void 0 : _a.length);
         });
     }
     /**

@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { action } from "mobx";
+import { action, makeObservable } from "mobx";
 import loadCsv from "../../Core/loadCsv";
 import loadJson5 from "../../Core/loadJson5";
 import ItemSearchProvider from "./ItemSearchProvider";
@@ -26,16 +26,40 @@ export default class IndexedItemSearchProvider extends ItemSearchProvider {
      */
     constructor(options, parameterOptions) {
         super(options, parameterOptions);
+        Object.defineProperty(this, "indexRootUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "indexRoot", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "resultsData", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         /**
          * Pre-emptively load the index while the user is entering input for the
          * parameter.
          */
-        this.loadParameterHint = (parameterId, valueHint) => {
-            const parameter = this.parameters.get(parameterId);
-            if (parameter) {
-                parameter.index.load(this.indexRootUrl, valueHint);
+        Object.defineProperty(this, "loadParameterHint", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: (parameterId, valueHint) => {
+                const parameter = this.parameters.get(parameterId);
+                if (parameter) {
+                    parameter.index.load(this.indexRootUrl, valueHint);
+                }
             }
-        };
+        });
+        makeObservable(this);
         const indexRootUrl = options === null || options === void 0 ? void 0 : options.indexRootUrl;
         if (typeof indexRootUrl !== "string")
             throw new Error(t("indexedItemSearchProvider.missingOptionIndexRootUrl"));
@@ -200,7 +224,7 @@ export default class IndexedItemSearchProvider extends ItemSearchProvider {
         // The record can have a bunch of arbitrary properties and a few known
         // properties. We use the latitude, longitude, height & radius for
         // constructing a zoom target for the search result.
-        let { latitude, longitude, height, ...properties } = record;
+        const { latitude, longitude, height, ...properties } = record;
         const _latitude = parseFloat(latitude);
         const _longitude = parseFloat(longitude);
         const _featureHeight = parseFloat(height);

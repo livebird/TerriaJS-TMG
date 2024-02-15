@@ -6,9 +6,24 @@ export class BaseModel {
      * property. If undefined, this model is not the target of a reference.
      */
     sourceReference) {
-        this.uniqueId = uniqueId;
-        this.terria = terria;
-        this.sourceReference = sourceReference;
+        Object.defineProperty(this, "uniqueId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: uniqueId
+        });
+        Object.defineProperty(this, "terria", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: terria
+        });
+        Object.defineProperty(this, "sourceReference", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: sourceReference
+        });
     }
     dispose() { }
 }

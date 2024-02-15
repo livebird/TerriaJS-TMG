@@ -7,8 +7,18 @@ import xml2json from "../../../ThirdParty/xml2json";
 import { parseOnlineResource, parseOwsKeywordList } from "./OwsInterfaces";
 export default class WebProcessingServiceCapabilities {
     constructor(capabilitiesXml, capabilities) {
-        this.capabilitiesXml = capabilitiesXml;
-        this.capabilities = capabilities;
+        Object.defineProperty(this, "capabilitiesXml", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: capabilitiesXml
+        });
+        Object.defineProperty(this, "capabilities", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: capabilities
+        });
     }
     static fromUrl(url) {
         return Promise.resolve(loadXML(url)).then(function (capabilitiesXml) {

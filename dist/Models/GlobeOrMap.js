@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, computed, observable, runInAction } from "mobx";
+import { action, makeObservable, observable, runInAction } from "mobx";
 import Color from "terriajs-cesium/Source/Core/Color";
 import createGuid from "terriajs-cesium/Source/Core/createGuid";
 import DeveloperError from "terriajs-cesium/Source/Core/DeveloperError";
@@ -21,24 +21,65 @@ import featureDataToGeoJson from "../Map/PickedFeatures/featureDataToGeoJson";
 import MappableMixin from "../ModelMixins/MappableMixin";
 import TimeVarying from "../ModelMixins/TimeVarying";
 import MouseCoords from "../ReactViewModels/MouseCoords";
-import TableColorStyleTraits from "../Traits/TraitsClasses/TableColorStyleTraits";
-import TableOutlineStyleTraits, { OutlineSymbolTraits } from "../Traits/TraitsClasses/TableOutlineStyleTraits";
-import TableStyleTraits from "../Traits/TraitsClasses/TableStyleTraits";
+import TableColorStyleTraits from "../Traits/TraitsClasses/Table/ColorStyleTraits";
+import TableOutlineStyleTraits, { OutlineSymbolTraits } from "../Traits/TraitsClasses/Table/OutlineStyleTraits";
+import TableStyleTraits from "../Traits/TraitsClasses/Table/StyleTraits";
 import Cesium3DTilesCatalogItem from "./Catalog/CatalogItems/Cesium3DTilesCatalogItem";
 import CommonStrata from "./Definition/CommonStrata";
 import createStratumInstance from "./Definition/createStratumInstance";
 import TerriaFeature from "./Feature/Feature";
 require("./Feature/ImageryLayerFeatureInfo"); // overrides Cesium's prototype.configureDescriptionFromProperties
-export default class GlobeOrMap {
+class GlobeOrMap {
     constructor() {
-        this._tilesLoadingCountMax = 0;
+        Object.defineProperty(this, "_removeHighlightCallback", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_highlightPromise", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_tilesLoadingCountMax", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
+        Object.defineProperty(this, "supportsPolylinesOnTerrain", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         // True if zoomTo() was called and the map is currently zooming to dataset
-        this.isMapZooming = false;
+        Object.defineProperty(this, "isMapZooming", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        // An internal id to track an in progress call to zoomTo()
+        Object.defineProperty(this, "_currentZoomId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         // This is updated by Leaflet and Cesium objects.
         // Avoid duplicate mousemove events.  Why would we get duplicate mousemove events?  I'm glad you asked:
         // http://stackoverflow.com/questions/17818493/mousemove-event-repeating-every-second/17819113
         // I (Kevin Ring) see this consistently on my laptop when Windows Media Player is running.
-        this.mouseCoords = new MouseCoords();
+        Object.defineProperty(this, "mouseCoords", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new MouseCoords()
+        });
+        makeObservable(this);
     }
     /**
      * Zoom map to a dataset or the given bounds.
@@ -148,10 +189,12 @@ export default class GlobeOrMap {
                 const catalogItem = feature._catalogItem;
                 let highlightColor;
                 if (catalogItem instanceof Cesium3DTilesCatalogItem) {
-                    highlightColor = (_a = Color.fromCssColorString(runInAction(() => catalogItem.highlightColor))) !== null && _a !== void 0 ? _a : defaultColor;
+                    highlightColor =
+                        (_a = Color.fromCssColorString(runInAction(() => catalogItem.highlightColor))) !== null && _a !== void 0 ? _a : defaultColor;
                 }
                 else {
-                    highlightColor = (_b = Color.fromCssColorString(this.terria.baseMapContrastColor)) !== null && _b !== void 0 ? _b : defaultColor;
+                    highlightColor =
+                        (_b = Color.fromCssColorString(this.terria.baseMapContrastColor)) !== null && _b !== void 0 ? _b : defaultColor;
                 }
                 // highlighting doesn't work if the highlight colour is full white
                 // so in this case use something close to white instead
@@ -187,7 +230,8 @@ export default class GlobeOrMap {
                 const cesiumPolyline = feature.cesiumEntity || feature;
                 const polylineMaterial = cesiumPolyline.polyline.material;
                 const polylineWidth = cesiumPolyline.polyline.width;
-                cesiumPolyline.polyline.material = (_e = Color.fromCssColorString(this.terria.baseMapContrastColor)) !== null && _e !== void 0 ? _e : Color.LIGHTGRAY;
+                cesiumPolyline.polyline.material =
+                    (_e = Color.fromCssColorString(this.terria.baseMapContrastColor)) !== null && _e !== void 0 ? _e : Color.LIGHTGRAY;
                 cesiumPolyline.polyline.width = new ConstantProperty(2);
                 this._removeHighlightCallback = function () {
                     if (cesiumPolyline.polyline) {
@@ -283,18 +327,23 @@ export default class GlobeOrMap {
         throw new DeveloperError("captureScreenshot must be implemented in the derived class.");
     }
 }
-GlobeOrMap.featureHighlightID = "___$FeatureHighlight&__";
-GlobeOrMap._featureHighlightName = "TerriaJS Feature Highlight Marker";
+Object.defineProperty(GlobeOrMap, "featureHighlightID", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "___$FeatureHighlight&__"
+});
+Object.defineProperty(GlobeOrMap, "_featureHighlightName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "TerriaJS Feature Highlight Marker"
+});
+export default GlobeOrMap;
 __decorate([
     observable
 ], GlobeOrMap.prototype, "isMapZooming", void 0);
 __decorate([
-    observable
-], GlobeOrMap.prototype, "mouseCoords", void 0);
-__decorate([
     action
 ], GlobeOrMap.prototype, "zoomTo", null);
-__decorate([
-    computed
-], GlobeOrMap.prototype, "attributions", null);
 //# sourceMappingURL=GlobeOrMap.js.map

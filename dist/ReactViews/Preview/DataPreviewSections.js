@@ -1,4 +1,10 @@
-import createReactClass from "create-react-class";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+import { jsx as _jsx } from "react/jsx-runtime";
 import naturalSort from "javascript-natural-sort";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react";
@@ -9,7 +15,6 @@ import { withTranslation } from "react-i18next";
 import isDefined from "../../Core/isDefined";
 import CommonStrata from "../../Models/Definition/CommonStrata";
 import Box from "../../Styled/Box";
-import { item } from "../Custom/Chart/tooltip.scss";
 import Collapsible from "../Custom/Collapsible/Collapsible";
 import parseCustomMarkdownToReact from "../Custom/parseCustomMarkdownToReact";
 import MetadataTable from "./MetadataTable";
@@ -21,12 +26,7 @@ Mustache.escape = function (string) {
  * CatalogItem-defined sections that sit within the preview description. These are ordered according to the catalog item's
  * order if available.
  */
-const DataPreviewSections = observer(createReactClass({
-    displayName: "DataPreviewSections",
-    propTypes: {
-        metadataItem: PropTypes.object.isRequired,
-        t: PropTypes.func.isRequired
-    },
+let DataPreviewSections = class DataPreviewSections extends React.Component {
     sortInfoSections(items) {
         const infoSectionOrder = this.props.metadataItem.infoSectionOrder;
         items.sort(function (a, b) {
@@ -49,7 +49,7 @@ const DataPreviewSections = observer(createReactClass({
                 ((_b = item.content) !== null && _b !== void 0 ? _b : item.contentAsObject) !== null &&
                 item.content !== "";
         });
-    },
+    }
     clickInfoSection(reportName, isOpen) {
         const info = this.props.metadataItem.info;
         const clickedInfo = info.find((report) => report.name === reportName);
@@ -59,9 +59,8 @@ const DataPreviewSections = observer(createReactClass({
             });
         }
         return false;
-    },
+    }
     render() {
-        var _a;
         const metadataItem = this.props.metadataItem;
         const items = metadataItem.hideSource
             ? metadataItem.infoWithoutSources
@@ -79,16 +78,25 @@ const DataPreviewSections = observer(createReactClass({
                 catalogItem: metadataItem
             });
         };
-        return (React.createElement("div", null,
-            React.createElement(For, { each: "item", index: "i", of: this.sortInfoSections(items) },
-                React.createElement(Box, { paddedVertically: true, displayInlineBlock: true, fullWidth: true, key: i },
-                    React.createElement(Collapsible, { key: i, light: false, title: item.name, isOpen: item.show, onToggle: (show) => this.clickInfoSection.bind(this, item.name, show)(), bodyTextProps: { medium: true } },
-                        React.createElement(Choose, null,
-                            React.createElement(When, { condition: ((_a = item.content) === null || _a === void 0 ? void 0 : _a.length) > 0 }, renderSection(item)),
-                            React.createElement(When, { condition: item.contentAsObject !== undefined },
-                                React.createElement(Box, { paddedVertically: 3, fullWidth: true },
-                                    React.createElement(MetadataTable, { metadataItem: item.contentAsObject })))))))));
+        return (_jsx("div", { children: this.sortInfoSections(items).map((item, i) => {
+                var _a;
+                return (_jsx(Box, { paddedVertically: true, displayInlineBlock: true, fullWidth: true, children: _jsx(Collapsible, { light: false, title: item.name, isOpen: item.show, onToggle: (show) => this.clickInfoSection.bind(this, item.name, show)(), bodyTextProps: { medium: true }, children: ((_a = item.content) === null || _a === void 0 ? void 0 : _a.length) > 0
+                            ? renderSection(item)
+                            : item.contentAsObject !== undefined && (_jsx(Box, { paddedVertically: 3, fullWidth: true, children: _jsx(MetadataTable, { metadataItem: item.contentAsObject }) })) }, i) }, i));
+            }) }));
     }
-}));
+};
+Object.defineProperty(DataPreviewSections, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        metadataItem: PropTypes.object.isRequired,
+        t: PropTypes.func.isRequired
+    }
+});
+DataPreviewSections = __decorate([
+    observer
+], DataPreviewSections);
 export default withTranslation()(DataPreviewSections);
 //# sourceMappingURL=DataPreviewSections.js.map

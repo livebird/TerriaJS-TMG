@@ -49,7 +49,12 @@ export default function mixTraits(Traits1, Traits2, Traits3, Traits4, Traits5, T
             });
         }
     }
-    Mixed.traits = {};
+    Object.defineProperty(Mixed, "traits", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: {}
+    });
     traitsClasses.forEach((traitsClass) => {
         Object.keys(traitsClass.traits).forEach((trait) => {
             Mixed.traits[trait] = traitsClass.traits[trait];

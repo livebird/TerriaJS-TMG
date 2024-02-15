@@ -14,7 +14,18 @@ import UrlTraits from "./UrlTraits";
 export default class GeoRssCatalogItemTraits extends mixTraits(UrlTraits, MappableTraits, CatalogMemberTraits, GeoJsonTraits, LegendOwnerTraits) {
     constructor() {
         super(...arguments);
-        this.clampToGround = true;
+        Object.defineProperty(this, "clampToGround", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "geoRssString", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([

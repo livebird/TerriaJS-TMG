@@ -10,8 +10,48 @@ import primitiveTrait from "../Decorators/primitiveTrait";
 export default class CkanResourceFormatTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.onlyUseIfSoleResource = false;
-        this.removeDuplicates = true;
+        Object.defineProperty(this, "id", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "formatRegex", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "urlRegex", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "maxFileSize", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "onlyUseIfSoleResource", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "removeDuplicates", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "definition", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
     static isRemoval(format) {
         return format.definition === null;

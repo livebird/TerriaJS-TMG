@@ -3,6 +3,30 @@ import ColorMap from "./ColorMap";
 export default class DiscreteColorMap extends ColorMap {
     constructor(options) {
         super();
+        Object.defineProperty(this, "includeMinimumInThisBin", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "maximums", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "colors", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "nullColor", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         const includeMinimumInThisBin = [];
         const maximums = [];
         const colors = [];
@@ -22,7 +46,9 @@ export default class DiscreteColorMap extends ColorMap {
         }
         const maximums = this.maximums;
         let i, len;
-        for (i = 0, len = maximums.length - 1; i < len && value > maximums[i]; ++i) { }
+        for (i = 0, len = maximums.length - 1; i < len && value > maximums[i]; ++i) {
+            /* TODO: refactor */
+        }
         // Value may equal maximum, in which case we look at
         // `includeMinimumInThisBin` for the _next_ bin.
         if (value === maximums[i] &&

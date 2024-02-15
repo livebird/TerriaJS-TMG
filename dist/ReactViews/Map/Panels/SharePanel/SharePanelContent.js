@@ -1,4 +1,5 @@
-import React, { useCallback, useMemo, useState } from "react";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Box from "../../../../Styled/Box";
 import Spacing from "../../../../Styled/Spacing";
@@ -26,14 +27,6 @@ export const SharePanelContent = ({ terria, viewState, closePanel }) => {
             return !prevState;
         });
     }, [terria]);
-    return (React.createElement(Box, { paddedRatio: 2, column: true },
-        React.createElement(Text, { medium: true }, t("clipboard.shareURL")),
-        React.createElement(Spacing, { bottom: 1 }),
-        React.createElement(ShareUrl, { theme: "dark", inputTheme: "dark", terria: terria, viewState: viewState, includeStories: includeStoryInShare, shouldShorten: shouldShorten, ref: shareUrlRef, callback: closePanel },
-            React.createElement(ShareUrlBookmark, { viewState: viewState })),
-        React.createElement(Spacing, { bottom: 2 }),
-        React.createElement(PrintSection, { viewState: viewState }),
-        React.createElement(StyledHr, null),
-        React.createElement(AdvancedOptions, { canShortenUrl: canShortenUrl, shouldShorten: shouldShorten, shouldShortenOnChange: shouldShortenOnChange, includeStoryInShare: includeStoryInShare, includeStoryInShareOnChange: includeStoryInShareOnChange, shareUrl: shareUrlRef })));
+    return (_jsxs(Box, { paddedRatio: 2, column: true, children: [_jsx(Text, { medium: true, children: t("clipboard.shareURL") }), _jsx(Spacing, { bottom: 1 }), _jsx(ShareUrl, { theme: "dark", inputTheme: "dark", terria: terria, viewState: viewState, includeStories: includeStoryInShare, shouldShorten: shouldShorten, ref: shareUrlRef, callback: closePanel, children: _jsx(ShareUrlBookmark, { viewState: viewState }) }), _jsx(Spacing, { bottom: 2 }), _jsx(PrintSection, { viewState: viewState }), _jsx(StyledHr, {}), _jsx(AdvancedOptions, { canShortenUrl: canShortenUrl, shouldShorten: shouldShorten, shouldShortenOnChange: shouldShortenOnChange, includeStoryInShare: includeStoryInShare, includeStoryInShareOnChange: includeStoryInShareOnChange, shareUrl: shareUrlRef })] }));
 };
 //# sourceMappingURL=SharePanelContent.js.map

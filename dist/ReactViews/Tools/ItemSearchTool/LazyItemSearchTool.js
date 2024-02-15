@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import i18next from "i18next";
 import React, { Suspense } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,13 +15,9 @@ const LazyItemSearchTool = (props) => {
     const { viewState, item } = props;
     const itemName = CatalogMemberMixin.isMixedInto(item) ? item.name : "Item";
     const [t] = useTranslation();
-    return (React.createElement(Suspense, { fallback: React.createElement(Frame, { viewState: viewState, title: t("itemSearchTool.title", { itemName }) },
-            React.createElement(Wrapper, null,
-                React.createElement(AnimatedSpinnerIcon, { light: true, styledWidth: "25px", styledHeight: "25px" }))) },
-        React.createElement(RaiseToUserErrorBoundary, { viewState: viewState, terriaErrorOptions: {
+    return (_jsx(Suspense, { fallback: _jsx(Frame, { viewState: viewState, title: t("itemSearchTool.title", { itemName }), children: _jsx(Wrapper, { children: _jsx(AnimatedSpinnerIcon, { light: true, styledWidth: "25px", styledHeight: "25px" }) }) }), children: _jsx(RaiseToUserErrorBoundary, { viewState: viewState, terriaErrorOptions: {
                 title: i18next.t("itemSearchTool.toolLoadError")
-            } },
-            React.createElement(ItemSearchTool, Object.assign({}, props)))));
+            }, children: _jsx(ItemSearchTool, { ...props }) }) }));
 };
 const Wrapper = styled(Main) `
   align-items: center;

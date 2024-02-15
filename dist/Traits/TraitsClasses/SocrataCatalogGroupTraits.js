@@ -15,6 +15,21 @@ import GroupTraits from "./GroupTraits";
 import LegendOwnerTraits from "./LegendOwnerTraits";
 import UrlTraits from "./UrlTraits";
 export class FacetFilterTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "name", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "value", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -33,8 +48,24 @@ __decorate([
 export default class SocrataCatalogGroupTraits extends mixTraits(UrlTraits, CatalogMemberTraits, LegendOwnerTraits, GroupTraits) {
     constructor() {
         super(...arguments);
-        this.facetGroups = ["tags", "categories"];
-        this.filterQuery = {};
+        Object.defineProperty(this, "facetGroups", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: ["tags", "categories"]
+        });
+        Object.defineProperty(this, "facetFilters", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "filterQuery", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {}
+        });
     }
 }
 __decorate([

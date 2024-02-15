@@ -9,12 +9,29 @@ import primitiveTrait from "../Decorators/primitiveTrait";
 import mixTraits from "../mixTraits";
 import ModelTraits from "../ModelTraits";
 import AutoRefreshingTraits from "./AutoRefreshingTraits";
-import TableTraits from "./TableTraits";
+import TableTraits from "./Table/TableTraits";
 import UrlTraits from "./UrlTraits";
 class PollingTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.shouldReplaceData = true;
+        Object.defineProperty(this, "seconds", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "url", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "shouldReplaceData", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
     }
 }
 __decorate([
@@ -39,6 +56,33 @@ __decorate([
     })
 ], PollingTraits.prototype, "shouldReplaceData", void 0);
 export default class CsvCatalogItemTraits extends mixTraits(AutoRefreshingTraits, UrlTraits, TableTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "characterSet", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "csvString", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "ignoreRowsStartingWithComment", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "polling", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({

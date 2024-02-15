@@ -4,16 +4,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import classNames from "classnames";
-import { merge } from "lodash-es";
-import { action, computed, observable, reaction, runInAction } from "mobx";
+import { isEmpty, merge } from "lodash-es";
+import { action, computed, makeObservable, observable, reaction, runInAction } from "mobx";
 import { observer } from "mobx-react";
 import Mustache from "mustache";
 import React from "react";
 import { withTranslation } from "react-i18next";
+import styled from "styled-components";
 import Ellipsoid from "terriajs-cesium/Source/Core/Ellipsoid";
 import JulianDate from "terriajs-cesium/Source/Core/JulianDate";
 import CesiumMath from "terriajs-cesium/Source/Core/Math";
+import TerriaError from "../../Core/TerriaError";
+import filterOutUndefined from "../../Core/filterOutUndefined";
 import isDefined from "../../Core/isDefined";
 import { getName } from "../../ModelMixins/CatalogMemberMixin";
 import DiscretelyTimeVaryingMixin from "../../ModelMixins/DiscretelyTimeVaryingMixin";
@@ -21,10 +25,11 @@ import MappableMixin from "../../ModelMixins/MappableMixin";
 import TimeVarying from "../../ModelMixins/TimeVarying";
 import FeatureInfoContext from "../../Models/Feature/FeatureInfoContext";
 import Icon from "../../Styled/Icon";
+import { withViewState } from "../Context";
 import parseCustomMarkdownToReact from "../Custom/parseCustomMarkdownToReact";
-import { withViewState } from "../StandardUserInterface/ViewStateContext";
-import Styles from "./feature-info-section.scss";
 import FeatureInfoDownload from "./FeatureInfoDownload";
+import FeatureInfoPanelButton from "./FeatureInfoPanelButton";
+import Styles from "./feature-info-section.scss";
 import { generateCesiumInfoHTMLFromProperties } from "./generateCesiumInfoHTMLFromProperties";
 import getFeatureProperties from "./getFeatureProperties";
 import { mustacheFormatDateTime, mustacheFormatNumberFunction, mustacheRenderPartialByName, mustacheURLEncodeText, mustacheURLEncodeTextComponent } from "./mustacheExpressions";
@@ -33,18 +38,52 @@ Mustache.escape = function (string) {
     return string;
 };
 let FeatureInfoSection = class FeatureInfoSection extends React.Component {
-    constructor() {
-        super(...arguments);
+    constructor(props) {
+        super(props);
+        Object.defineProperty(this, "templateReactionDisposer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "removeFeatureChangedSubscription", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         /** Rendered feature info template - this is set using reaction.
          * We can't use `@computed` values for custom templates - as CustomComponents may cause side-effects.
          * For example
          * - A CsvChartCustomComponent will create a new CsvCatalogItem and set traits
          * See `rawDataReactNode` for rendered raw data
          */
-        this.templatedFeatureInfoReactNode = undefined;
-        this.showRawData = false;
+        Object.defineProperty(this, "templatedFeatureInfoReactNode", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "noInfoRef", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: null
+        });
+        Object.defineProperty(this, "showRawData", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
         /** See `setFeatureChangedCounter` */
-        this.featureChangedCounter = 0;
+        Object.defineProperty(this, "featureChangedCounter", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
+        makeObservable(this);
     }
     componentDidMount() {
         this.templateReactionDisposer = reaction(() => [
@@ -189,7 +228,7 @@ let FeatureInfoSection = class FeatureInfoSection extends React.Component {
         var _a, _b;
         const feature = this.props.feature;
         const currentTime = (_a = this.currentTimeIfAvailable) !== null && _a !== void 0 ? _a : JulianDate.now();
-        let description = (_b = feature.description) === null || _b === void 0 ? void 0 : _b.getValue(currentTime);
+        const description = (_b = feature.description) === null || _b === void 0 ? void 0 : _b.getValue(currentTime);
         if (isDefined(description))
             return description;
         if (isDefined(feature.properties)) {
@@ -228,18 +267,37 @@ let FeatureInfoSection = class FeatureInfoSection extends React.Component {
             }
         }
         return {
-            data: this.featureProperties && this.featureProperties !== {}
+            data: this.featureProperties && !isEmpty(this.featureProperties)
                 ? this.featureProperties
                 : undefined,
             fileName
         };
+    }
+    get generatedButtons() {
+        const { feature, catalogItem } = this.props;
+        const buttons = filterOutUndefined(this.props.viewState.featureInfoPanelButtonGenerators.map((generator) => {
+            try {
+                const dim = generator({ feature, item: catalogItem });
+                return dim;
+            }
+            catch (error) {
+                TerriaError.from(error).log();
+            }
+        }));
+        return buttons;
+    }
+    renderButtons() {
+        const { t } = this.props;
+        return (_jsxs(ButtonsContainer, { children: [!this.props.printView && this.templatedFeatureInfoReactNode && (_jsx(FeatureInfoPanelButton, { onClick: this.toggleRawData.bind(this), text: this.showRawData
+                        ? t("featureInfo.showCuratedData")
+                        : t("featureInfo.showRawData") })), this.generatedButtons.map((button, i) => (_jsx(FeatureInfoPanelButton, { ...button }, i)))] }));
     }
     render() {
         var _a;
         const { t } = this.props;
         let title;
         if (this.props.catalogItem.featureInfoTemplate.name) {
-            title = Mustache.render(this.props.catalogItem.featureInfoTemplate.name, this.featureProperties);
+            title = Mustache.render(this.props.catalogItem.featureInfoTemplate.name, this.mustacheContextData, this.props.catalogItem.featureInfoTemplate.partials);
         }
         else
             title =
@@ -253,35 +311,27 @@ let FeatureInfoSection = class FeatureInfoSection extends React.Component {
             (this.templatedFeatureInfoReactNode &&
                 this.props.catalogItem.featureInfoTemplate
                     .showFeatureInfoDownloadWithTemplate);
-        const titleElement = this.props.printView ? (React.createElement("h2", null, title)) : (React.createElement("button", { type: "button", onClick: this.clickHeader.bind(this), className: Styles.title },
-            React.createElement("span", null, title),
-            this.props.isOpen ? (React.createElement(Icon, { glyph: Icon.GLYPHS.opened })) : (React.createElement(Icon, { glyph: Icon.GLYPHS.closed }))));
+        const titleElement = this.props.printView ? (_jsx("h2", { children: title })) : (_jsxs("button", { type: "button", onClick: this.clickHeader.bind(this), className: Styles.title, children: [_jsx("span", { children: title }), this.props.isOpen ? (_jsx(Icon, { glyph: Icon.GLYPHS.opened })) : (_jsx(Icon, { glyph: Icon.GLYPHS.closed }))] }));
         // If feature is unavailable (or not showing) - show no info message
         if (!this.props.feature.isAvailable((_a = this.currentTimeIfAvailable) !== null && _a !== void 0 ? _a : JulianDate.now()) ||
             !this.props.feature.isShowing) {
-            return (React.createElement("li", { className: classNames(Styles.section) },
-                titleElement,
-                this.props.isOpen ? (React.createElement("section", { className: Styles.content },
-                    React.createElement("div", { ref: "no-info", key: "no-info" }, t("featureInfo.noInfoAvailable")))) : null));
+            return (_jsxs("li", { className: classNames(Styles.section), children: [titleElement, this.props.isOpen ? (_jsx("section", { className: Styles.content, children: _jsx("div", { ref: (r) => {
+                                this.noInfoRef = r;
+                            }, children: t("featureInfo.noInfoAvailable") }, "no-info") })) : null] }));
         }
-        return (React.createElement("li", { className: classNames(Styles.section) },
-            titleElement,
-            this.props.isOpen ? (React.createElement("section", { className: Styles.content },
-                !this.props.printView && this.templatedFeatureInfoReactNode ? (React.createElement("button", { type: "button", className: Styles.rawDataButton, onClick: this.toggleRawData.bind(this) }, this.showRawData
-                    ? t("featureInfo.showCuratedData")
-                    : t("featureInfo.showRawData"))) : null,
-                React.createElement("div", null,
-                    this.props.feature.loadingFeatureInfoUrl ? ("Loading") : this.showRawData || !this.templatedFeatureInfoReactNode ? (React.createElement(React.Fragment, null, this.rawFeatureInfoReactNode ? (this.rawFeatureInfoReactNode) : (React.createElement("div", { ref: "no-info", key: "no-info" }, t("featureInfo.noInfoAvailable"))))) : (
-                    // Show templated feature info
-                    this.templatedFeatureInfoReactNode),
-                    // Show FeatureInfoDownload
-                    !this.props.printView &&
-                        showFeatureInfoDownload &&
-                        isDefined(this.downloadableData.data) ? (React.createElement(FeatureInfoDownload, { key: "download", data: this.downloadableData.data, name: this.downloadableData.fileName })) : null))) : null));
+        return (_jsxs("li", { className: classNames(Styles.section), children: [titleElement, this.props.isOpen ? (_jsxs("section", { className: Styles.content, children: [this.renderButtons(), _jsxs("div", { children: [this.props.feature.loadingFeatureInfoUrl ? ("Loading") : this.showRawData || !this.templatedFeatureInfoReactNode ? (this.rawFeatureInfoReactNode ? (this.rawFeatureInfoReactNode) : (_jsx("div", { ref: (r) => {
+                                        this.noInfoRef = r;
+                                    }, children: t("featureInfo.noInfoAvailable") }, "no-info"))) : (
+                                // Show templated feature info
+                                this.templatedFeatureInfoReactNode), 
+                                // Show FeatureInfoDownload
+                                !this.props.printView &&
+                                    showFeatureInfoDownload &&
+                                    isDefined(this.downloadableData.data) ? (_jsx(FeatureInfoDownload, { data: this.downloadableData.data, name: this.downloadableData.fileName }, "download")) : null] })] })) : null] }));
     }
 };
 __decorate([
-    observable
+    observable.ref
 ], FeatureInfoSection.prototype, "templatedFeatureInfoReactNode", void 0);
 __decorate([
     observable
@@ -316,6 +366,9 @@ __decorate([
 __decorate([
     computed
 ], FeatureInfoSection.prototype, "downloadableData", null);
+__decorate([
+    computed
+], FeatureInfoSection.prototype, "generatedButtons", null);
 FeatureInfoSection = __decorate([
     observer
 ], FeatureInfoSection);
@@ -330,5 +383,10 @@ function contains(text, number, precision) {
     return (text.indexOf(fixed(Math.floor, number)) !== -1 ||
         text.indexOf(fixed(Math.ceil, number)) !== -1);
 }
+const ButtonsContainer = styled.div `
+  display: flex;
+  justify-content: flex-end;
+  padding: 7px 0 10px 0;
+`;
 export default withTranslation()(withViewState(FeatureInfoSection));
 //# sourceMappingURL=FeatureInfoSection.js.map

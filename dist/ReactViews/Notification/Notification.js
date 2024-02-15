@@ -1,7 +1,7 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import { observer } from "mobx-react";
-import React from "react";
 import triggerResize from "../../Core/triggerResize";
-import { useViewState } from "../StandardUserInterface/ViewStateContext";
+import { useViewState } from "../Context";
 // Avoid type error caused by importing untyped jsx
 const NotificationWindow = require("./NotificationWindow").default;
 const Notification = observer(() => {
@@ -12,7 +12,7 @@ const Notification = observer(() => {
     if (viewState === undefined ||
         notificationState === undefined ||
         notification === undefined) {
-        return React.createElement(React.Fragment, null);
+        return null;
     }
     const close = () => {
         // Force refresh once the notification is dispatched if .hideUi is set since once all the .hideUi's
@@ -34,7 +34,7 @@ const Notification = observer(() => {
         }
         close();
     };
-    return (React.createElement(NotificationWindow, { viewState: viewState, title: notification.title, message: notification.message, confirmText: notification.confirmText, denyText: notification.denyText, onConfirm: confirm, onDeny: deny, type: (_a = notification.type) !== null && _a !== void 0 ? _a : "notification", width: notification.width, height: notification.height }));
+    return (_jsx(NotificationWindow, { viewState: viewState, title: notification.title, message: notification.message, confirmText: notification.confirmText, denyText: notification.denyText, onConfirm: confirm, onDeny: deny, type: (_a = notification.type) !== null && _a !== void 0 ? _a : "notification", width: notification.width, height: notification.height }));
 });
 export default Notification;
 //# sourceMappingURL=Notification.js.map

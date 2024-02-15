@@ -51,8 +51,8 @@ const findFirstTerm = (text, terms, fromIndex) => {
 const injectTerms = (string, termDictionary) => {
     let injectIndex = 0;
     const injectedBoldSet = new Set();
-    while (1) {
-        let tooltipTerms = new Map();
+    for (;;) {
+        const tooltipTerms = new Map();
         termDictionary.forEach((item) => tooltipTerms.set(applyTranslationIfExists(item.term, i18next).toLowerCase(), item));
         // some help content things will have aliases / variants
         termDictionary.forEach((term) => {

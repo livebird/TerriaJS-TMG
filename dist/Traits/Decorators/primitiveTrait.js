@@ -13,12 +13,24 @@ export default function primitiveTrait(options) {
 export class PrimitiveTrait extends Trait {
     constructor(id, options, parent) {
         super(id, options, parent);
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "isNullable", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         this.type = options.type;
         this.isNullable = options.isNullable || false;
     }
     getValue(model) {
         const strataTopToBottom = model.strataTopToBottom;
-        for (let stratum of strataTopToBottom.values()) {
+        for (const stratum of strataTopToBottom.values()) {
             const value = stratum[this.id];
             if (value !== undefined) {
                 return value;

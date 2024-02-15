@@ -1,6 +1,9 @@
-import i18next from "i18next";
+import { makeObservable } from "mobx";
+import { Category, SearchAction } from "../../Core/AnalyticEvents/analyticEvents";
+import WebFeatureServiceSearchProviderMixin from "../../ModelMixins/SearchProviders/WebFeatureServiceSearchProviderMixin";
+import WebFeatureServiceSearchProviderTraits from "../../Traits/SearchProviders/WebFeatureServiceSearchProviderTraits";
+import CreateModel from "../Definition/CreateModel";
 import SearchResult from "./SearchResult";
-import WebFeatureServiceSearchProvider from "../Catalog/Ows/WebFeatureServiceSearchProvider";
 const featureCodesToNamesMap = new Map([
     ["AF", "Aviation"],
     ["ANCH", "Anchorage"],
@@ -142,7 +145,7 @@ const searchResultFilterFunction = function (feature) {
 const searchResultScoreFunction = function (feature, searchText) {
     feature = feature.Gazetteer_of_Australia;
     // Taken from original GazetteerSearchProviderViewModel in v7
-    var featureTypes = [
+    const featureTypes = [
         "CONT",
         "STAT",
         "URBN",
@@ -188,20 +191,48 @@ const searchResultScoreFunction = function (feature, searchText) {
     }
     return score;
 };
-const WFS_SERVICE_URL = "http://services.ga.gov.au/gis/services/Australian_Gazetteer/MapServer/WFSServer";
-const SEARCH_PROPERTY_NAME = "Australian_Gazetteer:NameU";
-const SEARCH_PROPERTY_TYPE_NAME = "Australian_Gazetteer:Gazetteer_of_Australia";
-export default function createAustralianGazetteerSearchProvider(terria) {
-    return new WebFeatureServiceSearchProvider({
-        terria,
-        featureToSearchResultFunction,
-        wfsServiceUrl: WFS_SERVICE_URL,
-        searchPropertyName: SEARCH_PROPERTY_NAME,
-        searchPropertyTypeName: SEARCH_PROPERTY_TYPE_NAME,
-        transformSearchText: (searchText) => searchText.toUpperCase(),
-        name: i18next.t("viewModels.searchPlaceNames"),
-        searchResultFilterFunction: searchResultFilterFunction,
-        searchResultScoreFunction: searchResultScoreFunction
-    });
+class AustralianGazetteerSearchProvider extends WebFeatureServiceSearchProviderMixin(CreateModel(WebFeatureServiceSearchProviderTraits)) {
+    constructor(...args) {
+        super(...args);
+        Object.defineProperty(this, "featureToSearchResultFunction", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: featureToSearchResultFunction
+        });
+        Object.defineProperty(this, "transformSearchText", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: (searchText) => searchText.toUpperCase()
+        });
+        Object.defineProperty(this, "searchResultFilterFunction", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: searchResultFilterFunction
+        });
+        Object.defineProperty(this, "searchResultScoreFunction", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: searchResultScoreFunction
+        });
+        makeObservable(this);
+    }
+    get type() {
+        return AustralianGazetteerSearchProvider.type;
+    }
+    logEvent(searchText) {
+        var _a;
+        (_a = this.terria.analytics) === null || _a === void 0 ? void 0 : _a.logEvent(Category.search, SearchAction.gazetteer, searchText);
+    }
 }
+Object.defineProperty(AustralianGazetteerSearchProvider, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "australian-gazetteer-search-provider"
+});
+export default AustralianGazetteerSearchProvider;
 //# sourceMappingURL=AustralianGazetteerSearchProvider.js.map

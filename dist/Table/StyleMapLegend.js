@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { computed } from "mobx";
+import { computed, makeObservable } from "mobx";
 import isDefined from "../Core/isDefined";
 import createStratumInstance from "../Models/Definition/createStratumInstance";
 import LoadableStratum from "../Models/Definition/LoadableStratum";
@@ -12,10 +12,31 @@ import LegendTraits, { LegendItemTraits } from "../Traits/TraitsClasses/LegendTr
 export class StyleMapLegend extends LoadableStratum(LegendTraits) {
     constructor(catalogItem, styleMap, getPreview, legendItemOverrides = {}) {
         super();
-        this.catalogItem = catalogItem;
-        this.styleMap = styleMap;
-        this.getPreview = getPreview;
-        this.legendItemOverrides = legendItemOverrides;
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogItem
+        });
+        Object.defineProperty(this, "styleMap", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: styleMap
+        });
+        Object.defineProperty(this, "getPreview", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: getPreview
+        });
+        Object.defineProperty(this, "legendItemOverrides", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: legendItemOverrides
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(newModel) {
         return new StyleMapLegend(newModel, this.styleMap, this.getPreview, this.legendItemOverrides);

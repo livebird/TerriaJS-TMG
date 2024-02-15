@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, computed, isObservableArray, runInAction, toJS } from "mobx";
+import { action, computed, isObservableArray, runInAction, toJS, makeObservable, override } from "mobx";
 import Mustache from "mustache";
 import AsyncLoader from "../Core/AsyncLoader";
 import isDefined from "../Core/isDefined";
@@ -18,12 +18,23 @@ import MappableMixin from "./MappableMixin";
 import ReferenceMixin from "./ReferenceMixin";
 function CatalogMemberMixin(Base) {
     class CatalogMemberMixin extends AccessControlMixin(Base) {
-        constructor() {
-            super(...arguments);
+        constructor(...args) {
+            super(...args);
             // The names of items in the CatalogMember's info array that contain details of the source of this CatalogMember's data.
             // This should be overridden by children of this class. For an example see the WebMapServiceCatalogItem
-            this._sourceInfoItemNames = undefined;
-            this._metadataLoader = new AsyncLoader(this.forceLoadMetadata.bind(this));
+            Object.defineProperty(this, "_sourceInfoItemNames", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: undefined
+            });
+            Object.defineProperty(this, "_metadataLoader", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: new AsyncLoader(this.forceLoadMetadata.bind(this))
+            });
+            makeObservable(this);
         }
         get typeName() {
             return;
@@ -82,9 +93,9 @@ function CatalogMemberMixin(Base) {
             return super.nameInCatalog || this.name;
         }
         get nameSortKey() {
-            var parts = (this.nameInCatalog || "").split(/(\d+)/);
+            const parts = (this.nameInCatalog || "").split(/(\d+)/);
             return parts.map(function (part) {
-                var parsed = parseInt(part, 10);
+                const parsed = parseInt(part, 10);
                 if (parsed === parsed) {
                     return parsed;
                 }
@@ -171,10 +182,10 @@ function CatalogMemberMixin(Base) {
         computed
     ], CatalogMemberMixin.prototype, "inWorkbench", null);
     __decorate([
-        computed
+        override
     ], CatalogMemberMixin.prototype, "name", null);
     __decorate([
-        computed
+        override
     ], CatalogMemberMixin.prototype, "nameInCatalog", null);
     __decorate([
         computed

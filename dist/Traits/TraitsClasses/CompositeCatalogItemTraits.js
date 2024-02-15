@@ -13,7 +13,12 @@ import MappableTraits from "./MappableTraits";
 export default class CompositeCatalogItemTraits extends mixTraits(MappableTraits, CatalogMemberTraits, LegendOwnerTraits) {
     constructor() {
         super(...arguments);
-        this.members = [];
+        Object.defineProperty(this, "members", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
     }
 }
 __decorate([

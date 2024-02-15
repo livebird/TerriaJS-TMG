@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import isDefined from "../../Core/isDefined";
 import { RawButton } from "../../Styled/Button";
@@ -19,22 +20,10 @@ export const Panel = (props) => {
         if (!props.onToggle || !props.onToggle(newIsOpen))
             setIsOpen(newIsOpen);
     };
-    return props.title && props.collapsible ? (React.createElement(Wrapper, { className: props.className },
-        React.createElement(CollapsibleTitleBar, { onClick: toggleOpen, fullWidth: true, isOpen: isOpen },
-            props.icon !== undefined ? (React.createElement(Icon, { glyph: props.icon, styledWidth: "16px", styledHeight: "16px" })) : null,
-            React.createElement(Title, null, props.title),
-            React.createElement(CollapseIcon, { isOpen: isOpen })),
-        isOpen ? React.createElement(Content, null, props.children) : null)) : (React.createElement(Wrapper, { className: props.className },
-        props.title !== undefined && (React.createElement(TitleBar, null,
-            props.icon !== undefined ? (React.createElement(Icon, { glyph: props.icon, styledWidth: "16px", styledHeight: "16px" })) : null,
-            React.createElement(Title, null, props.title),
-            props.menuComponent)),
-        React.createElement(Content, null, props.children)));
+    return props.title && props.collapsible ? (_jsxs(Wrapper, { className: props.className, children: [_jsxs(CollapsibleTitleBar, { onClick: toggleOpen, fullWidth: true, isOpen: isOpen, children: [props.icon !== undefined ? (_jsx(Icon, { glyph: props.icon, styledWidth: "16px", styledHeight: "16px" })) : null, _jsx(Title, { children: props.title }), _jsx(CollapseIcon, { isOpen: isOpen })] }), isOpen ? _jsx(Content, { children: props.children }) : null] })) : (_jsxs(Wrapper, { className: props.className, children: [props.title !== undefined && (_jsxs(TitleBar, { children: [props.icon !== undefined ? (_jsx(Icon, { glyph: props.icon, styledWidth: "16px", styledHeight: "16px" })) : null, _jsx(Title, { children: props.title }), props.menuComponent] })), _jsx(Content, { children: props.children })] }));
 };
 /** Simple PanelButton - this mimics style of CollapsibleTitleBar */
-export const PanelButton = ({ onClick, title }) => (React.createElement(Wrapper, null,
-    React.createElement(CollapsibleTitleBar, { onClick: onClick, fullWidth: true, isOpen: false, activeStyles: true },
-        React.createElement(Title, { css: { textAlign: "center" } }, title))));
+export const PanelButton = ({ onClick, title }) => (_jsx(Wrapper, { children: _jsx(CollapsibleTitleBar, { onClick: onClick, fullWidth: true, isOpen: false, activeStyles: true, children: _jsx(Title, { css: { textAlign: "center" }, children: title }) }) }));
 const Wrapper = styled.div `
   background-color: ${(p) => p.theme.darkWithOverlay};
   margin: 10px 5px 0px 5px;

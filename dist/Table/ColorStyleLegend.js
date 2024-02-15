@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { computed } from "mobx";
+import { computed, makeObservable } from "mobx";
 import isDefined from "../Core/isDefined";
 import ConstantColorMap from "../Map/ColorMap/ConstantColorMap";
 import ContinuousColorMap from "../Map/ColorMap/ContinuousColorMap";
@@ -22,8 +22,19 @@ export class ColorStyleLegend extends LoadableStratum(LegendTraits) {
      */
     constructor(catalogItem, legendItemOverrides = {}) {
         super();
-        this.catalogItem = catalogItem;
-        this.legendItemOverrides = legendItemOverrides;
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogItem
+        });
+        Object.defineProperty(this, "legendItemOverrides", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: legendItemOverrides
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(newModel) {
         return new ColorStyleLegend(newModel);
@@ -50,12 +61,13 @@ export class ColorStyleLegend extends LoadableStratum(LegendTraits) {
     }
     /** Add column title as legend title if showing a Discrete or Enum ColorMap */
     get title() {
+        var _a, _b;
         if (this.oldLegendTraits.title)
             return this.oldLegendTraits.title;
         if (this.tableStyle.colorMap instanceof ContinuousColorMap ||
             this.tableStyle.colorMap instanceof DiscreteColorMap ||
             this.tableStyle.colorMap instanceof EnumColorMap)
-            return this.tableStyle.title;
+            return (_b = (_a = this.tableStyle.colorColumn) === null || _a === void 0 ? void 0 : _a.title) !== null && _b !== void 0 ? _b : this.tableStyle.title;
     }
     get items() {
         // This is a bit dodgy - but should be fine until we deprecate LegendTraits in TableColorStyleTraits

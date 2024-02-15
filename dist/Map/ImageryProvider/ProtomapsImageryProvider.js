@@ -9,21 +9,20 @@ import bbox from "@turf/bbox";
 import booleanIntersects from "@turf/boolean-intersects";
 import circle from "@turf/circle";
 import i18next from "i18next";
-import { cloneDeep } from "lodash-es";
-import { action, observable, runInAction } from "mobx";
-import { Labelers, LineSymbolizer, painter, PmtilesSource, TileCache, View, ZxySource } from "protomaps";
+import { cloneDeep, isEmpty } from "lodash-es";
+import { action, makeObservable, observable, runInAction } from "mobx";
+import { Labelers, LineSymbolizer, PmtilesSource, TileCache, View, ZxySource, painter } from "protomaps";
 import Cartographic from "terriajs-cesium/Source/Core/Cartographic";
 import Credit from "terriajs-cesium/Source/Core/Credit";
-import defaultValue from "terriajs-cesium/Source/Core/defaultValue";
 import DeveloperError from "terriajs-cesium/Source/Core/DeveloperError";
 import CesiumEvent from "terriajs-cesium/Source/Core/Event";
 import CesiumMath from "terriajs-cesium/Source/Core/Math";
 import Rectangle from "terriajs-cesium/Source/Core/Rectangle";
 import WebMercatorTilingScheme from "terriajs-cesium/Source/Core/WebMercatorTilingScheme";
+import defaultValue from "terriajs-cesium/Source/Core/defaultValue";
 import ImageryLayerFeatureInfo from "terriajs-cesium/Source/Scene/ImageryLayerFeatureInfo";
-import filterOutUndefined from "../../Core/filterOutUndefined";
-import isDefined from "../../Core/isDefined";
 import TerriaError from "../../Core/TerriaError";
+import isDefined from "../../Core/isDefined";
 import { FEATURE_ID_PROP as GEOJSON_FEATURE_ID_PROP, toFeatureCollection } from "../../ModelMixins/GeojsonMixin";
 const geojsonvt = require("geojson-vt").default;
 /** Buffer (in pixels) used when rendering (and generating - through geojson-vt) vector tiles */
@@ -39,6 +38,28 @@ export const GEOJSON_SOURCE_LAYER_NAME = "layer";
 const LAYER_NAME_PROP = "__LAYERNAME";
 export class GeojsonSource {
     constructor(url) {
+        /** Data object from Options */
+        Object.defineProperty(this, "data", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        /** Resolved geojsonObject (if applicable) */
+        Object.defineProperty(this, "geojsonObject", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        /** Geojson-vt tileIndex (if applicable) */
+        Object.defineProperty(this, "tileIndex", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
         this.data = url;
         if (!(typeof url === "string")) {
             this.geojsonObject = url;
@@ -66,7 +87,7 @@ export class GeojsonSource {
         }
         // request a particular tile
         const tile = (await this.tileIndex).getTile(c.z, c.x, c.y);
-        let result = new Map();
+        const result = new Map();
         const scale = tileSize / geojsonvtExtent;
         if (tile && tile.features && tile.features.length > 0) {
             result.set(GEOJSON_SOURCE_LAYER_NAME, 
@@ -75,7 +96,7 @@ export class GeojsonSource {
                 let transformedGeom = [];
                 let numVertices = 0;
                 // Calculate bbox
-                let bbox = {
+                const bbox = {
                     minX: Infinity,
                     minY: Infinity,
                     maxX: -Infinity,
@@ -143,23 +164,219 @@ __decorate([
 ], GeojsonSource.prototype, "geojsonObject", void 0);
 export default class ProtomapsImageryProvider {
     constructor(options) {
-        this.errorEvent = new CesiumEvent();
-        this.ready = true;
+        var _a;
+        Object.defineProperty(this, "terria", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        // Imagery provider properties
+        Object.defineProperty(this, "tilingScheme", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "tileWidth", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "tileHeight", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "minimumLevel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "maximumLevel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "rectangle", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "errorEvent", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new CesiumEvent()
+        });
+        Object.defineProperty(this, "ready", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "credit", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        /** This is only used for Terria feature picking - as we track ImageryProvider feature picking by url (See PickedFeatures/Cesium._attachProviderCoordHooks). This URL is never called.
+         * This is set using the `id` property in the constructor options
+         */
+        Object.defineProperty(this, "url", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         // Set values to please poor cesium types
-        this.defaultNightAlpha = undefined;
-        this.defaultDayAlpha = undefined;
-        this.hasAlphaChannel = true;
-        this.defaultAlpha = undefined;
-        this.defaultBrightness = undefined;
-        this.defaultContrast = undefined;
-        this.defaultGamma = undefined;
-        this.defaultHue = undefined;
-        this.defaultSaturation = undefined;
-        this.defaultMagnificationFilter = undefined;
-        this.defaultMinificationFilter = undefined;
-        this.proxy = undefined;
-        this.readyPromise = Promise.resolve(true);
-        this.tileDiscardPolicy = undefined;
+        Object.defineProperty(this, "defaultNightAlpha", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "defaultDayAlpha", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "hasAlphaChannel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "defaultAlpha", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "defaultBrightness", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "defaultContrast", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "defaultGamma", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "defaultHue", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "defaultSaturation", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "defaultMagnificationFilter", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "defaultMinificationFilter", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "proxy", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "readyPromise", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: Promise.resolve(true)
+        });
+        Object.defineProperty(this, "tileDiscardPolicy", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        // Protomaps properties
+        /** Data object from constructor options (this is transformed into `source`) */
+        Object.defineProperty(this, "data", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "labelers", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "view", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "processPickedFeatures", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "maximumNativeZoom", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "idProperty", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "source", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "paintRules", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "labelRules", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
         this.data = options.data;
         this.terria = options.terria;
         this.tilingScheme = new WebMercatorTilingScheme();
@@ -167,6 +384,7 @@ export default class ProtomapsImageryProvider {
         this.tileHeight = tileSize;
         this.minimumLevel = defaultValue(options.minimumZoom, 0);
         this.maximumLevel = defaultValue(options.maximumZoom, 24);
+        this.maximumNativeZoom = defaultValue(options.maximumNativeZoom, this.maximumLevel);
         this.rectangle = isDefined(options.rectangle)
             ? Rectangle.intersection(options.rectangle, this.tilingScheme.rectangle) || this.tilingScheme.rectangle
             : this.tilingScheme.rectangle;
@@ -182,21 +400,23 @@ export default class ProtomapsImageryProvider {
             }));
         }
         this.errorEvent = new CesiumEvent();
+        this.url = options.id;
         this.ready = true;
         this.credit =
-            typeof options.credit == "string"
+            typeof options.credit === "string"
                 ? new Credit(options.credit)
                 : options.credit;
         // Protomaps
         this.paintRules = options.paintRules;
         this.labelRules = options.labelRules;
+        this.idProperty = (_a = options.idProperty) !== null && _a !== void 0 ? _a : "FID";
         // Generate protomaps source based on this.data
         // - URL of pmtiles, geojson or pbf files
         if (typeof this.data === "string") {
             if (this.data.endsWith(".pmtiles")) {
                 this.source = new PmtilesSource(this.data, false);
-                let cache = new TileCache(this.source, 1024);
-                this.view = new View(cache, 14, 2);
+                const cache = new TileCache(this.source, 1024);
+                this.view = new View(cache, this.maximumNativeZoom, 2);
             }
             else if (this.data.endsWith(".json") ||
                 this.data.endsWith(".geojson")) {
@@ -204,8 +424,8 @@ export default class ProtomapsImageryProvider {
             }
             else {
                 this.source = new ZxySource(this.data, false);
-                let cache = new TileCache(this.source, 1024);
-                this.view = new View(cache, 14, 2);
+                const cache = new TileCache(this.source, 1024);
+                this.view = new View(cache, this.maximumNativeZoom, 2);
             }
         }
         // Source object
@@ -224,8 +444,9 @@ export default class ProtomapsImageryProvider {
         if (!labelersCanvasContext)
             throw TerriaError.from("Failed to create labelersCanvasContext");
         this.labelers = new Labelers(labelersCanvasContext, this.labelRules, 16, () => undefined);
+        this.processPickedFeatures = options.processPickedFeatures;
     }
-    getTileCredits(x, y, level) {
+    getTileCredits(_x, _y, _level) {
         return [];
     }
     async requestImage(x, y, level) {
@@ -266,7 +487,7 @@ export default class ProtomapsImageryProvider {
             return;
         const tileMap = new Map().set("", [tile]);
         this.labelers.add(coords.z, tileMap);
-        let labelData = this.labelers.getIndex(tile.z);
+        const labelData = this.labelers.getIndex(tile.z);
         const bbox = {
             minX: 256 * coords.x - BUF,
             minY: 256 * coords.y - BUF,
@@ -283,18 +504,19 @@ export default class ProtomapsImageryProvider {
             painter(ctx, coords.z, tileMap, labelData, this.paintRules, bbox, origin, false, "");
     }
     async pickFeatures(x, y, level, longitude, latitude) {
+        const featureInfos = [];
         // If view is set - this means we are using actual vector tiles (that is not GeoJson object)
         // So we use this.view.queryFeatures
         if (this.view) {
             // Get list of vector tile layers which are rendered
             const renderedLayers = [...this.paintRules, ...this.labelRules].map((r) => r.dataLayer);
-            return filterOutUndefined(this.view
+            this.view
                 .queryFeatures(CesiumMath.toDegrees(longitude), CesiumMath.toDegrees(latitude), level)
-                .map((f) => {
+                .forEach((f) => {
                 var _a;
                 // Only create FeatureInfo for visible features with properties
                 if (!f.feature.props ||
-                    f.feature.props === {} ||
+                    isEmpty(f.feature.props) ||
                     !renderedLayers.includes(f.layerName))
                     return;
                 const featureInfo = new ImageryLayerFeatureInfo();
@@ -303,15 +525,17 @@ export default class ProtomapsImageryProvider {
                 featureInfo.position = new Cartographic(longitude, latitude);
                 featureInfo.configureDescriptionFromProperties(f.feature.props);
                 featureInfo.configureNameFromProperties(f.feature.props);
-                return featureInfo;
-            }));
+                featureInfos.push(featureInfo);
+            });
             // No view is set and we have geoJSON object
             // So we pick features manually
         }
         else if (this.source instanceof GeojsonSource &&
             this.source.geojsonObject) {
+            // Get rough meters per pixel (at equator) for given zoom level
+            const zoomMeters = 156543 / Math.pow(2, level);
             // Create circle with 10 pixel radius to pick features
-            const buffer = circle([CesiumMath.toDegrees(longitude), CesiumMath.toDegrees(latitude)], 10 * this.terria.mainViewer.scale, {
+            const buffer = circle([CesiumMath.toDegrees(longitude), CesiumMath.toDegrees(latitude)], 10 * zoomMeters, {
                 steps: 10,
                 units: "meters"
             });
@@ -322,10 +546,10 @@ export default class ProtomapsImageryProvider {
             }));
             const bufferBbox = bbox(buffer);
             // Get array of all features
-            let features = this.source.geojsonObject.features;
+            const geojsonFeatures = this.source.geojsonObject.features;
             const pickedFeatures = [];
-            for (let index = 0; index < features.length; index++) {
-                const feature = features[index];
+            for (let index = 0; index < geojsonFeatures.length; index++) {
+                const feature = geojsonFeatures[index];
                 if (!feature.bbox) {
                     feature.bbox = bbox(feature);
                 }
@@ -348,7 +572,7 @@ export default class ProtomapsImageryProvider {
                 }
             }
             // Convert pickedFeatures to ImageryLayerFeatureInfos
-            return pickedFeatures.map((f) => {
+            pickedFeatures.forEach((f) => {
                 const featureInfo = new ImageryLayerFeatureInfo();
                 featureInfo.data = f;
                 featureInfo.properties = f.properties;
@@ -359,13 +583,16 @@ export default class ProtomapsImageryProvider {
                 }
                 featureInfo.configureDescriptionFromProperties(f.properties);
                 featureInfo.configureNameFromProperties(f.properties);
-                return featureInfo;
+                featureInfos.push(featureInfo);
             });
         }
-        return [];
+        if (this.processPickedFeatures) {
+            return await this.processPickedFeatures(featureInfos);
+        }
+        return featureInfos;
     }
     clone(options) {
-        var _a, _b, _c, _d, _e, _f, _g;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
         let data = options === null || options === void 0 ? void 0 : options.data;
         // To clone data/source, we want to minimize any unnecessary processing
         if (!data) {
@@ -397,14 +624,16 @@ export default class ProtomapsImageryProvider {
             return;
         return new ProtomapsImageryProvider({
             terria: (_a = options === null || options === void 0 ? void 0 : options.terria) !== null && _a !== void 0 ? _a : this.terria,
+            id: (_b = options === null || options === void 0 ? void 0 : options.id) !== null && _b !== void 0 ? _b : this.url,
             data,
-            minimumZoom: (_b = options === null || options === void 0 ? void 0 : options.minimumZoom) !== null && _b !== void 0 ? _b : this.minimumLevel,
-            maximumZoom: (_c = options === null || options === void 0 ? void 0 : options.maximumZoom) !== null && _c !== void 0 ? _c : this.maximumLevel,
-            maximumNativeZoom: options === null || options === void 0 ? void 0 : options.maximumNativeZoom,
-            rectangle: (_d = options === null || options === void 0 ? void 0 : options.rectangle) !== null && _d !== void 0 ? _d : this.rectangle,
-            credit: (_e = options === null || options === void 0 ? void 0 : options.credit) !== null && _e !== void 0 ? _e : this.credit,
-            paintRules: (_f = options === null || options === void 0 ? void 0 : options.paintRules) !== null && _f !== void 0 ? _f : this.paintRules,
-            labelRules: (_g = options === null || options === void 0 ? void 0 : options.labelRules) !== null && _g !== void 0 ? _g : this.labelRules
+            minimumZoom: (_c = options === null || options === void 0 ? void 0 : options.minimumZoom) !== null && _c !== void 0 ? _c : this.minimumLevel,
+            maximumZoom: (_d = options === null || options === void 0 ? void 0 : options.maximumZoom) !== null && _d !== void 0 ? _d : this.maximumLevel,
+            maximumNativeZoom: (_e = options === null || options === void 0 ? void 0 : options.maximumNativeZoom) !== null && _e !== void 0 ? _e : this.maximumNativeZoom,
+            rectangle: (_f = options === null || options === void 0 ? void 0 : options.rectangle) !== null && _f !== void 0 ? _f : this.rectangle,
+            credit: (_g = options === null || options === void 0 ? void 0 : options.credit) !== null && _g !== void 0 ? _g : this.credit,
+            paintRules: (_h = options === null || options === void 0 ? void 0 : options.paintRules) !== null && _h !== void 0 ? _h : this.paintRules,
+            labelRules: (_j = options === null || options === void 0 ? void 0 : options.labelRules) !== null && _j !== void 0 ? _j : this.labelRules,
+            processPickedFeatures: (_k = options === null || options === void 0 ? void 0 : options.processPickedFeatures) !== null && _k !== void 0 ? _k : this.processPickedFeatures
         });
     }
     /** Clones ImageryProvider, and sets paintRules to highlight picked features */
@@ -419,7 +648,7 @@ export default class ProtomapsImageryProvider {
             layerName = GEOJSON_SOURCE_LAYER_NAME;
         }
         else {
-            featureProp = "FID";
+            featureProp = this.idProperty;
             layerName = (_b = (_a = feature.properties) === null || _a === void 0 ? void 0 : _a[LAYER_NAME_PROP]) === null || _b === void 0 ? void 0 : _b.getValue();
         }
         const featureId = (_d = (_c = feature.properties) === null || _c === void 0 ? void 0 : _c[featureProp]) === null || _d === void 0 ? void 0 : _d.getValue();

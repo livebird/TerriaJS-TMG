@@ -11,7 +11,24 @@ import LegendTraits from "./LegendTraits";
 export default class LegendOwnerTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.hideLegendInWorkbench = false;
+        Object.defineProperty(this, "legends", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "legendBackgroundColor", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "hideLegendInWorkbench", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
     }
 }
 __decorate([

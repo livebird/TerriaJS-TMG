@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { computed, toJS } from "mobx";
+import { computed, toJS, makeObservable, override } from "mobx";
 import { createTransformer } from "mobx-utils";
 import filterOutUndefined from "../../../Core/filterOutUndefined";
 import isDefined from "../../../Core/isDefined";
@@ -29,13 +29,14 @@ import CatalogMemberFactory from "../CatalogMemberFactory";
 import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
 const magdaRecordStratum = "magda-record";
 StratumOrder.addDefaultStratum(magdaRecordStratum);
-export default class MagdaReference extends AccessControlMixin(UrlMixin(ReferenceMixin(CreateModel(MagdaReferenceTraits)))) {
-    constructor(id, terria, sourceReference, strata) {
-        super(id, terria, sourceReference, strata);
-        this.setTrait(CommonStrata.defaults, "distributionFormats", MagdaReference.defaultDistributionFormats);
-    }
+class MagdaReference extends AccessControlMixin(UrlMixin(ReferenceMixin(CreateModel(MagdaReferenceTraits)))) {
     get type() {
         return MagdaReference.type;
+    }
+    constructor(id, terria, sourceReference, strata) {
+        super(id, terria, sourceReference, strata);
+        makeObservable(this);
+        this.setTrait(CommonStrata.defaults, "distributionFormats", MagdaReference.defaultDistributionFormats);
     }
     get registryUri() {
         const uri = this.uri;
@@ -49,8 +50,13 @@ export default class MagdaReference extends AccessControlMixin(UrlMixin(Referenc
             this.distributionFormats.map(prepareDistributionFormat));
     }
     get accessType() {
-        const access = getAccessTypeFromMagdaRecord(this.magdaRecord);
-        return access || super.accessType;
+        var _a;
+        return (_a = this.magdaRecordAcessType) !== null && _a !== void 0 ? _a : super.accessType;
+    }
+    get magdaRecordAcessType() {
+        return this.magdaRecord
+            ? getAccessTypeFromMagdaRecord(this.magdaRecord)
+            : undefined;
     }
     async forceLoadReference(previousTarget) {
         const existingRecord = this.magdaRecord
@@ -85,7 +91,7 @@ export default class MagdaReference extends AccessControlMixin(UrlMixin(Referenc
     static overrideRecordAspects(record, override) {
         if (record && override && isJsonObject(override.aspects)) {
             if (isJsonObject(record.aspects)) {
-                for (let key in override.aspects)
+                for (const key in override.aspects)
                     record.aspects[key] = override.aspects[key];
             }
             else {
@@ -467,82 +473,93 @@ export default class MagdaReference extends AccessControlMixin(UrlMixin(Referenc
         return recordUri;
     }
 }
-MagdaReference.defaultDistributionFormats = [
-    createStratumInstance(MagdaDistributionFormatTraits, {
-        id: "WMS",
-        formatRegex: "^wms$",
-        definition: {
-            type: "wms"
-        }
-    }),
-    createStratumInstance(MagdaDistributionFormatTraits, {
-        id: "WMS-GROUP",
-        formatRegex: "^wms-group$",
-        definition: {
-            type: "wms-group"
-        }
-    }),
-    createStratumInstance(MagdaDistributionFormatTraits, {
-        id: "EsriMapServer",
-        formatRegex: "^esri (mapserver|map server|rest|tiled map service)$",
-        urlRegex: "MapServer",
-        definition: {
-            type: "esri-mapServer"
-        }
-    }),
-    createStratumInstance(MagdaDistributionFormatTraits, {
-        id: "CSV",
-        formatRegex: "^csv(-geo-)?",
-        definition: {
-            type: "csv"
-        }
-    }),
-    createStratumInstance(MagdaDistributionFormatTraits, {
-        id: "CZML",
-        formatRegex: "^czml$",
-        definition: {
-            type: "czml"
-        }
-    }),
-    createStratumInstance(MagdaDistributionFormatTraits, {
-        id: "KML",
-        formatRegex: "^km[lz]$",
-        definition: {
-            type: "kml"
-        }
-    }),
-    createStratumInstance(MagdaDistributionFormatTraits, {
-        id: "GeoJSON",
-        formatRegex: "^geojson$",
-        definition: {
-            type: "geojson"
-        }
-    }),
-    createStratumInstance(MagdaDistributionFormatTraits, {
-        id: "WFS",
-        formatRegex: "^wfs$",
-        definition: {
-            type: "wfs"
-        }
-    }),
-    createStratumInstance(MagdaDistributionFormatTraits, {
-        id: "EsriFeatureServer",
-        formatRegex: "ESRI (MAPSERVER|FEATURESERVER)",
-        urlRegex: "FeatureServer$|FeatureServer/$",
-        definition: {
-            type: "esri-featureServer-group"
-        }
-    }),
-    createStratumInstance(MagdaDistributionFormatTraits, {
-        id: "EsriFeatureServer",
-        formatRegex: "ESRI (MAPSERVER|FEATURESERVER)",
-        urlRegex: "FeatureServer/d",
-        definition: {
-            type: "esri-featureServer"
-        }
-    })
-];
-MagdaReference.type = "magda";
+Object.defineProperty(MagdaReference, "defaultDistributionFormats", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: [
+        createStratumInstance(MagdaDistributionFormatTraits, {
+            id: "WMS",
+            formatRegex: "^wms$",
+            definition: {
+                type: "wms"
+            }
+        }),
+        createStratumInstance(MagdaDistributionFormatTraits, {
+            id: "WMS-GROUP",
+            formatRegex: "^wms-group$",
+            definition: {
+                type: "wms-group"
+            }
+        }),
+        createStratumInstance(MagdaDistributionFormatTraits, {
+            id: "EsriMapServer",
+            formatRegex: "^esri (mapserver|map server|rest|tiled map service)$",
+            urlRegex: "MapServer",
+            definition: {
+                type: "esri-mapServer"
+            }
+        }),
+        createStratumInstance(MagdaDistributionFormatTraits, {
+            id: "CSV",
+            formatRegex: "^csv(-geo-)?",
+            definition: {
+                type: "csv"
+            }
+        }),
+        createStratumInstance(MagdaDistributionFormatTraits, {
+            id: "CZML",
+            formatRegex: "^czml$",
+            definition: {
+                type: "czml"
+            }
+        }),
+        createStratumInstance(MagdaDistributionFormatTraits, {
+            id: "KML",
+            formatRegex: "^km[lz]$",
+            definition: {
+                type: "kml"
+            }
+        }),
+        createStratumInstance(MagdaDistributionFormatTraits, {
+            id: "GeoJSON",
+            formatRegex: "^geojson$",
+            definition: {
+                type: "geojson"
+            }
+        }),
+        createStratumInstance(MagdaDistributionFormatTraits, {
+            id: "WFS",
+            formatRegex: "^wfs$",
+            definition: {
+                type: "wfs"
+            }
+        }),
+        createStratumInstance(MagdaDistributionFormatTraits, {
+            id: "EsriFeatureServer",
+            formatRegex: "ESRI (MAPSERVER|FEATURESERVER)",
+            urlRegex: "FeatureServer$|FeatureServer/$",
+            definition: {
+                type: "esri-featureServer-group"
+            }
+        }),
+        createStratumInstance(MagdaDistributionFormatTraits, {
+            id: "EsriFeatureServer",
+            formatRegex: "ESRI (MAPSERVER|FEATURESERVER)",
+            urlRegex: "FeatureServer/d",
+            definition: {
+                type: "esri-featureServer"
+            }
+        })
+    ]
+});
+Object.defineProperty(MagdaReference, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "magda"
+});
+export default MagdaReference;
 __decorate([
     computed
 ], MagdaReference.prototype, "registryUri", null);
@@ -550,10 +567,13 @@ __decorate([
     computed
 ], MagdaReference.prototype, "preparedDistributionFormats", null);
 __decorate([
-    computed
+    override
 ], MagdaReference.prototype, "accessType", null);
 __decorate([
     computed
+], MagdaReference.prototype, "magdaRecordAcessType", null);
+__decorate([
+    override
 ], MagdaReference.prototype, "cacheDuration", null);
 const prepareDistributionFormat = createTransformer((format) => {
     return {
@@ -565,9 +585,21 @@ const prepareDistributionFormat = createTransformer((format) => {
     };
 });
 function getAccessTypeFromMagdaRecord(magdaRecord) {
+    var _a, _b;
     const record = toJS(magdaRecord);
-    const accessControl = record && record.aspects && record.aspects["esri-access-control"];
-    const access = accessControl && accessControl.access;
-    return access;
+    // Magda V2 access control has higher priority.
+    if ((_a = record === null || record === void 0 ? void 0 : record.aspects) === null || _a === void 0 ? void 0 : _a["access-control"]) {
+        return record.aspects["access-control"].orgUnitId
+            ? record.aspects["access-control"].constraintExemption
+                ? "public"
+                : "non-public"
+            : "public";
+    }
+    else if ((_b = record === null || record === void 0 ? void 0 : record.aspects) === null || _b === void 0 ? void 0 : _b["esri-access-control"]) {
+        return record.aspects["esri-access-control"].access;
+    }
+    else {
+        return "public";
+    }
 }
 //# sourceMappingURL=MagdaReference.js.map

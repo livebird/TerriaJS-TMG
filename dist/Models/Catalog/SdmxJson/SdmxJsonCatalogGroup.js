@@ -6,7 +6,7 @@ import UrlMixin from "../../../ModelMixins/UrlMixin";
 import SdmxCatalogGroupTraits from "../../../Traits/TraitsClasses/SdmxCatalogGroupTraits";
 import CreateModel from "../../Definition/CreateModel";
 import { SdmxServerStratum } from "./SdmxJsonServerStratum";
-export default class SdmxCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(SdmxCatalogGroupTraits)))) {
+class SdmxCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(SdmxCatalogGroupTraits)))) {
     get type() {
         return SdmxCatalogGroup.type;
     }
@@ -25,5 +25,11 @@ export default class SdmxCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberM
         }
     }
 }
-SdmxCatalogGroup.type = "sdmx-group";
+Object.defineProperty(SdmxCatalogGroup, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "sdmx-group"
+});
+export default SdmxCatalogGroup;
 //# sourceMappingURL=SdmxJsonCatalogGroup.js.map

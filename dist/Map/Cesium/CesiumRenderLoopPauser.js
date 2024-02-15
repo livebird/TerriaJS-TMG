@@ -5,20 +5,85 @@ import Matrix4 from "terriajs-cesium/Source/Core/Matrix4";
 import TaskProcessor from "terriajs-cesium/Source/Core/TaskProcessor";
 import loadWithXhr from "../../Core/loadWithXhr";
 export default class CesiumRenderLoopPauser {
+    /**
+     * Gets or sets whether the render loop is currently paused.
+     * @type {boolean}
+     */
+    get renderingIsPaused() {
+        return !this.cesiumWidget.useDefaultRenderLoop;
+    }
+    set renderingIsPaused(value) {
+        this.cesiumWidget.useDefaultRenderLoop = !value;
+    }
     constructor(cesiumWidget, postRenderCallback) {
-        this.cesiumWidget = cesiumWidget;
-        this.postRenderCallback = postRenderCallback;
+        Object.defineProperty(this, "cesiumWidget", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: cesiumWidget
+        });
+        Object.defineProperty(this, "postRenderCallback", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: postRenderCallback
+        });
         /**
          * Gets or sets whether to output info to the console when starting and stopping rendering loop.
          * @type {boolean}
          */
-        this.verboseRendering = false;
-        this._lastCameraViewMatrix = new Matrix4();
-        this._lastCameraMoveTime = -Number.MAX_VALUE;
+        Object.defineProperty(this, "verboseRendering", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "_boundNotifyRepaintRequired", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_wheelEvent", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_removePostRenderListener", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_lastCameraViewMatrix", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new Matrix4()
+        });
+        Object.defineProperty(this, "_lastCameraMoveTime", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: -Number.MAX_VALUE
+        });
+        Object.defineProperty(this, "_originalLoadWithXhr", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_originalScheduleTask", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         const scene = this.cesiumWidget.scene;
         this._removePostRenderListener = scene.postRender.addEventListener(this.postRender.bind(this));
         this._boundNotifyRepaintRequired = this.notifyRepaintRequired.bind(this);
-        var canvas = this.cesiumWidget.canvas;
+        const canvas = this.cesiumWidget.canvas;
         canvas.addEventListener("mousemove", this._boundNotifyRepaintRequired, false);
         canvas.addEventListener("mousedown", this._boundNotifyRepaintRequired, false);
         canvas.addEventListener("mouseup", this._boundNotifyRepaintRequired, false);
@@ -60,10 +125,11 @@ export default class CesiumRenderLoopPauser {
         this._originalScheduleTask = TaskProcessor.prototype.scheduleTask;
         const that = this;
         TaskProcessor.prototype.scheduleTask = function (parameters, transferableObjects) {
-            var result = that._originalScheduleTask.call(this, parameters, transferableObjects);
-            if (!defined(this._originalWorkerMessageSinkRepaint)) {
+            const result = that._originalScheduleTask.call(this, parameters, transferableObjects);
+            if (!defined(this._originalWorkerMessageSinkRepaint) &&
+                defined(this._worker.onmessage)) {
                 this._originalWorkerMessageSinkRepaint = this._worker.onmessage;
-                var taskProcessor = this;
+                const taskProcessor = this;
                 this._worker.onmessage = function (event) {
                     taskProcessor._originalWorkerMessageSinkRepaint(event);
                     if (that.isDestroyed()) {
@@ -78,16 +144,6 @@ export default class CesiumRenderLoopPauser {
             }
             return result;
         };
-    }
-    /**
-     * Gets or sets whether the render loop is currently paused.
-     * @type {boolean}
-     */
-    get renderingIsPaused() {
-        return !this.cesiumWidget.useDefaultRenderLoop;
-    }
-    set renderingIsPaused(value) {
-        this.cesiumWidget.useDefaultRenderLoop = !value;
     }
     destroy() {
         if (this._removePostRenderListener) {
@@ -139,7 +195,7 @@ export default class CesiumRenderLoopPauser {
         }
         const cameraMovedInLastSecond = now - this._lastCameraMoveTime < 1000;
         const surface = scene.globe._surface;
-        const terrainTilesWaiting = !surface._tileProvider.ready ||
+        const terrainTilesWaiting = !surface._tileProvider ||
             surface._tileLoadQueueHigh.length > 0 ||
             surface._tileLoadQueueMedium.length > 0 ||
             surface._tileLoadQueueLow.length > 0 ||

@@ -16,8 +16,47 @@ import TerriaError from "../Core/TerriaError";
  * Holds a camera's view parameters, expressed as a rectangular extent and/or as a camera position, direction,
  * and up vector.
  */
-export default class CameraView {
+class CameraView {
     constructor(rectangle, position, direction, up) {
+        /**
+         * Gets the rectangular extent of the view.  If {@link CameraView#position}, {@link CameraView#direction},
+         * and {@link CameraView#up} are specified, this property will be ignored for viewers that support those parameters
+         * (e.g. Cesium).  This property must always be supplied, however, for the benefit of viewers that do not understand
+         * these parameters (e.g. Leaflet).
+         */
+        Object.defineProperty(this, "rectangle", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        /**
+         * Gets the position of the camera in the Earth-centered Fixed frame.
+         */
+        Object.defineProperty(this, "position", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        /**
+         * Gets the look direction of the camera in the Earth-centered Fixed frame.
+         */
+        Object.defineProperty(this, "direction", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        /**
+         * Gets the up vector direction of the camera in the Earth-centered Fixed frame.
+         */
+        Object.defineProperty(this, "up", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         this.rectangle = Rectangle.clone(rectangle);
         if (position !== undefined || direction !== undefined || up !== undefined) {
             if (position === undefined ||
@@ -37,14 +76,14 @@ export default class CameraView {
             east: CesiumMath.toDegrees(this.rectangle.east),
             north: CesiumMath.toDegrees(this.rectangle.north)
         };
+        function vectorToJson(vector) {
+            return {
+                x: vector.x,
+                y: vector.y,
+                z: vector.z
+            };
+        }
         if (this.position && this.direction && this.up) {
-            function vectorToJson(vector) {
-                return {
-                    x: vector.x,
-                    y: vector.y,
-                    z: vector.z
-                };
-            }
             result.position = vectorToJson(this.position);
             result.direction = vectorToJson(this.direction);
             result.up = vectorToJson(this.up);
@@ -153,30 +192,36 @@ export default class CameraView {
  * @param headingPitchRange The offset of the camera from the target position.
  * @return The camera view.
  */
-CameraView.fromLookAt = function (targetPosition, headingPitchRange) {
-    const positionENU = offsetFromHeadingPitchRange(headingPitchRange.heading, -headingPitchRange.pitch, headingPitchRange.range, scratchPosition);
-    const directionENU = Cartesian3.normalize(Cartesian3.negate(positionENU, scratchDirection), scratchDirection);
-    const rightENU = Cartesian3.cross(directionENU, Cartesian3.UNIT_Z, scratchRight);
-    if (Cartesian3.magnitudeSquared(rightENU) < CesiumMath.EPSILON10) {
-        Cartesian3.clone(Cartesian3.UNIT_X, rightENU);
+Object.defineProperty(CameraView, "fromLookAt", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: function (targetPosition, headingPitchRange) {
+        const positionENU = offsetFromHeadingPitchRange(headingPitchRange.heading, -headingPitchRange.pitch, headingPitchRange.range, scratchPosition);
+        const directionENU = Cartesian3.normalize(Cartesian3.negate(positionENU, scratchDirection), scratchDirection);
+        const rightENU = Cartesian3.cross(directionENU, Cartesian3.UNIT_Z, scratchRight);
+        if (Cartesian3.magnitudeSquared(rightENU) < CesiumMath.EPSILON10) {
+            Cartesian3.clone(Cartesian3.UNIT_X, rightENU);
+        }
+        Cartesian3.normalize(rightENU, rightENU);
+        const upENU = Cartesian3.cross(rightENU, directionENU, scratchUp);
+        Cartesian3.normalize(upENU, upENU);
+        const targetCartesian = Ellipsoid.WGS84.cartographicToCartesian(targetPosition, scratchTarget);
+        const transform = Transforms.eastNorthUpToFixedFrame(targetCartesian, Ellipsoid.WGS84, scratchMatrix4);
+        const offsetECF = Matrix4.multiplyByPointAsVector(transform, positionENU, scratchOffset);
+        const position = Cartesian3.add(targetCartesian, offsetECF, new Cartesian3());
+        const direction = Cartesian3.normalize(Cartesian3.negate(offsetECF, new Cartesian3()), new Cartesian3());
+        const up = Matrix4.multiplyByPointAsVector(transform, upENU, new Cartesian3());
+        // Estimate a rectangle for this view.
+        const fieldOfViewHalfAngle = CesiumMath.toRadians(30);
+        const groundDistance = Math.tan(fieldOfViewHalfAngle) *
+            (headingPitchRange.range + targetPosition.height);
+        const angle = groundDistance / Ellipsoid.WGS84.minimumRadius;
+        const extent = new Rectangle(targetPosition.longitude - angle, targetPosition.latitude - angle, targetPosition.longitude + angle, targetPosition.latitude + angle);
+        return new CameraView(extent, position, direction, up);
     }
-    Cartesian3.normalize(rightENU, rightENU);
-    var upENU = Cartesian3.cross(rightENU, directionENU, scratchUp);
-    Cartesian3.normalize(upENU, upENU);
-    const targetCartesian = Ellipsoid.WGS84.cartographicToCartesian(targetPosition, scratchTarget);
-    const transform = Transforms.eastNorthUpToFixedFrame(targetCartesian, Ellipsoid.WGS84, scratchMatrix4);
-    const offsetECF = Matrix4.multiplyByPointAsVector(transform, positionENU, scratchOffset);
-    const position = Cartesian3.add(targetCartesian, offsetECF, new Cartesian3());
-    const direction = Cartesian3.normalize(Cartesian3.negate(offsetECF, new Cartesian3()), new Cartesian3());
-    const up = Matrix4.multiplyByPointAsVector(transform, upENU, new Cartesian3());
-    // Estimate a rectangle for this view.
-    const fieldOfViewHalfAngle = CesiumMath.toRadians(30);
-    const groundDistance = Math.tan(fieldOfViewHalfAngle) *
-        (headingPitchRange.range + targetPosition.height);
-    const angle = groundDistance / Ellipsoid.WGS84.minimumRadius;
-    const extent = new Rectangle(targetPosition.longitude - angle, targetPosition.latitude - angle, targetPosition.longitude + angle, targetPosition.latitude + angle);
-    return new CameraView(extent, position, direction, up);
-};
+});
+export default CameraView;
 function isVector(value) {
     return (isJsonObject(value) &&
         isJsonNumber(value.x) &&

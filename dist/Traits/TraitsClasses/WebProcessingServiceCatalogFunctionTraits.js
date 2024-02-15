@@ -11,8 +11,36 @@ import CatalogFunctionTraits from "./CatalogFunctionTraits";
 export default class WebProcessingServiceCatalogFunctionTraits extends mixTraits(CatalogFunctionTraits, UrlTraits) {
     constructor() {
         super(...arguments);
-        this.executeWithHttpGet = false;
-        this.forceConvertResultsToV8 = false;
+        Object.defineProperty(this, "executeWithHttpGet", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "storeSupported", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "statusSupported", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "identifier", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "forceConvertResultsToV8", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
     }
 }
 __decorate([

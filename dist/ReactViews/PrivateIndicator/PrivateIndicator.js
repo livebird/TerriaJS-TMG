@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
@@ -8,16 +9,13 @@ PrivateIndicator.propTypes = {
 };
 export default function PrivateIndicator(props) {
     const { t } = useTranslation();
-    return (React.createElement(IconWrapper, { marginRight: !props.inWorkbench, title: t("catalogItem.privateIndicatorTitle"), inWorkbench: props.inWorkbench, css: `
+    return (_jsx(IconWrapper, { marginRight: !props.inWorkbench, title: t("catalogItem.privateIndicatorTitle"), inWorkbench: props.inWorkbench, css: `
         margin-top: -1px;
-        ${(p) => p.inWorkbench && `margin-right: 2px;`}
-
         svg {
           width: 15px;
           height: 15px;
-          fill: ${(p) => p.inWorkbench ? p.theme.textLight : p.theme.colorPrimary};
+          fill: ${(p) => p.inWorkbench ? p.theme.textLight : p.theme.charcoalGrey};
         }
-      ` },
-        React.createElement(Icon, { glyph: Icon.GLYPHS.lock })));
+      `, children: _jsx(Icon, { glyph: Icon.GLYPHS.lock }) }));
 }
 //# sourceMappingURL=PrivateIndicator.js.map

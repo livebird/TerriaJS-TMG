@@ -70,6 +70,8 @@ function getProcessingInstructions(context) {
             const aElement = utils.createElement(node, index, node.data, children);
             // If external link and showExternalLinkWarning is true - replace with ExternalLinkWithWarning
             if (appendExternalLink && context.showExternalLinkWarning) {
+                /* TODO: Fix types */
+                /* eslint-disable-next-line react/no-children-prop */
                 return createElement(ExternalLinkWithWarning, {
                     attributes: aElement.props,
                     children: aElement.props.children

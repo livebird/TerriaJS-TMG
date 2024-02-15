@@ -4,8 +4,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import classNames from "classnames";
-import { action, reaction, runInAction } from "mobx";
+import { action, reaction, runInAction, makeObservable } from "mobx";
 import { disposeOnUnmount, observer } from "mobx-react";
 import React from "react";
 import { withTranslation } from "react-i18next";
@@ -23,11 +24,15 @@ import TerriaFeature from "../../Models/Feature/Feature";
 import { addMarker, isMarkerVisible, removeMarker } from "../../Models/LocationMarkerUtils";
 import Icon from "../../Styled/Icon";
 import Loader from "../Loader";
-import { withViewState } from "../StandardUserInterface/ViewStateContext";
+import { withViewState } from "../Context";
 import Styles from "./feature-info-panel.scss";
 import FeatureInfoCatalogItem from "./FeatureInfoCatalogItem";
 const DragWrapper = require("../DragWrapper");
 let FeatureInfoPanel = class FeatureInfoPanel extends React.Component {
+    constructor(props) {
+        super(props);
+        makeObservable(this);
+    }
     componentDidMount() {
         const { t } = this.props;
         const terria = this.props.viewState.terria;
@@ -75,7 +80,7 @@ let FeatureInfoPanel = class FeatureInfoPanel extends React.Component {
             const features = (_a = (catalogItem.uniqueId
                 ? featureMap.get(catalogItem.uniqueId)
                 : undefined)) !== null && _a !== void 0 ? _a : [];
-            return (React.createElement(FeatureInfoCatalogItem, { key: catalogItem.uniqueId, viewState: this.props.viewState, catalogItem: catalogItem, features: features, onToggleOpen: this.toggleOpenFeature, printView: this.props.printView }));
+            return (_jsx(FeatureInfoCatalogItem, { viewState: this.props.viewState, catalogItem: catalogItem, features: features, onToggleOpen: this.toggleOpenFeature, printView: this.props.printView }, catalogItem.uniqueId));
         });
     }
     close() {
@@ -156,7 +161,7 @@ let FeatureInfoPanel = class FeatureInfoPanel extends React.Component {
     renderLocationItem(cartesianPosition) {
         const cartographic = Ellipsoid.WGS84.cartesianToCartographic(cartesianPosition);
         if (cartographic === undefined) {
-            return React.createElement(React.Fragment, null);
+            return null;
         }
         const latitude = CesiumMath.toDegrees(cartographic.latitude);
         const longitude = CesiumMath.toDegrees(cartographic.longitude);
@@ -169,12 +174,7 @@ let FeatureInfoPanel = class FeatureInfoPanel extends React.Component {
         const locationButtonStyle = isMarkerVisible(this.props.viewState.terria)
             ? Styles.btnLocationSelected
             : Styles.btnLocation;
-        return (React.createElement("div", { className: Styles.location },
-            React.createElement("span", null, "Lat / Lon\u00A0"),
-            React.createElement("span", null,
-                pretty.latitude + ", " + pretty.longitude,
-                !this.props.printView && (React.createElement("button", { type: "button", onClick: pinClicked, className: locationButtonStyle },
-                    React.createElement(Icon, { glyph: Icon.GLYPHS.location }))))));
+        return (_jsxs("div", { className: Styles.location, children: [_jsx("span", { children: "Lat / Lon\u00A0" }), _jsxs("span", { children: [pretty.latitude + ", " + pretty.longitude, !this.props.printView && (_jsx("button", { type: "button", onClick: pinClicked, className: locationButtonStyle, children: _jsx(Icon, { glyph: Icon.GLYPHS.location }) }))] })] }));
     }
     render() {
         var _a, _b, _c, _d;
@@ -218,33 +218,22 @@ let FeatureInfoPanel = class FeatureInfoPanel extends React.Component {
             // Otherwise use the location picked.
             position = (_d = terria.pickedFeatures) === null || _d === void 0 ? void 0 : _d.pickPosition;
         }
-        const locationElements = position ? (React.createElement("li", null, this.renderLocationItem(position))) : null;
-        return (React.createElement(DragWrapper, null,
-            React.createElement("div", { className: panelClassName, "aria-hidden": !viewState.featureInfoPanelIsVisible },
-                !this.props.printView && (React.createElement("div", { className: Styles.header },
-                    React.createElement("div", { className: classNames("drag-handle", Styles.btnPanelHeading) },
-                        React.createElement("span", null, t("featureInfo.panelHeading")),
-                        React.createElement("button", { type: "button", onClick: this.toggleCollapsed, className: Styles.btnToggleFeature }, this.props.viewState.featureInfoPanelIsCollapsed ? (React.createElement(Icon, { glyph: Icon.GLYPHS.closed })) : (React.createElement(Icon, { glyph: Icon.GLYPHS.opened })))),
-                    React.createElement("button", { type: "button", onClick: this.close, className: Styles.btnCloseFeature, title: t("featureInfo.btnCloseFeature") },
-                        React.createElement(Icon, { glyph: Icon.GLYPHS.close })))),
-                React.createElement("ul", { className: Styles.body },
-                    this.props.printView && locationElements,
-                    // Is feature info visible
-                    !viewState.featureInfoPanelIsCollapsed &&
-                        viewState.featureInfoPanelIsVisible ? (
-                    // Are picked features loading -> show Loader
-                    isDefined(terria.pickedFeatures) &&
-                        terria.pickedFeatures.isLoading ? (React.createElement("li", null,
-                        React.createElement(Loader, { light: true }))) : // Do we have no features/catalog items to show?
-                        featureInfoCatalogItems.length === 0 ? (React.createElement("li", { className: Styles.noResults }, this.getMessageForNoResults())) : (
-                        // Finally show feature info
-                        featureInfoCatalogItems)) : null,
-                    !this.props.printView && locationElements,
-                    // Add "filter by location" buttons if supported
-                    filterableCatalogItems.map((pair) => TimeFilterMixin.isMixedInto(pair.catalogItem) &&
-                        pair.feature ? (React.createElement("button", { key: pair.catalogItem.uniqueId, type: "button", onClick: this.filterIntervalsByFeature.bind(this, pair.catalogItem, pair.feature), className: Styles.satelliteSuggestionBtn }, t("featureInfo.satelliteSuggestionBtn", {
-                        catalogItemName: pair.catalogItem.name
-                    }))) : null)))));
+        const locationElements = position ? (_jsx("li", { children: this.renderLocationItem(position) })) : null;
+        return (_jsx(DragWrapper, { children: _jsxs("div", { className: panelClassName, "aria-hidden": !viewState.featureInfoPanelIsVisible, children: [!this.props.printView && (_jsxs("div", { className: Styles.header, children: [_jsxs("div", { className: classNames("drag-handle", Styles.btnPanelHeading), children: [_jsx("span", { children: t("featureInfo.panelHeading") }), _jsx("button", { type: "button", onClick: this.toggleCollapsed, className: Styles.btnToggleFeature, children: this.props.viewState.featureInfoPanelIsCollapsed ? (_jsx(Icon, { glyph: Icon.GLYPHS.closed })) : (_jsx(Icon, { glyph: Icon.GLYPHS.opened })) })] }), _jsx("button", { type: "button", onClick: this.close, className: Styles.btnCloseFeature, title: t("featureInfo.btnCloseFeature"), children: _jsx(Icon, { glyph: Icon.GLYPHS.close }) })] })), _jsxs("ul", { className: Styles.body, children: [this.props.printView && locationElements, 
+                            // Is feature info visible
+                            !viewState.featureInfoPanelIsCollapsed &&
+                                viewState.featureInfoPanelIsVisible ? (
+                            // Are picked features loading -> show Loader
+                            isDefined(terria.pickedFeatures) &&
+                                terria.pickedFeatures.isLoading ? (_jsx("li", { children: _jsx(Loader, { light: true }) })) : // Do we have no features/catalog items to show?
+                                featureInfoCatalogItems.length === 0 ? (_jsx("li", { className: Styles.noResults, children: this.getMessageForNoResults() })) : (
+                                // Finally show feature info
+                                featureInfoCatalogItems)) : null, !this.props.printView && locationElements, 
+                            // Add "filter by location" buttons if supported
+                            filterableCatalogItems.map((pair) => TimeFilterMixin.isMixedInto(pair.catalogItem) &&
+                                pair.feature ? (_jsx("button", { type: "button", onClick: this.filterIntervalsByFeature.bind(this, pair.catalogItem, pair.feature), className: Styles.satelliteSuggestionBtn, children: t("featureInfo.satelliteSuggestionBtn", {
+                                    catalogItemName: pair.catalogItem.name
+                                }) }, pair.catalogItem.uniqueId)) : null)] })] }) }));
     }
 };
 __decorate([

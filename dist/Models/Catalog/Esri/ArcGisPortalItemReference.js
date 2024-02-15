@@ -6,7 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import DOMPurify from "dompurify";
 import i18next from "i18next";
-import { computed, runInAction } from "mobx";
+import { computed, runInAction, makeObservable, override } from "mobx";
 import { createTransformer } from "mobx-utils";
 import URI from "urijs";
 import isDefined from "../../../Core/isDefined";
@@ -27,8 +27,19 @@ import StratumOrder from "../../Definition/StratumOrder";
 export class ArcGisPortalItemStratum extends LoadableStratum(ArcGisPortalItemTraits) {
     constructor(arcgisPortalItemReference, arcgisPortalCatalogGroup) {
         super();
-        this.arcgisPortalItemReference = arcgisPortalItemReference;
-        this.arcgisPortalCatalogGroup = arcgisPortalCatalogGroup;
+        Object.defineProperty(this, "arcgisPortalItemReference", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: arcgisPortalItemReference
+        });
+        Object.defineProperty(this, "arcgisPortalCatalogGroup", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: arcgisPortalCatalogGroup
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(newModel) {
         return new ArcGisPortalItemStratum(this.arcgisPortalItemReference, this.arcgisPortalCatalogGroup);
@@ -102,7 +113,12 @@ export class ArcGisPortalItemStratum extends LoadableStratum(ArcGisPortalItemTra
         return outArray;
     }
 }
-ArcGisPortalItemStratum.stratumName = "arcGisPortalDataset";
+Object.defineProperty(ArcGisPortalItemStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "arcGisPortalDataset"
+});
 __decorate([
     computed
 ], ArcGisPortalItemStratum.prototype, "arcgisPortalItem", null);
@@ -122,20 +138,41 @@ __decorate([
     computed
 ], ArcGisPortalItemStratum.prototype, "info", null);
 StratumOrder.addLoadStratum(ArcGisPortalItemStratum.stratumName);
-export default class ArcGisPortalItemReference extends AccessControlMixin(UrlMixin(ReferenceMixin(CreateModel(ArcGisPortalItemTraits)))) {
-    constructor(id, terria, sourceReference, strata) {
-        super(id, terria, sourceReference, strata);
-        this._arcgisItem = undefined;
-        this._arcgisPortalCatalogGroup = undefined;
-        this._supportedFormat = undefined;
-        this._portalRootUrl = undefined;
-        this.setTrait(CommonStrata.defaults, "supportedFormats", ArcGisPortalItemReference.defaultSupportedFormats);
-    }
+class ArcGisPortalItemReference extends AccessControlMixin(UrlMixin(ReferenceMixin(CreateModel(ArcGisPortalItemTraits)))) {
     get type() {
         return ArcGisPortalItemReference.type;
     }
     get typeName() {
         return i18next.t("models.arcgisPortal.name");
+    }
+    constructor(id, terria, sourceReference, strata) {
+        super(id, terria, sourceReference, strata);
+        Object.defineProperty(this, "_arcgisItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "_arcgisPortalCatalogGroup", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "_supportedFormat", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "_portalRootUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        makeObservable(this);
+        this.setTrait(CommonStrata.defaults, "supportedFormats", ArcGisPortalItemReference.defaultSupportedFormats);
     }
     get cacheDuration() {
         if (isDefined(super.cacheDuration)) {
@@ -230,80 +267,91 @@ export default class ArcGisPortalItemReference extends AccessControlMixin(UrlMix
         return model;
     }
 }
-ArcGisPortalItemReference.defaultSupportedFormats = [
-    createStratumInstance(ArcGisPortalItemFormatTraits, {
-        id: "I3S",
-        formatRegex: "Scene Service",
-        urlRegex: "SceneServer$|SceneServer/$",
-        definition: {
-            type: "3d-tiles"
-        }
-    }),
-    // createStratumInstance(ArcGisPortalItemFormatTraits, {
-    //   id: "WFS",
-    //   formatRegex: "WFS",
-    //   urlRegex: "WFSServer",
-    //   definition: {
-    //     type: "wfs"
-    //   }
-    // }),
-    createStratumInstance(ArcGisPortalItemFormatTraits, {
-        id: "WMS",
-        formatRegex: "WMS",
-        urlRegex: "WMSServer",
-        definition: {
-            type: "wms"
-        }
-    }),
-    createStratumInstance(ArcGisPortalItemFormatTraits, {
-        id: "ArcGIS MapServer Group",
-        formatRegex: "Map Service",
-        urlRegex: "MapServer$|MapServer/$",
-        definition: {
-            type: "esri-mapServer-group"
-        }
-    }),
-    createStratumInstance(ArcGisPortalItemFormatTraits, {
-        id: "ArcGIS MapServer",
-        formatRegex: "Map Service",
-        urlRegex: /MapServer\/\d/,
-        definition: {
-            type: "esri-mapServer"
-        }
-    }),
-    createStratumInstance(ArcGisPortalItemFormatTraits, {
-        id: "ArcGIS FeatureServer Group",
-        formatRegex: "Feature Service",
-        urlRegex: "FeatureServer$|FeatureServer/$",
-        definition: {
-            type: "esri-featureServer-group"
-        }
-    }),
-    createStratumInstance(ArcGisPortalItemFormatTraits, {
-        id: "ArcGIS FeatureServer",
-        formatRegex: "Feature Service",
-        urlRegex: /FeatureServer\/\d/,
-        definition: {
-            type: "esri-featureServer"
-        }
-    }),
-    createStratumInstance(ArcGisPortalItemFormatTraits, {
-        id: "Kml",
-        formatRegex: "KML",
-        definition: {
-            type: "kml"
-        }
-    })
-];
-ArcGisPortalItemReference.type = "arcgis-portal-item";
+Object.defineProperty(ArcGisPortalItemReference, "defaultSupportedFormats", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: [
+        createStratumInstance(ArcGisPortalItemFormatTraits, {
+            id: "I3S",
+            formatRegex: "Scene Service",
+            urlRegex: "SceneServer$|SceneServer/$",
+            definition: {
+                type: "3d-tiles"
+            }
+        }),
+        // createStratumInstance(ArcGisPortalItemFormatTraits, {
+        //   id: "WFS",
+        //   formatRegex: "WFS",
+        //   urlRegex: "WFSServer",
+        //   definition: {
+        //     type: "wfs"
+        //   }
+        // }),
+        createStratumInstance(ArcGisPortalItemFormatTraits, {
+            id: "WMS",
+            formatRegex: "WMS",
+            urlRegex: "WMSServer",
+            definition: {
+                type: "wms"
+            }
+        }),
+        createStratumInstance(ArcGisPortalItemFormatTraits, {
+            id: "ArcGIS MapServer Group",
+            formatRegex: "Map Service",
+            urlRegex: "MapServer$|MapServer/$",
+            definition: {
+                type: "esri-mapServer-group"
+            }
+        }),
+        createStratumInstance(ArcGisPortalItemFormatTraits, {
+            id: "ArcGIS MapServer",
+            formatRegex: "Map Service",
+            urlRegex: /MapServer\/\d/,
+            definition: {
+                type: "esri-mapServer"
+            }
+        }),
+        createStratumInstance(ArcGisPortalItemFormatTraits, {
+            id: "ArcGIS FeatureServer Group",
+            formatRegex: "Feature Service",
+            urlRegex: "FeatureServer$|FeatureServer/$",
+            definition: {
+                type: "esri-featureServer-group"
+            }
+        }),
+        createStratumInstance(ArcGisPortalItemFormatTraits, {
+            id: "ArcGIS FeatureServer",
+            formatRegex: "Feature Service",
+            urlRegex: /FeatureServer\/\d/,
+            definition: {
+                type: "esri-featureServer"
+            }
+        }),
+        createStratumInstance(ArcGisPortalItemFormatTraits, {
+            id: "Kml",
+            formatRegex: "KML",
+            definition: {
+                type: "kml"
+            }
+        })
+    ]
+});
+Object.defineProperty(ArcGisPortalItemReference, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "arcgis-portal-item"
+});
+export default ArcGisPortalItemReference;
 __decorate([
-    computed
+    override
 ], ArcGisPortalItemReference.prototype, "cacheDuration", null);
 __decorate([
     computed
 ], ArcGisPortalItemReference.prototype, "preparedSupportedFormats", null);
 async function loadPortalItem(portalItem) {
-    var uri = new URI(portalItem._portalRootUrl)
+    const uri = new URI(portalItem._portalRootUrl)
         .segment(`/sharing/rest/content/items/${portalItem.itemId}`)
         .addQuery({ f: "json" });
     const response = await loadJson(proxyCatalogItemUrl(portalItem, uri.toString(), portalItem.cacheDuration));
@@ -316,7 +364,7 @@ async function loadAdditionalPortalInfo(portalItem) {
     if (portalItem._arcgisItem === undefined)
         return undefined;
     const baseUrl = portalItem._portalRootUrl;
-    var uri = new URI(baseUrl)
+    const uri = new URI(baseUrl)
         .segment(`/sharing/rest/content/items/${portalItem._arcgisItem.id}/data`)
         .addQuery({ f: "json" });
     // The request also returns 200 even if the page is blank causing json errors

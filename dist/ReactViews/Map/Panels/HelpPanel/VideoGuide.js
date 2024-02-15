@@ -4,6 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { observer } from "mobx-react";
 import PropTypes from "prop-types";
 import React from "react";
@@ -21,7 +22,7 @@ const VideoWrapperBox = (props) => {
     useKeyPress("Escape", () => {
         handleClose();
     });
-    return (React.createElement(Box, { centered: true, onClick: (e) => {
+    return (_jsxs(Box, { centered: true, onClick: (e) => {
             e.stopPropagation();
             handleClose();
         }, css: `
@@ -32,11 +33,7 @@ const VideoWrapperBox = (props) => {
         right: 0;
         bottom: 0;
         background: rgba(0, 0, 0, 0.75);
-      ` },
-        React.createElement(Box, { paddedRatio: 4, position: "absolute", topRight: true },
-            React.createElement(RawButton, { onClick: handleClose.bind(null) },
-                React.createElement(StyledIcon, { styledWidth: "22px", light: true, glyph: Icon.GLYPHS.closeLight }))),
-        props.children));
+      `, children: [_jsx(Box, { paddedRatio: 4, position: "absolute", topRight: true, children: _jsx(RawButton, { onClick: handleClose.bind(null), children: _jsx(StyledIcon, { styledWidth: "22px", light: true, glyph: Icon.GLYPHS.closeLight }) }) }), props.children] }));
 };
 VideoWrapperBox.propTypes = {
     viewState: PropTypes.object.isRequired,
@@ -49,9 +46,7 @@ let VideoGuide = class VideoGuide extends React.Component {
     render() {
         const backgroundOpacity = this.props.backgroundOpacity;
         const backgroundBlackOverlay = backgroundOpacity === undefined ? undefined : 1.0 - backgroundOpacity;
-        return (React.createElement(FadeIn, { isVisible: this.props.viewState.videoGuideVisible === this.props.videoName },
-            React.createElement(VideoWrapperBox, { viewState: this.props.viewState },
-                React.createElement(Box, { centered: true, col11: true, styledHeight: "87%", backgroundImage: this.props.background, backgroundBlackOverlay: backgroundBlackOverlay, css: `
+        return (_jsx(FadeIn, { isVisible: this.props.viewState.videoGuideVisible === this.props.videoName, children: _jsx(VideoWrapperBox, { viewState: this.props.viewState, children: _jsxs(Box, { centered: true, col11: true, styledHeight: "87%", backgroundImage: this.props.background, backgroundBlackOverlay: backgroundBlackOverlay, css: `
               svg {
                 fill: #fff;
                 width: 60px;
@@ -59,29 +54,37 @@ let VideoGuide = class VideoGuide extends React.Component {
                 top: -30px;
                 left: -30px;
               }
-            `, onClick: (e) => e.stopPropagation() },
-                    React.createElement(Loader, { message: ` ` }),
-                    React.createElement("iframe", { src: this.props.videoLink, allow: "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture", css: `
+            `, onClick: (e) => e.stopPropagation(), children: [_jsx(Loader, { message: ` ` }), _jsx("iframe", { src: this.props.videoLink, allow: "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture", css: `
                 border: none;
                 position: absolute;
                 top: 0;
                 left: 0;
                 width: 100%;
                 height: 100%;
-              ` })))));
+              ` })] }) }) }));
     }
 };
-VideoGuide.displayName = "VideoGuide";
-VideoGuide.propTypes = {
-    viewState: PropTypes.object.isRequired,
-    videoName: PropTypes.string.isRequired,
-    videoLink: PropTypes.string,
-    background: PropTypes.string,
-    // A number between 0 and 1.0
-    backgroundOpacity: PropTypes.number,
-    theme: PropTypes.object,
-    t: PropTypes.func
-};
+Object.defineProperty(VideoGuide, "displayName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "VideoGuide"
+});
+Object.defineProperty(VideoGuide, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        viewState: PropTypes.object.isRequired,
+        videoName: PropTypes.string.isRequired,
+        videoLink: PropTypes.string,
+        background: PropTypes.string,
+        // A number between 0 and 1.0
+        backgroundOpacity: PropTypes.number,
+        theme: PropTypes.object,
+        t: PropTypes.func
+    }
+});
 VideoGuide = __decorate([
     observer
 ], VideoGuide);

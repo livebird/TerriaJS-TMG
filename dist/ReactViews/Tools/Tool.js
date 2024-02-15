@@ -4,15 +4,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx } from "react/jsx-runtime";
 import i18next from "i18next";
-import { computed } from "mobx";
+import { computed, makeObservable } from "mobx";
 import React, { Suspense, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import TerriaError from "../../Core/TerriaError";
 import { applyTranslationIfExists, TRANSLATE_KEY_PREFIX } from "../../Language/languageHelpers";
 import ViewerMode from "../../Models/ViewerMode";
 import MapNavigationItemController from "../../ViewModels/MapNavigation/MapNavigationItemController";
-import { useViewState } from "../StandardUserInterface/ViewStateContext";
+import { useViewState } from "../Context";
 /**
  * Loads the given tool component.
  *
@@ -33,18 +34,23 @@ const Tool = (props) => {
             React.lazy(() => Promise.resolve(getToolComponent()).then((c) => ({ default: c }))),
             params
         ]);
-    }, [getToolComponent]);
+    }, [getToolComponent, params]);
     let ToolComponent;
     let toolProps;
     if (toolAndProps !== undefined)
         [ToolComponent, toolProps] = toolAndProps;
-    return (React.createElement(ToolErrorBoundary, { t: t, toolName: toolName, terria: viewState.terria },
-        React.createElement(Suspense, { fallback: React.createElement("div", null, "Loading...") }, ToolComponent !== undefined ? (React.createElement(ToolComponent, Object.assign({}, toolProps, { viewState: viewState }))) : null)));
+    return (_jsx(ToolErrorBoundary, { t: t, toolName: toolName, terria: viewState.terria, children: _jsx(Suspense, { fallback: _jsx("div", { children: "Loading..." }), children: ToolComponent !== undefined ? (_jsx(ToolComponent, { ...toolProps, viewState: viewState })) : null }) }));
 };
 export class ToolButtonController extends MapNavigationItemController {
     constructor(props) {
         super();
-        this.props = props;
+        Object.defineProperty(this, "props", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: props
+        });
+        makeObservable(this);
     }
     get glyph() {
         return this.props.icon;
@@ -90,7 +96,12 @@ __decorate([
 class ToolErrorBoundary extends React.Component {
     constructor() {
         super(...arguments);
-        this.state = { hasError: false };
+        Object.defineProperty(this, "state", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: { hasError: false }
+        });
     }
     static getDerivedStateFromError() {
         return { hasError: true };

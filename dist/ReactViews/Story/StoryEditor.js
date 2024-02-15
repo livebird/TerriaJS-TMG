@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { Suspense } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
@@ -119,22 +120,14 @@ class StoryEditor extends React.Component {
     renderPopupEditor() {
         const { t } = this.props;
         const maxImageHeight = "350px"; // TODO: where to put this to reduce coupling?
-        return (React.createElement("div", { onKeyDown: this.onKeyDown, onKeyUp: this.onKeyUp, className: classNames(Styles.popupEditor, {
+        return (_jsx("div", { onKeyDown: this.onKeyDown, onKeyUp: this.onKeyUp, className: classNames(Styles.popupEditor, {
                 [Styles.isMounted]: this.state.inView
-            }) },
-            React.createElement("div", { className: Styles.inner },
-                React.createElement("div", { className: Styles.header },
-                    React.createElement("input", { ref: (titleInput) => (this.titleInput = titleInput), placeholder: t("story.editor.placeholder"), autoComplete: "off", className: Styles.field, type: "text", id: "title", value: this.state.title, onChange: this.updateTitle }),
-                    React.createElement("button", { className: Styles.cancelBtn, onClick: this.cancelEditing, type: "button", title: t("story.editor.cancelBtn") }, t("story.editor.cancelEditing")),
-                    React.createElement("button", { disabled: !this.state.title.length, className: Styles.saveBtn, onClick: this.saveStory, type: "button", title: t("story.editor.saveBtn") }, t("story.editor.saveStory"))),
-                React.createElement("div", { className: Styles.body },
-                    React.createElement(Suspense, { fallback: React.createElement("div", null, "Loading...") },
-                        React.createElement(Editor, { html: this.state.text, onChange: (newValue, editor) => {
-                                // TODO: This makes StoryEditor tightly coupled to Editor. How to reduce coupling?
-                                tinymce.activeEditor.dom.setStyles(tinymce.activeEditor.dom.select("img"), { "max-height": `${maxImageHeight}`, width: "auto" });
-                                const text = editor.getBody().innerHTML;
-                                this.setState({ text });
-                            }, terria: this.props.terria }))))));
+            }), children: _jsxs("div", { className: Styles.inner, children: [_jsxs("div", { className: Styles.header, children: [_jsx("input", { ref: (titleInput) => (this.titleInput = titleInput), placeholder: t("story.editor.placeholder"), autoComplete: "off", className: Styles.field, type: "text", id: "title", value: this.state.title, onChange: this.updateTitle }), _jsx("button", { className: Styles.cancelBtn, onClick: this.cancelEditing, type: "button", title: t("story.editor.cancelBtn"), children: t("story.editor.cancelEditing") }), _jsx("button", { disabled: !this.state.title.length, className: Styles.saveBtn, onClick: this.saveStory, type: "button", title: t("story.editor.saveBtn"), children: t("story.editor.saveStory") })] }), _jsx("div", { className: Styles.body, children: _jsx(Suspense, { fallback: _jsx("div", { children: "Loading..." }), children: _jsx(Editor, { html: this.state.text, onChange: (newValue, editor) => {
+                                    // TODO: This makes StoryEditor tightly coupled to Editor. How to reduce coupling?
+                                    tinymce.activeEditor.dom.setStyles(tinymce.activeEditor.dom.select("img"), { "max-height": `${maxImageHeight}`, width: "auto" });
+                                    const text = editor.getBody().innerHTML;
+                                    this.setState({ text });
+                                }, terria: this.props.terria }) }) })] }) }));
     }
     removeStory() {
         this.props.exitEditingMode();
@@ -143,7 +136,7 @@ class StoryEditor extends React.Component {
         }
     }
     render() {
-        return React.createElement("div", { className: Styles.editor }, this.renderPopupEditor());
+        return _jsx("div", { className: Styles.editor, children: this.renderPopupEditor() });
     }
 }
 StoryEditor.propTypes = {

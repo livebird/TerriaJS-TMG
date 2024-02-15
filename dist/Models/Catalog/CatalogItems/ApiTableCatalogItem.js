@@ -5,18 +5,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import dateFormat from "dateformat";
-import { get as _get } from "lodash";
-import { computed, observable, runInAction } from "mobx";
+import { get as _get, map as _map } from "lodash";
+import { computed, observable, runInAction, makeObservable } from "mobx";
 import URI from "urijs";
 import isDefined from "../../../Core/isDefined";
 import loadJson from "../../../Core/loadJson";
 import AutoRefreshingMixin from "../../../ModelMixins/AutoRefreshingMixin";
-import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
 import TableMixin from "../../../ModelMixins/TableMixin";
 import TableAutomaticStylesStratum from "../../../Table/TableAutomaticStylesStratum";
 import ApiTableCatalogItemTraits from "../../../Traits/TraitsClasses/ApiTableCatalogItemTraits";
-import TableStyleTraits from "../../../Traits/TraitsClasses/TableStyleTraits";
-import TableTimeStyleTraits from "../../../Traits/TraitsClasses/TableTimeStyleTraits";
+import TableStyleTraits from "../../../Traits/TraitsClasses/Table/StyleTraits";
+import TableTimeStyleTraits from "../../../Traits/TraitsClasses/Table/TimeStyleTraits";
 import CreateModel from "../../Definition/CreateModel";
 import createStratumInstance from "../../Definition/createStratumInstance";
 import LoadableStratum from "../../Definition/LoadableStratum";
@@ -24,12 +23,18 @@ import saveModelToJson from "../../Definition/saveModelToJson";
 import StratumOrder from "../../Definition/StratumOrder";
 import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
 export class ApiTableStratum extends LoadableStratum(ApiTableCatalogItemTraits) {
-    constructor(catalogItem) {
-        super();
-        this.catalogItem = catalogItem;
-    }
     duplicateLoadableStratum(model) {
         return new ApiTableStratum(model);
+    }
+    constructor(catalogItem) {
+        super();
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogItem
+        });
+        makeObservable(this);
     }
     // Set time id columns to `idKey`
     get defaultStyle() {
@@ -40,7 +45,12 @@ export class ApiTableStratum extends LoadableStratum(ApiTableCatalogItemTraits) 
         });
     }
 }
-ApiTableStratum.stratumName = "apiTable";
+Object.defineProperty(ApiTableStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "apiTable"
+});
 __decorate([
     computed
 ], ApiTableStratum.prototype, "defaultStyle", null);
@@ -54,16 +64,27 @@ StratumOrder.addLoadStratum(ApiTableStratum.stratumName);
  * mapping. Also currently only supports a single API to get values from, and a
  * single API to get positions from.
  */
-export class ApiTableCatalogItem extends AutoRefreshingMixin(TableMixin(CatalogMemberMixin(CreateModel(ApiTableCatalogItemTraits)))) {
-    constructor(id, terria) {
-        super(id, terria);
-        this.apiResponses = [];
-        this.hasData = false;
-        this.strata.set(TableAutomaticStylesStratum.stratumName, new TableAutomaticStylesStratum(this));
-        this.strata.set(ApiTableStratum.stratumName, new ApiTableStratum(this));
-    }
+export class ApiTableCatalogItem extends AutoRefreshingMixin(TableMixin(CreateModel(ApiTableCatalogItemTraits))) {
     get type() {
         return ApiTableCatalogItem.type;
+    }
+    constructor(id, terria) {
+        super(id, terria);
+        Object.defineProperty(this, "apiResponses", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "hasData", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        makeObservable(this);
+        this.strata.set(TableAutomaticStylesStratum.stratumName, new TableAutomaticStylesStratum(this));
+        this.strata.set(ApiTableStratum.stratumName, new ApiTableStratum(this));
     }
     get apiDataIsLoaded() {
         return this.apiResponses.length > 0;
@@ -76,7 +97,7 @@ export class ApiTableCatalogItem extends AutoRefreshingMixin(TableMixin(CatalogM
                 ? saveModelToJson(api.requestData)
                 : undefined, api.postRequestDataAsFormData);
             if (api.responseDataPath !== undefined) {
-                data = _get(data, api.responseDataPath);
+                data = getResponseDataPath(data, api.responseDataPath);
             }
             return Promise.resolve({
                 data,
@@ -105,7 +126,7 @@ export class ApiTableCatalogItem extends AutoRefreshingMixin(TableMixin(CatalogM
                     row["value"] = value; // add the id to the row's data
                     row[this.idKey] = id;
                     if (columnMajorData.has(id)) {
-                        let currentRow = columnMajorData.get(id);
+                        const currentRow = columnMajorData.get(id);
                         columnMajorData.set(id, { currentRow, ...value });
                     }
                     else {
@@ -145,11 +166,18 @@ export class ApiTableCatalogItem extends AutoRefreshingMixin(TableMixin(CatalogM
         // Fill in column values from the API response
         this.apiResponses.forEach((response) => {
             this.columns.forEach((col, mappingIdx) => {
-                var _a;
+                var _a, _b, _c;
                 if (!isDefined(col.name))
                     return;
-                // Append the new value to the correct column
-                columnMajorTable[mappingIdx].push(`${(_a = response[col.name]) !== null && _a !== void 0 ? _a : ""}`);
+                // If ApiColumnTraits has a responseDataPath, use that to get the value
+                const dataPath = (_a = this.apiColumns.find((c) => c.name === col.name)) === null || _a === void 0 ? void 0 : _a.responseDataPath;
+                if (dataPath) {
+                    columnMajorTable[mappingIdx].push(`${(_b = getResponseDataPath(response, dataPath)) !== null && _b !== void 0 ? _b : ""}`);
+                }
+                // Otherwise, use column name as the path
+                else {
+                    columnMajorTable[mappingIdx].push(`${(_c = response[col.name]) !== null && _c !== void 0 ? _c : ""}`);
+                }
             });
         });
         return columnMajorTable;
@@ -209,7 +237,12 @@ export class ApiTableCatalogItem extends AutoRefreshingMixin(TableMixin(CatalogM
         return uri.toString();
     }
 }
-ApiTableCatalogItem.type = "api-table";
+Object.defineProperty(ApiTableCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "api-table"
+});
 __decorate([
     observable
 ], ApiTableCatalogItem.prototype, "apiResponses", void 0);
@@ -219,5 +252,24 @@ __decorate([
 __decorate([
     computed
 ], ApiTableCatalogItem.prototype, "apiDataIsLoaded", null);
+/**
+ * Return the value at json path of the data object.
+ *
+ * This works exactly like the lodash.get() function but adds support for
+ * traversing array objects.  For eg, the lodash.get() does not support a path
+ * like: `a.users[].name`, but this function will correctly return a `{name}[]`
+ * array if they exist. The particular syntax for array traversal
+ * is borrowed from `jq` CLI tool.
+ */
+function getResponseDataPath(data, jsonPath) {
+    // Split the path at `[].` or `[]`
+    const pathSegments = jsonPath.split(/\[\]\.?/);
+    const getPath = (data, path) => path === ""
+        ? data
+        : Array.isArray(data)
+            ? _map(data, path)
+            : _get(data, path);
+    return pathSegments.reduce((nextData, segment) => getPath(nextData, segment), data);
+}
 StratumOrder.addLoadStratum(TableAutomaticStylesStratum.stratumName);
 //# sourceMappingURL=ApiTableCatalogItem.js.map

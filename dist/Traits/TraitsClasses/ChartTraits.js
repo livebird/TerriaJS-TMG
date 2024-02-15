@@ -10,6 +10,36 @@ import mixTraits from "../mixTraits";
 import MappableTraits from "./MappableTraits";
 const availableChartGlyphStyles = Object.keys(Glyphs).join(", ");
 export default class ChartTraits extends mixTraits(MappableTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "chartType", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        // This trait proabably doesn't belong here and should instead be on a new
+        //  trait class ChartTraits, however there are complexities to changing
+        //  chart-related traits, mixins and interfaces to support this change.
+        Object.defineProperty(this, "chartDisclaimer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "chartColor", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "chartGlyphStyle", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({

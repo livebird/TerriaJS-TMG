@@ -1,4 +1,4 @@
-import React from "react";
+import { jsx as _jsx } from "react/jsx-runtime";
 import styled from "styled-components";
 import { GLYPHS, StyledIcon } from "../../Icon";
 const StyledCheckboxIcon = styled(StyledIcon).attrs({
@@ -17,16 +17,16 @@ const StyledCheckboxIcon = styled(StyledIcon).attrs({
 `;
 const CheckboxIcon = (props) => {
     if (props.isDisabled) {
-        return (React.createElement(StyledCheckboxIcon, { glyph: props.isChecked ? GLYPHS.checkboxOn : GLYPHS.checkboxOff, disabled: true, css: `
+        return (_jsx(StyledCheckboxIcon, { glyph: props.isChecked ? GLYPHS.checkboxOn : GLYPHS.checkboxOff, disabled: true, css: `
           cursor: not-allowed;
           opacity: 0.3;
         ` }));
     }
     else if (props.isIndeterminate) {
-        return React.createElement(StyledCheckboxIcon, { glyph: GLYPHS.checkboxIndeterminate });
+        return _jsx(StyledCheckboxIcon, { glyph: GLYPHS.checkboxIndeterminate });
     }
     else {
-        return (React.createElement(StyledCheckboxIcon, { glyph: props.isChecked ? GLYPHS.checkboxOn : GLYPHS.checkboxOff }));
+        return (_jsx(StyledCheckboxIcon, { glyph: props.isChecked ? GLYPHS.checkboxOn : GLYPHS.checkboxOff }));
     }
 };
 export default CheckboxIcon;

@@ -4,16 +4,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { observable } from "mobx";
+import { observable, makeObservable } from "mobx";
 import ImageryProvider from "terriajs-cesium/Source/Scene/ImageryProvider";
 import isDefined from "../Core/isDefined";
 import { scaleDenominatorToLevel } from "./../Core/scaleToDenominator";
 import CommonStrata from "./../Models/Definition/CommonStrata";
 function MinMaxLevelMixin(Base) {
     class MinMaxLevelMixin extends Base {
-        constructor() {
-            super(...arguments);
-            this.notVisible = false;
+        constructor(...args) {
+            super(...args);
+            Object.defineProperty(this, "notVisible", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: false
+            });
+            makeObservable(this);
         }
         get supportsMinMaxLevel() {
             return true;
@@ -24,13 +30,11 @@ function MinMaxLevelMixin(Base) {
         getMaximumLevel(ows) {
             return scaleDenominatorToLevel(this.minScaleDenominator, false, ows);
         }
-        updateRequestImage(imageryProvider, ows = true) {
-            const maximumLevel = this.getMaximumLevel(ows);
-            const minimumLevel = this.getMinimumLevel(ows);
+        static updateRequestImageInternal(mixin, imageryProvider, minimumLevel, maximumLevel, hideLayerAfterMinScaleDenominator) {
             const realRequestImage = imageryProvider.requestImage;
-            if ((isDefined(maximumLevel) && this.hideLayerAfterMinScaleDenominator) ||
+            if ((isDefined(maximumLevel) && hideLayerAfterMinScaleDenominator) ||
                 isDefined(minimumLevel)) {
-                imageryProvider.requestImage = (x, y, level) => {
+                imageryProvider.requestImage = ((x, y, level, request) => {
                     if ((maximumLevel && level > maximumLevel) ||
                         (minimumLevel && level < minimumLevel)) {
                         if (isDefined(imageryProvider.enablePickFeatures)) {
@@ -38,22 +42,36 @@ function MinMaxLevelMixin(Base) {
                         }
                         if (maximumLevel &&
                             level > maximumLevel &&
-                            this.hideLayerAfterMinScaleDenominator) {
-                            this.setTrait(CommonStrata.defaults, "scaleWorkbenchInfo", "translate#models.scaleDatasetNotVisible.scaleZoomOut");
+                            mixin.hideLayerAfterMinScaleDenominator) {
+                            mixin.setTrait(CommonStrata.defaults, "scaleWorkbenchInfo", "translate#models.scaleDatasetNotVisible.scaleZoomOut");
                         }
                         else if (minimumLevel && level < minimumLevel) {
-                            this.setTrait(CommonStrata.defaults, "scaleWorkbenchInfo", "translate#models.scaleDatasetNotVisible.scaleZoomIn");
+                            mixin.setTrait(CommonStrata.defaults, "scaleWorkbenchInfo", "translate#models.scaleDatasetNotVisible.scaleZoomIn");
                         }
-                        return ImageryProvider.loadImage(imageryProvider, `${this.terria.baseUrl}images/blank.png`);
+                        return ImageryProvider.loadImage(imageryProvider, `${mixin.terria.baseUrl}images/blank.png`);
                     }
-                    this.setTrait(CommonStrata.defaults, "scaleWorkbenchInfo", undefined);
+                    mixin.setTrait(CommonStrata.defaults, "scaleWorkbenchInfo", undefined);
                     if (isDefined(imageryProvider.enablePickFeatures)) {
                         imageryProvider.enablePickFeatures = true;
                     }
                     return realRequestImage.call(imageryProvider, x, y, level);
-                };
+                });
             }
             return imageryProvider;
+        }
+        updateRequestImage(imageryProvider, ows = true) {
+            const maximumLevel = this.getMaximumLevel(ows);
+            const minimumLevel = this.getMinimumLevel(ows);
+            const hideLayerAfterMinScaleDenominator = this.hideLayerAfterMinScaleDenominator;
+            return MinMaxLevelMixin.updateRequestImageInternal(this, imageryProvider, minimumLevel, maximumLevel, hideLayerAfterMinScaleDenominator);
+        }
+        updateRequestImageAsync(imageryProviderPromise, ows = true) {
+            const maximumLevel = this.getMaximumLevel(ows);
+            const minimumLevel = this.getMinimumLevel(ows);
+            const hideLayerAfterMinScaleDenominator = this.hideLayerAfterMinScaleDenominator;
+            return imageryProviderPromise.then((imageryProvider) => {
+                return MinMaxLevelMixin.updateRequestImageInternal(this, imageryProvider, minimumLevel, maximumLevel, hideLayerAfterMinScaleDenominator);
+            });
         }
     }
     __decorate([

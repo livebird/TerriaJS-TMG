@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 /**
  * <Guidance /> is the (currently unused) "in app tour" where we have the dots,
  * whereas <Guide /> is the generic "slider/static tour"
@@ -12,11 +13,11 @@ import GuidanceDot from "./GuidanceDot.jsx";
 const GuidanceProgress = (props) => {
     const countArray = Array.from(Array(props.max).keys()).map((e) => e++);
     const countStep = props.step;
-    return (React.createElement("div", { className: Styles.indicatorWrapper }, countArray.map((count) => {
-        return (React.createElement("div", { key: count, className: classNames(Styles.indicator, {
-                [Styles.indicatorEnabled]: count < countStep
-            }) }));
-    })));
+    return (_jsx("div", { className: Styles.indicatorWrapper, children: countArray.map((count) => {
+            return (_jsx("div", { className: classNames(Styles.indicator, {
+                    [Styles.indicatorEnabled]: count < countStep
+                }) }, count));
+        }) }));
 };
 GuidanceProgress.propTypes = {
     max: PropTypes.number.isRequired,
@@ -25,20 +26,14 @@ GuidanceProgress.propTypes = {
 };
 const GuidanceContextModal = ({ children }) => {
     const { t } = useTranslation();
-    return (React.createElement("div", { className: Styles.context },
-        React.createElement(Text, { tallerHeight: true }, children),
-        React.createElement("button", { className: Styles.btn }, t("general.next")),
-        t("general.skip"),
-        React.createElement(GuidanceProgress, { step: 2, max: 4 })));
+    return (_jsxs("div", { className: Styles.context, children: [_jsx(Text, { tallerHeight: true, children: children }), _jsx("button", { className: Styles.btn, children: t("general.next") }), t("general.skip"), _jsx(GuidanceProgress, { step: 2, max: 4 })] }));
 };
 GuidanceContextModal.propTypes = {
     children: PropTypes.node.isRequired
 };
 export const Guidance = ({ children }) => {
     const [showGuidance, setShowGuidance] = useState(false);
-    return (React.createElement("div", { className: Styles.guidance },
-        React.createElement(GuidanceDot, { onClick: () => setShowGuidance(!showGuidance) }),
-        showGuidance && React.createElement(GuidanceContextModal, null, children)));
+    return (_jsxs("div", { className: Styles.guidance, children: [_jsx(GuidanceDot, { onClick: () => setShowGuidance(!showGuidance) }), showGuidance && _jsx(GuidanceContextModal, { children: children })] }));
 };
 Guidance.propTypes = {
     children: PropTypes.node.isRequired

@@ -1,4 +1,5 @@
 "use strict";
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import createReactClass from "create-react-class";
 import PropTypes from "prop-types";
@@ -33,9 +34,9 @@ const RegionTypeParameterEditor = createReactClass({
         const value = this.props.parameter.value;
         const regionProviders = this.getRegionProviders();
         if (!regionProviders) {
-            return React.createElement(Loader, null);
+            return _jsx(Loader, {});
         }
-        return (React.createElement("select", { className: Styles.field, onChange: this.onChange, value: defined(value) ? value.regionType : "" }, regionProviders.map((r, i) => (React.createElement("option", { value: r.regionType, key: i }, r.regionType)))));
+        return (_jsx("select", { className: Styles.field, onChange: this.onChange, value: defined(value) ? value.regionType : "", children: regionProviders.map((r, i) => (_jsx("option", { value: r.regionType, children: r.regionType }, i))) }));
     }
 });
 module.exports = RegionTypeParameterEditor;

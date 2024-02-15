@@ -28,7 +28,7 @@ export function selectOnMap(terria, viewState, parameter) {
         }
     });
     terria.mapInteractionModeStack.push(pickPolygonMode);
-    reaction(() => pickPolygonMode.pickedFeatures, async (pickedFeatures, reaction) => {
+    reaction(() => pickPolygonMode.pickedFeatures, async (pickedFeatures, _previousValue, reaction) => {
         var _a;
         pickedFeaturesSubscription = reaction;
         if (pickedFeatures === null || pickedFeatures === void 0 ? void 0 : pickedFeatures.allFeaturesAvailablePromise) {

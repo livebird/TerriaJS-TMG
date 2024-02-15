@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { action, computed, runInAction } from "mobx";
+import { action, computed, runInAction, makeObservable } from "mobx";
 import URI from "urijs";
 import filterOutUndefined from "../../../Core/filterOutUndefined";
 import replaceUnderscores from "../../../Core/replaceUnderscores";
@@ -27,8 +27,19 @@ import WebProcessingServiceCatalogFunction from "./WebProcessingServiceCatalogFu
 class GetCapabilitiesStratum extends LoadableStratum(WebProcessingServiceCatalogGroupTraits) {
     constructor(model, capabilities) {
         super();
-        this.model = model;
-        this.capabilities = capabilities;
+        Object.defineProperty(this, "model", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: model
+        });
+        Object.defineProperty(this, "capabilities", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: capabilities
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(model) {
         return new GetCapabilitiesStratum(model, this.capabilities);
@@ -143,7 +154,11 @@ __decorate([
 __decorate([
     action
 ], GetCapabilitiesStratum, "load", null);
-export default class WebProcessingServiceCatalogGroup extends GroupMixin(GetCapabilitiesMixin(UrlMixin(CatalogMemberMixin(CreateModel(WebProcessingServiceCatalogGroupTraits))))) {
+class WebProcessingServiceCatalogGroup extends GroupMixin(GetCapabilitiesMixin(UrlMixin(CatalogMemberMixin(CreateModel(WebProcessingServiceCatalogGroupTraits))))) {
+    constructor(...args) {
+        super(...args);
+        makeObservable(this);
+    }
     get type() {
         return WebProcessingServiceCatalogGroup.type;
     }
@@ -174,7 +189,13 @@ export default class WebProcessingServiceCatalogGroup extends GroupMixin(GetCapa
                 .toString();
     }
 }
-WebProcessingServiceCatalogGroup.type = "wps-getCapabilities";
+Object.defineProperty(WebProcessingServiceCatalogGroup, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "wps-getCapabilities"
+});
+export default WebProcessingServiceCatalogGroup;
 __decorate([
     computed
 ], WebProcessingServiceCatalogGroup.prototype, "defaultGetCapabilitiesUrl", null);

@@ -11,8 +11,18 @@ import WebMapServiceCatalogGroup from "../Ows/WebMapServiceCatalogGroup";
 export class ThreddsDatasetStratum extends LoadableStratum(ThreddsItemReferenceTraits) {
     constructor(threddsItemReference, threddsDataset) {
         super();
-        this.threddsItemReference = threddsItemReference;
-        this.threddsDataset = threddsDataset;
+        Object.defineProperty(this, "threddsItemReference", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: threddsItemReference
+        });
+        Object.defineProperty(this, "threddsDataset", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: threddsDataset
+        });
     }
     duplicateLoadableStratum(newModel) {
         return new ThreddsDatasetStratum(this.threddsItemReference, this.threddsDataset);
@@ -31,19 +41,34 @@ export class ThreddsDatasetStratum extends LoadableStratum(ThreddsItemReferenceT
         return this.threddsDataset.wmsUrl;
     }
 }
-ThreddsDatasetStratum.stratumName = "threddsDataset";
+Object.defineProperty(ThreddsDatasetStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "threddsDataset"
+});
 StratumOrder.addLoadStratum(ThreddsDatasetStratum.stratumName);
-export default class ThreddsItemReference extends UrlMixin(ReferenceMixin(CreateModel(ThreddsItemReferenceTraits))) {
-    constructor(id, terria, sourceReference, strata) {
-        super(id, terria, sourceReference, strata);
-        this._threddsDataset = undefined;
-        this._threddsCatalogGroup = undefined;
-    }
+class ThreddsItemReference extends UrlMixin(ReferenceMixin(CreateModel(ThreddsItemReferenceTraits))) {
     get type() {
         return ThreddsItemReference.type;
     }
     get typeName() {
         return i18next.t("models.threddsItem.name");
+    }
+    constructor(id, terria, sourceReference, strata) {
+        super(id, terria, sourceReference, strata);
+        Object.defineProperty(this, "_threddsDataset", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "_threddsCatalogGroup", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
     }
     setDataset(dataset) {
         this._threddsDataset = dataset;
@@ -81,5 +106,11 @@ export default class ThreddsItemReference extends UrlMixin(ReferenceMixin(Create
         return model;
     }
 }
-ThreddsItemReference.type = "thredds-item";
+Object.defineProperty(ThreddsItemReference, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "thredds-item"
+});
+export default ThreddsItemReference;
 //# sourceMappingURL=ThreddsItemReference.js.map

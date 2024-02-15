@@ -9,6 +9,15 @@ import mixTraits from "../mixTraits";
 import CatalogMemberTraits from "./CatalogMemberTraits";
 import LegendOwnerTraits from "./LegendOwnerTraits";
 export default class CatalogFunctionTraits extends mixTraits(CatalogMemberTraits, LegendOwnerTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "parameters", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     anyTrait({

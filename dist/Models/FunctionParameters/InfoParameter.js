@@ -4,17 +4,34 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { computed, observable } from "mobx";
+import { makeObservable, observable, override } from "mobx";
 import isDefined from "../../Core/isDefined";
 import FunctionParameter from "./FunctionParameter";
 /**
  * Function Parameter for showing information - this makes no changes to `parameters`, all values are stored locally.
  */
-export default class InfoParameter extends FunctionParameter {
+class InfoParameter extends FunctionParameter {
     constructor(catalogFunction, options) {
         super(catalogFunction, options);
-        this.type = "info";
-        this._errorMessage = false;
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "info"
+        });
+        Object.defineProperty(this, "_value", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_errorMessage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        makeObservable(this);
         if (isDefined(options.value)) {
             this._value = options.value;
         }
@@ -35,14 +52,20 @@ export default class InfoParameter extends FunctionParameter {
         this._value = undefined;
     }
 }
-InfoParameter.type = "info";
+Object.defineProperty(InfoParameter, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "info"
+});
+export default InfoParameter;
 __decorate([
     observable
 ], InfoParameter.prototype, "_value", void 0);
 __decorate([
-    computed
+    override
 ], InfoParameter.prototype, "isValid", null);
 __decorate([
-    computed
+    override
 ], InfoParameter.prototype, "value", null);
 //# sourceMappingURL=InfoParameter.js.map

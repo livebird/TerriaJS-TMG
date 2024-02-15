@@ -14,6 +14,21 @@ import GroupTraits from "./GroupTraits";
 import LegendOwnerTraits from "./LegendOwnerTraits";
 import UrlTraits from "./UrlTraits";
 export default class WebMapServiceCatalogGroupTraits extends mixTraits(GetCapabilitiesTraits, GroupTraits, UrlTraits, CatalogMemberTraits, LegendOwnerTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "flatten", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "perLayerLinkedWcs", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({

@@ -10,6 +10,21 @@ import CatalogMemberReferenceTraits from "./CatalogMemberReferenceTraits";
 import UrlTraits from "./UrlTraits";
 import primitiveTrait from "../Decorators/primitiveTrait";
 export default class TerriaReferenceTraits extends mixTraits(UrlTraits, CatalogMemberReferenceTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "isOpen", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "path", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({

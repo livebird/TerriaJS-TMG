@@ -4,19 +4,29 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import ModelTraits from "../ModelTraits";
-import primitiveTrait from "../Decorators/primitiveTrait";
-import primitiveArrayTrait from "../Decorators/primitiveArrayTrait";
+import BoxDrawingTraits from "../BoxDrawingTraits";
 import objectArrayTrait from "../Decorators/objectArrayTrait";
 import objectTrait from "../Decorators/objectTrait";
-import LatLonHeightTraits from "./LatLonHeightTraits";
-import BoxDrawingTraits from "../BoxDrawingTraits";
+import primitiveArrayTrait from "../Decorators/primitiveArrayTrait";
+import primitiveTrait from "../Decorators/primitiveTrait";
 import mixTraits from "../mixTraits";
+import ModelTraits from "../ModelTraits";
+import LatLonHeightTraits from "./LatLonHeightTraits";
 export class ClippingPlaneDefinitionTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.distance = 0;
-        this.normal = [];
+        Object.defineProperty(this, "distance", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
+        Object.defineProperty(this, "normal", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
     }
 }
 __decorate([
@@ -36,8 +46,42 @@ __decorate([
 export class ClippingPlaneCollectionTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.enabled = true;
-        this.unionClippingRegions = false;
+        Object.defineProperty(this, "enabled", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "unionClippingRegions", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "edgeWidth", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "edgeColor", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "planes", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "modelMatrix", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([
@@ -84,6 +128,27 @@ __decorate([
     })
 ], ClippingPlaneCollectionTraits.prototype, "modelMatrix", void 0);
 export class ClippingBoxDimensionTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "length", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "width", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "height", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -109,11 +174,48 @@ __decorate([
 export class ClippingBoxTraits extends mixTraits(BoxDrawingTraits) {
     constructor() {
         super(...arguments);
-        this.enableFeature = true;
-        this.clipModel = false;
-        this.showClippingBox = true;
-        this.keepBoxAboveGround = true;
-        this.clipDirection = "inside";
+        Object.defineProperty(this, "enableFeature", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "clipModel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "showClippingBox", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "keepBoxAboveGround", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "position", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "dimensions", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "clipDirection", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "inside"
+        });
     }
 }
 __decorate([
@@ -166,6 +268,21 @@ __decorate([
     })
 ], ClippingBoxTraits.prototype, "clipDirection", void 0);
 export default class ClippingPlanesTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "clippingPlanes", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "clippingBox", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     objectTrait({

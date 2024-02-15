@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import createReactClass from "create-react-class";
 import PropTypes from "prop-types";
@@ -15,8 +16,7 @@ const MoreOrLess = createReactClass({
         this.setState({ isOpen: !this.state.isOpen });
     },
     render: function () {
-        return (React.createElement("button", { type: "button", onClick: this.toggleIcon, className: this.props.myclass },
-            React.createElement(Icon, { glyph: this.state.isOpen ? Icon.GLYPHS.showLess : Icon.GLYPHS.showMore })));
+        return (_jsx("button", { type: "button", onClick: this.toggleIcon, className: this.props.myclass, children: _jsx(Icon, { glyph: this.state.isOpen ? Icon.GLYPHS.showLess : Icon.GLYPHS.showMore }) }));
     }
 });
 module.exports = MoreOrLess;

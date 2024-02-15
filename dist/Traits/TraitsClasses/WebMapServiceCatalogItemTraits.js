@@ -26,6 +26,33 @@ import UrlTraits from "./UrlTraits";
 export const SUPPORTED_CRS_3857 = ["EPSG:3857", "EPSG:900913"];
 export const SUPPORTED_CRS_4326 = ["EPSG:4326", "CRS:84", "EPSG:4283"];
 export class WebMapServiceAvailableStyleTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "name", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "title", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "abstract", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "legend", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -56,6 +83,21 @@ __decorate([
     })
 ], WebMapServiceAvailableStyleTraits.prototype, "legend", void 0);
 export class WebMapServiceAvailableLayerStylesTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "layerName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "styles", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -73,6 +115,51 @@ __decorate([
     })
 ], WebMapServiceAvailableLayerStylesTraits.prototype, "styles", void 0);
 export class WebMapServiceAvailableDimensionTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "name", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "values", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "units", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "unitSymbol", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "default", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "multipleValues", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "nearestValue", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -124,6 +211,21 @@ __decorate([
     })
 ], WebMapServiceAvailableDimensionTraits.prototype, "nearestValue", void 0);
 export class WebMapServiceAvailableLayerDimensionsTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "layerName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "dimensions", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -141,12 +243,27 @@ __decorate([
     })
 ], WebMapServiceAvailableLayerDimensionsTraits.prototype, "dimensions", void 0);
 export class GetFeatureInfoFormat extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "format", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
         type: "string",
         name: "Type",
-        description: "The type of response to expect from a GetFeatureInfo request.  Valid values are 'json', 'xml', 'html', or 'text'."
+        description: "The type of response to expect from a GetFeatureInfo request.  Valid values are 'json', 'xml', 'html', 'text' or 'csv'. If type is 'csv', then featureInfoContext will contain timeSeries object (see \"Customizing the Feature Info Template\" in documentation)"
     })
 ], GetFeatureInfoFormat.prototype, "type", void 0);
 __decorate([
@@ -159,17 +276,138 @@ __decorate([
 let WebMapServiceCatalogItemTraits = class WebMapServiceCatalogItemTraits extends mixTraits(ExportWebCoverageServiceTraits, DiffableTraits, LayerOrderingTraits, GetCapabilitiesTraits, ImageryProviderTraits, UrlTraits, MappableTraits, CatalogMemberTraits, LegendOwnerTraits, MinMaxLevelTraits) {
     constructor() {
         super(...arguments);
-        this.maxRefreshIntervals = 1000;
-        this.disableDimensionSelectors = false;
-        this.isGeoServer = false;
-        this.isEsri = false;
-        this.isThredds = false;
-        this.isNcWMS = false;
-        this.supportsColorScaleRange = false;
-        this.supportsGetLegendGraphic = false;
-        this.colorScaleMinimum = -50;
-        this.colorScaleMaximum = 50;
-        this.useWmsVersion130 = true;
+        Object.defineProperty(this, "layers", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "styles", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "crs", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "dimensions", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "availableStyles", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "availableDimensions", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "parameters", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "maxRefreshIntervals", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 1000
+        });
+        Object.defineProperty(this, "disableDimensionSelectors", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "isGeoServer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "isEsri", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "isThredds", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "isNcWMS", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "supportsColorScaleRange", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "supportsGetLegendGraphic", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "supportsGetTimeseries", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "colorScaleMinimum", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: -50
+        });
+        Object.defineProperty(this, "colorScaleMaximum", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 50
+        });
+        Object.defineProperty(this, "useWmsVersion130", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "getFeatureInfoFormat", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "getFeatureInfoUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "getFeatureInfoParameters", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 };
 __decorate([
@@ -279,6 +517,13 @@ __decorate([
         description: "Gets or sets whether this WMS server supports GetLegendGraphic requests."
     })
 ], WebMapServiceCatalogItemTraits.prototype, "supportsGetLegendGraphic", void 0);
+__decorate([
+    primitiveTrait({
+        type: "boolean",
+        name: "Supports GetTimeseries requests",
+        description: 'Gets or sets whether this WMS server supports GetTimeseries requests. If true, then GetTimeseries will be used instead of GetFeatureInfo. This will also set default value of `getFeatureInfoFormat` to `{ format: "text/csv", type: "text" }`'
+    })
+], WebMapServiceCatalogItemTraits.prototype, "supportsGetTimeseries", void 0);
 __decorate([
     primitiveTrait({
         type: "number",

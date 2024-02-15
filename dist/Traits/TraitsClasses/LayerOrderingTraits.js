@@ -9,8 +9,18 @@ import primitiveTrait from "../Decorators/primitiveTrait";
 export default class LayerOrderingTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.keepOnTop = false;
-        this.supportsReordering = true;
+        Object.defineProperty(this, "keepOnTop", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "supportsReordering", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
     }
 }
 __decorate([

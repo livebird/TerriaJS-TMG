@@ -8,6 +8,15 @@ import primitiveTrait from "../Decorators/primitiveTrait";
 import mixTraits from "../mixTraits";
 import ReferenceTraits from "./ReferenceTraits";
 export default class SplitItemReferenceTraits extends mixTraits(ReferenceTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "splitSourceItemId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({

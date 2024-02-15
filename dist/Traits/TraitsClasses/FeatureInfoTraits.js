@@ -10,7 +10,36 @@ import ModelTraits from "../ModelTraits";
 export class FeatureInfoTemplateTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.showFeatureInfoDownloadWithTemplate = false;
+        Object.defineProperty(this, "name", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "template", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "showFeatureInfoDownloadWithTemplate", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "partials", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "formats", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([
@@ -57,7 +86,18 @@ __decorate([
 export default class FeatureInfoUrlTemplateTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.maxRequests = 10;
+        Object.defineProperty(this, "featureInfoUrlTemplate", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "maxRequests", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 10
+        });
     }
 }
 __decorate([

@@ -1,5 +1,6 @@
 "use strict";
-import React, { useRef, useState } from "react";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { useRef, useState } from "react";
 import styled, { useTheme } from "styled-components";
 import Box from "../../Styled/Box";
 import { RawButton } from "../../Styled/Button";
@@ -77,7 +78,7 @@ function MapIconButton(props) {
     const [isExpanded, setExpanded] = useState(false);
     const { children, roundLeft, roundRight, title, expandInPlace, neverCollapse, primary, splitter, inverted, disabled, noExpand = false } = props;
     const expanded = !noExpand && (isExpanded || neverCollapse) && children;
-    const buttonRef = props.buttonRef || useRef();
+    const buttonRef = useRef();
     const theme = useTheme();
     // const handleAway = () => setTimeout(() => setExpanded(false), 1000);
     const handleAway = () => setExpanded(false);
@@ -86,16 +87,13 @@ function MapIconButton(props) {
             setExpanded(expanded);
         }
     };
-    const MapIconButtonRaw = (React.createElement(StyledMapIconButton, { ref: buttonRef, className: props.className, primary: primary, splitter: splitter, inverted: inverted, roundLeft: roundLeft, roundRight: roundRight, disabled: disabled, type: "button", title: title, onMouseOver: () => handleFocus(true), onFocus: () => handleFocus(true), onMouseOut: handleAway, onBlur: handleAway, onClick: props.onClick, css: `
+    const MapIconButtonRaw = (_jsx(StyledMapIconButton, { ref: props.buttonRef || buttonRef, className: props.className, primary: primary, splitter: splitter, inverted: inverted, roundLeft: roundLeft, roundRight: roundRight, disabled: disabled, type: "button", title: title, onMouseOver: () => handleFocus(true), onFocus: () => handleFocus(true), onMouseOut: handleAway, onBlur: handleAway, onClick: props.onClick, css: `
         svg {
           margin: 0px 6px;
         }
-      ` },
-        React.createElement(ButtonWrapper, null,
-            primary && props.closeIconElement && (React.createElement("span", { css: `
+      `, children: _jsxs(ButtonWrapper, { children: [primary && props.closeIconElement && (_jsx("span", { css: `
               display: block;
-            ` }, props.closeIconElement())),
-            children && (React.createElement(TextSpan, { noWrap: true, medium: true, css: `
+            `, children: props.closeIconElement() })), children && (_jsx(TextSpan, { noWrap: true, medium: true, css: `
               display: block;
               transition: visibility 0.3s ease, max-width 0.3s ease,
                 margin-right 0.3s ease, opacity 0.3s ease;
@@ -103,14 +101,13 @@ function MapIconButton(props) {
               max-width: ${expanded ? `150px` : `0px`};
               margin-right: ${expanded ? `10px` : `0px`};
               opacity: ${expanded ? `1.0` : `0`};
-            ` }, children)),
-            props.iconElement && (React.createElement("span", { css: `
+            `, children: children })), props.iconElement && (_jsx("span", { css: `
               display: block;
-            ` }, props.iconElement())))));
+            `, children: props.iconElement() }))] }) }));
     // we need to add some positional wrapping elements if we need to expand the
     // button in place (`absolute`ly) instead of in the layout flow (`relative`).
     if (expandInPlace) {
-        return (React.createElement("div", { css: expandInPlace &&
+        return (_jsx("div", { css: expandInPlace &&
                 `
             position:relative;
             width: 32px;
@@ -121,14 +118,13 @@ function MapIconButton(props) {
                     ? "64px"
                     : "32px"};
             }
-          ` },
-            React.createElement("div", { css: expandInPlace &&
+          `, children: _jsx("div", { css: expandInPlace &&
                     `
               position:absolute;
               top:0;
               right:0;
               ${isExpanded && `z-index:10;`}
-            ` }, MapIconButtonRaw)));
+            `, children: MapIconButtonRaw }) }));
     }
     else
         return MapIconButtonRaw;

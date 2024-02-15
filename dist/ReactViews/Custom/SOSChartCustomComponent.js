@@ -4,13 +4,18 @@ import ChartCustomComponent from "./ChartCustomComponent";
 export default class SOSChartCustomComponent extends ChartCustomComponent {
     constructor() {
         super(...arguments);
-        this.constructShareableCatalogItem = async (id, context, sourceReference) => this.createItemReference(context.catalogItem);
+        Object.defineProperty(this, "constructShareableCatalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: async (id, context, sourceReference) => this.createItemReference(context.catalogItem)
+        });
     }
     get name() {
         return "sos-chart";
     }
     get attributes() {
-        let attributes = super.attributes;
+        const attributes = super.attributes;
         attributes.push("name");
         return attributes;
     }

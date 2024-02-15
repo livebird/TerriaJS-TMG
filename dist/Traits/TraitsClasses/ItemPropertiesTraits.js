@@ -10,6 +10,21 @@ import primitiveArrayTrait from "../Decorators/primitiveArrayTrait";
 import primitiveTrait from "../Decorators/primitiveTrait";
 import ModelTraits from "../ModelTraits";
 export class ItemPropertiesByTypeTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "itemProperties", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -27,7 +42,18 @@ __decorate([
 export class ItemPropertiesByIdTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.ids = [];
+        Object.defineProperty(this, "ids", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "itemProperties", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([
@@ -46,8 +72,24 @@ __decorate([
 export class ItemPropertiesTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.itemPropertiesByType = [];
-        this.itemPropertiesByIds = [];
+        Object.defineProperty(this, "itemProperties", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "itemPropertiesByType", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "itemPropertiesByIds", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
     }
 }
 __decorate([

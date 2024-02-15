@@ -9,10 +9,30 @@ import primitiveTrait from "../Decorators/primitiveTrait";
 export default class ScaleByDistanceTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.near = 0.0;
-        this.nearValue = 1.0;
-        this.far = 1.0;
-        this.farValue = 1.0;
+        Object.defineProperty(this, "near", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0.0
+        });
+        Object.defineProperty(this, "nearValue", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 1.0
+        });
+        Object.defineProperty(this, "far", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 1.0
+        });
+        Object.defineProperty(this, "farValue", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 1.0
+        });
     }
 }
 __decorate([

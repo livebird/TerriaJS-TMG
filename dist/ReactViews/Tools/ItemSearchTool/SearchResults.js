@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { observer } from "mobx-react";
 import Mustache from "mustache";
 import React, { useState } from "react";
@@ -29,24 +30,17 @@ const SearchResults = (props) => {
             ? setCurrentMapEffect({ is: "none" })
             : setCurrentMapEffect(newSelection);
     };
-    return (React.createElement(Wrapper, null,
-        React.createElement(ResultsCount, { count: results.length }),
-        React.createElement(ActionMenu, null,
-            React.createElement(ActionButton, { selected: currentMapEffect.is === "highlightAll", onClick: () => toggleSelection({ is: "highlightAll" }) }, t("itemSearchTool.actions.highlightAll")),
-            React.createElement(ActionButton, { selected: currentMapEffect.is === "showMatchingOnly", onClick: () => toggleSelection({ is: "showMatchingOnly" }) }, t("itemSearchTool.actions.showMatchingOnly"))),
-        React.createElement(List, { ref: parentRef, height: `250px` },
-            React.createElement(ListInner, { height: `${list.totalSize}px` }, list.virtualItems.map(({ index, ...row }) => (React.createElement(Result, { key: results[index].id, result: results[index], isSelected: results[index].id === (selectedResult === null || selectedResult === void 0 ? void 0 : selectedResult.id), isEven: index % 2 === 0, onClick: () => toggleSelection({
-                    is: "highlightSingleResult",
-                    result: results[index]
-                }), template: props.template, style: {
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: `${row.size}px`,
-                    transform: `translateY(${row.start}px)`
-                } }))))),
-        React.createElement(MapEffects, { effect: currentMapEffect, item: item, results: results })));
+    return (_jsxs(Wrapper, { children: [_jsx(ResultsCount, { count: results.length }), _jsxs(ActionMenu, { children: [_jsx(ActionButton, { selected: currentMapEffect.is === "highlightAll", onClick: () => toggleSelection({ is: "highlightAll" }), children: t("itemSearchTool.actions.highlightAll") }), _jsx(ActionButton, { selected: currentMapEffect.is === "showMatchingOnly", onClick: () => toggleSelection({ is: "showMatchingOnly" }), children: t("itemSearchTool.actions.showMatchingOnly") })] }), _jsx(List, { ref: parentRef, height: `250px`, children: _jsx(ListInner, { height: `${list.totalSize}px`, children: list.virtualItems.map(({ index, ...row }) => (_jsx(Result, { result: results[index], isSelected: results[index].id === (selectedResult === null || selectedResult === void 0 ? void 0 : selectedResult.id), isEven: index % 2 === 0, onClick: () => toggleSelection({
+                            is: "highlightSingleResult",
+                            result: results[index]
+                        }), template: props.template, style: {
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: `${row.size}px`,
+                            transform: `translateY(${row.start}px)`
+                        } }, results[index].id))) }) }), _jsx(MapEffects, { effect: currentMapEffect, item: item, results: results })] }));
 };
 export const Result = observer((props) => {
     const { result, template, isEven, isSelected, style } = props;
@@ -61,7 +55,7 @@ export const Result = observer((props) => {
             e.preventDefault();
         }
     };
-    return (React.createElement(ClickableItem, { role: "button", isEven: isEven, isSelected: isSelected, onClick: onClick, style: style }, content));
+    return (_jsx(ClickableItem, { role: "button", isEven: isEven, isSelected: isSelected, onClick: onClick, style: style, children: content }));
 });
 const ClickableItem = styled.a `
   display: block;
@@ -93,10 +87,10 @@ const Wrapper = styled(Box).attrs({ column: true, flex: 1 }) `
 `;
 export const ResultsCount = ({ count }) => {
     const [t] = useTranslation();
-    return (React.createElement(Box, { css: `
+    return (_jsx(Box, { css: `
         margin-bottom: 1em;
         ${count === 0 ? "align-self: center;" : ""}
-      ` }, t(`itemSearchTool.resultsCount`, { count })));
+      `, children: t(`itemSearchTool.resultsCount`, { count }) }));
 };
 const ActionButton = styled(Button).attrs((props) => ({
     primary: props.selected,

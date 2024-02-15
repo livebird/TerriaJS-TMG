@@ -6,7 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import { featureCollection } from "@turf/helpers";
 import i18next from "i18next";
-import { computed, observable, runInAction } from "mobx";
+import { computed, observable, runInAction, makeObservable } from "mobx";
 import RequestErrorEvent from "terriajs-cesium/Source/Core/RequestErrorEvent";
 import URI from "urijs";
 import { isJsonNumber, isJsonObject, isJsonString, isJsonStringArray } from "../../../Core/Json";
@@ -16,7 +16,7 @@ import TerriaError, { networkRequestError } from "../../../Core/TerriaError";
 import GeoJsonMixin, { toFeatureCollection } from "../../../ModelMixins/GeojsonMixin";
 import CartoMapV3CatalogItemTraits from "../../../Traits/TraitsClasses/CartoMapV3CatalogItemTraits";
 import { GeoJsonTraits } from "../../../Traits/TraitsClasses/GeoJsonTraits";
-import TableStyleTraits from "../../../Traits/TraitsClasses/TableStyleTraits";
+import TableStyleTraits from "../../../Traits/TraitsClasses/Table/StyleTraits";
 import CreateModel from "../../Definition/CreateModel";
 import createStratumInstance from "../../Definition/createStratumInstance";
 import LoadableStratum from "../../Definition/LoadableStratum";
@@ -24,7 +24,13 @@ import StratumOrder from "../../Definition/StratumOrder";
 class CartoMapV3Stratum extends LoadableStratum(GeoJsonTraits) {
     constructor(catalogItem) {
         super();
-        this.catalogItem = catalogItem;
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogItem
+        });
+        makeObservable(this);
     }
     static load(item) {
         return new CartoMapV3Stratum(item);
@@ -42,15 +48,35 @@ class CartoMapV3Stratum extends LoadableStratum(GeoJsonTraits) {
         ];
     }
 }
-CartoMapV3Stratum.stratumName = "cartoMapV3Stratum";
+Object.defineProperty(CartoMapV3Stratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "cartoMapV3Stratum"
+});
 __decorate([
     computed
 ], CartoMapV3Stratum.prototype, "styles", null);
 StratumOrder.addLoadStratum(CartoMapV3Stratum.stratumName);
-export default class CartoMapV3CatalogItem extends GeoJsonMixin(CreateModel(CartoMapV3CatalogItemTraits)) {
+class CartoMapV3CatalogItem extends GeoJsonMixin(CreateModel(CartoMapV3CatalogItemTraits)) {
     constructor(id, terria, sourceReference) {
         super(id, terria, sourceReference);
-        this.geoJsonUrls = [];
+        Object.defineProperty(this, "geoJsonUrls", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        // Commented out as we don't support tileJSON yet
+        // @observable
+        // mvtTileJsonUrls: string[] = [];
+        Object.defineProperty(this, "geoJsonSize", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
         if (this.strata.get(CartoMapV3Stratum.stratumName) === undefined) {
             runInAction(() => {
                 this.strata.set(CartoMapV3Stratum.stratumName, new CartoMapV3Stratum(this));
@@ -64,17 +90,17 @@ export default class CartoMapV3CatalogItem extends GeoJsonMixin(CreateModel(Cart
         return i18next.t("models.carto-v3.name");
     }
     async forceLoadMetadata() {
-        var _a;
+        var _a, _b, _c;
         let response;
         // If cartoQuery is defined - use Query API (https://api-docs.carto.com/#8f2020d9-edf3-4b50-ae58-9edeaa34613c)
         if (this.cartoQuery) {
             const url = new URI(this.baseUrl)
                 .path("")
                 .path(`v3/maps/${this.connectionName}/query`);
-            response = (await callCartoApi(url.toString(), this.accessToken, {
+            response = (_a = (await callCartoApi(url.toString(), this.accessToken, {
                 q: this.cartoQuery,
                 geo_column: this.cartoGeoColumn
-            })).throwIfError();
+            }))) === null || _a === void 0 ? void 0 : _a.throwIfError();
         }
         // If cartoTableName is defined - use Table API (https://api-docs.carto.com/#6a05d4d7-c6a1-4635-a8de-c91fa5e77fda)
         else if (this.cartoTableName) {
@@ -83,10 +109,10 @@ export default class CartoMapV3CatalogItem extends GeoJsonMixin(CreateModel(Cart
                 .path(`v3/maps/${this.connectionName}/table`)
                 .query({
                 name: this.cartoTableName,
-                columns: (_a = this.cartoColumns) === null || _a === void 0 ? void 0 : _a.join(","),
+                columns: (_b = this.cartoColumns) === null || _b === void 0 ? void 0 : _b.join(","),
                 geo_column: this.cartoGeoColumn
             });
-            response = (await callCartoApi(url.toString(), this.accessToken)).throwIfError();
+            response = (_c = (await callCartoApi(url.toString(), this.accessToken))) === null || _c === void 0 ? void 0 : _c.throwIfError();
         }
         else {
             throw new TerriaError({
@@ -128,7 +154,8 @@ export default class CartoMapV3CatalogItem extends GeoJsonMixin(CreateModel(Cart
         let jsonData = undefined;
         // Download all geoJson files
         const geojsonResponses = await Promise.all(this.geoJsonUrls.map(async (url) => {
-            jsonData = (await callCartoApi(url, this.accessToken)).throwIfError();
+            var _a;
+            jsonData = (_a = (await callCartoApi(url, this.accessToken))) === null || _a === void 0 ? void 0 : _a.throwIfError();
             if (jsonData === undefined) {
                 throw new TerriaError({
                     title: "Failed to load GeoJSON",
@@ -185,7 +212,13 @@ export default class CartoMapV3CatalogItem extends GeoJsonMixin(CreateModel(Cart
         return combinedFeatureCollection;
     }
 }
-CartoMapV3CatalogItem.type = "carto-v3";
+Object.defineProperty(CartoMapV3CatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "carto-v3"
+});
+export default CartoMapV3CatalogItem;
 __decorate([
     observable
 ], CartoMapV3CatalogItem.prototype, "geoJsonUrls", void 0);
@@ -217,7 +250,9 @@ async function callCartoApi(url, auth, body) {
                     })));
                 }
             }
-            catch { }
+            catch {
+                /* eslint-disable-line no-empty */
+            }
         }
         return Result.error(e);
     }

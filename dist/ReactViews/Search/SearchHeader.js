@@ -1,28 +1,21 @@
-import Loader from "../Loader";
+import { jsx as _jsx } from "react/jsx-runtime";
 import { observer } from "mobx-react";
-import React from "react";
-import createReactClass from "create-react-class";
-import PropTypes from "prop-types";
-import Styles from "./search-header.scss";
-/** Renders either a loader or a message based off search state. */
-export default observer(createReactClass({
-    displayName: "SearchHeader",
-    propTypes: {
-        searchResults: PropTypes.object.isRequired,
-        isWaitingForSearchToStart: PropTypes.bool
-    },
-    render() {
-        if (this.props.searchResults.isSearching ||
-            this.props.isWaitingForSearchToStart) {
-            return (React.createElement("div", { key: "loader", className: Styles.loader },
-                React.createElement(Loader, null)));
-        }
-        else if (this.props.searchResults.message) {
-            return (React.createElement("div", { key: "message", className: Styles.noResults }, this.props.searchResults.message));
-        }
-        else {
-            return null;
-        }
+import { useTranslation } from "react-i18next";
+import { applyTranslationIfExists } from "../../Language/languageHelpers";
+import { BoxSpan } from "../../Styled/Box";
+import Text from "../../Styled/Text";
+import Loader from "../Loader";
+const SearchHeader = observer((props) => {
+    const { i18n } = useTranslation();
+    if (props.searchResults.isSearching || props.isWaitingForSearchToStart) {
+        return (_jsx("div", { children: _jsx(Loader, { boxProps: { padded: true } }) }, "loader"));
     }
-}));
+    else if (props.searchResults.message) {
+        return (_jsx(BoxSpan, { paddedRatio: 2, children: _jsx(Text, { children: applyTranslationIfExists(props.searchResults.message.content, i18n, props.searchResults.message.params) }, "message") }));
+    }
+    else {
+        return null;
+    }
+});
+export default SearchHeader;
 //# sourceMappingURL=SearchHeader.js.map

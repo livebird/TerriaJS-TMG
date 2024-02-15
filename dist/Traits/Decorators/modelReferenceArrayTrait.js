@@ -18,7 +18,18 @@ export default function modelReferenceArrayTrait(options) {
 export class ModelReferenceArrayTrait extends Trait {
     constructor(id, options, parent) {
         super(id, options, parent);
-        this.decoratorForFlattened = computed.struct;
+        Object.defineProperty(this, "decoratorForFlattened", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: computed.struct
+        });
+        Object.defineProperty(this, "factory", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         this.factory = options.factory;
     }
     // This can probably be converted to a general array handler.
@@ -31,7 +42,7 @@ export class ModelReferenceArrayTrait extends Trait {
         const idMap = {};
         const removedIds = {};
         // Create a single array with all the unique model IDs.
-        for (let stratum of strataTopToBottom.values()) {
+        for (const stratum of strataTopToBottom.values()) {
             const modelIdArray = stratum[this.id];
             if (modelIdArray) {
                 modelIdArray.forEach((modelId) => {

@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, computed, runInAction } from "mobx";
+import { action, computed, runInAction, makeObservable, override } from "mobx";
 import binarySearch from "terriajs-cesium/Source/Core/binarySearch";
 import JulianDate from "terriajs-cesium/Source/Core/JulianDate";
 import getChartColorForId from "../Charts/getChartColorForId";
@@ -16,6 +16,10 @@ import CommonStrata from "../Models/Definition/CommonStrata";
 import { DATE_SECONDS_PRECISION } from "./TimeVarying";
 function DiscretelyTimeVaryingMixin(Base) {
     class DiscretelyTimeVaryingMixin extends ChartableMixin(Base) {
+        constructor(...args) {
+            super(...args);
+            makeObservable(this);
+        }
         get hasDiscreteTimes() {
             return true;
         }
@@ -79,7 +83,9 @@ function DiscretelyTimeVaryingMixin(Base) {
                         });
                     }
                 }
-                catch { }
+                catch {
+                    /* eslint-disable-line no-empty */
+                }
             }
             asJulian.sort((a, b) => JulianDate.compare(a.time, b.time));
             return asJulian;
@@ -266,7 +272,7 @@ function DiscretelyTimeVaryingMixin(Base) {
         }
     }
     __decorate([
-        computed
+        override
     ], DiscretelyTimeVaryingMixin.prototype, "currentTime", null);
     __decorate([
         computed({ equals: JulianDate.equals })
@@ -311,13 +317,13 @@ function DiscretelyTimeVaryingMixin(Base) {
         computed
     ], DiscretelyTimeVaryingMixin.prototype, "isNextDiscreteTimeAvailable", null);
     __decorate([
-        computed
+        override
     ], DiscretelyTimeVaryingMixin.prototype, "startTime", null);
     __decorate([
-        computed
+        override
     ], DiscretelyTimeVaryingMixin.prototype, "stopTime", null);
     __decorate([
-        computed
+        override
     ], DiscretelyTimeVaryingMixin.prototype, "multiplier", null);
     __decorate([
         action
@@ -350,7 +356,7 @@ function toJulianDate(time) {
     }
     const julianDate = JulianDate.fromIso8601(time);
     // Don't return an invalid JulianDate
-    if (julianDate.secondsOfDay === NaN || julianDate.dayNumber === NaN)
+    if (isNaN(julianDate.secondsOfDay) || isNaN(julianDate.dayNumber))
         return undefined;
     return julianDate;
 }
@@ -361,14 +367,14 @@ function toJulianDate(time) {
  *   whose values are objects whose keys are days, whose values are arrays of all the datetimes on that day.
  */
 function objectifyDates(dates) {
-    let result = { index: [], dates };
+    const result = { index: [], dates };
     for (let i = 0; i < dates.length; i++) {
-        let date = dates[i];
-        let year = date.getFullYear();
-        let century = Math.floor(year / 100);
-        let month = date.getMonth();
-        let day = date.getDate();
-        let hour = date.getHours();
+        const date = dates[i];
+        const year = date.getFullYear();
+        const century = Math.floor(year / 100);
+        const month = date.getMonth();
+        const day = date.getDate();
+        const hour = date.getHours();
         // ObjectifiedDates
         if (!result[century]) {
             result[century] = { index: [], dates: [] };

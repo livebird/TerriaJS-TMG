@@ -16,8 +16,18 @@ import UrlTraits from "./UrlTraits";
 export default class OpenStreetMapCatalogItemTraits extends mixTraits(ImageryProviderTraits, LayerOrderingTraits, UrlTraits, MappableTraits, CatalogMemberTraits, LegendOwnerTraits) {
     constructor() {
         super(...arguments);
-        this.fileExtension = "png";
-        this.subdomains = [];
+        Object.defineProperty(this, "fileExtension", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "png"
+        });
+        Object.defineProperty(this, "subdomains", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
     }
 }
 __decorate([

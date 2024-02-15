@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { computed, runInAction } from "mobx";
+import { computed, runInAction, makeObservable, override } from "mobx";
 import defined from "terriajs-cesium/Source/Core/defined";
 import WebMercatorTilingScheme from "terriajs-cesium/Source/Core/WebMercatorTilingScheme";
 import WebMapTileServiceImageryProvider from "terriajs-cesium/Source/Scene/WebMapTileServiceImageryProvider";
@@ -27,11 +27,6 @@ import LoadableStratum from "../../Definition/LoadableStratum";
 import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
 import WebMapTileServiceCapabilities from "./WebMapTileServiceCapabilities";
 class GetCapabilitiesStratum extends LoadableStratum(WebMapTileServiceCatalogItemTraits) {
-    constructor(catalogItem, capabilities) {
-        super();
-        this.catalogItem = catalogItem;
-        this.capabilities = capabilities;
-    }
     static async load(catalogItem, capabilities) {
         if (!isDefined(catalogItem.getCapabilitiesUrl)) {
             throw new TerriaError({
@@ -42,6 +37,22 @@ class GetCapabilitiesStratum extends LoadableStratum(WebMapTileServiceCatalogIte
         if (!isDefined(capabilities))
             capabilities = await WebMapTileServiceCapabilities.fromUrl(proxyCatalogItemUrl(catalogItem, catalogItem.getCapabilitiesUrl, catalogItem.getCapabilitiesCacheDuration));
         return new GetCapabilitiesStratum(catalogItem, capabilities);
+    }
+    constructor(catalogItem, capabilities) {
+        super();
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogItem
+        });
+        Object.defineProperty(this, "capabilities", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: capabilities
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(model) {
         return new GetCapabilitiesStratum(model, this.capabilities);
@@ -156,7 +167,7 @@ class GetCapabilitiesStratum extends LoadableStratum(WebMapTileServiceCatalogIte
         }
     }
     get capabilitiesLayer() {
-        let result = this.catalogItem.layer
+        const result = this.catalogItem.layer
             ? this.capabilities.findLayer(this.catalogItem.layer)
             : undefined;
         return result;
@@ -178,7 +189,7 @@ class GetCapabilitiesStratum extends LoadableStratum(WebMapTileServiceCatalogIte
         result.push({
             layerName: layer === null || layer === void 0 ? void 0 : layer.Identifier,
             styles: styles.map((style) => {
-                let wmtsLegendUrl = isReadOnlyArray(style.LegendURL)
+                const wmtsLegendUrl = isReadOnlyArray(style.LegendURL)
                     ? style.LegendURL[0]
                     : style.LegendURL;
                 let legendUri, legendMimeType;
@@ -231,9 +242,9 @@ class GetCapabilitiesStratum extends LoadableStratum(WebMapTileServiceCatalogIte
             if (!isDefined(levelZeroMatrix.TopLeftCorner)) {
                 continue;
             }
-            var levelZeroTopLeftCorner = levelZeroMatrix.TopLeftCorner.split(" ");
-            var startX = parseFloat(levelZeroTopLeftCorner[0]);
-            var startY = parseFloat(levelZeroTopLeftCorner[1]);
+            const levelZeroTopLeftCorner = levelZeroMatrix.TopLeftCorner.split(" ");
+            const startX = parseFloat(levelZeroTopLeftCorner[0]);
+            const startY = parseFloat(levelZeroTopLeftCorner[1]);
             const rectangleInMeters = standardTilingScheme.rectangleToNativeRectangle(standardTilingScheme.rectangle);
             if (Math.abs(startX - rectangleInMeters.west) > 1 ||
                 Math.abs(startY - rectangleInMeters.north) > 1) {
@@ -278,7 +289,12 @@ class GetCapabilitiesStratum extends LoadableStratum(WebMapTileServiceCatalogIte
         return ((_c = (_b = layerAvailableStyles === null || layerAvailableStyles === void 0 ? void 0 : layerAvailableStyles.find((style) => style.isDefault)) === null || _b === void 0 ? void 0 : _b.identifier) !== null && _c !== void 0 ? _c : (_d = layerAvailableStyles === null || layerAvailableStyles === void 0 ? void 0 : layerAvailableStyles[0]) === null || _d === void 0 ? void 0 : _d.identifier);
     }
 }
-GetCapabilitiesStratum.stratumName = "wmtsServer";
+Object.defineProperty(GetCapabilitiesStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "wmtsServer"
+});
 __decorate([
     computed
 ], GetCapabilitiesStratum.prototype, "layer", null);
@@ -310,12 +326,18 @@ __decorate([
     computed
 ], GetCapabilitiesStratum.prototype, "style", null);
 class WebMapTileServiceCatalogItem extends MappableMixin(GetCapabilitiesMixin(UrlMixin(CatalogMemberMixin(CreateModel(WebMapTileServiceCatalogItemTraits))))) {
-    constructor() {
-        super(...arguments);
+    constructor(...args) {
+        super(...args);
         // hide elements in the info section which might show information about the datasource
-        this._sourceInfoItemNames = [
-            i18next.t("models.webMapTileServiceCatalogItem.getCapabilitiesUrl")
-        ];
+        Object.defineProperty(this, "_sourceInfoItemNames", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: [
+                i18next.t("models.webMapTileServiceCatalogItem.getCapabilitiesUrl")
+            ]
+        });
+        makeObservable(this);
     }
     get type() {
         return WebMapTileServiceCatalogItem.type;
@@ -398,8 +420,9 @@ class WebMapTileServiceCatalogItem extends MappableMixin(GetCapabilitiesMixin(Ur
             tileHeight: (_e = (_d = this.tileHeight) !== null && _d !== void 0 ? _d : this.minimumLevel) !== null && _e !== void 0 ? _e : tileMatrixSet.tileHeight,
             tilingScheme: new WebMercatorTilingScheme(),
             format,
-            credit: this.attribution,
-            enablePickFeatures: this.allowFeaturePicking
+            credit: this.attribution
+            // TODO: implement picking for WebMapTileServiceImageryProvider
+            //enablePickFeatures: this.allowFeaturePicking
         });
         return imageryProvider;
     }
@@ -498,13 +521,23 @@ class WebMapTileServiceCatalogItem extends MappableMixin(GetCapabilitiesMixin(Ur
  * in the Abstract, the Abstract will not be used.  This makes it easy to filter out placeholder data like
  * Geoserver's "A compliant implementation of WMTS..." stock abstract.
  */
-WebMapTileServiceCatalogItem.abstractsToIgnore = [
-    "A compliant implementation of WMTS service.",
-    "This is the reference implementation of WMTS 1.0.0"
-];
-WebMapTileServiceCatalogItem.type = "wmts";
+Object.defineProperty(WebMapTileServiceCatalogItem, "abstractsToIgnore", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: [
+        "A compliant implementation of WMTS service.",
+        "This is the reference implementation of WMTS 1.0.0"
+    ]
+});
+Object.defineProperty(WebMapTileServiceCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "wmts"
+});
 __decorate([
-    computed
+    override
 ], WebMapTileServiceCatalogItem.prototype, "cacheDuration", null);
 __decorate([
     computed

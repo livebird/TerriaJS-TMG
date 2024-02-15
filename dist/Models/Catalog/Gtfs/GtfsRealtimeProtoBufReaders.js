@@ -8,10 +8,15 @@ export class ProtobufMessageReader {
 export class FeedMessageReader extends ProtobufMessageReader {
     constructor() {
         super();
-        this.defaultMessage = {
-            header: null,
-            entity: []
-        };
+        Object.defineProperty(this, "defaultMessage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                header: null,
+                entity: []
+            }
+        });
     }
     readField(tag, obj, pbf) {
         if (pbf === null || pbf === undefined) {
@@ -38,11 +43,16 @@ var FeedHeaderIncrementality;
 export class FeedHeaderReader extends ProtobufMessageReader {
     constructor() {
         super(...arguments);
-        this.defaultMessage = {
-            gtfs_realtime_version: "",
-            incrementality: FeedHeaderIncrementality.FULL_DATASET,
-            timestamp: 0
-        };
+        Object.defineProperty(this, "defaultMessage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                gtfs_realtime_version: "",
+                incrementality: FeedHeaderIncrementality.FULL_DATASET,
+                timestamp: 0
+            }
+        });
     }
     readField(tag, obj, pbf) {
         if (pbf === null || pbf === undefined) {
@@ -62,13 +72,18 @@ export class FeedHeaderReader extends ProtobufMessageReader {
 export class FeedEntityReader extends ProtobufMessageReader {
     constructor() {
         super(...arguments);
-        this.defaultMessage = {
-            id: "",
-            is_deleted: false,
-            trip_update: null,
-            vehicle: null,
-            alert: null
-        };
+        Object.defineProperty(this, "defaultMessage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                id: "",
+                is_deleted: false,
+                trip_update: null,
+                vehicle: null,
+                alert: null
+            }
+        });
     }
     readField(tag, obj, pbf) {
         if (pbf === null || pbf === undefined) {
@@ -92,13 +107,18 @@ export class FeedEntityReader extends ProtobufMessageReader {
 export class TripUpdateReader extends ProtobufMessageReader {
     constructor() {
         super(...arguments);
-        this.defaultMessage = {
-            trip: {},
-            vehicle: {},
-            stop_time_update: [],
-            timestamp: 0,
-            delay: 0
-        };
+        Object.defineProperty(this, "defaultMessage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                trip: {},
+                vehicle: {},
+                stop_time_update: [],
+                timestamp: 0,
+                delay: 0
+            }
+        });
     }
     readField(tag, obj, pbf) {
         if (pbf === null || pbf === undefined) {
@@ -125,11 +145,16 @@ export class TripUpdateReader extends ProtobufMessageReader {
 export class StopTimeEventReader extends ProtobufMessageReader {
     constructor() {
         super(...arguments);
-        this.defaultMessage = {
-            delay: 0,
-            time: 0,
-            uncertainty: 0
-        };
+        Object.defineProperty(this, "defaultMessage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                delay: 0,
+                time: 0,
+                uncertainty: 0
+            }
+        });
     }
     readField(tag, obj, pbf) {
         if (pbf === null || pbf === undefined) {
@@ -149,13 +174,18 @@ export class StopTimeEventReader extends ProtobufMessageReader {
 export class StopTimeUpdateReader extends ProtobufMessageReader {
     constructor() {
         super(...arguments);
-        this.defaultMessage = {
-            stop_sequence: 0,
-            stop_id: "",
-            arrival: null,
-            departure: null,
-            schedule_relationship: StopTimeUpdateScheduleRelationship.NO_DATA
-        };
+        Object.defineProperty(this, "defaultMessage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                stop_sequence: 0,
+                stop_id: "",
+                arrival: null,
+                departure: null,
+                schedule_relationship: StopTimeUpdateScheduleRelationship.NO_DATA
+            }
+        });
     }
     readField(tag, obj, pbf) {
         if (pbf === null || pbf === undefined) {
@@ -185,17 +215,22 @@ var StopTimeUpdateScheduleRelationship;
 export class VehiclePositionReader extends ProtobufMessageReader {
     constructor() {
         super(...arguments);
-        this.defaultMessage = {
-            trip: null,
-            vehicle: null,
-            position: null,
-            current_stop_sequence: 0,
-            stop_id: "",
-            current_status: VehicleStopStatus.IN_TRANSIT_TO,
-            timestamp: 0,
-            congestion_level: CongestionLevel.UNKNOWN_CONGESTION_LEVEL,
-            occupancy_status: OccupancyStatus.EMPTY
-        };
+        Object.defineProperty(this, "defaultMessage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                trip: null,
+                vehicle: null,
+                position: null,
+                current_stop_sequence: 0,
+                stop_id: "",
+                current_status: VehicleStopStatus.IN_TRANSIT_TO,
+                timestamp: 0,
+                congestion_level: CongestionLevel.UNKNOWN_CONGESTION_LEVEL,
+                occupancy_status: OccupancyStatus.EMPTY
+            }
+        });
     }
     readField(tag, obj, pbf) {
         if (pbf === null || pbf === undefined) {
@@ -251,15 +286,20 @@ export var OccupancyStatus;
 export class AlertReader extends ProtobufMessageReader {
     constructor() {
         super(...arguments);
-        this.defaultMessage = {
-            active_period: [],
-            informed_entity: [],
-            cause: AlertCause.CONSTRUCTION,
-            effect: AlertEffect.STOP_MOVED,
-            url: null,
-            header_text: null,
-            description_text: null
-        };
+        Object.defineProperty(this, "defaultMessage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                active_period: [],
+                informed_entity: [],
+                cause: AlertCause.CONSTRUCTION,
+                effect: AlertEffect.STOP_MOVED,
+                url: null,
+                header_text: null,
+                description_text: null
+            }
+        });
     }
     readField(tag, obj, pbf) {
         if (pbf === null || pbf === undefined) {
@@ -319,10 +359,15 @@ var AlertEffect;
 export class TimeRangeReader extends ProtobufMessageReader {
     constructor() {
         super(...arguments);
-        this.defaultMessage = {
-            start: 0,
-            end: 0
-        };
+        Object.defineProperty(this, "defaultMessage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                start: 0,
+                end: 0
+            }
+        });
     }
     readField(tag, obj, pbf) {
         if (pbf === null || pbf === undefined) {
@@ -340,13 +385,18 @@ export class TimeRangeReader extends ProtobufMessageReader {
 export class PositionReader extends ProtobufMessageReader {
     constructor() {
         super(...arguments);
-        this.defaultMessage = {
-            latitude: 0,
-            longitude: 0,
-            bearing: 0,
-            odometer: 0,
-            speed: 0
-        };
+        Object.defineProperty(this, "defaultMessage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                latitude: 0,
+                longitude: 0,
+                bearing: 0,
+                odometer: 0,
+                speed: 0
+            }
+        });
     }
     readField(tag, obj, pbf) {
         if (pbf === null || pbf === undefined) {
@@ -370,14 +420,19 @@ export class PositionReader extends ProtobufMessageReader {
 export class TripDescriptorReader extends ProtobufMessageReader {
     constructor() {
         super(...arguments);
-        this.defaultMessage = {
-            trip_id: "",
-            route_id: "",
-            direction_id: 0,
-            start_time: "",
-            start_date: "",
-            schedule_relationship: TripDescriptorScheduleRelationship.SCHEDULED
-        };
+        Object.defineProperty(this, "defaultMessage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                trip_id: "",
+                route_id: "",
+                direction_id: 0,
+                start_time: "",
+                start_date: "",
+                schedule_relationship: TripDescriptorScheduleRelationship.SCHEDULED
+            }
+        });
     }
     readField(tag, obj, pbf) {
         if (pbf === null || pbf === undefined) {
@@ -410,11 +465,16 @@ var TripDescriptorScheduleRelationship;
 export class VehicleDescriptorReader extends ProtobufMessageReader {
     constructor() {
         super(...arguments);
-        this.defaultMessage = {
-            id: "",
-            label: "",
-            license_plate: ""
-        };
+        Object.defineProperty(this, "defaultMessage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                id: "",
+                label: "",
+                license_plate: ""
+            }
+        });
     }
     readField(tag, obj, pbf) {
         if (pbf === null || pbf === undefined) {
@@ -434,13 +494,18 @@ export class VehicleDescriptorReader extends ProtobufMessageReader {
 export class EntitySelectorReader extends ProtobufMessageReader {
     constructor() {
         super(...arguments);
-        this.defaultMessage = {
-            agency_id: "",
-            route_id: "",
-            route_type: 0,
-            trip: null,
-            stop_id: ""
-        };
+        Object.defineProperty(this, "defaultMessage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                agency_id: "",
+                route_id: "",
+                route_type: 0,
+                trip: null,
+                stop_id: ""
+            }
+        });
     }
     readField(tag, obj, pbf) {
         if (pbf === null || pbf === undefined) {
@@ -464,7 +529,12 @@ export class EntitySelectorReader extends ProtobufMessageReader {
 export class TranslatedStringReader extends ProtobufMessageReader {
     constructor() {
         super(...arguments);
-        this.defaultMessage = { translation: [] };
+        Object.defineProperty(this, "defaultMessage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: { translation: [] }
+        });
     }
     readField(tag, obj, pbf) {
         if (pbf === null || pbf === undefined) {
@@ -483,7 +553,12 @@ export class TranslatedStringReader extends ProtobufMessageReader {
 export class TranslationReader extends ProtobufMessageReader {
     constructor() {
         super(...arguments);
-        this.defaultMessage = { text: "", language: "" };
+        Object.defineProperty(this, "defaultMessage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: { text: "", language: "" }
+        });
     }
     readField(tag, obj, pbf) {
         if (pbf === null || pbf === undefined) {

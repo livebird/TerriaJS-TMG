@@ -6,7 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import i18next from "i18next";
 import flatten from "lodash-es/flatten";
-import { action, computed, isObservableArray, runInAction } from "mobx";
+import { action, computed, isObservableArray, runInAction, makeObservable, override } from "mobx";
 import CesiumMath from "terriajs-cesium/Source/Core/Math";
 import URI from "urijs";
 import filterOutUndefined from "../../../Core/filterOutUndefined";
@@ -39,8 +39,19 @@ import WebProcessingServiceCatalogFunctionJob from "./WebProcessingServiceCatalo
 class WpsLoadableStratum extends LoadableStratum(WebProcessingServiceCatalogFunctionTraits) {
     constructor(item, processDescription) {
         super();
-        this.item = item;
-        this.processDescription = processDescription;
+        Object.defineProperty(this, "item", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: item
+        });
+        Object.defineProperty(this, "processDescription", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: processDescription
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(newModel) {
         return new WpsLoadableStratum(newModel, this.processDescription);
@@ -92,7 +103,12 @@ class WpsLoadableStratum extends LoadableStratum(WebProcessingServiceCatalogFunc
         return Boolean(this.processDescription.statusSupported);
     }
 }
-WpsLoadableStratum.stratumName = "wpsLoadable";
+Object.defineProperty(WpsLoadableStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "wpsLoadable"
+});
 __decorate([
     computed
 ], WpsLoadableStratum.prototype, "inputs", null);
@@ -100,7 +116,11 @@ __decorate([
     action
 ], WpsLoadableStratum, "load", null);
 StratumOrder.addLoadStratum(WpsLoadableStratum.stratumName);
-export default class WebProcessingServiceCatalogFunction extends XmlRequestMixin(CatalogFunctionMixin(CreateModel(WebProcessingServiceCatalogFunctionTraits))) {
+class WebProcessingServiceCatalogFunction extends XmlRequestMixin(CatalogFunctionMixin(CreateModel(WebProcessingServiceCatalogFunctionTraits))) {
+    constructor(...args) {
+        super(...args);
+        makeObservable(this);
+    }
     get type() {
         return WebProcessingServiceCatalogFunction.type;
     }
@@ -159,7 +179,7 @@ export default class WebProcessingServiceCatalogFunction extends XmlRequestMixin
     }
     async createJob(id) {
         const job = new WebProcessingServiceCatalogFunctionJob(id, this.terria);
-        let dataInputs = filterOutUndefined(await Promise.all(this.functionParameters
+        const dataInputs = filterOutUndefined(await Promise.all(this.functionParameters
             .filter((p) => isDefined(p.value) && p.value !== null)
             .map((p) => this.convertParameterToInput(p))));
         runInAction(() => updateModelFromJson(job, CommonStrata.user, {
@@ -198,7 +218,7 @@ export default class WebProcessingServiceCatalogFunction extends XmlRequestMixin
         }
     }
     async convertParameterToInput(parameter) {
-        let converter = parameterTypeToConverter(parameter);
+        const converter = parameterTypeToConverter(parameter);
         const result = converter === null || converter === void 0 ? void 0 : converter.parameterToInput(parameter);
         if (!isDefined(result)) {
             return;
@@ -214,9 +234,15 @@ export default class WebProcessingServiceCatalogFunction extends XmlRequestMixin
         };
     }
 }
-WebProcessingServiceCatalogFunction.type = "wps";
+Object.defineProperty(WebProcessingServiceCatalogFunction, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "wps"
+});
+export default WebProcessingServiceCatalogFunction;
 __decorate([
-    computed
+    override
 ], WebProcessingServiceCatalogFunction.prototype, "cacheDuration", null);
 __decorate([
     computed
@@ -355,8 +381,8 @@ const RectangleConverter = {
             !isDefined(input.BoundingBoxData.Default.CRS)) {
             return undefined;
         }
-        var code = Reproject.crsStringToCode(input.BoundingBoxData.Default.CRS);
-        var usedCrs = input.BoundingBoxData.Default.CRS;
+        let code = Reproject.crsStringToCode(input.BoundingBoxData.Default.CRS);
+        let usedCrs = input.BoundingBoxData.Default.CRS;
         // Find out if Terria's CRS is supported.
         if (code !== Reproject.TERRIA_CRS &&
             isDefined(input.BoundingBoxData.Supported) &&
@@ -465,7 +491,7 @@ function simpleGeoJsonDataConverter(schemaType, klass) {
                 !isDefined(input.ComplexData.Default.Format.Schema)) {
                 return undefined;
             }
-            var schema = input.ComplexData.Default.Format.Schema;
+            const schema = input.ComplexData.Default.Format.Schema;
             if (schema.indexOf("http://geojson.org/geojson-spec.html#") !== 0) {
                 return undefined;
             }

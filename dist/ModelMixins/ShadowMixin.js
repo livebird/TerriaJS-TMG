@@ -5,10 +5,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { computed, runInAction } from "mobx";
+import { computed, runInAction, makeObservable, override } from "mobx";
 import ShadowMode from "terriajs-cesium/Source/Scene/ShadowMode";
 function ShadowMixin(Base) {
     class ShadowMixin extends Base {
+        constructor(...args) {
+            super(...args);
+            makeObservable(this);
+        }
         get hasShadows() {
             return true;
         }
@@ -55,7 +59,7 @@ function ShadowMixin(Base) {
         computed
     ], ShadowMixin.prototype, "cesiumShadows", null);
     __decorate([
-        computed
+        override
     ], ShadowMixin.prototype, "selectableDimensions", null);
     return ShadowMixin;
 }

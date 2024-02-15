@@ -1,9 +1,10 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import { withTranslation } from "react-i18next";
 import DataUri from "../../Core/DataUri";
 import filterOutUndefined from "../../Core/filterOutUndefined";
 import Icon from "../../Styled/Icon";
-import { withViewState } from "../StandardUserInterface/ViewStateContext";
+import { withViewState } from "../Context";
 import Styles from "./feature-info-download.scss";
 const Dropdown = require("../Generic/Dropdown");
 class FeatureInfoDownload extends React.Component {
@@ -27,14 +28,13 @@ class FeatureInfoDownload extends React.Component {
     render() {
         const { t } = this.props;
         const links = this.getLinks();
-        const icon = (React.createElement("span", { className: Styles.iconDownload },
-            React.createElement(Icon, { glyph: Icon.GLYPHS.opened })));
-        return (React.createElement(Dropdown, { options: links, textProperty: "label", theme: {
+        const icon = (_jsx("span", { className: Styles.iconDownload, children: _jsx(Icon, { glyph: Icon.GLYPHS.opened }) }));
+        return (_jsx(Dropdown, { options: links, textProperty: "label", theme: {
                 dropdown: Styles.download,
                 list: Styles.dropdownList,
                 button: Styles.dropdownButton,
                 icon: icon
-            }, buttonClassName: Styles.btn }, t("featureInfo.download")));
+            }, buttonClassName: Styles.btn, children: t("featureInfo.download") }));
     }
 }
 /**

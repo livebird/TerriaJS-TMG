@@ -6,10 +6,27 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import ModelTraits from "../ModelTraits";
 import primitiveTrait from "../Decorators/primitiveTrait";
-export default class UrlTraits extends ModelTraits {
+class UrlTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.forceProxy = false;
+        Object.defineProperty(this, "url", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "forceProxy", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "cacheDuration", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([
@@ -33,4 +50,5 @@ __decorate([
         description: "The cache duration to use for proxied URLs for this catalog member. If undefined, proxied URLs are effectively cachable forever. The duration is expressed as a Varnish-like duration string, such as '1d' (one day) or '10000s' (ten thousand seconds)."
     })
 ], UrlTraits.prototype, "cacheDuration", void 0);
+export default UrlTraits;
 //# sourceMappingURL=UrlTraits.js.map

@@ -13,6 +13,24 @@ import TerriaError from "../Core/TerriaError";
  */
 export default class ShareDataService {
     constructor(options) {
+        Object.defineProperty(this, "terria", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "url", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_serverConfig", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         this.terria = options.terria;
         this.url = options.url;
     }

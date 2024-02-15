@@ -1,4 +1,5 @@
 "use strict";
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import createReactClass from "create-react-class";
 import PropTypes from "prop-types";
@@ -17,7 +18,7 @@ const SplitPoint = createReactClass({
         const ChunkComponent = this.state.component;
         const loadingProgress = this.props.loadingProgress;
         if (ChunkComponent)
-            return React.createElement(ChunkComponent, Object.assign({}, this.props));
+            return _jsx(ChunkComponent, { ...this.props });
         else if (loadingProgress)
             return loadingProgress;
         else

@@ -1,3 +1,4 @@
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 /**
  * TourPortal.jsx
  * Framework for tour
@@ -23,7 +24,7 @@ import { parseCustomMarkdownToReactWithOptions } from "../Custom/parseCustomMark
 import Caret from "../Generic/Caret";
 import CloseButton from "../Generic/CloseButton";
 import { useWindowSize } from "../Hooks/useWindowSize";
-import { useViewState } from "../StandardUserInterface/ViewStateContext";
+import { useViewState } from "../Context";
 import { applyTranslationIfExists } from "./../../Language/languageHelpers";
 import { calculateLeftPosition, calculateTopPosition, getOffsetsFromTourPoint } from "./tour-helpers.ts";
 import TourExplanationBox, { TourExplanationBoxZIndex } from "./TourExplanationBox.jsx";
@@ -38,9 +39,9 @@ import TourProgressDot from "./TourProgressDot.jsx";
 const TourProgress = ({ max, step, setTourIndex }) => {
     const countArray = Array.from(Array(max).keys()).map((e) => e++);
     const countStep = step;
-    return (React.createElement(Box, { centered: true }, countArray.map((count) => {
-        return (React.createElement(TourProgressDot, { onClick: () => setTourIndex(count), key: count, active: count < countStep }));
-    })));
+    return (_jsx(Box, { centered: true, children: countArray.map((count) => {
+            return (_jsx(TourProgressDot, { onClick: () => setTourIndex(count), active: count < countStep }, count));
+        }) }));
 };
 TourProgress.propTypes = {
     setTourIndex: PropTypes.func.isRequired,
@@ -54,40 +55,25 @@ export const TourExplanation = ({ topStyle, leftStyle, caretOffsetTop, caretOffs
         // Tour explanation requires the various positioning even if only just
         // showing the "tour indicator" button, as it is offset against the caret
         // which is offset against the original box
-        return (React.createElement(Box, { position: "absolute", style: {
+        return (_jsx(Box, { position: "absolute", style: {
                 zIndex: TourExplanationBoxZIndex - 1,
                 top: topStyle,
                 left: leftStyle
-            } },
-            React.createElement(Box, { position: "absolute", style: {
+            }, children: _jsx(Box, { position: "absolute", style: {
                     top: `${caretOffsetTop}px`,
                     left: `${caretOffsetLeft}px`
-                } },
-                React.createElement(TourIndicator, { onClick: onTourIndicatorClick, style: {
+                }, children: _jsx(TourIndicator, { onClick: onTourIndicatorClick, style: {
                         top: `${indicatorOffsetTop}px`,
                         left: `${indicatorOffsetLeft}px`
-                    } }))));
+                    } }) }) }));
     }
-    return (React.createElement(TourExplanationBox, { paddedRatio: 3, column: true, style: {
+    return (_jsxs(TourExplanationBox, { paddedRatio: 3, column: true, style: {
             top: topStyle,
             left: leftStyle
-        } },
-        React.createElement(CloseButton, { color: theme.darkWithOverlay, topRight: true, onClick: () => onSkip === null || onSkip === void 0 ? void 0 : onSkip() }),
-        React.createElement(Spacing, { bottom: 2 }),
-        React.createElement(Caret, { style: {
-                top: `${caretOffsetTop}px`,
-                left: `${caretOffsetLeft}px`
-            } }),
-        React.createElement(Text, { light: true, medium: true, textDarker: true },
-            React.createElement(Text, { light: true, medium: true, noFontSize: true, textDarker: true }, children),
-            React.createElement(Spacing, { bottom: 3 }),
-            React.createElement(Box, { centered: true, justifySpaceBetween: true },
-                React.createElement(TourProgress, { setTourIndex: setTourIndex, step: currentStep, max: maxSteps }),
-                React.createElement(Box, { centered: true },
-                    !isFirstTourPoint && (React.createElement(React.Fragment, null,
-                        React.createElement(Button, { secondary: true, shortMinHeight: true, onClick: () => onPrevious === null || onPrevious === void 0 ? void 0 : onPrevious() }, t("general.back")),
-                        React.createElement(Spacing, { right: 2 }))),
-                    isLastTourPoint ? (React.createElement(Button, { primary: true, shortMinHeight: true, onClick: () => onSkip === null || onSkip === void 0 ? void 0 : onSkip() }, t("tour.finish"))) : (React.createElement(Button, { primary: true, shortMinHeight: true, onClick: () => onNext === null || onNext === void 0 ? void 0 : onNext() }, t("general.next"))))))));
+        }, children: [_jsx(CloseButton, { color: theme.darkWithOverlay, topRight: true, onClick: () => onSkip === null || onSkip === void 0 ? void 0 : onSkip() }), _jsx(Spacing, { bottom: 2 }), _jsx(Caret, { style: {
+                    top: `${caretOffsetTop}px`,
+                    left: `${caretOffsetLeft}px`
+                } }), _jsxs(Text, { light: true, medium: true, textDarker: true, children: [_jsx(Text, { light: true, medium: true, noFontSize: true, textDarker: true, children: children }), _jsx(Spacing, { bottom: 3 }), _jsxs(Box, { centered: true, justifySpaceBetween: true, children: [_jsx(TourProgress, { setTourIndex: setTourIndex, step: currentStep, max: maxSteps }), _jsxs(Box, { centered: true, children: [!isFirstTourPoint && (_jsxs(_Fragment, { children: [_jsx(Button, { secondary: true, shortMinHeight: true, onClick: () => onPrevious === null || onPrevious === void 0 ? void 0 : onPrevious(), children: t("general.back") }), _jsx(Spacing, { right: 2 })] })), isLastTourPoint ? (_jsx(Button, { primary: true, shortMinHeight: true, onClick: () => onSkip === null || onSkip === void 0 ? void 0 : onSkip(), children: t("tour.finish") })) : (_jsx(Button, { primary: true, shortMinHeight: true, onClick: () => onNext === null || onNext === void 0 ? void 0 : onNext(), children: t("general.next") }))] })] })] })] }));
 };
 TourExplanation.propTypes = {
     children: PropTypes.node.isRequired,
@@ -118,63 +104,47 @@ const TourGrouping = observer(({ tourPoints }) => {
     if (!currentRectangle) {
         console.log("Tried to show guidance portal with no rectangle available from ref");
     }
-    return (React.createElement(React.Fragment, null,
-        currentRectangle && (React.createElement(TourOverlay, { rectangle: currentRectangle, onCancel: () => viewState.nextTourPoint() })),
-        tourPoints.map((tourPoint, index) => {
-            var _a, _b;
-            const tourPointRef = viewState.appRefs.get(tourPoint === null || tourPoint === void 0 ? void 0 : tourPoint.appRefName);
-            const currentRectangle = (_b = (_a = tourPointRef === null || tourPointRef === void 0 ? void 0 : tourPointRef.current) === null || _a === void 0 ? void 0 : _a.getBoundingClientRect) === null || _b === void 0 ? void 0 : _b.call(_a);
-            const { offsetTop, offsetLeft, caretOffsetTop, caretOffsetLeft, indicatorOffsetTop, indicatorOffsetLeft } = getOffsetsFromTourPoint(tourPoint);
-            // To match old HelpScreenWindow / HelpOverlay API
-            const currentScreen = {
-                rectangle: currentRectangle,
-                positionTop: (tourPoint === null || tourPoint === void 0 ? void 0 : tourPoint.positionTop) || viewState.relativePosition.RECT_BOTTOM,
-                positionLeft: (tourPoint === null || tourPoint === void 0 ? void 0 : tourPoint.positionLeft) || viewState.relativePosition.RECT_LEFT,
-                offsetTop: offsetTop,
-                offsetLeft: offsetLeft
-            };
-            const positionLeft = calculateLeftPosition(currentScreen);
-            const positionTop = calculateTopPosition(currentScreen);
-            const currentTourIndex = viewState.currentTourIndex;
-            const maxSteps = tourPoints.length;
-            if (!tourPoint)
-                return null;
-            return (React.createElement(TourExplanation, { key: tourPoint.appRefName, active: currentTourIndex === index, currentStep: currentTourIndex + 1, maxSteps: maxSteps, setTourIndex: (idx) => viewState.setTourIndex(idx), onTourIndicatorClick: () => viewState.setTourIndex(index), onPrevious: () => viewState.previousTourPoint(), onNext: () => viewState.nextTourPoint(), onSkip: () => viewState.closeTour(), isFirstTourPoint: index === 0, isLastTourPoint: index === tourPoints.length - 1, topStyle: `${positionTop}px`, leftStyle: `${positionLeft}px`, caretOffsetTop: caretOffsetTop, caretOffsetLeft: caretOffsetLeft, indicatorOffsetTop: indicatorOffsetTop, indicatorOffsetLeft: indicatorOffsetLeft }, parseCustomMarkdownToReactWithOptions(applyTranslationIfExists(tourPoint === null || tourPoint === void 0 ? void 0 : tourPoint.content, i18n), {
-                injectTermsAsTooltips: true,
-                tooltipTerms: viewState.terria.configParameters.helpContentTerms
-            })));
-        })));
+    return (_jsxs(_Fragment, { children: [currentRectangle && (_jsx(TourOverlay, { rectangle: currentRectangle, onCancel: () => viewState.nextTourPoint() })), tourPoints.map((tourPoint, index) => {
+                var _a, _b;
+                const tourPointRef = viewState.appRefs.get(tourPoint === null || tourPoint === void 0 ? void 0 : tourPoint.appRefName);
+                const currentRectangle = (_b = (_a = tourPointRef === null || tourPointRef === void 0 ? void 0 : tourPointRef.current) === null || _a === void 0 ? void 0 : _a.getBoundingClientRect) === null || _b === void 0 ? void 0 : _b.call(_a);
+                const { offsetTop, offsetLeft, caretOffsetTop, caretOffsetLeft, indicatorOffsetTop, indicatorOffsetLeft } = getOffsetsFromTourPoint(tourPoint);
+                // To match old HelpScreenWindow / HelpOverlay API
+                const currentScreen = {
+                    rectangle: currentRectangle,
+                    positionTop: (tourPoint === null || tourPoint === void 0 ? void 0 : tourPoint.positionTop) || viewState.relativePosition.RECT_BOTTOM,
+                    positionLeft: (tourPoint === null || tourPoint === void 0 ? void 0 : tourPoint.positionLeft) || viewState.relativePosition.RECT_LEFT,
+                    offsetTop: offsetTop,
+                    offsetLeft: offsetLeft
+                };
+                const positionLeft = calculateLeftPosition(currentScreen);
+                const positionTop = calculateTopPosition(currentScreen);
+                const currentTourIndex = viewState.currentTourIndex;
+                const maxSteps = tourPoints.length;
+                if (!tourPoint)
+                    return null;
+                return (_jsx(TourExplanation, { active: currentTourIndex === index, currentStep: currentTourIndex + 1, maxSteps: maxSteps, setTourIndex: (idx) => viewState.setTourIndex(idx), onTourIndicatorClick: () => viewState.setTourIndex(index), onPrevious: () => viewState.previousTourPoint(), onNext: () => viewState.nextTourPoint(), onSkip: () => viewState.closeTour(), isFirstTourPoint: index === 0, isLastTourPoint: index === tourPoints.length - 1, topStyle: `${positionTop}px`, leftStyle: `${positionLeft}px`, caretOffsetTop: caretOffsetTop, caretOffsetLeft: caretOffsetLeft, indicatorOffsetTop: indicatorOffsetTop, indicatorOffsetLeft: indicatorOffsetLeft, children: parseCustomMarkdownToReactWithOptions(applyTranslationIfExists(tourPoint === null || tourPoint === void 0 ? void 0 : tourPoint.content, i18n), {
+                        injectTermsAsTooltips: true,
+                        tooltipTerms: viewState.terria.configParameters.helpContentTerms
+                    }) }, tourPoint.appRefName));
+            })] }));
 });
 export const TourPreface = () => {
     const { t } = useTranslation();
     const viewState = useViewState();
     const theme = useTheme();
-    return (React.createElement(React.Fragment, null,
-        React.createElement(TourPrefaceBox, { onClick: () => viewState.closeTour(), role: "presentation", "aria-hidden": "true", pseudoBg: true }),
-        React.createElement(TourExplanationBox, { longer: true, paddedRatio: 4, column: true, style: {
-                right: 25,
-                bottom: 45
-            } },
-            React.createElement(CloseButton, { color: theme.darkWithOverlay, 
-                // color={"green"}
-                topRight: true, onClick: () => viewState.closeTour() }),
-            React.createElement(Spacing, { bottom: 2 }),
-            React.createElement(Text, { extraExtraLarge: true, bold: true, textDarker: true }, t("tour.preface.title")),
-            React.createElement(Spacing, { bottom: 3 }),
-            React.createElement(Text, { light: true, medium: true, textDarker: true }, t("tour.preface.content")),
-            React.createElement(Spacing, { bottom: 4 }),
-            React.createElement(Text, { medium: true },
-                React.createElement(Box, null,
-                    React.createElement(Button, { fullWidth: true, secondary: true, onClick: (e) => {
-                            e.stopPropagation();
-                            viewState.closeTour();
-                        } }, t("tour.preface.close")),
-                    React.createElement(Spacing, { right: 3 }),
-                    React.createElement(Button, { primary: true, fullWidth: true, textProps: { noFontSize: true }, onClick: (e) => {
-                            e.stopPropagation();
-                            viewState.setShowTour(true);
-                        } }, t("tour.preface.start")))),
-            React.createElement(Spacing, { bottom: 1 }))));
+    return (_jsxs(_Fragment, { children: [_jsx(TourPrefaceBox, { onClick: () => viewState.closeTour(), role: "presentation", "aria-hidden": "true", pseudoBg: true }), _jsxs(TourExplanationBox, { longer: true, paddedRatio: 4, column: true, style: {
+                    right: 25,
+                    bottom: 45
+                }, children: [_jsx(CloseButton, { color: theme.darkWithOverlay, 
+                        // color={"green"}
+                        topRight: true, onClick: () => viewState.closeTour() }), _jsx(Spacing, { bottom: 2 }), _jsx(Text, { extraExtraLarge: true, bold: true, textDarker: true, children: t("tour.preface.title") }), _jsx(Spacing, { bottom: 3 }), _jsx(Text, { light: true, medium: true, textDarker: true, children: t("tour.preface.content") }), _jsx(Spacing, { bottom: 4 }), _jsx(Text, { medium: true, children: _jsxs(Box, { children: [_jsx(Button, { fullWidth: true, secondary: true, onClick: (e) => {
+                                        e.stopPropagation();
+                                        viewState.closeTour();
+                                    }, children: t("tour.preface.close") }), _jsx(Spacing, { right: 3 }), _jsx(Button, { primary: true, fullWidth: true, textProps: { noFontSize: true }, onClick: (e) => {
+                                        e.stopPropagation();
+                                        viewState.setShowTour(true);
+                                    }, children: t("tour.preface.start") })] }) }), _jsx(Spacing, { bottom: 1 })] })] }));
 };
 export const TourPortalDisplayName = "TourPortal";
 export const TourPortal = observer(() => {
@@ -194,9 +164,9 @@ export const TourPortal = observer(() => {
         return null;
     }
     if (showPreface) {
-        return React.createElement(TourPreface, { viewState: viewState });
+        return _jsx(TourPreface, { viewState: viewState });
     }
-    return (React.createElement(TourGrouping, { key: width, viewState: viewState, tourPoints: viewState.tourPointsWithValidRefs }));
+    return (_jsx(TourGrouping, { viewState: viewState, tourPoints: viewState.tourPointsWithValidRefs }, width));
 });
 TourPortal.propTypes = {
     children: PropTypes.node

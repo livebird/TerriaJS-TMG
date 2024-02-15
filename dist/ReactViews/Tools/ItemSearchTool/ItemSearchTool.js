@@ -1,6 +1,7 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { autorun } from "mobx";
 import { observer } from "mobx-react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { withTranslation } from "react-i18next";
 import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
 import Box from "../../../Styled/Box";
@@ -46,17 +47,9 @@ const ItemSearchTool = observer((props) => {
     };
     const searchAgain = () => setState({ is: "search" });
     const loadIndexForParameter = (_a = itemSearchProvider.loadParameterHint) === null || _a === void 0 ? void 0 : _a.bind(itemSearchProvider);
-    return (React.createElement(Frame, { viewState: viewState, title: t("itemSearchTool.title", { itemName }) },
-        React.createElement(Main, { textLight: true, light: true },
-            React.createElement(Box, { centered: true, css: `
+    return (_jsx(Frame, { viewState: viewState, title: t("itemSearchTool.title", { itemName }), children: _jsxs(Main, { textLight: true, light: true, children: [_jsxs(Box, { centered: true, css: `
             text-align: center;
-          ` },
-                state.is === "loadingParameters" && (React.createElement(Loading, null, t("itemSearchTool.loading"))),
-                state.is === "error" && (React.createElement(ErrorComponent, null, t("itemSearchTool.loadError"))),
-                state.is === "search" && parameters.length === 0 && (React.createElement(ErrorComponent, null, t("itemSearchTool.noParameters")))),
-            state.is === "search" && parameters.length > 0 && (React.createElement(SearchForm, { itemSearchProvider: itemSearchProvider, parameters: parameters, query: query, onResults: setResults, onValueChange: loadIndexForParameter })),
-            state.is === "results" && (React.createElement(SearchResults, { item: item, results: state.results, template: item.search.resultTemplate })),
-            state.is === "results" && (React.createElement(BackButton, { onClick: searchAgain }, t("itemSearchTool.backBtnText"))))));
+          `, children: [state.is === "loadingParameters" && (_jsx(Loading, { children: t("itemSearchTool.loading") })), state.is === "error" && (_jsx(ErrorComponent, { children: t("itemSearchTool.loadError") })), state.is === "search" && parameters.length === 0 && (_jsx(ErrorComponent, { children: t("itemSearchTool.noParameters") }))] }), state.is === "search" && parameters.length > 0 && (_jsx(SearchForm, { itemSearchProvider: itemSearchProvider, parameters: parameters, query: query, onResults: setResults, onValueChange: loadIndexForParameter })), state.is === "results" && (_jsx(SearchResults, { item: item, results: state.results, template: item.search.resultTemplate })), state.is === "results" && (_jsx(BackButton, { onClick: searchAgain, children: t("itemSearchTool.backBtnText") }))] }) }));
 });
 /**
  * Callback when the given item is disabled or removed from the workbench.

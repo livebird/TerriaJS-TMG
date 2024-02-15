@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { action, computed, runInAction } from "mobx";
+import { action, computed, runInAction, makeObservable } from "mobx";
 import URI from "urijs";
 import filterOutUndefined from "../../../Core/filterOutUndefined";
 import isDefined from "../../../Core/isDefined";
@@ -28,8 +28,19 @@ import StratumOrder from "../../Definition/StratumOrder";
 export class FeatureServerStratum extends LoadableStratum(ArcGisFeatureServerCatalogGroupTraits) {
     constructor(_catalogGroup, _featureServer) {
         super();
-        this._catalogGroup = _catalogGroup;
-        this._featureServer = _featureServer;
+        Object.defineProperty(this, "_catalogGroup", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: _catalogGroup
+        });
+        Object.defineProperty(this, "_featureServer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: _featureServer
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(model) {
         return new FeatureServerStratum(model, this._featureServer);
@@ -74,8 +85,8 @@ export class FeatureServerStratum extends LoadableStratum(ArcGisFeatureServerCat
         }
     }
     static async load(catalogGroup) {
-        var terria = catalogGroup.terria;
-        var uri = new URI(catalogGroup.url).addQuery("f", "json");
+        const terria = catalogGroup.terria;
+        const uri = new URI(catalogGroup.url).addQuery("f", "json");
         return loadJson(proxyCatalogItemUrl(catalogGroup, uri.toString()))
             .then((featureServer) => {
             // Is this really a FeatureServer REST response?
@@ -128,11 +139,16 @@ export class FeatureServerStratum extends LoadableStratum(ArcGisFeatureServerCat
         // Replace the stratum inherited from the parent group.
         model.strata.delete(CommonStrata.definition);
         model.setTrait(CommonStrata.definition, "name", replaceUnderscores(layer.name));
-        var uri = new URI(this._catalogGroup.url).segment(layer.id + ""); // Convert layer id to string as segment(0) means sthg different.
+        const uri = new URI(this._catalogGroup.url).segment(layer.id + ""); // Convert layer id to string as segment(0) means sthg different.
         model.setTrait(CommonStrata.definition, "url", uri.toString());
     }
 }
-FeatureServerStratum.stratumName = "featureServer";
+Object.defineProperty(FeatureServerStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "featureServer"
+});
 __decorate([
     computed
 ], FeatureServerStratum.prototype, "name", null);
@@ -158,7 +174,7 @@ __decorate([
     action
 ], FeatureServerStratum.prototype, "createMemberFromLayer", null);
 StratumOrder.addLoadStratum(FeatureServerStratum.stratumName);
-export default class ArcGisFeatureServerCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(ArcGisFeatureServerCatalogGroupTraits)))) {
+class ArcGisFeatureServerCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(ArcGisFeatureServerCatalogGroupTraits)))) {
     get type() {
         return ArcGisFeatureServerCatalogGroup.type;
     }
@@ -179,5 +195,11 @@ export default class ArcGisFeatureServerCatalogGroup extends UrlMixin(GroupMixin
         }
     }
 }
-ArcGisFeatureServerCatalogGroup.type = "esri-featureServer-group";
+Object.defineProperty(ArcGisFeatureServerCatalogGroup, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "esri-featureServer-group"
+});
+export default ArcGisFeatureServerCatalogGroup;
 //# sourceMappingURL=ArcGisFeatureServerCatalogGroup.js.map

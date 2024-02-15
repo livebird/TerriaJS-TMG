@@ -6,13 +6,23 @@ const SUPPORTED_CHART_TYPES = ["line", "lineAndPoint"];
 export default class CsvChartCustomComponent extends ChartCustomComponent {
     constructor() {
         super(...arguments);
-        this.setTraitsFromBody = (item, csvString) => {
-            item.setTrait(CommonStrata.user, "csvString", csvString);
-        };
-        this.constructDownloadUrlFromBody = (body) => {
-            const blob = new Blob([body], { type: "text/csv;charset=utf-8" });
-            return URL.createObjectURL(blob);
-        };
+        Object.defineProperty(this, "setTraitsFromBody", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: (item, csvString) => {
+                item.setTrait(CommonStrata.user, "csvString", csvString);
+            }
+        });
+        Object.defineProperty(this, "constructDownloadUrlFromBody", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: (body) => {
+                const blob = new Blob([body], { type: "text/csv;charset=utf-8" });
+                return URL.createObjectURL(blob);
+            }
+        });
     }
     get name() {
         // For backward compatibility reasons, since the original ChartCustomComponent assumed your catalog item was a Csv, we use the name "chart" even though "csv-chart" would be more correct
@@ -49,7 +59,7 @@ export default class CsvChartCustomComponent extends ChartCustomComponent {
             item.polling.setTrait(CommonStrata.user, "url", pollUrl);
             item.polling.setTrait(CommonStrata.user, "shouldReplaceData", attrs.pollReplace);
         }
-        if (!!attrs.chartDisclaimer) {
+        if (attrs.chartDisclaimer) {
             item.setTrait(CommonStrata.user, "chartDisclaimer", attrs.chartDisclaimer);
         }
         if (attrs.columnTitles !== undefined) {
@@ -120,7 +130,7 @@ export default class CsvChartCustomComponent extends ChartCustomComponent {
     }
 }
 function parseIntOrUndefined(s) {
-    const maybeInt = parseInt(s || "");
+    const maybeInt = parseInt(s || "", 10);
     return isNaN(maybeInt) ? undefined : maybeInt;
 }
 //# sourceMappingURL=CsvChartCustomComponent.js.map

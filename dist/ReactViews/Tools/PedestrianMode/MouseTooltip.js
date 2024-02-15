@@ -1,4 +1,5 @@
-import React, { createRef, useEffect } from "react";
+import { jsx as _jsx } from "react/jsx-runtime";
+import { createRef, useEffect } from "react";
 import styled from "styled-components";
 import Text from "../../../Styled/Text";
 const MouseTooltip = (props) => {
@@ -26,7 +27,7 @@ const MouseTooltip = (props) => {
             scene.canvas.style.cursor = `auto`;
         };
     });
-    return (React.createElement(TooltipText, { ref: tooltipText, dangerouslySetInnerHTML: { __html: text } }));
+    return (_jsx(TooltipText, { ref: tooltipText, dangerouslySetInnerHTML: { __html: text } }));
 };
 const TooltipText = styled(Text).attrs({
     small: true,

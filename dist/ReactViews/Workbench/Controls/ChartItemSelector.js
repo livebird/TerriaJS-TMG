@@ -1,6 +1,6 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react";
-import React from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components";
 import ChartView from "../../../Charts/ChartView";
@@ -23,10 +23,9 @@ export const ChartItem = observer(({ chartItem }) => {
             }
         });
     };
-    return (React.createElement(Checkbox, { id: "depthTestAgainstTerrain", isChecked: chartItem.isSelectedInWorkbench, title: t("chart.showItemInChart", { value: chartItem.name }), onChange: toggleActive, css: `
+    return (_jsx(Checkbox, { id: "depthTestAgainstTerrain", isChecked: chartItem.isSelectedInWorkbench, title: t("chart.showItemInChart", { value: chartItem.name }), onChange: toggleActive, css: `
           color: ${lineColor};
-        ` },
-        React.createElement(TextSpan, null, chartItem.name)));
+        `, children: _jsx(TextSpan, { children: chartItem.name }) }));
 });
 const ChartItemSelector = observer(({ item }) => {
     const theme = useTheme();
@@ -39,10 +38,9 @@ const ChartItemSelector = observer(({ item }) => {
         .sort((a, b) => (a.name >= b.name ? 1 : -1));
     if (chartItems && chartItems.length === 0)
         return null;
-    return (React.createElement(Ul, { fullWidth: true, spaced: true, padded: true, column: true, rounded: true, backgroundColor: theme === null || theme === void 0 ? void 0 : theme.overlay, css: `
+    return (_jsx(Ul, { fullWidth: true, spaced: true, padded: true, column: true, rounded: true, backgroundColor: theme === null || theme === void 0 ? void 0 : theme.overlay, css: `
           margin: 10px 0;
-        ` }, chartItems.map((chartItem) => (React.createElement(Li, { key: `li-${chartItem.key}` },
-        React.createElement(ChartItem, { chartItem: chartItem }))))));
+        `, children: chartItems.map((chartItem) => (_jsx(Li, { children: _jsx(ChartItem, { chartItem: chartItem }) }, `li-${chartItem.key}`))) }));
 });
 function unselectChartItemsWithXAxisNotMatching(items, requiredAxis) {
     items.forEach((item) => {

@@ -1,4 +1,4 @@
-import React from "react";
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import { useTranslation } from "react-i18next";
 import styled, { useTheme } from "styled-components";
 import Box from "../../../Styled/Box";
@@ -23,27 +23,9 @@ const FooterBar = ({ goPrev, goNext, jumpToStory, zoomTo, currentHumanIndex, tot
     const isEnd = currentHumanIndex === totalStories;
     const { t } = useTranslation();
     const theme = useTheme();
-    return (React.createElement(React.Fragment, null,
-        React.createElement(Box, { flex: 1 }, totalStories > 1 && (React.createElement(NavigationButton, { disabled: currentHumanIndex == 1, onClick: goPrev },
-            React.createElement(StoryIcon, { displayInline: true, styledWidth: "15px", fillColor: theme.grey, glyph: Icon.GLYPHS.left }),
-            React.createElement(Text, { medium: true }, t("story.prev"))))),
-        React.createElement(Box, { flex: 1, centered: true },
-            React.createElement(FooterButton, { onClick: listStories },
-                React.createElement(StoryIcon, { displayInline: true, styledWidth: "15px", glyph: Icon.GLYPHS.menu, fillColor: theme.grey })),
-            React.createElement(Box, { paddedRatio: 3 },
-                React.createElement(Text, { noWrap: true },
-                    currentHumanIndex,
-                    " / ",
-                    totalStories)),
-            React.createElement(FooterButton, { onClick: zoomTo, title: t("story.locationBtn") },
-                React.createElement(StoryIcon, { styledWidth: "16px", glyph: Icon.GLYPHS.location }))),
-        React.createElement(Box, { flex: 1, right: true }, totalStories > 1 && (React.createElement(NavigationButton, { css: `
+    return (_jsxs(_Fragment, { children: [_jsx(Box, { flex: 1, children: totalStories > 1 && (_jsxs(NavigationButton, { disabled: currentHumanIndex === 1, onClick: goPrev, children: [_jsx(StoryIcon, { displayInline: true, styledWidth: "15px", fillColor: theme.grey, glyph: Icon.GLYPHS.left }), _jsx(Text, { medium: true, children: t("story.prev") })] })) }), _jsxs(Box, { flex: 1, centered: true, children: [_jsx(FooterButton, { onClick: listStories, children: _jsx(StoryIcon, { displayInline: true, styledWidth: "15px", glyph: Icon.GLYPHS.menu, fillColor: theme.grey }) }), _jsx(Box, { paddedRatio: 3, children: _jsxs(Text, { noWrap: true, children: [currentHumanIndex, " / ", totalStories] }) }), _jsx(FooterButton, { onClick: zoomTo, title: t("story.locationBtn"), children: _jsx(StoryIcon, { styledWidth: "16px", glyph: Icon.GLYPHS.location }) })] }), _jsx(Box, { flex: 1, right: true, children: totalStories > 1 && (_jsx(NavigationButton, { css: `
               justify-content: flex-end;
-            `, onClick: isEnd ? () => jumpToStory(0) : goNext }, isEnd ? (React.createElement(React.Fragment, null,
-            React.createElement(Text, null, t("story.restart")),
-            React.createElement(StoryIcon, { displayInline: true, styledWidth: "15px", glyph: Icon.GLYPHS.revert, fillColor: theme.grey }))) : (React.createElement(React.Fragment, null,
-            React.createElement(Text, { medium: true }, t("story.next")),
-            React.createElement(StoryIcon, { displayInline: true, styledWidth: "15px", glyph: Icon.GLYPHS.right, fillColor: theme.grey }))))))));
+            `, onClick: isEnd ? () => jumpToStory(0) : goNext, children: isEnd ? (_jsxs(_Fragment, { children: [_jsx(Text, { children: t("story.restart") }), _jsx(StoryIcon, { displayInline: true, styledWidth: "15px", glyph: Icon.GLYPHS.revert, fillColor: theme.grey })] })) : (_jsxs(_Fragment, { children: [_jsx(Text, { medium: true, children: t("story.next") }), _jsx(StoryIcon, { displayInline: true, styledWidth: "15px", glyph: Icon.GLYPHS.right, fillColor: theme.grey })] })) })) })] }));
 };
 export default FooterBar;
 //# sourceMappingURL=StoryFooterBar.js.map

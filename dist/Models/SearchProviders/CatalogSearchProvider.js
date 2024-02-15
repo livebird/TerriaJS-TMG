@@ -4,14 +4,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { autorun, computed, observable, runInAction } from "mobx";
-import { fromPromise } from "mobx-utils";
+import { autorun, makeObservable, observable, runInAction } from "mobx";
 import { Category, SearchAction } from "../../Core/AnalyticEvents/analyticEvents";
-import isDefined from "../../Core/isDefined";
 import { TerriaErrorSeverity } from "../../Core/TerriaError";
 import GroupMixin from "../../ModelMixins/GroupMixin";
 import ReferenceMixin from "../../ModelMixins/ReferenceMixin";
-import SearchProvider from "./SearchProvider";
+import CatalogSearchProviderMixin from "../../ModelMixins/SearchProviders/CatalogSearchProviderMixin";
+import CatalogSearchProviderTraits from "../../Traits/SearchProviders/CatalogSearchProviderTraits";
+import CommonStrata from "../Definition/CommonStrata";
+import CreateModel from "../Definition/CreateModel";
 import SearchResult from "./SearchResult";
 export function loadAndSearchCatalogRecursively(models, searchTextLowercase, searchResults, resultMap, iteration = 0) {
     // checkTerriaAgainstResults(terria, searchResults)
@@ -36,7 +37,7 @@ export function loadAndSearchCatalogRecursively(models, searchTextLowercase, sea
                 if (matchesString) {
                     runInAction(() => {
                         searchResults.results.push(new SearchResult({
-                            name: name,
+                            name: modelToSave.name,
                             catalogItem: modelToSave
                         }));
                     });
@@ -55,7 +56,7 @@ export function loadAndSearchCatalogRecursively(models, searchTextLowercase, sea
     if (referencesAndGroupsToLoad.length === 0) {
         return Promise.resolve();
     }
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         autorun((reaction) => {
             Promise.all(referencesAndGroupsToLoad.map(async (model) => {
                 if (ReferenceMixin.isMixedInto(model)) {
@@ -66,29 +67,45 @@ export function loadAndSearchCatalogRecursively(models, searchTextLowercase, sea
                 // else if (GroupMixin.isMixedInto(model)) {
                 //   return model.loadMembers();
                 // }
-            })).then(() => {
+            }))
+                .then(() => {
                 // Then call this function again to see if new child references were loaded in
                 resolve(loadAndSearchCatalogRecursively(models, searchTextLowercase, searchResults, resultMap, iteration + 1));
+            })
+                .catch((error) => {
+                reject(error);
             });
             reaction.dispose();
         });
     });
 }
-export default class CatalogSearchProvider extends SearchProvider {
-    constructor(options) {
-        super();
-        this.isSearching = false;
-        this.debounceDurationOnceLoaded = 300;
-        this.terria = options.terria;
-        this.name = "Catalog Items";
+class CatalogSearchProvider extends CatalogSearchProviderMixin(CreateModel(CatalogSearchProviderTraits)) {
+    constructor(id, terria) {
+        super(id, terria);
+        Object.defineProperty(this, "isSearching", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "debounceDurationOnceLoaded", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 300
+        });
+        makeObservable(this);
+        this.setTrait(CommonStrata.defaults, "minCharacters", terria.searchBarModel.minCharacters);
     }
-    get resultsAreReferences() {
+    get type() {
+        return CatalogSearchProvider.type;
+    }
+    logEvent(searchText) {
         var _a;
-        return (isDefined((_a = this.terria.catalogIndex) === null || _a === void 0 ? void 0 : _a.loadPromise) &&
-            fromPromise(this.terria.catalogIndex.loadPromise).state === "fulfilled");
+        (_a = this.terria.analytics) === null || _a === void 0 ? void 0 : _a.logEvent(Category.search, SearchAction.catalog, searchText);
     }
     async doSearch(searchText, searchResults) {
-        var _a, _b;
+        var _a;
         runInAction(() => (this.isSearching = true));
         searchResults.results.length = 0;
         searchResults.message = undefined;
@@ -105,10 +122,9 @@ export default class CatalogSearchProvider extends SearchProvider {
                 this.terria.raiseErrorToUser(e, "Failed to load catalog index. Searching may be slow/inaccurate");
             }
         }
-        (_a = this.terria.analytics) === null || _a === void 0 ? void 0 : _a.logEvent(Category.search, SearchAction.catalog, searchText);
         const resultMap = new Map();
         try {
-            if ((_b = this.terria.catalogIndex) === null || _b === void 0 ? void 0 : _b.searchIndex) {
+            if ((_a = this.terria.catalogIndex) === null || _a === void 0 ? void 0 : _a.searchIndex) {
                 const results = await this.terria.catalogIndex.search(searchText);
                 runInAction(() => (searchResults.results = results));
             }
@@ -126,7 +142,9 @@ export default class CatalogSearchProvider extends SearchProvider {
                 this.terria.catalogReferencesLoaded = true;
             });
             if (searchResults.results.length === 0) {
-                searchResults.message = "Sorry, no locations match your search query.";
+                searchResults.message = {
+                    content: "translate#viewModels.searchNoCatalogueItem"
+                };
             }
         }
         catch (e) {
@@ -138,18 +156,23 @@ export default class CatalogSearchProvider extends SearchProvider {
                 // A new search has superseded this one, so ignore the result.
                 return;
             }
-            searchResults.message =
-                "An error occurred while searching.  Please check your internet connection or try again later.";
+            searchResults.message = {
+                content: "translate#viewModels.searchErrorOccurred"
+            };
         }
     }
 }
+Object.defineProperty(CatalogSearchProvider, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "catalog-search-provider"
+});
+export default CatalogSearchProvider;
 __decorate([
     observable
 ], CatalogSearchProvider.prototype, "isSearching", void 0);
 __decorate([
     observable
 ], CatalogSearchProvider.prototype, "debounceDurationOnceLoaded", void 0);
-__decorate([
-    computed
-], CatalogSearchProvider.prototype, "resultsAreReferences", null);
 //# sourceMappingURL=CatalogSearchProvider.js.map

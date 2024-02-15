@@ -21,9 +21,43 @@ export class ObjectArrayTrait extends Trait {
     constructor(id, options, parent) {
         var _a;
         super(id, options, parent);
-        this.decoratorForFlattened = computed.struct;
-        this.createObject = computedFn((model, objectId) => {
-            return new this.modelClass(undefined, model.terria, undefined, new ArrayNestedStrataMap(model, this.id, this.type, this.idProperty, objectId, this.merge));
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "idProperty", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "decoratorForFlattened", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: computed.struct
+        });
+        Object.defineProperty(this, "modelClass", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "merge", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "createObject", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: computedFn((model, objectId) => {
+                return new this.modelClass(undefined, model.terria, undefined, new ArrayNestedStrataMap(model, this.id, this.type, this.idProperty, objectId, this.merge));
+            })
         });
         this.type = options.type;
         this.idProperty = options.idProperty;
@@ -34,7 +68,7 @@ export class ObjectArrayTrait extends Trait {
         const ids = new Set();
         const removedIds = new Set();
         // Find the unique objects and the strata that go into each.
-        for (let stratumId of strata.keys()) {
+        for (const stratumId of strata.keys()) {
             const stratum = strata.get(stratumId);
             const objectArray = stratum[this.id];
             if (!objectArray) {

@@ -1,7 +1,8 @@
-"use strict";
-const Resource = require("terriajs-cesium/Source/Core/Resource").default;
-function loadJsonp(urlOrResource, callbackParameterName) {
-    var resource = Resource.createIfNeeded(urlOrResource);
+import Resource from "terriajs-cesium/Source/Core/Resource";
+export function loadJsonp(urlOrResource, callbackParameterName) {
+    const resource = typeof urlOrResource === "string"
+        ? new Resource({ url: urlOrResource })
+        : urlOrResource;
     return resource.fetchJsonp(callbackParameterName);
 }
 Object.defineProperties(loadJsonp, {
@@ -19,5 +20,4 @@ Object.defineProperties(loadJsonp, {
         }
     }
 });
-module.exports = loadJsonp;
 //# sourceMappingURL=loadJsonp.js.map

@@ -4,6 +4,7 @@ export const Li = styled.li ``;
 export const Ul = styled(Box).attrs({
     as: "ul"
 }) `
+  padding-left: 0;
   list-style: none;
   margin: 0;
   ${(props) => props.fullWidth &&
@@ -19,7 +20,6 @@ export const Ul = styled(Box).attrs({
         padding-top: 5px;
       }
     `}
-
   ${(props) => props.lined &&
     css `
       ${Li}:first-child {

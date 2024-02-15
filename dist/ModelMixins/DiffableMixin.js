@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { computed } from "mobx";
+import { computed, makeObservable, override } from "mobx";
 import JulianDate from "terriajs-cesium/Source/Core/JulianDate";
 import createStratumInstance from "../Models/Definition/createStratumInstance";
 import LoadableStratum from "../Models/Definition/LoadableStratum";
@@ -15,7 +15,13 @@ import TimeFilterMixin from "./TimeFilterMixin";
 class DiffStratum extends LoadableStratum(DiffableTraits) {
     constructor(catalogItem) {
         super();
-        this.catalogItem = catalogItem;
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogItem
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(model) {
         return new DiffStratum(model);
@@ -45,7 +51,12 @@ class DiffStratum extends LoadableStratum(DiffableTraits) {
         return this.catalogItem.isShowingDiff;
     }
 }
-DiffStratum.stratumName = "diffStratum";
+Object.defineProperty(DiffStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "diffStratum"
+});
 __decorate([
     computed
 ], DiffStratum.prototype, "legends", null);
@@ -59,6 +70,7 @@ function DiffableMixin(Base) {
     class DiffableMixin extends TimeFilterMixin(Base) {
         constructor(...args) {
             super(...args);
+            makeObservable(this);
             const diffStratum = new DiffStratum(this);
             this.strata.set(DiffStratum.stratumName, diffStratum);
         }
@@ -72,7 +84,7 @@ function DiffableMixin(Base) {
         }
     }
     __decorate([
-        computed
+        override
     ], DiffableMixin.prototype, "canFilterTimeByFeature", null);
     return DiffableMixin;
 }

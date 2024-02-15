@@ -4,10 +4,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { computed } from "mobx";
+import { makeObservable, override } from "mobx";
 import StratumOrder from "../Models/Definition/StratumOrder";
 function GetCapabilitiesMixin(Base) {
     class GetCapabilitiesMixin extends Base {
+        constructor(...args) {
+            super(...args);
+            makeObservable(this);
+        }
         get getCapabilitiesUrl() {
             const getCapabilitiesUrl = super.getCapabilitiesUrl;
             if (getCapabilitiesUrl !== undefined) {
@@ -19,7 +23,7 @@ function GetCapabilitiesMixin(Base) {
         }
     }
     __decorate([
-        computed
+        override
     ], GetCapabilitiesMixin.prototype, "getCapabilitiesUrl", null);
     return GetCapabilitiesMixin;
 }

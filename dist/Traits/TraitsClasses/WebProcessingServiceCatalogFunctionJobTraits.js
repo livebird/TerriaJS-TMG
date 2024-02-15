@@ -12,6 +12,27 @@ import ModelTraits from "../ModelTraits";
 import CatalogFunctionJobTraits from "./CatalogFunctionJobTraits";
 import WebProcessingServiceCatalogFunctionTraits from "./WebProcessingServiceCatalogFunctionTraits";
 export class WPSParameterTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "inputIdentifier", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "inputValue", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "inputType", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -35,6 +56,33 @@ __decorate([
     })
 ], WPSParameterTraits.prototype, "inputType", void 0);
 export default class WebProcessingServiceCatalogJobTraits extends mixTraits(CatalogFunctionJobTraits, WebProcessingServiceCatalogFunctionTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "wpsParameters", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "wpsResponse", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "geojsonFeatures", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "wpsResponseUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     objectArrayTrait({

@@ -1,12 +1,13 @@
-import React from "react";
-import PropTypes from "prop-types";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import createReactClass from "create-react-class";
 import debounce from "lodash-es/debounce";
-import Icon, { StyledIcon } from "../../Styled/Icon";
+import PropTypes from "prop-types";
+import React from "react";
 import styled, { withTheme } from "styled-components";
 import Box, { BoxSpan } from "../../Styled/Box";
-import Text from "../../Styled/Text";
 import { RawButton } from "../../Styled/Button";
+import Icon, { StyledIcon } from "../../Styled/Icon";
+import Text from "../../Styled/Text";
 const SearchInput = styled.input `
   box-sizing: border-box;
   margin-top: 0;
@@ -45,6 +46,9 @@ export const SearchBox = createReactClass({
         autoFocus: PropTypes.bool,
         theme: PropTypes.object
     },
+    /**
+     * @returns {any}
+     */
     getDefaultProps() {
         return {
             placeholder: "Search",
@@ -99,30 +103,21 @@ export const SearchBox = createReactClass({
         }
     },
     render() {
-        const clearButton = (React.createElement(Box, { position: "absolute", topRight: true, fullHeight: true, styledWidth: "40px" },
-            React.createElement(RawButton, { type: "button", onClick: () => this.clearSearch(), fullWidth: true, fullHeight: true },
-                React.createElement(BoxSpan, { centered: true },
-                    React.createElement(StyledIcon, { glyph: Icon.GLYPHS.close, styledWidth: "15px", fillColor: this.props.theme.charcoalGrey, opacity: "0.5" })))));
-        return (React.createElement("form", { autoComplete: "off", onSubmit: (event) => {
+        const clearButton = (_jsx(Box, { position: "absolute", topRight: true, fullHeight: true, styledWidth: "40px", children: _jsx(RawButton, { type: "button", onClick: () => this.clearSearch(), fullWidth: true, fullHeight: true, children: _jsx(BoxSpan, { centered: true, children: _jsx(StyledIcon, { glyph: Icon.GLYPHS.close, styledWidth: "15px", fillColor: this.props.theme.charcoalGrey, opacity: "0.5" }) }) }) }));
+        return (_jsxs("form", { autoComplete: "off", onSubmit: (event) => {
                 event.preventDefault();
                 event.stopPropagation();
                 this.search();
             }, css: `
           position: relative;
           width: 100%;
-        ` },
-            React.createElement("label", { htmlFor: "search", css: `
+        `, children: [_jsx("label", { htmlFor: "search", css: `
             position: absolute;
-          ` },
-                React.createElement(Box, { paddedRatio: 2 },
-                    React.createElement(StyledIcon, { glyph: Icon.GLYPHS.search, styledWidth: "20px", fillColor: this.props.theme.charcoalGrey, opacity: "0.5", css: `
+          `, children: _jsx(Box, { paddedRatio: 2, children: _jsx(StyledIcon, { glyph: Icon.GLYPHS.search, styledWidth: "20px", fillColor: this.props.theme.charcoalGrey, opacity: "0.5", css: `
                 position: absolute;
-              ` }))),
-            React.createElement(Text, { large: true, semiBold: true },
-                React.createElement(SearchInput, { ref: this.props.inputBoxRef, id: "search", type: "text", name: "search", value: this.props.searchText, onChange: this.handleChange, onFocus: this.props.onFocus, onKeyDown: this.onKeyDown, placeholder: this.props.placeholder, autoComplete: "off", autoFocus: this.props.autoFocus, rounded: true })),
-            (this.props.alwaysShowClear || this.hasValue()) && clearButton));
+              ` }) }) }), _jsx(Text, { large: true, semiBold: true, children: _jsx(SearchInput, { ref: this.props.inputBoxRef, id: "search", type: "text", name: "search", value: this.props.searchText, onChange: this.handleChange, onFocus: this.props.onFocus, onKeyDown: this.onKeyDown, placeholder: this.props.placeholder, autoComplete: "off", autoFocus: this.props.autoFocus, rounded: true }) }), (this.props.alwaysShowClear || this.hasValue()) && clearButton] }));
     }
 });
-const SearchBoxWithRef = (props, ref) => (React.createElement(SearchBox, Object.assign({}, props, { inputBoxRef: ref })));
+const SearchBoxWithRef = (props, ref) => (_jsx(SearchBox, { ...props, inputBoxRef: ref }));
 export default withTheme(React.forwardRef(SearchBoxWithRef));
 //# sourceMappingURL=SearchBox.js.map

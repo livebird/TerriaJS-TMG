@@ -14,6 +14,21 @@ import MappableTraits from "./MappableTraits";
 import TimeVaryingTraits from "./TimeVaryingTraits";
 import UrlTraits from "./UrlTraits";
 export default class CzmlCatalogItemTraits extends mixTraits(AutoRefreshingTraits, TimeVaryingTraits, UrlTraits, CatalogMemberTraits, LegendOwnerTraits, MappableTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "czmlData", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "czmlString", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     anyTrait({

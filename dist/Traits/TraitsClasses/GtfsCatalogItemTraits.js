@@ -19,6 +19,21 @@ import OpacityTraits from "./OpacityTraits";
 import ScaleByDistanceTraits from "./ScaleByDistanceTraits";
 import UrlTraits from "./UrlTraits";
 export class HeadersTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "name", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "value", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -35,6 +50,33 @@ __decorate([
     })
 ], HeadersTraits.prototype, "value", void 0);
 export default class GtfsCatalogItemTraits extends mixTraits(UrlTraits, CatalogMemberTraits, LegendOwnerTraits, MappableTraits, OpacityTraits, LayerOrderingTraits, AutoRefreshingTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "headers", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "image", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "scaleImageByDistance", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "model", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     objectArrayTrait({

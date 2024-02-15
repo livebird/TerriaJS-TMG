@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { jsx as _jsx } from "react/jsx-runtime";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Cartographic from "terriajs-cesium/Source/Core/Cartographic";
 import EllipsoidTerrainProvider from "terriajs-cesium/Source/Core/EllipsoidTerrainProvider";
@@ -51,7 +52,7 @@ const DropPedestrianToGround = (props) => {
             cesium.isFeaturePickingPaused = false;
         };
     });
-    return (React.createElement(React.Fragment, null, showMouseTooltip && (React.createElement(MouseTooltip, { scene: scene, text: t("pedestrianMode.dropPedestrianTooltipMessage") }))));
+    return showMouseTooltip ? (_jsx(MouseTooltip, { scene: scene, text: t("pedestrianMode.dropPedestrianTooltipMessage") })) : null;
 };
 async function getPrecisePosition(scene, position) {
     const terrainProvider = scene.terrainProvider;

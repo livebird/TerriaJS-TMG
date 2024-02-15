@@ -1,9 +1,10 @@
 "use strict";
+import { jsx as _jsx } from "react/jsx-runtime";
 import { observer } from "mobx-react";
 import React from "react";
 import isDefined from "../../Core/isDefined";
 import parseCustomHtmlToReact from "../Custom/parseCustomHtmlToReact";
-import { withViewState } from "../StandardUserInterface/ViewStateContext";
+import { withViewState } from "../Context";
 const DEFAULT_BRANDING = '<a target="_blank" href="http://terria.io"><img src="images/terria_logo.png" height="52" title="Version: {{ version }}" /></a>';
 export default withViewState(observer((props) => {
     var _a, _b, _c;
@@ -25,7 +26,7 @@ export default withViewState(observer((props) => {
             ];
     }
     const version = (_c = props.version) !== null && _c !== void 0 ? _c : "Unknown";
-    return (React.createElement("div", { css: `
+    return (_jsx("div", { css: `
           display: flex;
           justify-content: space-between;
 
@@ -67,6 +68,6 @@ export default withViewState(observer((props) => {
               ${brandingHtmlElements.length > 0 ? "display: unset;" : ""}
             }
           }
-        ` }, brandingHtmlElements.map((element, idx) => (React.createElement(React.Fragment, { key: idx }, parseCustomHtmlToReact(element.replace(/\{\{\s*version\s*\}\}/g, version), { disableExternalLinkIcon: true }))))));
+        `, children: brandingHtmlElements.map((element, idx) => (_jsx(React.Fragment, { children: parseCustomHtmlToReact(element.replace(/\{\{\s*version\s*\}\}/g, version), { disableExternalLinkIcon: true }) }, idx))) }));
 }));
 //# sourceMappingURL=Branding.js.map

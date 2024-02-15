@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 // for all the panels and modals we will eventually normalise
 import React from "react";
 import styled from "styled-components";
@@ -21,8 +22,7 @@ const StyledCloseButton = styled(RawButton) `
   }
 `;
 const CloseButton = (props) => {
-    return (React.createElement(StyledCloseButton, Object.assign({}, props),
-        React.createElement(Icon, { glyph: Icon.GLYPHS.closeLight })));
+    return (_jsx(StyledCloseButton, { ...props, children: _jsx(Icon, { glyph: Icon.GLYPHS.closeLight }) }));
 };
 export default CloseButton;
 //# sourceMappingURL=CloseButton.js.map

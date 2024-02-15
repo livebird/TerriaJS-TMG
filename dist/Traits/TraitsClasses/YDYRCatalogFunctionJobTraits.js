@@ -9,6 +9,21 @@ import UrlTraits from "./UrlTraits";
 import CatalogFunctionJobTraits from "./CatalogFunctionJobTraits";
 import primitiveTrait from "../Decorators/primitiveTrait";
 export default class YDYRCatalogFunctionJobTraits extends mixTraits(UrlTraits, CatalogFunctionJobTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "jobId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "resultId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({

@@ -21,7 +21,36 @@ import UrlTraits from "./UrlTraits";
 export class WebMapTileServiceAvailableStyleTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.isDefault = false;
+        Object.defineProperty(this, "identifier", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "title", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "abstract", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "legend", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "isDefault", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
     }
 }
 __decorate([
@@ -60,6 +89,21 @@ __decorate([
     })
 ], WebMapTileServiceAvailableStyleTraits.prototype, "isDefault", void 0);
 export class WebMapTileServiceAvailableLayerStylesTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "layerName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "styles", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -79,7 +123,36 @@ __decorate([
 export default class WebMapServiceCatalogItemTraits extends mixTraits(LayerOrderingTraits, GetCapabilitiesTraits, ImageryProviderTraits, UrlTraits, MappableTraits, CatalogMemberTraits, LegendOwnerTraits) {
     constructor() {
         super(...arguments);
-        this.isGeoServer = false;
+        Object.defineProperty(this, "isGeoServer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "layer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "style", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "availableStyles", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "parameters", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([

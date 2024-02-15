@@ -13,12 +13,29 @@ import ModelTraits from "../ModelTraits";
 import FeatureInfoUrlTemplateTraits from "./FeatureInfoTraits";
 import LegendOwnerTraits from "./LegendOwnerTraits";
 import StyleTraits from "./StyleTraits";
-import TableTraits from "./TableTraits";
+import TableTraits from "./Table/TableTraits";
 import UrlTraits from "./UrlTraits";
 export class PerPropertyGeoJsonStyleTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.caseSensitive = false;
+        Object.defineProperty(this, "properties", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "style", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "caseSensitive", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
     }
 }
 __decorate([
@@ -45,9 +62,72 @@ export class GeoJsonTraits extends mixTraits(FeatureInfoUrlTemplateTraits, Legen
     constructor() {
         super(...arguments);
         /** Override TableTraits which aren't applicable to GeoJsonTraits */
-        this.enableManualRegionMapping = false;
-        this.clampToGround = true;
-        this.perPropertyStyles = [];
+        Object.defineProperty(this, "enableManualRegionMapping", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "useOutlineColorForLineFeatures", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "style", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "clampToGround", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "forceCesiumPrimitives", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "filterByProperties", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "perPropertyStyles", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "timeProperty", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "heightProperty", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "czmlTemplate", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "explodeMultiPoints", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
     }
 }
 __decorate([
@@ -154,4 +234,11 @@ __decorate([
     - \`heightOffset: number\` to offset height values (in m)`
     })
 ], GeoJsonTraits.prototype, "czmlTemplate", void 0);
+__decorate([
+    primitiveTrait({
+        type: "boolean",
+        name: "Explode MultiPoints",
+        description: "Replaces `MultiPoint` features with its equivalent `Point` features when `true`. This is useful for example when using Table mode which does not support `MultiPoint` features currently."
+    })
+], GeoJsonTraits.prototype, "explodeMultiPoints", void 0);
 //# sourceMappingURL=GeoJsonTraits.js.map

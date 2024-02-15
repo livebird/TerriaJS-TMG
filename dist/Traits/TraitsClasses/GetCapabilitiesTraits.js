@@ -9,7 +9,18 @@ import primitiveTrait from "../Decorators/primitiveTrait";
 export default class GetCapabilitiesTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.getCapabilitiesCacheDuration = "1d";
+        Object.defineProperty(this, "getCapabilitiesUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "getCapabilitiesCacheDuration", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "1d"
+        });
     }
 }
 __decorate([

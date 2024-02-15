@@ -1,6 +1,7 @@
 "use strict";
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import { observer } from "mobx-react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Box from "../../../Styled/Box";
 import { RawButton } from "../../../Styled/Button";
 import { GLYPHS, StyledIcon } from "../../../Styled/Icon";
@@ -25,7 +26,7 @@ export const CollapseIcon = (props) => {
         glyphRotation = props.isOpen ? 0 : -90;
         glyphOpacity = props.isOpen ? 1 : 0.4;
     }
-    return (React.createElement(StyledIcon, { displayInline: true, styledWidth: `${glyphWidth}px`, light: (_a = props.light) !== null && _a !== void 0 ? _a : true, glyph: glyph, opacity: glyphOpacity, rotation: glyphRotation }));
+    return (_jsx(StyledIcon, { displayInline: true, styledWidth: `${glyphWidth}px`, light: (_a = props.light) !== null && _a !== void 0 ? _a : true, glyph: glyph, opacity: glyphOpacity, rotation: glyphRotation }));
 };
 const Collapsible = observer((props) => {
     var _a, _b;
@@ -37,21 +38,13 @@ const Collapsible = observer((props) => {
         if (!props.onToggle || !props.onToggle(newIsOpen))
             setIsOpen(newIsOpen);
     };
-    return (React.createElement(React.Fragment, null,
-        React.createElement(RawButton, { fullWidth: true, onClick: toggleOpen, css: `
+    return (_jsxs(_Fragment, { children: [_jsxs(RawButton, { fullWidth: true, onClick: toggleOpen, css: `
           text-align: left;
           display: flex;
           align-items: center;
-        `, "aria-expanded": isOpen, "aria-controls": `${props.title}`, activeStyles: true },
-            !props.btnRight && React.createElement(CollapseIcon, Object.assign({}, props, { isOpen: isOpen })),
-            !props.btnRight && React.createElement(SpacingSpan, { right: 1 }),
-            React.createElement(TextSpan, Object.assign({ textLight: (_a = props.light) !== null && _a !== void 0 ? _a : true, bold: true, medium: true }, props.titleTextProps), parseCustomMarkdownToReactWithOptions(props.title, {
-                inline: true
-            })),
-            props.btnRight && React.createElement(SpacingSpan, { right: 1 }),
-            props.btnRight && React.createElement(CollapseIcon, Object.assign({}, props, { isOpen: isOpen }))),
-        isOpen ? (React.createElement(Box, Object.assign({}, props.bodyBoxProps),
-            React.createElement(Text, Object.assign({ textLight: (_b = props.light) !== null && _b !== void 0 ? _b : true, small: true, id: `${props.title}` }, props.bodyTextProps), props.children))) : null));
+        `, "aria-expanded": isOpen, "aria-controls": `${props.title}`, activeStyles: true, children: [!props.btnRight && _jsx(CollapseIcon, { ...props, isOpen: isOpen }), !props.btnRight && _jsx(SpacingSpan, { right: 1 }), _jsx(TextSpan, { textLight: (_a = props.light) !== null && _a !== void 0 ? _a : true, bold: true, medium: true, ...props.titleTextProps, children: parseCustomMarkdownToReactWithOptions(props.title, {
+                            inline: true
+                        }) }), props.btnRight && _jsx(SpacingSpan, { right: 1 }), props.btnRight && _jsx(CollapseIcon, { ...props, isOpen: isOpen })] }), isOpen ? (_jsx(Box, { ...props.bodyBoxProps, children: _jsx(Text, { textLight: (_b = props.light) !== null && _b !== void 0 ? _b : true, small: true, id: `${props.title}`, ...props.bodyTextProps, children: props.children }) })) : null] }));
 });
 export default Collapsible;
 //# sourceMappingURL=Collapsible.js.map

@@ -12,9 +12,48 @@ import { GeoJsonTraits } from "./GeoJsonTraits";
 let CartoMapV3TableCatalogItemTraits = class CartoMapV3TableCatalogItemTraits extends mixTraits(GeoJsonTraits) {
     constructor() {
         super(...arguments);
-        this.connectionName = "carto_dw";
-        this.baseUrl = "https://gcp-australia-southeast1.api.carto.com/";
-        this.cartoGeoColumn = "geom";
+        Object.defineProperty(this, "accessToken", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "connectionName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "carto_dw"
+        });
+        Object.defineProperty(this, "baseUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "https://gcp-australia-southeast1.api.carto.com/"
+        });
+        Object.defineProperty(this, "cartoGeoColumn", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "geom"
+        });
+        Object.defineProperty(this, "cartoQuery", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "cartoTableName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "cartoColumns", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 };
 __decorate([

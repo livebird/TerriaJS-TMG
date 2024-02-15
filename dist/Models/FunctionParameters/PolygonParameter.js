@@ -4,13 +4,19 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { computed } from "mobx";
+import { computed, makeObservable } from "mobx";
 import isDefined from "../../Core/isDefined";
 import FunctionParameter from "./FunctionParameter";
-export default class PolygonParameter extends FunctionParameter {
-    constructor() {
-        super(...arguments);
-        this.type = "polygon";
+class PolygonParameter extends FunctionParameter {
+    constructor(...args) {
+        super(...args);
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "polygon"
+        });
+        makeObservable(this);
     }
     static formatValueForUrl(value) {
         return JSON.stringify({
@@ -42,7 +48,13 @@ export default class PolygonParameter extends FunctionParameter {
         }
     }
 }
-PolygonParameter.type = "polygon";
+Object.defineProperty(PolygonParameter, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "polygon"
+});
+export default PolygonParameter;
 __decorate([
     computed
 ], PolygonParameter.prototype, "geoJsonFeature", null);

@@ -6,13 +6,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import countBy from "lodash-es/countBy";
 import Mexp from "math-expression-evaluator";
-import { computed } from "mobx";
+import { computed, makeObservable } from "mobx";
 import JulianDate from "terriajs-cesium/Source/Core/JulianDate";
 import filterOutUndefined from "../Core/filterOutUndefined";
 import isDefined from "../Core/isDefined";
 import runLater from "../Core/runLater";
 import createCombinedModel from "../Models/Definition/createCombinedModel";
-import { THIS_COLUMN_EXPRESSION_TOKEN } from "../Traits/TraitsClasses/TableColumnTraits";
+import { THIS_COLUMN_EXPRESSION_TOKEN } from "../Traits/TraitsClasses/Table/ColumnTraits";
 import TableColumnType, { stringToTableColumnType } from "./TableColumnType";
 const naturalSort = require("javascript-natural-sort");
 naturalSort.insensitive = true;
@@ -21,6 +21,19 @@ naturalSort.insensitive = true;
  */
 export default class TableColumn {
     constructor(tableModel, columnNumber) {
+        Object.defineProperty(this, "columnNumber", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "tableModel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
         this.columnNumber = columnNumber;
         this.tableModel = tableModel;
     }
@@ -86,7 +99,8 @@ export default class TableColumn {
         return this.mexpColumnTokens.reduce((pairs, token) => {
             var _a, _b;
             if (token.token !== THIS_COLUMN_EXPRESSION_TOKEN)
-                pairs[token.value] = (_b = (_a = this.tableModel.tableColumns.find((col) => col.name === token.token)) === null || _a === void 0 ? void 0 : _a.valuesAsNumbers.values[rowIndex]) !== null && _b !== void 0 ? _b : null;
+                pairs[token.value] =
+                    (_b = (_a = this.tableModel.tableColumns.find((col) => col.name === token.token)) === null || _a === void 0 ? void 0 : _a.valuesAsNumbers.values[rowIndex]) !== null && _b !== void 0 ? _b : null;
             // Add column pair for this value (token `THIS_COLUMN_EXPRESSION_TOKEN`)
             else
                 pairs[THIS_COLUMN_EXPRESSION_TOKEN] = value;
@@ -193,7 +207,7 @@ export default class TableColumn {
         const centuryFix = (y) => y < 50 ? 2000 + y : y < 100 ? 1900 + y : y;
         const ddmmyyyy = (value) => {
             // Try dd/mm/yyyy and watch out for failures that would also cross out mm/dd/yyyy
-            for (let separator of separators) {
+            for (const separator of separators) {
                 const sep1 = value.indexOf(separator);
                 if (sep1 === -1)
                     continue; // Try next separator
@@ -204,9 +218,9 @@ export default class TableColumn {
                     skipMmddyyyy = true;
                     return null;
                 }
-                let dayString = value.slice(0, sep1);
-                let monthString = value.slice(sep1 + 1, sep2);
-                let yearString = value.slice(sep2 + 1);
+                const dayString = value.slice(0, sep1);
+                const monthString = value.slice(sep1 + 1, sep2);
+                const yearString = value.slice(sep2 + 1);
                 const d = +dayString;
                 const m = +monthString;
                 const y = +yearString;
@@ -236,7 +250,7 @@ export default class TableColumn {
             skipMmddyyyy = true;
             return null;
         };
-        let mmddyyyy = (value) => {
+        const mmddyyyy = (value) => {
             // This function only exists to allow mm-dd-yyyy dates
             // mm/dd/yyyy dates could be picked up by `new Date`
             const separator = "-";
@@ -250,9 +264,9 @@ export default class TableColumn {
                 parsingFailed = true;
                 return null;
             }
-            let monthString = value.slice(0, sep1);
-            let dayString = value.slice(sep1 + 1, sep2);
-            let yearString = value.slice(sep2 + 1);
+            const monthString = value.slice(0, sep1);
+            const dayString = value.slice(sep1 + 1, sep2);
+            const yearString = value.slice(sep2 + 1);
             const d = +dayString;
             const m = +monthString;
             const y = +yearString;
@@ -268,7 +282,7 @@ export default class TableColumn {
                 return null;
             }
         };
-        let yyyyQQ = (value) => {
+        const yyyyQQ = (value) => {
             // Is it quarterly data in the format yyyy-Qx ? (Ignoring null values, and failing on any purely numeric values)
             if (value[4] === "-" && value[5] === "Q") {
                 const year = +value.slice(0, 4);
@@ -299,7 +313,7 @@ export default class TableColumn {
             parsingFailed = true;
             return null;
         };
-        let dateConstructor = (value) => {
+        const dateConstructor = (value) => {
             const ms = Date.parse(value);
             if (!Number.isNaN(ms)) {
                 return new Date(ms);

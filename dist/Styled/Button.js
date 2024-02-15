@@ -1,9 +1,10 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import styled from "styled-components";
 import { BoxSpan } from "./Box";
 import { TextSpan } from "./Text";
-const Icon = styled.span `
-  ${(p) => (p.rightIcon ? `margin-left: 8px` : `margin-right: 8px`)};
+const IconSpan = styled.span `
+  ${(p) => p.margin};
 `;
 const StyledButton = styled.button `
   pointer-events: auto;
@@ -124,13 +125,15 @@ export const RawButton = styled.button `
 export const Button = (props) => {
     const { primary, secondary, warning, textLight, iconProps, textProps, buttonRef, ...rest } = props;
     const IconComponent = props.renderIcon && typeof props.renderIcon === "function"
-        ? () => (React.createElement(Icon, Object.assign({ css: iconProps && iconProps.css, rightIcon: props.rightIcon }, iconProps), props.renderIcon()))
+        ? () => (_jsx(IconSpan, { css: iconProps && iconProps.css, margin: 
+            // Apply left or right margin only when the button content is not empty
+            props.children
+                ? props.rightIcon
+                    ? "margin-left: 8px"
+                    : "margin-right: 8px"
+                : null, rightIcon: props.rightIcon, ...iconProps, children: props.renderIcon() }))
         : undefined;
-    return (React.createElement(StyledButton, Object.assign({ ref: buttonRef, primary: primary, secondary: secondary, warning: warning }, rest),
-        React.createElement(BoxSpan, { centered: true },
-            !props.rightIcon && (IconComponent === null || IconComponent === void 0 ? void 0 : IconComponent()),
-            props.children && (React.createElement(TextSpan, Object.assign({ white: primary || secondary || warning || textLight, medium: secondary }, textProps), props.children)),
-            props.rightIcon && (IconComponent === null || IconComponent === void 0 ? void 0 : IconComponent()))));
+    return (_jsx(StyledButton, { ref: buttonRef, primary: primary, secondary: secondary, warning: warning, ...rest, children: _jsxs(BoxSpan, { centered: true, children: [!props.rightIcon && (IconComponent === null || IconComponent === void 0 ? void 0 : IconComponent()), props.children && (_jsx(TextSpan, { white: primary || secondary || warning || textLight, medium: secondary, ...textProps, children: props.children })), props.rightIcon && (IconComponent === null || IconComponent === void 0 ? void 0 : IconComponent())] }) }));
 };
-export default React.forwardRef((props, ref) => React.createElement(Button, Object.assign({}, props, { buttonRef: ref })));
+export default React.forwardRef((props, ref) => _jsx(Button, { ...props, buttonRef: ref }));
 //# sourceMappingURL=Button.js.map

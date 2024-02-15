@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { action, autorun, computed, runInAction } from "mobx";
+import { action, autorun, computed, runInAction, makeObservable } from "mobx";
 import DeveloperError from "terriajs-cesium/Source/Core/DeveloperError";
 import filterOutUndefined from "../../../Core/filterOutUndefined";
 import isDefined from "../../../Core/isDefined";
@@ -17,12 +17,18 @@ import CompositeCatalogItemTraits from "../../../Traits/TraitsClasses/CompositeC
 import CommonStrata from "../../Definition/CommonStrata";
 import CreateModel from "../../Definition/CreateModel";
 import { BaseModel } from "../../Definition/Model";
-export default class CompositeCatalogItem extends MappableMixin(CatalogMemberMixin(CreateModel(CompositeCatalogItemTraits))) {
-    constructor() {
-        super(...arguments);
-        this._visibilityDisposer = autorun(() => {
-            this.syncVisibilityToMembers();
+class CompositeCatalogItem extends MappableMixin(CatalogMemberMixin(CreateModel(CompositeCatalogItemTraits))) {
+    constructor(...args) {
+        super(...args);
+        Object.defineProperty(this, "_visibilityDisposer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: autorun(() => {
+                this.syncVisibilityToMembers();
+            })
         });
+        makeObservable(this);
     }
     get type() {
         return CompositeCatalogItem.type;
@@ -86,7 +92,13 @@ export default class CompositeCatalogItem extends MappableMixin(CatalogMemberMix
         this._visibilityDisposer();
     }
 }
-CompositeCatalogItem.type = "composite";
+Object.defineProperty(CompositeCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "composite"
+});
+export default CompositeCatalogItem;
 __decorate([
     computed
 ], CompositeCatalogItem.prototype, "memberModels", null);

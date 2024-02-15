@@ -3,7 +3,12 @@ import { createTransformer } from "mobx-utils";
 const undefinedObjectSymbol = Symbol("isUndefinedObject");
 class UndefinedObject {
     constructor() {
-        this[_a] = true;
+        Object.defineProperty(this, _a, {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
     }
 }
 _a = undefinedObjectSymbol;
@@ -23,7 +28,7 @@ export default function createTransformerAllowUndefined(transformer, onCleanup) 
     Object.defineProperty(unwrap, "name", {
         value: (transformer.name || "anonymous") + "-allowUndefined"
     });
-    const unwrapOnCleanup = onCleanup == undefined
+    const unwrapOnCleanup = onCleanup === undefined
         ? undefined
         : function (resultObject, sourceObject) {
             const unwrapped = isUndefinedObject(sourceObject)

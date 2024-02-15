@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import groupBy from "lodash-es/groupBy";
-import { computed } from "mobx";
+import { computed, makeObservable } from "mobx";
 import binarySearch from "terriajs-cesium/Source/Core/binarySearch";
 import JulianDate from "terriajs-cesium/Source/Core/JulianDate";
 import TimeInterval from "terriajs-cesium/Source/Core/TimeInterval";
@@ -33,8 +33,19 @@ export default class TableStyle {
      * @param styleNumber Index of styleTraits in tableModel (if undefined, then default style will be used)
      */
     constructor(tableModel, styleNumber) {
-        this.tableModel = tableModel;
-        this.styleNumber = styleNumber;
+        Object.defineProperty(this, "tableModel", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: tableModel
+        });
+        Object.defineProperty(this, "styleNumber", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: styleNumber
+        });
+        makeObservable(this);
     }
     /** Is style ready to be used.
      * This will be false if any of dependent columns are not ready
@@ -95,18 +106,23 @@ export default class TableStyle {
      */
     get isCustom() {
         var _a, _b, _c, _d, _e, _f;
-        const userStrata = this.colorTraits.strata.get(CommonStrata.user);
-        if (!userStrata)
-            return false;
-        return (((_b = ((_a = userStrata.binColors) !== null && _a !== void 0 ? _a : [])) === null || _b === void 0 ? void 0 : _b.length) > 0 ||
-            ((_d = ((_c = userStrata.binMaximums) !== null && _c !== void 0 ? _c : [])) === null || _d === void 0 ? void 0 : _d.length) > 0 ||
-            ((_f = ((_e = userStrata.enumColors) !== null && _e !== void 0 ? _e : [])) === null || _f === void 0 ? void 0 : _f.length) > 0 ||
-            isDefined(userStrata.numberOfBins) ||
-            isDefined(userStrata.minimumValue) ||
-            isDefined(userStrata.maximumValue) ||
-            isDefined(userStrata.regionColor) ||
-            isDefined(userStrata.nullColor) ||
-            isDefined(userStrata.outlierColor));
+        const colorTraits = this.colorTraits.strata.get(CommonStrata.user);
+        const pointSizeTraits = this.pointSizeTraits.strata.get(CommonStrata.user);
+        const styleTraits = this.styleTraits.strata.get(CommonStrata.user);
+        return (((_b = ((_a = colorTraits === null || colorTraits === void 0 ? void 0 : colorTraits.binColors) !== null && _a !== void 0 ? _a : [])) === null || _b === void 0 ? void 0 : _b.length) > 0 ||
+            ((_d = ((_c = colorTraits === null || colorTraits === void 0 ? void 0 : colorTraits.binMaximums) !== null && _c !== void 0 ? _c : [])) === null || _d === void 0 ? void 0 : _d.length) > 0 ||
+            ((_f = ((_e = colorTraits === null || colorTraits === void 0 ? void 0 : colorTraits.enumColors) !== null && _e !== void 0 ? _e : [])) === null || _f === void 0 ? void 0 : _f.length) > 0 ||
+            isDefined(colorTraits === null || colorTraits === void 0 ? void 0 : colorTraits.numberOfBins) ||
+            isDefined(colorTraits === null || colorTraits === void 0 ? void 0 : colorTraits.minimumValue) ||
+            isDefined(colorTraits === null || colorTraits === void 0 ? void 0 : colorTraits.maximumValue) ||
+            isDefined(colorTraits === null || colorTraits === void 0 ? void 0 : colorTraits.regionColor) ||
+            isDefined(colorTraits === null || colorTraits === void 0 ? void 0 : colorTraits.nullColor) ||
+            isDefined(colorTraits === null || colorTraits === void 0 ? void 0 : colorTraits.outlierColor) ||
+            pointSizeTraits ||
+            (styleTraits === null || styleTraits === void 0 ? void 0 : styleTraits.point) ||
+            (styleTraits === null || styleTraits === void 0 ? void 0 : styleTraits.outline) ||
+            (styleTraits === null || styleTraits === void 0 ? void 0 : styleTraits.label) ||
+            (styleTraits === null || styleTraits === void 0 ? void 0 : styleTraits.trail));
     }
     /**
      * Gets the {@link TableColorStyleTraits} from the {@link #styleTraits}.
@@ -427,9 +443,9 @@ export default class TableStyle {
         }
         return finishDates;
     }
-    /** Get rows grouped by id. Id will be calculated using idColumns, latitude/longitude columns or region column
+    /** Columns used in rowGroups - idColumns, latitude/longitude columns or region column
      */
-    get rowGroups() {
+    get groupByColumns() {
         let groupByCols = this.idColumns;
         if (!groupByCols) {
             // If points use lat long
@@ -440,18 +456,13 @@ export default class TableStyle {
             else if (this.regionColumn)
                 groupByCols = [this.regionColumn];
         }
-        if (!groupByCols)
-            groupByCols = [];
+        return groupByCols !== null && groupByCols !== void 0 ? groupByCols : [];
+    }
+    /** Get rows grouped by id.
+     */
+    get rowGroups() {
         const tableRowIds = this.tableModel.rowIds;
-        return (Object.entries(groupBy(tableRowIds, (rowId) => groupByCols
-            .map((col) => {
-            // If using region column as ID - only use valid regions
-            if (col.type === TableColumnType.region) {
-                return col.valuesAsRegions.regionIds[rowId];
-            }
-            return col.values[rowId];
-        })
-            .join("-")))
+        return (Object.entries(groupBy(tableRowIds, (rowId) => createRowGroupId(rowId, this.groupByColumns)))
             // Filter out bad IDs
             .filter((value) => value[0] !== ""));
     }
@@ -460,8 +471,8 @@ export default class TableStyle {
         const colorColumn = this.colorColumn;
         if ((_a = colorColumn === null || colorColumn === void 0 ? void 0 : colorColumn.traits) === null || _a === void 0 ? void 0 : _a.format)
             return (_b = colorColumn === null || colorColumn === void 0 ? void 0 : colorColumn.traits) === null || _b === void 0 ? void 0 : _b.format;
-        let min = (_c = this.tableColorMap.minimumValue) !== null && _c !== void 0 ? _c : colorColumn === null || colorColumn === void 0 ? void 0 : colorColumn.valuesAsNumbers.minimum;
-        let max = (_d = this.tableColorMap.maximumValue) !== null && _d !== void 0 ? _d : colorColumn === null || colorColumn === void 0 ? void 0 : colorColumn.valuesAsNumbers.maximum;
+        const min = (_c = this.tableColorMap.minimumValue) !== null && _c !== void 0 ? _c : colorColumn === null || colorColumn === void 0 ? void 0 : colorColumn.valuesAsNumbers.minimum;
+        const max = (_d = this.tableColorMap.maximumValue) !== null && _d !== void 0 ? _d : colorColumn === null || colorColumn === void 0 ? void 0 : colorColumn.valuesAsNumbers.maximum;
         if (colorColumn &&
             colorColumn.type === TableColumnType.scalar &&
             isDefined(min) &&
@@ -480,7 +491,7 @@ export default class TableStyle {
             // We use 20 here instead of 10 to give us a more conservative value (that is, we may show an extra fraction digit even if it is not needed)
             // So when x >= 20 - we will not show any fraction digits
             // Clamp values between 0 and 5
-            let fractionDigits = Math.max(0, Math.min(5, Math.ceil(Math.log10(20 / Math.abs(max - min)))));
+            const fractionDigits = Math.max(0, Math.min(5, Math.ceil(Math.log10(20 / Math.abs(max - min)))));
             return {
                 maximumFractionDigits: fractionDigits,
                 minimumFractionDigits: fractionDigits
@@ -501,7 +512,8 @@ export default class TableStyle {
         // Calculate last date based on if spreadFinishTime is true:
         // - If true, use the maximum date in the entire timeColumn
         // - If false, use the last date in startDates - which is the last date in the current row group
-        const lastDate = this.timeTraits.spreadFinishTime && ((_a = this.timeColumn) === null || _a === void 0 ? void 0 : _a.valuesAsJulianDates.maximum)
+        const lastDate = this.timeTraits.spreadFinishTime &&
+            ((_a = this.timeColumn) === null || _a === void 0 ? void 0 : _a.valuesAsJulianDates.maximum)
             ? this.timeColumn.valuesAsJulianDates.maximum
             : sortedStartDates[sortedStartDates.length - 1];
         const finishDates = new Array(startDates.length).fill(null);
@@ -629,10 +641,25 @@ __decorate([
 ], TableStyle.prototype, "finishJulianDates", null);
 __decorate([
     computed
+], TableStyle.prototype, "groupByColumns", null);
+__decorate([
+    computed
 ], TableStyle.prototype, "rowGroups", null);
 __decorate([
     computed
 ], TableStyle.prototype, "numberFormatOptions", null);
+/** Create row group ID by concatenating values for columns */
+export function createRowGroupId(rowId, columns) {
+    return columns
+        .map((col) => {
+        // If using region column as ID - only use valid regions
+        if (col.type === TableColumnType.region) {
+            return col.valuesAsRegions.regionIds[rowId];
+        }
+        return col.values[rowId];
+    })
+        .join("-");
+}
 /**
  * Returns an array of sorted unique dates
  */

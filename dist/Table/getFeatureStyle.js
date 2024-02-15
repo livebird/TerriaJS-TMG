@@ -1,7 +1,10 @@
 import Cartesian2 from "terriajs-cesium/Source/Core/Cartesian2";
 import Color from "terriajs-cesium/Source/Core/Color";
 import CesiumMath from "terriajs-cesium/Source/Core/Math";
+import NearFarScalar from "terriajs-cesium/Source/Core/NearFarScalar";
+import HorizontalOrigin from "terriajs-cesium/Source/Scene/HorizontalOrigin";
 import LabelStyle from "terriajs-cesium/Source/Scene/LabelStyle";
+import VerticalOrigin from "terriajs-cesium/Source/Scene/VerticalOrigin";
 import { getMakiIcon, isMakiIcon } from "../Map/Icons/Maki/MakiIcons";
 import { isConstantStyleMap } from "./TableStyleMap";
 /** For given TableStyle and rowId, return feature styling in a "cesium-friendly" format.
@@ -13,7 +16,7 @@ import { isConstantStyleMap } from "./TableStyleMap";
  * - `usePointGraphics` flag - whether to use PointGraphics or BillboardGraphics for marker symbology
  */
 export function getFeatureStyle(style, rowId) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
     // Convert TablePointStyleTraits, TableColorStyleTraits, TableOutlineStyleTraits and TablePointSizeStyleTraits into
     // - PointGraphics options
     // - BillboardGraphics options
@@ -39,7 +42,9 @@ export function getFeatureStyle(style, rowId) {
     const pointGraphicsOptions = pointStyle
         ? {
             color: color,
-            pixelSize: (_d = pointSize !== null && pointSize !== void 0 ? pointSize : pointStyle === null || pointStyle === void 0 ? void 0 : pointStyle.height) !== null && _d !== void 0 ? _d : pointStyle === null || pointStyle === void 0 ? void 0 : pointStyle.width
+            pixelSize: (_d = pointSize !== null && pointSize !== void 0 ? pointSize : pointStyle === null || pointStyle === void 0 ? void 0 : pointStyle.height) !== null && _d !== void 0 ? _d : pointStyle === null || pointStyle === void 0 ? void 0 : pointStyle.width,
+            scaleByDistance: scaleByDistanceFromTraits(pointStyle === null || pointStyle === void 0 ? void 0 : pointStyle.scaleByDistance),
+            disableDepthTestDistance: pointStyle === null || pointStyle === void 0 ? void 0 : pointStyle.disableDepthTestDistance
         }
         : undefined;
     if (pointGraphicsOptions && outlineStyle && outlineColor) {
@@ -59,7 +64,9 @@ export function getFeatureStyle(style, rowId) {
             height: pointSize !== null && pointSize !== void 0 ? pointSize : pointStyle.height,
             // Convert clockwise degrees to counter-clockwise radians
             rotation: CesiumMath.toRadians(360 - ((_h = pointStyle.rotation) !== null && _h !== void 0 ? _h : 0)),
-            pixelOffset: new Cartesian2((_j = pointStyle.pixelOffset) === null || _j === void 0 ? void 0 : _j[0], (_k = pointStyle.pixelOffset) === null || _k === void 0 ? void 0 : _k[1])
+            pixelOffset: new Cartesian2((_j = pointStyle.pixelOffset) === null || _j === void 0 ? void 0 : _j[0], (_k = pointStyle.pixelOffset) === null || _k === void 0 ? void 0 : _k[1]),
+            scaleByDistance: scaleByDistanceFromTraits(pointStyle === null || pointStyle === void 0 ? void 0 : pointStyle.scaleByDistance),
+            disableDepthTestDistance: pointStyle === null || pointStyle === void 0 ? void 0 : pointStyle.disableDepthTestDistance
         }
         : undefined;
     // Convert TableTrailStyleTraits into PathGraphics options
@@ -72,14 +79,16 @@ export function getFeatureStyle(style, rowId) {
             : style.trailStyleMap.styleMap.mapValueToStyle(rowId)
         : undefined;
     const pathGraphicsOptions = trailStyle;
-    const pathGraphicsSolidColorOptions = (trailStyle === null || trailStyle === void 0 ? void 0 : trailStyle.solidColor) ? {
-        color: Color.fromCssColorString(trailStyle.solidColor.color)
-    }
+    const pathGraphicsSolidColorOptions = (trailStyle === null || trailStyle === void 0 ? void 0 : trailStyle.solidColor)
+        ? {
+            color: Color.fromCssColorString(trailStyle.solidColor.color)
+        }
         : undefined;
-    const pathGraphicsPolylineGlowOptions = (trailStyle === null || trailStyle === void 0 ? void 0 : trailStyle.polylineGlow) ? {
-        ...trailStyle.polylineGlow,
-        color: Color.fromCssColorString(trailStyle.polylineGlow.color)
-    }
+    const pathGraphicsPolylineGlowOptions = (trailStyle === null || trailStyle === void 0 ? void 0 : trailStyle.polylineGlow)
+        ? {
+            ...trailStyle.polylineGlow,
+            color: Color.fromCssColorString(trailStyle.polylineGlow.color)
+        }
         : undefined;
     // Convert TableLabelStyleTraits to LabelGraphics options
     const labelStyle = style.labelStyleMap.traits.enabled
@@ -98,7 +107,21 @@ export function getFeatureStyle(style, rowId) {
                     : LabelStyle.FILL,
             fillColor: Color.fromCssColorString(labelStyle.fillColor),
             outlineColor: Color.fromCssColorString(labelStyle.outlineColor),
-            pixelOffset: new Cartesian2(labelStyle.pixelOffset[0], labelStyle.pixelOffset[1])
+            pixelOffset: new Cartesian2(labelStyle.pixelOffset[0], labelStyle.pixelOffset[1]),
+            verticalOrigin: labelStyle.verticalOrigin === "TOP"
+                ? VerticalOrigin.TOP
+                : labelStyle.verticalOrigin === "BOTTOM"
+                    ? VerticalOrigin.BOTTOM
+                    : labelStyle.verticalOrigin === "BASELINE"
+                        ? VerticalOrigin.BASELINE
+                        : VerticalOrigin.CENTER,
+            horizontalOrigin: labelStyle.horizontalOrigin === "CENTER"
+                ? HorizontalOrigin.CENTER
+                : labelStyle.horizontalOrigin === "RIGHT"
+                    ? HorizontalOrigin.RIGHT
+                    : HorizontalOrigin.LEFT,
+            scaleByDistance: scaleByDistanceFromTraits(labelStyle === null || labelStyle === void 0 ? void 0 : labelStyle.scaleByDistance),
+            disableDepthTestDistance: labelStyle === null || labelStyle === void 0 ? void 0 : labelStyle.disableDepthTestDistance
         }
         : undefined;
     return {
@@ -108,8 +131,25 @@ export function getFeatureStyle(style, rowId) {
         pathGraphicsSolidColorOptions,
         pathGraphicsPolylineGlowOptions,
         billboardGraphicsOptions,
-        /** Use PointGraphics instead of BillboardGraphics, if not using maki icon. */
-        usePointGraphics: !isMakiIcon(pointStyle === null || pointStyle === void 0 ? void 0 : pointStyle.marker)
+        /** Use PointGraphics instead of BillboardGraphics, if not using maki icon AND not using image marker. */
+        usePointGraphics: !isMakiIcon(pointStyle === null || pointStyle === void 0 ? void 0 : pointStyle.marker) &&
+            !((_m = pointStyle === null || pointStyle === void 0 ? void 0 : pointStyle.marker) === null || _m === void 0 ? void 0 : _m.startsWith("data:image"))
     };
+}
+/**
+ * Constructs a `NearFarScalar` instance from the ScaleByDistance traits or
+ * `undefined` if the settings is not meaningful.
+ */
+function scaleByDistanceFromTraits(scaleByDistance) {
+    if (!scaleByDistance) {
+        return;
+    }
+    const { near, nearValue, far, farValue } = scaleByDistance;
+    if (nearValue === 1 && farValue === 1) {
+        // Return undefined as this value will have no effect when both near and
+        // far value is equal to 1.
+        return;
+    }
+    return new NearFarScalar(near, nearValue, far, farValue);
 }
 //# sourceMappingURL=getFeatureStyle.js.map

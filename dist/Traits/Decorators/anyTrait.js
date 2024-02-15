@@ -13,10 +13,15 @@ export default function anyTrait(options) {
 export class AnyTrait extends Trait {
     constructor(id, options, parent) {
         super(id, options, parent);
-        this.decoratorForFlattened = computed.struct;
+        Object.defineProperty(this, "decoratorForFlattened", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: computed.struct
+        });
     }
     getValue(model) {
-        for (let stratum of model.strataTopToBottom.values()) {
+        for (const stratum of model.strataTopToBottom.values()) {
             const stratumAny = stratum;
             if (stratumAny !== undefined && stratumAny[this.id] !== undefined) {
                 return stratumAny[this.id];

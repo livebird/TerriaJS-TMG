@@ -1,4 +1,5 @@
 "use strict";
+import { jsx as _jsx } from "react/jsx-runtime";
 import Styles from "!style-loader!css-loader?modules&sourceMap!sass-loader?sourceMap!./cesium-timeline.scss";
 import createReactClass from "create-react-class";
 import dateFormat from "dateformat";
@@ -7,7 +8,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import defined from "terriajs-cesium/Source/Core/defined";
 import JulianDate from "terriajs-cesium/Source/Core/JulianDate";
-import WrappedTimeline from "terriajs-cesium/Source/Widgets/Timeline/Timeline";
+import WrappedTimeline from "terriajs-cesium-widgets/Source/Timeline/Timeline";
 import CommonStrata from "../../../Models/Definition/CommonStrata";
 import { formatDate, formatDateTime, formatTime } from "./DateFormats";
 const CesiumTimeline = createReactClass({
@@ -69,7 +70,7 @@ const CesiumTimeline = createReactClass({
         return false;
     },
     render() {
-        return (React.createElement("div", { className: Styles.cesiumTimeline, ref: (ref) => {
+        return (_jsx("div", { className: Styles.cesiumTimeline, ref: (ref) => {
                 this.timelineContainer = ref;
             } }));
     }

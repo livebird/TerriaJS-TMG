@@ -1,4 +1,5 @@
 "use strict";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import PropTypes from "prop-types";
 import createReactClass from "create-react-class";
@@ -70,14 +71,7 @@ const TimelineControls = createReactClass({
     },
     render() {
         const { t } = this.props;
-        return (React.createElement("div", { className: Styles.controls },
-            React.createElement("button", { type: "button", className: Styles.timelineControl, onClick: this.gotoStart, title: t("dateTime.timeline.gotoStart") },
-                React.createElement(Icon, { glyph: Icon.GLYPHS.backToStart })),
-            React.createElement("button", { type: "button", className: Styles.timelineControl, onClick: this.togglePlay, title: t("dateTime.timeline.togglePlay") }, this.isPlaying() ? (React.createElement(Icon, { glyph: Icon.GLYPHS.pause })) : (React.createElement(Icon, { glyph: Icon.GLYPHS.play }))),
-            React.createElement("button", { type: "button", className: Styles.timelineControl, onClick: this.playSlower, title: t("dateTime.timeline.playSlower") },
-                React.createElement(Icon, { glyph: Icon.GLYPHS.backward })),
-            React.createElement("button", { type: "button", className: Styles.timelineControl, onClick: this.playFaster, title: t("dateTime.timeline.playFaster") },
-                React.createElement(Icon, { glyph: Icon.GLYPHS.forward }))));
+        return (_jsxs("div", { className: Styles.controls, children: [_jsx("button", { type: "button", className: Styles.timelineControl, onClick: this.gotoStart, title: t("dateTime.timeline.gotoStart"), children: _jsx(Icon, { glyph: Icon.GLYPHS.backToStart }) }), _jsx("button", { type: "button", className: Styles.timelineControl, onClick: this.togglePlay, title: t("dateTime.timeline.togglePlay"), children: this.isPlaying() ? (_jsx(Icon, { glyph: Icon.GLYPHS.pause })) : (_jsx(Icon, { glyph: Icon.GLYPHS.play })) }), _jsx("button", { type: "button", className: Styles.timelineControl, onClick: this.playSlower, title: t("dateTime.timeline.playSlower"), children: _jsx(Icon, { glyph: Icon.GLYPHS.backward }) }), _jsx("button", { type: "button", className: Styles.timelineControl, onClick: this.playFaster, title: t("dateTime.timeline.playFaster"), children: _jsx(Icon, { glyph: Icon.GLYPHS.forward }) })] }));
     }
 });
 export default withTranslation()(TimelineControls);

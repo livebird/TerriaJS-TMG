@@ -5,13 +5,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { action, computed, observable, runInAction } from "mobx";
+import { action, computed, isObservableArray, makeObservable, observable, override, runInAction } from "mobx";
+import Mustache from "mustache";
 import URI from "urijs";
+import { networkRequestError } from "../../../Core/TerriaError";
 import flatten from "../../../Core/flatten";
 import isDefined from "../../../Core/isDefined";
 import loadJson from "../../../Core/loadJson";
 import runLater from "../../../Core/runLater";
-import { networkRequestError } from "../../../Core/TerriaError";
 import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
 import GroupMixin from "../../../ModelMixins/GroupMixin";
 import UrlMixin from "../../../ModelMixins/UrlMixin";
@@ -44,12 +45,43 @@ StratumOrder.addLoadStratum(createInheritedCkanSharedTraitsStratum.stratumName);
 export class CkanServerStratum extends LoadableStratum(CkanCatalogGroupTraits) {
     constructor(_catalogGroup, _ckanResponse) {
         super();
-        this._catalogGroup = _catalogGroup;
-        this._ckanResponse = _ckanResponse;
-        this.groups = [];
-        this.filteredGroups = [];
-        this.datasets = [];
-        this.filteredDatasets = [];
+        Object.defineProperty(this, "_catalogGroup", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: _catalogGroup
+        });
+        Object.defineProperty(this, "_ckanResponse", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: _ckanResponse
+        });
+        Object.defineProperty(this, "groups", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "filteredGroups", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "datasets", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "filteredDatasets", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        makeObservable(this);
         this.datasets = this.getDatasets();
         this.filteredDatasets = this.getFilteredDatasets();
         this.groups = this.getGroups();
@@ -73,12 +105,12 @@ export class CkanServerStratum extends LoadableStratum(CkanCatalogGroupTraits) {
         return uri;
     }
     static async load(catalogGroup) {
-        var terria = catalogGroup.terria;
+        const terria = catalogGroup.terria;
         let ckanServerResponse = undefined;
         // Each item in the array causes an independent request to the CKAN, and the results are concatenated
-        for (var i = 0; i < catalogGroup.filterQuery.length; ++i) {
+        for (let i = 0; i < catalogGroup.filterQuery.length; ++i) {
             const filterQuery = catalogGroup.filterQuery[i];
-            var uri = new URI(catalogGroup.url)
+            const uri = new URI(catalogGroup.url)
                 .segment("api/3/action/package_search")
                 .addQuery({ start: 0, rows: 1000, sort: "metadata_created asc" });
             CkanServerStratum.addFilterQuery(uri, filterQuery);
@@ -171,7 +203,7 @@ export class CkanServerStratum extends LoadableStratum(CkanCatalogGroupTraits) {
         });
     }
     addCatalogItemToCatalogGroup(catalogItem, dataset, groupId) {
-        let group = this._catalogGroup.terria.getModelById(CatalogGroup, groupId);
+        const group = this._catalogGroup.terria.getModelById(CatalogGroup, groupId);
         if (group !== undefined) {
             group.add(CommonStrata.definition, catalogItem);
         }
@@ -208,7 +240,7 @@ export class CkanServerStratum extends LoadableStratum(CkanCatalogGroupTraits) {
         let filteredResources = [];
         // Track format IDS which multiple resources
         // As if they do, we will need to make sure that CkanItemReference uses resource name (instead of dataset name)
-        let formatsWithMultipleResources = new Set();
+        const formatsWithMultipleResources = new Set();
         if (this._catalogGroup.useSingleResource) {
             filteredResources = supportedResources[0] ? [supportedResources[0]] : [];
         }
@@ -252,7 +284,7 @@ export class CkanServerStratum extends LoadableStratum(CkanCatalogGroupTraits) {
         // Create CkanItemReference for each filteredResource
         // Create a computed stratum to pass shared configuration down to items
         const inheritedPropertiesStratum = createInheritedCkanSharedTraitsStratum(this._catalogGroup);
-        for (var i = 0; i < filteredResources.length; ++i) {
+        for (let i = 0; i < filteredResources.length; ++i) {
             const { resource, format } = filteredResources[i];
             const itemId = this.getItemId(ckanDataset, resource);
             let item = this._catalogGroup.terria.getModelById(CkanItemReference, itemId);
@@ -296,10 +328,48 @@ export class CkanServerStratum extends LoadableStratum(CkanCatalogGroupTraits) {
         }
     }
     getItemId(ckanDataset, resource) {
-        return `${this._catalogGroup.uniqueId}/${ckanDataset.id}/${resource.id}`;
+        const resourceId = this.buildResourceId(ckanDataset, resource);
+        return `${this._catalogGroup.uniqueId}/${ckanDataset.id}/${resourceId}`;
+    }
+    /**
+     * Build an ID for the given resource using the `resourceIdTemplate` if available.
+     */
+    buildResourceId(ckanDataset, resource) {
+        var _a;
+        const resourceIdTemplate = this.resourceIdTemplateForOrg((_a = ckanDataset.organization) === null || _a === void 0 ? void 0 : _a.name);
+        const resourceId = resourceIdTemplate
+            ? // Use mustache to construct the resource id from template. Also delete any `/`
+                // character in the resulting ID to avoid conflict with the path separator.
+                Mustache.render(resourceIdTemplate, { resource }).replace("/", "")
+            : resource.id;
+        return resourceId;
+    }
+    /**
+     * Returns a template for constructing alternate resourceId for the given
+     * organisation or `undefined` when no template is defined.
+     */
+    resourceIdTemplateForOrg(orgName) {
+        const template = this._catalogGroup.resourceIdTemplate;
+        // No template defined
+        if (!template) {
+            return undefined;
+        }
+        const restrictedOrgNames = this._catalogGroup.restrictResourceIdTemplateToOrgsWithNames;
+        if (Array.isArray(restrictedOrgNames) ||
+            isObservableArray(restrictedOrgNames)) {
+            // Use of template restricted by org names - return template only if this org is in the list
+            return restrictedOrgNames.includes(orgName) ? template : undefined;
+        }
+        // Template usage has no restrictions - return template for any org
+        return template;
     }
 }
-CkanServerStratum.stratumName = "ckanServer";
+Object.defineProperty(CkanServerStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "ckanServer"
+});
 __decorate([
     computed
 ], CkanServerStratum.prototype, "preparedSupportedFormats", null);
@@ -331,9 +401,10 @@ __decorate([
     action
 ], CkanServerStratum.prototype, "getItemId", null);
 StratumOrder.addLoadStratum(CkanServerStratum.stratumName);
-export default class CkanCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(CkanCatalogGroupTraits)))) {
+class CkanCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(CkanCatalogGroupTraits)))) {
     constructor(uniqueId, terria, sourceReference) {
         super(uniqueId, terria, sourceReference);
+        makeObservable(this);
         this.strata.set(CkanDefaultFormatsStratum.stratumName, new CkanDefaultFormatsStratum());
     }
     get type() {
@@ -366,9 +437,15 @@ export default class CkanCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberM
         }
     }
 }
-CkanCatalogGroup.type = "ckan-group";
+Object.defineProperty(CkanCatalogGroup, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "ckan-group"
+});
+export default CkanCatalogGroup;
 __decorate([
-    computed
+    override
 ], CkanCatalogGroup.prototype, "cacheDuration", null);
 function createGroup(groupId, terria, groupName) {
     const g = new CatalogGroup(groupId, terria);

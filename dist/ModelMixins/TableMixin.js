@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { action, computed, observable, runInAction } from "mobx";
+import { action, computed, observable, runInAction, makeObservable, override } from "mobx";
 import { createTransformer } from "mobx-utils";
 import DeveloperError from "terriajs-cesium/Source/Core/DeveloperError";
 import CustomDataSource from "terriajs-cesium/Source/DataSources/CustomDataSource";
@@ -36,39 +36,87 @@ import CatalogMemberMixin from "./CatalogMemberMixin";
 import { calculateDomain } from "./ChartableMixin";
 import DiscretelyTimeVaryingMixin from "./DiscretelyTimeVaryingMixin";
 import ExportableMixin from "./ExportableMixin";
+import MappableMixin from "./MappableMixin";
 function TableMixin(Base) {
-    class TableMixin extends ExportableMixin(DiscretelyTimeVaryingMixin(CatalogMemberMixin(Base))) {
+    class TableMixin extends ExportableMixin(DiscretelyTimeVaryingMixin(MappableMixin(CatalogMemberMixin(Base)))) {
         constructor(...args) {
             super(...args);
-            this.createLongitudeLatitudeDataSource = createTransformer((style) => {
-                if (!style.isPoints()) {
-                    return undefined;
-                }
-                const dataSource = new CustomDataSource(this.name || "Table");
-                dataSource.entities.suspendEvents();
-                let features;
-                if (style.isTimeVaryingPointsWithId()) {
-                    features = createLongitudeLatitudeFeaturePerId(style);
-                }
-                else {
-                    features = createLongitudeLatitudeFeaturePerRow(style);
-                }
-                // _catalogItem property is needed for some feature picking functions (eg `featureInfoTemplate`)
-                features.forEach((f) => {
-                    f._catalogItem = this;
-                    dataSource.entities.add(f);
-                });
-                dataSource.show = this.show;
-                dataSource.entities.resumeEvents();
-                return dataSource;
+            /**
+             * The default {@link TableStyle}, which is used for styling
+             * only when there are no styles defined.
+             */
+            Object.defineProperty(this, "defaultTableStyle", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
             });
-            this.createRegionMappedImageryProvider = createTransformer((input) => createRegionMappedImageryProvider(input.style, input.currentTime));
-            this.getTableColumn = createTransformer((index) => {
-                return new TableColumn(this, index);
+            // Always use the getter and setter for this
+            Object.defineProperty(this, "_dataColumnMajor", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
             });
-            this.getTableStyle = createTransformer((index) => {
-                return new TableStyle(this, index);
+            /**
+             * The list of region providers to be used with this table.
+             */
+            Object.defineProperty(this, "regionProviderLists", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
             });
+            Object.defineProperty(this, "createLongitudeLatitudeDataSource", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: createTransformer((style) => {
+                    if (!style.isPoints()) {
+                        return undefined;
+                    }
+                    const dataSource = new CustomDataSource(this.name || "Table");
+                    dataSource.entities.suspendEvents();
+                    let features;
+                    if (style.isTimeVaryingPointsWithId()) {
+                        features = createLongitudeLatitudeFeaturePerId(style);
+                    }
+                    else {
+                        features = createLongitudeLatitudeFeaturePerRow(style);
+                    }
+                    // _catalogItem property is needed for some feature picking functions (eg `featureInfoTemplate`)
+                    features.forEach((f) => {
+                        f._catalogItem = this;
+                        dataSource.entities.add(f);
+                    });
+                    dataSource.show = this.show;
+                    dataSource.entities.resumeEvents();
+                    return dataSource;
+                })
+            });
+            Object.defineProperty(this, "createRegionMappedImageryProvider", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: createTransformer((input) => createRegionMappedImageryProvider(input.style, input.currentTime))
+            });
+            Object.defineProperty(this, "getTableColumn", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: createTransformer((index) => {
+                    return new TableColumn(this, index);
+                })
+            });
+            Object.defineProperty(this, "getTableStyle", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: createTransformer((index) => {
+                    return new TableStyle(this, index);
+                })
+            });
+            makeObservable(this);
             // Create default TableStyle and set TableAutomaticLegendStratum
             this.defaultTableStyle = new TableStyle(this);
             if (this.strata.get(TableAutomaticLegendStratum.stratumName) === undefined) {
@@ -145,7 +193,7 @@ function TableMixin(Base) {
             if (activeStyle === undefined) {
                 return this.defaultTableStyle;
             }
-            let ret = this.tableStyles.find((style) => style.id === this.activeStyle);
+            const ret = this.tableStyles.find((style) => style.id === this.activeStyle);
             if (ret === undefined) {
                 return this.defaultTableStyle;
             }
@@ -164,7 +212,7 @@ function TableMixin(Base) {
         async _exportData() {
             if (isDefined(this.dataColumnMajor)) {
                 // I am assuming all columns have the same length -> so use first column
-                let csvString = this.dataColumnMajor[0]
+                const csvString = this.dataColumnMajor[0]
                     .map((row, rowIndex) => this.dataColumnMajor.map((col) => col[rowIndex]).join(","))
                     .join("\n");
                 // Make sure we have .csv file extension
@@ -181,6 +229,9 @@ function TableMixin(Base) {
                 sender: this,
                 message: "No data available to download."
             });
+        }
+        get name() {
+            return super.name;
         }
         get disableZoomTo() {
             // Disable zoom if only showing imagery parts  (eg region mapping) and no rectangle is defined
@@ -339,7 +390,7 @@ function TableMixin(Base) {
                 ...super.viewingControls,
                 {
                     id: TableStylingWorkflow.type,
-                    name: "Edit Style",
+                    name: i18next.t("models.tableData.editStyle"),
                     onClick: action((viewState) => SelectableDimensionWorkflow.runWorkflow(viewState, new TableStylingWorkflow(this))),
                     icon: { glyph: Icon.GLYPHS.layers }
                 }
@@ -369,7 +420,7 @@ function TableMixin(Base) {
             return {
                 type: "select",
                 id: "activeStyle",
-                name: "Display Variable",
+                name: i18next.t("models.tableData.activeStyle"),
                 options: this.tableStyles
                     .filter((style) => !style.hidden || this.activeStyle === style.id)
                     .map((style) => {
@@ -401,7 +452,7 @@ function TableMixin(Base) {
             }
             return {
                 id: "regionMapping",
-                name: "Region Mapping",
+                name: i18next.t("models.tableData.regionMapping"),
                 options: allRegionProviders.map((regionProvider) => {
                     return {
                         name: regionProvider.description,
@@ -432,7 +483,7 @@ function TableMixin(Base) {
             }
             return {
                 id: "regionColumn",
-                name: "Region Column",
+                name: i18next.t("models.tableData.regionColumn"),
                 options: this.tableColumns.map((col) => {
                     return {
                         name: col.name,
@@ -447,7 +498,8 @@ function TableMixin(Base) {
         }
         get regionMappingDimensions() {
             return {
-                id: "Manual Region Mapping",
+                id: "manual-region-mapping",
+                name: i18next.t("models.tableData.manualRegionMapping"),
                 type: "group",
                 selectableDimensions: filterOutUndefined([
                     this.regionColumnDimensions,
@@ -548,7 +600,7 @@ function TableMixin(Base) {
         get legendButton() {
             return this.activeTableStyle.isCustom
                 ? {
-                    title: "Custom",
+                    title: i18next.t("models.tableData.custom"),
                     onClick: action(() => {
                         SelectableDimensionWorkflow.runWorkflow(this.terria, new TableStylingWorkflow(this));
                     })
@@ -652,7 +704,10 @@ function TableMixin(Base) {
         computed
     ], TableMixin.prototype, "_canExportData", null);
     __decorate([
-        computed
+        override
+    ], TableMixin.prototype, "name", null);
+    __decorate([
+        override
     ], TableMixin.prototype, "disableZoomTo", null);
     __decorate([
         computed
@@ -670,16 +725,16 @@ function TableMixin(Base) {
         computed
     ], TableMixin.prototype, "tableChartItems", null);
     __decorate([
-        computed
+        override
     ], TableMixin.prototype, "chartItems", null);
     __decorate([
-        computed
+        override
     ], TableMixin.prototype, "viewingControls", null);
     __decorate([
         computed
     ], TableMixin.prototype, "featureInfoContext", null);
     __decorate([
-        computed
+        override
     ], TableMixin.prototype, "selectableDimensions", null);
     __decorate([
         computed

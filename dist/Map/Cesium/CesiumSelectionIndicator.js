@@ -4,25 +4,108 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, autorun, computed, observable, runInAction } from "mobx";
+import { action, autorun, computed, observable, runInAction, makeObservable } from "mobx";
 import Cartesian2 from "terriajs-cesium/Source/Core/Cartesian2";
 import EasingFunction from "terriajs-cesium/Source/Core/EasingFunction";
 import SceneTransforms from "terriajs-cesium/Source/Scene/SceneTransforms";
 import isDefined from "../../Core/isDefined";
-var screenSpacePos = new Cartesian2();
-var offScreen = "-1000px";
+const screenSpacePos = new Cartesian2();
+const offScreen = "-1000px";
 export default class CesiumSelectionIndicator {
     constructor(cesium) {
+        /**
+         * Gets or sets the world position of the object for which to display the selection indicator.
+         * @type {Cartesian3}
+         */
+        Object.defineProperty(this, "position", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         /**
          * Gets or sets the visibility of the selection indicator.
          * @type {Boolean}
          */
-        this.showSelection = true;
-        this.transform = "";
-        this.opacity = 1.0;
-        this._screenPositionX = offScreen;
-        this._screenPositionY = offScreen;
-        this._selectionIndicatorIsAppearing = false;
+        Object.defineProperty(this, "showSelection", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "transform", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: ""
+        });
+        Object.defineProperty(this, "opacity", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 1.0
+        });
+        Object.defineProperty(this, "container", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "selectionIndicatorElement", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "scene", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_screenPositionX", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: offScreen
+        });
+        Object.defineProperty(this, "_screenPositionY", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: offScreen
+        });
+        Object.defineProperty(this, "_cesium", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_tweens", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_selectionIndicatorTween", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_selectionIndicatorIsAppearing", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "_disposeAutorun", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
         this._cesium = cesium;
         this._tweens = cesium.scene.tweens;
         this.container = cesium.cesiumWidget.container;

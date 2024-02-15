@@ -11,6 +11,15 @@ import LegendOwnerTraits from "./LegendOwnerTraits";
 import MappableTraits from "./MappableTraits";
 import UrlTraits from "./UrlTraits";
 export default class KmlCatalogItemTraits extends mixTraits(UrlTraits, MappableTraits, CatalogMemberTraits, LegendOwnerTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "kmlString", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({

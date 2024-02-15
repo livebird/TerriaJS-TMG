@@ -1,19 +1,18 @@
-"use strict";
-var proj4 = require("proj4").default;
-var loadText = require("../../Core/loadText");
-var defined = require("terriajs-cesium/Source/Core/defined").default;
-var Proj4Definitions = require("./Proj4Definitions");
-var urijs = require("urijs");
-var Reproject = {
+import defined from "terriajs-cesium/Source/Core/defined";
+import Proj4Definitions from "./Proj4Definitions";
+import urijs from "urijs";
+const proj4 = require("proj4").default;
+const loadText = require("../../Core/loadText");
+export default {
     TERRIA_CRS: "EPSG:4326",
     /**
      * Convert a CRS string into a code that Proj4 understands.
-     * @param {String} crsString A CRS URI
-     * @return {String} A code that is recognised by Proj4 as a valid CRS code.
+     * @param crsString A CRS URI
+     * @return A code that is recognised by Proj4 as a valid CRS code.
      */
     crsStringToCode: function (crsString) {
-        var crs = crsString.toLowerCase();
-        var code;
+        const crs = crsString.toLowerCase();
+        let code;
         if (crs.indexOf("epsg:") === 0) {
             code = crsString.toUpperCase();
         }
@@ -36,8 +35,8 @@ var Reproject = {
      * If the code is not defined, it's assumed that the point/s will not need reprojecting as we don't know what the
      * source is, so we can't reproject anyway.
      *
-     * @param {String} code A CRS code that Proj4 recognises.
-     * @return {Bool} whether points in the CRS provided will need reprojecting.
+     * @param code A CRS code that Proj4 recognises.
+     * @return whether points in the CRS provided will need reprojecting.
      */
     willNeedReprojecting: function (code) {
         if (!defined(code) || code === this.TERRIA_CRS || code === "EPSG:4283") {
@@ -47,37 +46,43 @@ var Reproject = {
     },
     /**
      * Reproject points from one CRS to another.
-     * @param {Array} coordinates which are two floating point numbers in an array in order long, lat.
-     * @param {String} sourceCode The Proj4 code for the CRS the source coordinates are in.
-     * @param {String} destCode The Proj4 code for the CRS the generated coordinates should be in.
-     * @return {Array} coordinates in destCode CRS projection, two floating points in order long, lat.
+     * @param coordinates which are two floating point numbers in an array in order long, lat.
+     * @param  sourceCode The Proj4 code for the CRS the source coordinates are in.
+     * @param  destCode The Proj4 code for the CRS the generated coordinates should be in.
+     * @return coordinates in destCode CRS projection, two floating points in order long, lat.
      */
     reprojectPoint: function (coordinates, sourceCode, destCode) {
-        var source = new proj4.Proj(Proj4Definitions[sourceCode]);
-        var dest = new proj4.Proj(Proj4Definitions[destCode]);
+        const source = sourceCode in Proj4Definitions
+            ? new proj4.Proj(Proj4Definitions[sourceCode])
+            : undefined;
+        const dest = destCode in Proj4Definitions
+            ? new proj4.Proj(Proj4Definitions[destCode])
+            : undefined;
+        if (!sourceCode || !destCode) {
+            return;
+        }
         return proj4(source, dest, coordinates);
     },
     /**
      * Add the reprojection parameters to proj4 if the code is not already known by Proj4.
-     * @param {String} proj4ServiceBaseUrl URL relative to Terria for accessing the proj4 service
-     * @param {String} code The Proj4 CRS code to check for and potentially add
-     * @return {Promise} Eventually resolves to false if code wasn't there and wasn't able to be added
+     * @param  proj4ServiceBaseUrl URL relative to Terria for accessing the proj4 service
+     * @param  code The Proj4 CRS code to check for and potentially add
+     * @return Eventually resolves to false if code wasn't there and wasn't able to be added
      */
-    checkProjection: function (proj4ServiceBaseUrl, code) {
+    checkProjection: async function (proj4ServiceBaseUrl, code) {
         if (Object.prototype.hasOwnProperty.call(Proj4Definitions, code)) {
             return true;
         }
-        var url = new urijs(proj4ServiceBaseUrl).segment(code).toString();
+        const url = new urijs(proj4ServiceBaseUrl).segment(code).toString();
         return loadText(url)
             .then(function (proj4Text) {
             Proj4Definitions[code] = proj4Text;
             console.log("Added new string for", code, "=", proj4Text);
             return true;
         })
-            .catch(function (err) {
+            .catch(function () {
             return false;
         });
     }
 };
-module.exports = Reproject;
 //# sourceMappingURL=Reproject.js.map

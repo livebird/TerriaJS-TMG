@@ -1,9 +1,20 @@
 import FunctionParameter from "./FunctionParameter";
-export default class StringParameter extends FunctionParameter {
+class StringParameter extends FunctionParameter {
     constructor() {
         super(...arguments);
-        this.type = "string";
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "string"
+        });
     }
 }
-StringParameter.type = "string";
+Object.defineProperty(StringParameter, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "string"
+});
+export default StringParameter;
 //# sourceMappingURL=StringParameter.js.map

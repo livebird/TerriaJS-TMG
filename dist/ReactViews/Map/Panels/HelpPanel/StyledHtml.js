@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import { observer } from "mobx-react";
 import PropTypes from "prop-types";
 import React from "react";
@@ -17,12 +18,7 @@ const Numbers = styled(Text) `
   background-color: ${(props) => props.theme.textDarker};
 `;
 const renderOrderedList = function (contents) {
-    return (React.createElement(For, { each: "content", index: "i", of: contents },
-        React.createElement(Box, { key: i, paddedVertically: true },
-            React.createElement(Box, { alignItemsFlexStart: true },
-                React.createElement(Numbers, { textLight: true, textAlignCenter: true, darkBg: true }, i + 1),
-                React.createElement(Spacing, { right: 3 })),
-            React.createElement(Text, { medium: true, textDark: true }, content))));
+    return contents.map((content, i) => (_jsxs(Box, { paddedVertically: true, children: [_jsxs(Box, { alignItemsFlexStart: true, children: [_jsx(Numbers, { textLight: true, textAlignCenter: true, darkBg: true, children: i + 1 }), _jsx(Spacing, { right: 3 })] }), _jsx(Text, { medium: true, textDark: true, children: content })] }, i)));
 };
 export class StyledHtmlRaw extends React.Component {
     constructor(props) {
@@ -39,28 +35,53 @@ export class StyledHtmlRaw extends React.Component {
         const content = Array.isArray(parsed.props.children)
             ? parsed.props.children
             : [parsed.props.children];
-        return (React.createElement("div", null, (content === null || content === void 0 ? void 0 : content.map) && (React.createElement(For, { each: "item", index: "i", of: content }, item && (React.createElement(Choose, null,
-            React.createElement(When, { condition: /(h[0-6]|p)/i.test(item.type) },
-                React.createElement(Text, Object.assign({ as: item.type, key: i, textDark: true, medium: item.type === "p" }, styledTextProps), item.props.children)),
-            React.createElement(When, { condition: item.type === "ol" },
-                renderOrderedList(item.props.children.map((point) => point.props.children)),
-                React.createElement(Spacing, { bottom: 4 })),
-            React.createElement(Otherwise, null,
-                React.createElement(Text, Object.assign({ key: i, textDark: true, medium: true }, styledTextProps), item))))))));
+        return (_jsx("div", { children: (content === null || content === void 0 ? void 0 : content.map) &&
+                content.map((item, i) => {
+                    if (!item)
+                        return null;
+                    /* Either a header or paragraph tag */
+                    if (/(h[0-6]|p)/i.test(item.type)) {
+                        return (_jsx(Text, { as: item.type, textDark: true, medium: item.type === "p", ...styledTextProps, children: item.props.children }, i));
+                    }
+                    else if (item.type === "ol") {
+                        return (_jsxs(_Fragment, { children: [renderOrderedList(item.props.children.map((point) => point.props.children)), _jsx(Spacing, { bottom: 4 })] }));
+                        /* If it's none of the above tags, just render as
+                            normal html but with the same text formatting.
+                            We can style more tags as necessary */
+                    }
+                    else {
+                        return (_jsx(Text, { textDark: true, medium: true, ...styledTextProps, children: item }, i));
+                    }
+                }) }));
     }
 }
-StyledHtmlRaw.displayName = "StyledHtml";
-StyledHtmlRaw.propTypes = {
-    markdown: PropTypes.string.isRequired,
-    viewState: PropTypes.object.isRequired,
-    theme: PropTypes.object,
-    styledTextProps: PropTypes.object,
-    injectTooltips: PropTypes.bool,
-    t: PropTypes.func.isRequired,
-    i18n: PropTypes.object.isRequired
-};
-StyledHtmlRaw.defaultProps = {
-    injectTooltips: true
-};
+Object.defineProperty(StyledHtmlRaw, "displayName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "StyledHtml"
+});
+Object.defineProperty(StyledHtmlRaw, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        markdown: PropTypes.string.isRequired,
+        viewState: PropTypes.object.isRequired,
+        theme: PropTypes.object,
+        styledTextProps: PropTypes.object,
+        injectTooltips: PropTypes.bool,
+        t: PropTypes.func.isRequired,
+        i18n: PropTypes.object.isRequired
+    }
+});
+Object.defineProperty(StyledHtmlRaw, "defaultProps", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        injectTooltips: true
+    }
+});
 export default withTranslation()(withTheme(observer(StyledHtmlRaw)));
 //# sourceMappingURL=StyledHtml.js.map

@@ -4,6 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react";
 import PropTypes from "prop-types";
@@ -18,7 +19,7 @@ import Text, { TextSpan } from "../../Styled/Text";
 import { ExplorerWindowElementName } from "../ExplorerWindow/ExplorerWindow";
 import { useKeyPress } from "../Hooks/useKeyPress.js";
 import VideoGuide from "../Map/Panels/HelpPanel/VideoGuide";
-import { withViewState } from "../StandardUserInterface/ViewStateContext";
+import { withViewState } from "../Context";
 import { TourPortalDisplayName } from "../Tour/TourPortal";
 import FadeIn from "../Transitions/FadeIn/FadeIn";
 import SlideUpFadeIn from "../Transitions/SlideUpFadeIn/SlideUpFadeIn";
@@ -30,11 +31,7 @@ const WelcomeModalWrapper = styled(Box) `
   background-color: rgba(0, 0, 0, 0.75);
 `;
 function WelcomeMessageButton(props) {
-    return (React.createElement(Button, { primary: true, rounded: true, fullWidth: true, onClick: props.onClick },
-        React.createElement(Box, { centered: true },
-            props.buttonIcon && (React.createElement(StyledIcon, { light: true, styledWidth: "22px", glyph: props.buttonIcon })),
-            React.createElement(Spacing, { right: 2 }),
-            props.buttonText && (React.createElement(TextSpan, { textLight: true, extraLarge: true }, props.buttonText)))));
+    return (_jsx(Button, { primary: true, rounded: true, fullWidth: true, onClick: props.onClick, children: _jsxs(Box, { centered: true, children: [props.buttonIcon && (_jsx(StyledIcon, { light: true, styledWidth: "22px", glyph: props.buttonIcon })), _jsx(Spacing, { right: 2 }), props.buttonText && (_jsx(TextSpan, { textLight: true, extraLarge: true, children: props.buttonText }))] }) }));
 }
 WelcomeMessageButton.propTypes = {
     buttonText: PropTypes.string,
@@ -52,15 +49,25 @@ let WelcomeMessage = class WelcomeMessage extends React.Component {
     }
     render() {
         const viewState = this.props.viewState || {};
-        return (React.createElement(WelcomeMessagePure, { showWelcomeMessage: viewState.showWelcomeMessage, setShowWelcomeMessage: (bool) => this.props.viewState.setShowWelcomeMessage(bool), isTopElement: this.props.viewState.topElement === "WelcomeMessage", viewState: this.props.viewState }));
+        return (_jsx(WelcomeMessagePure, { showWelcomeMessage: viewState.showWelcomeMessage, setShowWelcomeMessage: (bool) => this.props.viewState.setShowWelcomeMessage(bool), isTopElement: this.props.viewState.topElement === "WelcomeMessage", viewState: this.props.viewState }));
     }
 };
-WelcomeMessage.displayName = "WelcomeMessage";
-WelcomeMessage.propTypes = {
-    viewState: PropTypes.object,
-    theme: PropTypes.object,
-    t: PropTypes.func.isRequired
-};
+Object.defineProperty(WelcomeMessage, "displayName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "WelcomeMessage"
+});
+Object.defineProperty(WelcomeMessage, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        viewState: PropTypes.object,
+        theme: PropTypes.object,
+        t: PropTypes.func.isRequired
+    }
+});
 WelcomeMessage = __decorate([
     observer
 ], WelcomeMessage);
@@ -90,7 +97,7 @@ export const WelcomeMessagePure = (props) => {
             handleClose(false);
         }
     });
-    return (React.createElement(FadeIn, { isVisible: showWelcomeMessage, onEnter: () => setWelcomeVisible(true), transitionProps: {
+    return (_jsx(FadeIn, { isVisible: showWelcomeMessage, onEnter: () => setWelcomeVisible(true), transitionProps: {
             onExiting: () => setWelcomeVisible(false),
             onExited: () => {
                 if (shouldTakeTour) {
@@ -119,80 +126,38 @@ export const WelcomeMessagePure = (props) => {
                     });
                 }
             }
-        } },
-        React.createElement(WelcomeModalWrapper, { fullWidth: true, fullHeight: true, position: "absolute", right: true, onClick: () => handleClose(false) },
-            React.createElement(Box, { styledWidth: viewState.isMapFullScreen || viewState.useSmallScreenInterface
+        }, children: _jsx(WelcomeModalWrapper, { fullWidth: true, fullHeight: true, position: "absolute", right: true, onClick: () => handleClose(false), children: _jsxs(Box, { styledWidth: viewState.isMapFullScreen || viewState.useSmallScreenInterface
                     ? "100%"
-                    : "calc(100% - 350px)", fullHeight: true, centered: true },
-                React.createElement(VideoGuide, { viewState: viewState, videoLink: viewState.terria.configParameters.welcomeMessageVideo.videoUrl, background: viewState.terria.configParameters.welcomeMessageVideo
-                        .placeholderImage, videoName: WELCOME_MESSAGE_VIDEO }),
-                React.createElement(SlideUpFadeIn, { isVisible: welcomeVisible },
-                    React.createElement(Box, { styledWidth: "667px", styledMinHeight: "504px", displayInlineBlock: true, paddedRatio: viewState.useSmallScreenInterface ? 2 : 6, onClick: (e) => {
-                            viewState.setTopElement("WelcomeMessage");
-                            e.stopPropagation();
-                        } },
-                        React.createElement(RawButton, { onClick: handleClose.bind(null, false), css: `
+                    : "calc(100% - 350px)", fullHeight: true, centered: true, children: [_jsx(VideoGuide, { viewState: viewState, videoLink: viewState.terria.configParameters.welcomeMessageVideo.videoUrl, background: viewState.terria.configParameters.welcomeMessageVideo
+                            .placeholderImage, videoName: WELCOME_MESSAGE_VIDEO }), _jsx(SlideUpFadeIn, { isVisible: welcomeVisible, children: _jsxs(Box, { styledWidth: "667px", styledMinHeight: "504px", displayInlineBlock: true, paddedRatio: viewState.useSmallScreenInterface ? 2 : 6, onClick: (e) => {
+                                viewState.setTopElement("WelcomeMessage");
+                                e.stopPropagation();
+                            }, children: [_jsx(RawButton, { onClick: handleClose.bind(null, false), css: `
                   float: right;
-                ` },
-                            React.createElement(StyledIcon, { styledWidth: "24px", light: true, glyph: Icon.GLYPHS.closeLight })),
-                        React.createElement(Spacing, { bottom: 7 }),
-                        React.createElement(Box, { displayInlineBlock: true, styledWidth: viewState.useSmallScreenInterface ? "100%" : "83.33333%" },
-                            React.createElement(Text, { bold: true, textLight: true, styledFontSize: viewState.useSmallScreenInterface ? "26px" : "36px", textAlignCenter: viewState.useSmallScreenInterface, styledLineHeight: "49px" }, t("welcomeMessage.title")),
-                            React.createElement(Spacing, { bottom: 3 }),
-                            React.createElement(Text, { textLight: true, medium: true, textAlignCenter: viewState.useSmallScreenInterface },
-                                viewState.useSmallScreenInterface === false && (React.createElement(Trans, { i18nKey: "welcomeMessage.welcomeMessage" },
-                                    "Interested in data discovery and exploration?",
-                                    React.createElement("br", null),
-                                    "Dive right in and get started or check the following help guide options.")),
-                                viewState.useSmallScreenInterface === true && (React.createElement(Trans, { i18nKey: "welcomeMessage.welcomeMessageOnMobile" }, "Interested in data discovery and exploration?")))),
-                        React.createElement(Spacing, { bottom: 6 }),
-                        React.createElement(If, { condition: !viewState.useSmallScreenInterface },
-                            React.createElement(Text, { bold: true, textLight: true, extraLarge: true }, viewState.terria.configParameters.welcomeMessageVideo
-                                .videoTitle),
-                            React.createElement(Spacing, { bottom: 2 })),
-                        React.createElement(Box, { fullWidth: true, styledMinHeight: "160px" },
-                            React.createElement(If, { condition: !viewState.useSmallScreenInterface },
-                                React.createElement(Box, { col6: true, centered: true, backgroundImage: viewState.terria.configParameters.welcomeMessageVideo
-                                        .placeholderImage, backgroundBlackOverlay: "50%" },
-                                    React.createElement(RawButton, { fullWidth: true, fullHeight: true, onClick: () => viewState.setVideoGuideVisible(WELCOME_MESSAGE_VIDEO) },
-                                        React.createElement(StyledIcon, { styledWidth: "48px", light: true, glyph: Icon.GLYPHS.playInverted, css: `
-                          margin: auto;
-                        ` }))),
-                                React.createElement(Spacing, { right: 5 })),
-                            React.createElement(Box, { styledMargin: "0 auto", displayInlineBlock: true },
-                                React.createElement(If, { condition: !viewState.useSmallScreenInterface },
-                                    React.createElement(WelcomeMessageButton, { onClick: () => {
-                                            handleClose(false);
-                                            // not sure if we should wait for the exit animation,
-                                            // if we don't, we have a flicker due to the difference
-                                            // in overlay darkness - but if we wait, it goes
-                                            // dark -> light -> dark anyway..
-                                            setShouldTakeTour(true);
-                                            viewState.setTourIndex(0);
-                                            viewState.setShowTour(true);
-                                            viewState.setTopElement(TourPortalDisplayName);
-                                        }, buttonText: t("welcomeMessage.tourBtnText"), buttonIcon: Icon.GLYPHS.tour }),
-                                    React.createElement(Spacing, { bottom: 4 }),
-                                    React.createElement(WelcomeMessageButton, { buttonText: t("welcomeMessage.helpBtnText"), buttonIcon: Icon.GLYPHS.newHelp, onClick: () => {
-                                            handleClose(false);
-                                            setShouldOpenHelp(true);
-                                        } })),
-                                React.createElement(Spacing, { bottom: 4 }),
-                                React.createElement(WelcomeMessageButton, { buttonText: t("welcomeMessage.exploreDataBtnText"), buttonIcon: Icon.GLYPHS.add, onClick: () => {
-                                        handleClose(false);
-                                        setShouldExploreData(true);
-                                    } }),
-                                viewState.useSmallScreenInterface && (React.createElement(React.Fragment, null,
-                                    React.createElement(Spacing, { bottom: 4 }),
-                                    React.createElement(WelcomeMessageButton, { buttonText: t("welcomeMessage.searchBtnText"), buttonIcon: Icon.GLYPHS.search, onClick: () => {
-                                            handleClose(false);
-                                            setShouldOpenSearch(true);
-                                        } }))))),
-                        React.createElement(If, { condition: !viewState.useSmallScreenInterface },
-                            React.createElement(Spacing, { bottom: 13 })),
-                        React.createElement(Box, { fullWidth: true, centered: true },
-                            React.createElement(RawButton, { onClick: handleClose.bind(null, true) },
-                                React.createElement(TextSpan, { textLight: true, isLink: true }, t("welcomeMessage.dismissText"))))))))));
+                `, children: _jsx(StyledIcon, { styledWidth: "24px", light: true, glyph: Icon.GLYPHS.closeLight }) }), _jsx(Spacing, { bottom: 7 }), _jsxs(Box, { displayInlineBlock: true, styledWidth: viewState.useSmallScreenInterface ? "100%" : "83.33333%", children: [_jsx(Text, { bold: true, textLight: true, styledFontSize: viewState.useSmallScreenInterface ? "26px" : "36px", textAlignCenter: viewState.useSmallScreenInterface, styledLineHeight: "49px", children: t("welcomeMessage.title") }), _jsx(Spacing, { bottom: 3 }), _jsxs(Text, { textLight: true, medium: true, textAlignCenter: viewState.useSmallScreenInterface, children: [viewState.useSmallScreenInterface === false && (_jsxs(Trans, { i18nKey: "welcomeMessage.welcomeMessage", children: ["Interested in data discovery and exploration?", _jsx("br", {}), "Dive right in and get started or check the following help guide options."] })), viewState.useSmallScreenInterface === true && (_jsx(Trans, { i18nKey: "welcomeMessage.welcomeMessageOnMobile", children: "Interested in data discovery and exploration?" }))] })] }), _jsx(Spacing, { bottom: 6 }), !viewState.useSmallScreenInterface && (_jsxs(_Fragment, { children: [_jsx(Text, { bold: true, textLight: true, extraLarge: true, children: viewState.terria.configParameters.welcomeMessageVideo
+                                                .videoTitle }), _jsx(Spacing, { bottom: 2 })] })), _jsxs(Box, { fullWidth: true, styledMinHeight: "160px", children: [!viewState.useSmallScreenInterface && (_jsxs(_Fragment, { children: [_jsx(Box, { col6: true, centered: true, backgroundImage: viewState.terria.configParameters.welcomeMessageVideo
+                                                        .placeholderImage, backgroundBlackOverlay: "50%", children: _jsx(RawButton, { fullWidth: true, fullHeight: true, onClick: () => viewState.setVideoGuideVisible(WELCOME_MESSAGE_VIDEO), children: _jsx(StyledIcon, { styledWidth: "48px", light: true, glyph: Icon.GLYPHS.playInverted, css: `
+                            margin: auto;
+                          ` }) }) }), _jsx(Spacing, { right: 5 })] })), _jsxs(Box, { styledMargin: "0 auto", displayInlineBlock: true, children: [!viewState.useSmallScreenInterface && (_jsxs(_Fragment, { children: [_jsx(WelcomeMessageButton, { onClick: () => {
+                                                                handleClose(false);
+                                                                // not sure if we should wait for the exit animation,
+                                                                // if we don't, we have a flicker due to the difference
+                                                                // in overlay darkness - but if we wait, it goes
+                                                                // dark -> light -> dark anyway..
+                                                                setShouldTakeTour(true);
+                                                                viewState.setTourIndex(0);
+                                                                viewState.setShowTour(true);
+                                                                viewState.setTopElement(TourPortalDisplayName);
+                                                            }, buttonText: t("welcomeMessage.tourBtnText"), buttonIcon: Icon.GLYPHS.tour }), _jsx(Spacing, { bottom: 4 }), _jsx(WelcomeMessageButton, { buttonText: t("welcomeMessage.helpBtnText"), buttonIcon: Icon.GLYPHS.newHelp, onClick: () => {
+                                                                handleClose(false);
+                                                                setShouldOpenHelp(true);
+                                                            } })] })), _jsx(Spacing, { bottom: 4 }), _jsx(WelcomeMessageButton, { buttonText: t("welcomeMessage.exploreDataBtnText"), buttonIcon: Icon.GLYPHS.add, onClick: () => {
+                                                        handleClose(false);
+                                                        setShouldExploreData(true);
+                                                    } }), viewState.useSmallScreenInterface && (_jsxs(_Fragment, { children: [_jsx(Spacing, { bottom: 4 }), _jsx(WelcomeMessageButton, { buttonText: t("welcomeMessage.searchBtnText"), buttonIcon: Icon.GLYPHS.search, onClick: () => {
+                                                                handleClose(false);
+                                                                setShouldOpenSearch(true);
+                                                            } })] }))] })] }), !viewState.useSmallScreenInterface && _jsx(Spacing, { bottom: 13 }), _jsx(Box, { fullWidth: true, centered: true, children: _jsx(RawButton, { onClick: handleClose.bind(null, true), children: _jsx(TextSpan, { textLight: true, isLink: true, children: t("welcomeMessage.dismissText") }) }) })] }) })] }) }) }));
 };
 WelcomeMessagePure.propTypes = {
     showWelcomeMessage: PropTypes.bool.isRequired,

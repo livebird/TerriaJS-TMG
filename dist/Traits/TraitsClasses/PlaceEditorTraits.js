@@ -10,8 +10,18 @@ import objectTrait from "../Decorators/objectTrait";
 export class EditorTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.isEditable = false;
-        this.isTransformable = false;
+        Object.defineProperty(this, "isEditable", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "isTransformable", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
     }
 }
 __decorate([
@@ -32,6 +42,15 @@ __decorate([
  * Traits for an external tool
  */
 export default class PlaceEditorTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "editing", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     objectTrait({

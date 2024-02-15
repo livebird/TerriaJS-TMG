@@ -1,7 +1,8 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import { observer } from "mobx-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { useViewState } from "../StandardUserInterface/ViewStateContext";
+import { useViewState } from "../Context";
 import HelpPrompt from "./HelpPrompt";
 export const SATELLITE_HELP_PROMPT_KEY = "satelliteGuidance";
 export const SatelliteHelpPrompt = observer(() => {
@@ -12,7 +13,7 @@ export const SatelliteHelpPrompt = observer(() => {
         viewState.toggleFeaturePrompt(SATELLITE_HELP_PROMPT_KEY, true, true);
         viewState.setShowSatelliteGuidance(false);
     };
-    return (React.createElement(HelpPrompt, { isVisible: showHelp, viewState: viewState, title: t("satelliteGuidance.titleI"), content: t("satelliteGuidance.bodyI"), dismissLabel: t("satelliteGuidance.prevI"), acceptLabel: t("satelliteGuidance.nextI"), onAccept: () => {
+    return (_jsx(HelpPrompt, { isVisible: showHelp, viewState: viewState, title: t("satelliteGuidance.titleI"), content: t("satelliteGuidance.bodyI"), dismissLabel: t("satelliteGuidance.prevI"), acceptLabel: t("satelliteGuidance.nextI"), onAccept: () => {
             dismissSatellitePrompt();
             viewState.showHelpPanel();
             viewState.selectHelpMenuItem("satelliteimagery");

@@ -1,5 +1,5 @@
 "use strict";
-import React from "react";
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import styled from "styled-components";
 import Box from "../../Styled/Box";
 import { SpacingSpan } from "./../../Styled/Spacing";
@@ -68,16 +68,11 @@ const StyledWorkbenchButton = styled(RawButton) `
 `;
 const WorkbenchButton = (props) => {
     const { children, title, primary, inverted, disabled, iconOnly } = props;
-    return (React.createElement(StyledWorkbenchButton, Object.assign({ primary: primary, disabled: disabled, iconOnly: iconOnly, inverted: inverted, type: "button", title: title, onClick: props.onClick }, props),
-        React.createElement(ButtonWrapper, null,
-            props.iconElement && props.iconElement(),
-            children && (React.createElement(React.Fragment, null,
-                React.createElement(SpacingSpan, { right: 1 }),
-                React.createElement(TextSpan, { noWrap: true, small: true, css: `
+    return (_jsx(StyledWorkbenchButton, { primary: primary, disabled: disabled, iconOnly: iconOnly, inverted: inverted, type: "button", title: title, onClick: props.onClick, ...props, children: _jsxs(ButtonWrapper, { children: [props.iconElement && props.iconElement(), children && (_jsxs(_Fragment, { children: [_jsx(SpacingSpan, { right: 1 }), _jsx(TextSpan, { noWrap: true, small: true, css: `
                 display: block;
                 text-transform: uppercase;
                 letter-spacing: 0.08px;
-              ` }, children))))));
+              `, children: children })] }))] }) }));
 };
 export default WorkbenchButton;
 //# sourceMappingURL=WorkbenchButton.js.map

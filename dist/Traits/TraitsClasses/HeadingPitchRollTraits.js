@@ -14,6 +14,27 @@ import CesiumMath from "terriajs-cesium/Source/Core/Math";
 const hprScratch = new HeadingPitchRoll();
 const quaternionScratch = new Quaternion();
 export default class HeadingPitchRollTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "heading", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "pitch", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "roll", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
     static setFromRotationMatrix(model, stratumId, rotation) {
         this.setFromHeadingPitchRoll(model, stratumId, HeadingPitchRoll.fromQuaternion(Quaternion.fromRotationMatrix(rotation, quaternionScratch), hprScratch));
     }

@@ -15,6 +15,22 @@ import LegendOwnerTraits from "./LegendOwnerTraits";
 import MappableTraits from "./MappableTraits";
 import UrlTraits from "./UrlTraits";
 let CartoMapV1CatalogItemTraits = class CartoMapV1CatalogItemTraits extends mixTraits(ImageryProviderTraits, LayerOrderingTraits, UrlTraits, MappableTraits, CatalogMemberTraits, LegendOwnerTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "config", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        /** TODO: Make this camel case please */
+        Object.defineProperty(this, "auth_token", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 };
 __decorate([
     anyTrait({

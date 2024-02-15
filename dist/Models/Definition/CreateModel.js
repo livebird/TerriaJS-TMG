@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, computed, observable, runInAction, toJS } from "mobx";
+import { action, computed, observable, runInAction, toJS, makeObservable } from "mobx";
 import filterOutUndefined from "../../Core/filterOutUndefined";
 import flatten from "../../Core/flatten";
 import isDefined from "../../Core/isDefined";
@@ -19,8 +19,24 @@ export default function CreateModel(Traits) {
     class Model extends BaseModel {
         constructor(id, terria, sourceReference, strata) {
             super(id, terria, sourceReference);
-            this.traits = Traits.traits;
-            this.TraitsClass = Traits;
+            Object.defineProperty(this, "traits", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: Traits.traits
+            });
+            Object.defineProperty(this, "TraitsClass", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: Traits
+            });
+            Object.defineProperty(this, "strata", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
             /**
              * Babel transpiles this & correctly assigns undefined to this property as
              * under `proposal-class-fields` declaring a property without initialising
@@ -50,7 +66,13 @@ export default function CreateModel(Traits) {
              * if the container isn't loaded yet. It's also important for locating
              * this model in a hierarchical catalog.
              */
-            this.knownContainerUniqueIds = [];
+            Object.defineProperty(this, "knownContainerUniqueIds", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: []
+            });
+            makeObservable(this);
             this.strata = strata || observable.map();
         }
         dispose() { }
@@ -122,11 +144,15 @@ export default function CreateModel(Traits) {
             // This method `isRemoval` and `idProperty="index"` into account.
             else {
                 let maxIndex = -1;
-                this.strata.forEach((s) => { var _a; return (_a = s[traitId]) === null || _a === void 0 ? void 0 : _a.forEach((e, idx) => (maxIndex = idx > maxIndex ? idx : maxIndex)); });
-                // We need to make sure that the array in this stratum is as long as in every
+                this.strata.forEach((s) => {
+                    var _a;
+                    return (_a = s[traitId]) === null || _a === void 0 ? void 0 : _a.forEach((e, idx) => (maxIndex = idx > maxIndex ? idx : maxIndex));
+                });
+                // Make array in this stratum the same length as largest array across all strata
                 for (let i = array.length; i <= maxIndex; i++) {
                     array[i] = createStratumInstance(nestedTraitsClass);
                 }
+                // Add new object at the end of the array
                 array[maxIndex + 1] = newStratum;
                 // Return newly created model
                 const models = this[traitId];
@@ -149,8 +175,18 @@ export default function CreateModel(Traits) {
             return findContainers(this).reverse();
         }
     }
-    Model.TraitsClass = Traits;
-    Model.traits = Traits.traits;
+    Object.defineProperty(Model, "TraitsClass", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: Traits
+    });
+    Object.defineProperty(Model, "traits", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: Traits.traits
+    });
     __decorate([
         observable
     ], Model.prototype, "knownContainerUniqueIds", void 0);

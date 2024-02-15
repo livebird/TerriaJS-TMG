@@ -4,6 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx } from "react/jsx-runtime";
 import { observer } from "mobx-react";
 import React from "react";
 import { withTranslation } from "react-i18next";
@@ -21,7 +22,7 @@ let SelectableDimensionSection = class SelectableDimensionSection extends React.
         if (!isDefined(selectableDimensions) || selectableDimensions.length === 0) {
             return null;
         }
-        return (React.createElement(Box, { displayInlineBlock: true, fullWidth: true }, selectableDimensions.map((dim, i) => (React.createElement(SelectableDimension, { key: `${item.uniqueId}-${dim.id}-fragment`, id: `${item.uniqueId}-${dim.id}`, dim: dim })))));
+        return (_jsx(Box, { displayInlineBlock: true, fullWidth: true, children: selectableDimensions.map((dim, i) => (_jsx(SelectableDimension, { id: `${item.uniqueId}-${dim.id}`, dim: dim }, `${item.uniqueId}-${dim.id}-fragment`))) }));
     }
 };
 SelectableDimensionSection = __decorate([

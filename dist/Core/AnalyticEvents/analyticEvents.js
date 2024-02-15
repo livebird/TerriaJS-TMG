@@ -18,6 +18,7 @@ export var SearchAction;
     SearchAction["catalog"] = "Catalog";
     SearchAction["gazetteer"] = "Gazetteer";
     SearchAction["nominatim"] = "nominatim";
+    SearchAction["cesium"] = "Cesium";
 })(SearchAction || (SearchAction = {}));
 export var LaunchAction;
 (function (LaunchAction) {
@@ -53,6 +54,11 @@ export var DataSourceAction;
     DataSourceAction["removeFromWorkbench"] = "Remove from workbench";
     DataSourceAction["removeAllFromWorkbench"] = "Remove all from workbench";
     DataSourceAction["addFromDragAndDrop"] = "Add from Drag and Drop";
+    DataSourceAction["addFromShareOrInit"] = "Add from share or init source";
+    DataSourceAction["addDisplayGroupFromCatalogue"] = "Add display group from catalogue";
+    DataSourceAction["removeDisplayGroupFromCatalogue"] = "Remove display group from catalogue";
+    DataSourceAction["addDisplayGroupFromAddAllButton"] = "Add display group via Add All button";
+    DataSourceAction["removeDisplayGroupFromRemoveAllButton"] = "Remove display group via Remove All button";
 })(DataSourceAction || (DataSourceAction = {}));
 export var DatatabAction;
 (function (DatatabAction) {

@@ -4,36 +4,124 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-// import CatalogItemNameSearchProviderViewModel from "../ViewModels/CatalogItemNameSearchProviderViewModel";
-import { observable, reaction, computed, action } from "mobx";
+import { action, computed, observable, reaction, makeObservable, runInAction } from "mobx";
 import filterOutUndefined from "../Core/filterOutUndefined";
 import CatalogSearchProvider from "../Models/SearchProviders/CatalogSearchProvider";
 export default class SearchState {
     constructor(options) {
-        this.catalogSearchText = "";
-        this.isWaitingToStartCatalogSearch = false;
-        this.locationSearchText = "";
-        this.isWaitingToStartLocationSearch = false;
-        this.unifiedSearchText = "";
-        this.isWaitingToStartUnifiedSearch = false;
-        this.showLocationSearchResults = false;
-        this.showMobileLocationSearch = false;
-        this.showMobileCatalogSearch = false;
-        this.locationSearchResults = [];
-        this.unifiedSearchResults = [];
-        this.catalogSearchProvider =
-            options.catalogSearchProvider ||
-                new CatalogSearchProvider({ terria: options.terria });
-        this.locationSearchProviders = options.locationSearchProviders || [];
-        this._catalogSearchDisposer = reaction(() => this.catalogSearchText, () => {
-            this.isWaitingToStartCatalogSearch = true;
-            if (this.catalogSearchProvider) {
-                this.catalogSearchResults = this.catalogSearchProvider.search("");
+        Object.defineProperty(this, "catalogSearchText", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: ""
+        });
+        Object.defineProperty(this, "isWaitingToStartCatalogSearch", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "locationSearchText", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: ""
+        });
+        Object.defineProperty(this, "isWaitingToStartLocationSearch", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "unifiedSearchText", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: ""
+        });
+        Object.defineProperty(this, "isWaitingToStartUnifiedSearch", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "showLocationSearchResults", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "showMobileLocationSearch", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "showMobileCatalogSearch", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "locationSearchResults", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "catalogSearchResults", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "unifiedSearchResults", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "_catalogSearchDisposer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_locationSearchDisposer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_unifiedSearchDisposer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "terria", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
+        this.terria = options.terria;
+        runInAction(() => {
+            this.terria.searchBarModel.catalogSearchProvider =
+                options.catalogSearchProvider ||
+                    new CatalogSearchProvider("catalog-search-provider", options.terria);
+        });
+        const self = this;
+        this._catalogSearchDisposer = reaction(() => self.catalogSearchText, () => {
+            self.isWaitingToStartCatalogSearch = true;
+            if (self.catalogSearchProvider) {
+                self.catalogSearchResults = self.catalogSearchProvider.search("");
             }
         });
-        this._locationSearchDisposer = reaction(() => this.locationSearchText, () => {
-            this.isWaitingToStartLocationSearch = true;
-            this.locationSearchResults = this.locationSearchProviders.map((provider) => {
+        this._locationSearchDisposer = reaction(() => self.locationSearchText, () => {
+            self.isWaitingToStartLocationSearch = true;
+            self.locationSearchResults = self.locationSearchProviders.map((provider) => {
                 return provider.search("");
             });
         });
@@ -48,6 +136,12 @@ export default class SearchState {
         this._catalogSearchDisposer();
         this._locationSearchDisposer();
         this._unifiedSearchDisposer();
+    }
+    get locationSearchProviders() {
+        return this.terria.searchBarModel.locationSearchProvidersArray;
+    }
+    get catalogSearchProvider() {
+        return this.terria.searchBarModel.catalogSearchProvider;
     }
     get unifiedSearchProviders() {
         return filterOutUndefined([
@@ -90,12 +184,6 @@ export default class SearchState {
 }
 __decorate([
     observable
-], SearchState.prototype, "catalogSearchProvider", void 0);
-__decorate([
-    observable
-], SearchState.prototype, "locationSearchProviders", void 0);
-__decorate([
-    observable
 ], SearchState.prototype, "catalogSearchText", void 0);
 __decorate([
     observable
@@ -130,6 +218,12 @@ __decorate([
 __decorate([
     observable
 ], SearchState.prototype, "unifiedSearchResults", void 0);
+__decorate([
+    computed
+], SearchState.prototype, "locationSearchProviders", null);
+__decorate([
+    computed
+], SearchState.prototype, "catalogSearchProvider", null);
 __decorate([
     computed
 ], SearchState.prototype, "unifiedSearchProviders", null);

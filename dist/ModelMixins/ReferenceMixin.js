@@ -4,9 +4,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { computed, observable, runInAction, untracked } from "mobx";
+import { computed, observable, runInAction, untracked, makeObservable } from "mobx";
 import DeveloperError from "terriajs-cesium/Source/Core/DeveloperError";
 import AsyncLoader from "../Core/AsyncLoader";
+import Result from "../Core/Result";
+import TerriaError from "../Core/TerriaError";
 import { getName } from "./CatalogMemberMixin";
 import { applyItemProperties } from "./GroupMixin";
 /**
@@ -19,30 +21,47 @@ import { applyItemProperties } from "./GroupMixin";
  */
 function ReferenceMixin(Base) {
     class ReferenceMixinClass extends Base {
-        constructor() {
-            super(...arguments);
+        constructor(...args) {
+            super(...args);
             /** A "weak" reference has a target which doesn't include the `sourceReference` property.
              * This means the reference is treated more like a shortcut to the target. So share links, for example, will use the target instead of sourceReference. */
-            this.weakReference = false;
-            this._referenceLoader = new AsyncLoader(async () => {
-                const previousTarget = untracked(() => this._target);
-                const target = await this.forceLoadReference(previousTarget);
-                if (!target) {
-                    throw new DeveloperError("Failed to create reference");
-                }
-                if ((target === null || target === void 0 ? void 0 : target.uniqueId) !== this.uniqueId) {
-                    throw new DeveloperError("The model returned by `forceLoadReference` must be constructed with its `uniqueId` set to the same value as the Reference model.");
-                }
-                if (!this.weakReference && (target === null || target === void 0 ? void 0 : target.sourceReference) !== this) {
-                    throw new DeveloperError("The model returned by `forceLoadReference` must be constructed with its `sourceReference` set to the Reference model.");
-                }
-                if (this.weakReference && (target === null || target === void 0 ? void 0 : target.sourceReference)) {
-                    throw new DeveloperError('This is a "weak" reference, so the model returned by `forceLoadReference` must not have a `sourceReference` set.');
-                }
-                runInAction(() => {
-                    this._target = target;
-                });
+            Object.defineProperty(this, "weakReference", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: false
             });
+            Object.defineProperty(this, "_target", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "_referenceLoader", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: new AsyncLoader(async () => {
+                    const previousTarget = untracked(() => this._target);
+                    const target = await this.forceLoadReference(previousTarget);
+                    if (!target) {
+                        throw new DeveloperError("Failed to create reference");
+                    }
+                    if ((target === null || target === void 0 ? void 0 : target.uniqueId) !== this.uniqueId) {
+                        throw new DeveloperError("The model returned by `forceLoadReference` must be constructed with its `uniqueId` set to the same value as the Reference model.");
+                    }
+                    if (!this.weakReference && (target === null || target === void 0 ? void 0 : target.sourceReference) !== this) {
+                        throw new DeveloperError("The model returned by `forceLoadReference` must be constructed with its `sourceReference` set to the Reference model.");
+                    }
+                    if (this.weakReference && (target === null || target === void 0 ? void 0 : target.sourceReference)) {
+                        throw new DeveloperError('This is a "weak" reference, so the model returned by `forceLoadReference` must not have a `sourceReference` set.');
+                    }
+                    runInAction(() => {
+                        this._target = target;
+                    });
+                })
+            });
+            makeObservable(this);
         }
         get loadReferenceResult() {
             return this._referenceLoader.result;
@@ -91,6 +110,26 @@ function ReferenceMixin(Base) {
                 applyItemProperties(this, this.target);
             }
             return result;
+        }
+        /**
+         * Recursively load a nested chain of references till the given maxDepth.
+         *
+         * If this reference points to another reference and so on.. then this
+         * method will load them all up to the given depth.
+         *
+         * @param maxDepth The maximum depth up to which the references should be resolved.
+         * @returns A promise that is fulfilled with a Result value when all the references have been loaded.
+         */
+        async recursivelyLoadReference(maxDepth) {
+            let currentTarget = this;
+            const errors = [];
+            while (maxDepth > 0 && ReferenceMixin.isMixedInto(currentTarget)) {
+                (await currentTarget.loadReference()).pushErrorTo(errors);
+                currentTarget = currentTarget.target;
+                maxDepth -= 1;
+            }
+            const maybeError = TerriaError.combine(errors, "Failed to recursively load reference `${this.uniqueId}`");
+            return Result.none(maybeError);
         }
         dispose() {
             super.dispose();

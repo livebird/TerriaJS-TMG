@@ -1,5 +1,6 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import classNames from "classnames";
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { sortable } from "react-anything-sortable";
 import { useTranslation } from "react-i18next";
 import styled, { useTheme } from "styled-components";
@@ -105,27 +106,7 @@ const calculateOffset = (props) => (storyRef) => {
 };
 const renderMenu = (props) => {
     const { t } = props;
-    return (React.createElement(Ul, { column: true },
-        React.createElement("li", null,
-            React.createElement(StoryMenuButton, { onClick: viewStory(props), title: t("story.viewStory") },
-                React.createElement(StoryControl, null,
-                    React.createElement(StyledIcon, { glyph: Icon.GLYPHS.viewStory }),
-                    React.createElement("span", null, t("story.view"))))),
-        React.createElement("li", null,
-            React.createElement(StoryMenuButton, { onClick: editStory(props), title: t("story.editStory") },
-                React.createElement(StoryControl, null,
-                    React.createElement(StyledIcon, { glyph: Icon.GLYPHS.editStory }),
-                    React.createElement("span", null, t("story.edit"))))),
-        React.createElement("li", null,
-            React.createElement(StoryMenuButton, { onClick: recaptureStory(props), title: t("story.recaptureStory") },
-                React.createElement(StoryControl, null,
-                    React.createElement(StyledIcon, { glyph: Icon.GLYPHS.story }),
-                    React.createElement("span", null, t("story.recapture"))))),
-        React.createElement("li", null,
-            React.createElement(StoryMenuButton, { onClick: deleteStory(props), title: t("story.deleteStory") },
-                React.createElement(StoryControl, null,
-                    React.createElement(StyledIcon, { glyph: Icon.GLYPHS.cancel }),
-                    React.createElement("span", null, t("story.delete")))))));
+    return (_jsxs(Ul, { column: true, children: [_jsx("li", { children: _jsx(StoryMenuButton, { onClick: viewStory(props), title: t("story.viewStory"), children: _jsxs(StoryControl, { children: [_jsx(StyledIcon, { glyph: Icon.GLYPHS.viewStory }), _jsx("span", { children: t("story.view") })] }) }) }), _jsx("li", { children: _jsx(StoryMenuButton, { onClick: editStory(props), title: t("story.editStory"), children: _jsxs(StoryControl, { children: [_jsx(StyledIcon, { glyph: Icon.GLYPHS.editStory }), _jsx("span", { children: t("story.edit") })] }) }) }), _jsx("li", { children: _jsx(StoryMenuButton, { onClick: recaptureStory(props), title: t("story.recaptureStory"), children: _jsxs(StoryControl, { children: [_jsx(StyledIcon, { glyph: Icon.GLYPHS.story }), _jsx("span", { children: t("story.recapture") })] }) }) }), _jsx("li", { children: _jsx(StoryMenuButton, { onClick: deleteStory(props), title: t("story.deleteStory"), children: _jsxs(StoryControl, { children: [_jsx(StyledIcon, { glyph: Icon.GLYPHS.cancel }), _jsx("span", { children: t("story.delete") })] }) }) })] }));
 };
 const Story = (props) => {
     const story = props.story;
@@ -140,27 +121,18 @@ const Story = (props) => {
         window.addEventListener("click", closeHandler);
         return () => window.removeEventListener("click", closeHandler);
     });
-    return (React.createElement(React.Fragment, null,
-        React.createElement(Box, { ref: storyRef, column: true, backgroundColor: theme.darkWithOverlay, rounded: true, css: `
+    return (_jsxs(_Fragment, { children: [_jsxs(Box, { ref: storyRef, column: true, backgroundColor: theme.darkWithOverlay, rounded: true, css: `
           cursor: move;
           float: none !important;
-        `, position: "static", style: props.style, className: classNames(props.className), onMouseDown: props.onMouseDown, onTouchStart: props.onTouchStart },
-            React.createElement(Box, { fullWidth: true, position: "static", justifySpaceBetween: true, padded: true, verticalCenter: true, styledHeight: "40px", backgroundColor: theme.darkWithOverlay, rounded: true, css: `
+        `, position: "static", style: props.style, className: classNames(props.className), onMouseDown: props.onMouseDown, onTouchStart: props.onTouchStart, children: [_jsxs(Box, { fullWidth: true, position: "static", justifySpaceBetween: true, padded: true, verticalCenter: true, styledHeight: "40px", backgroundColor: theme.darkWithOverlay, rounded: true, css: `
             padding-left: 15px;
             padding-right: 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-          ` },
-                React.createElement(Text, { textLight: true, medium: true }, story.title && story.title.length > 0
-                    ? story.title
-                    : t("story.untitledScene")),
-                React.createElement(Box, null,
-                    props.recaptureStorySuccessful && (React.createElement(RawButton, null,
-                        React.createElement(StyledIcon, { styledWidth: "20px", light: true, glyph: Icon.GLYPHS.recapture, css: `
+          `, children: [_jsx(Text, { textLight: true, medium: true, children: story.title && story.title.length > 0
+                                    ? story.title
+                                    : t("story.untitledScene") }), _jsxs(Box, { children: [props.recaptureStorySuccessful && (_jsx(RawButton, { children: _jsx(StyledIcon, { styledWidth: "20px", light: true, glyph: Icon.GLYPHS.recapture, css: `
                     padding-right: 10px;
-                  ` }))),
-                    React.createElement(MenuButton, { theme: theme, onClick: toggleMenu(props) },
-                        React.createElement(StyledIcon, { styledWidth: "20px", light: true, glyph: Icon.GLYPHS.menuDotted }))),
-                props.menuOpen && (React.createElement(Box, { css: `
+                  ` }) })), _jsx(MenuButton, { theme: theme, onClick: toggleMenu(props), children: _jsx(StyledIcon, { styledWidth: "20px", light: true, glyph: Icon.GLYPHS.menuDotted }) })] }), props.menuOpen && (_jsx(Box, { css: `
                 position: absolute;
                 z-index: 100;
                 right: 20px;
@@ -172,10 +144,7 @@ const Story = (props) => {
                 ul {
                   list-style: none;
                 }
-              ` }, renderMenu({ ...props, t })))),
-            bodyText.length > 0 && (React.createElement(Box, { paddedRatio: 2, paddedHorizontally: 3 },
-                React.createElement(Text, { textLight: true, medium: true }, bodyText)))),
-        React.createElement(Spacing, { bottom: 1 })));
+              `, children: renderMenu({ ...props, t }) }))] }), bodyText.length > 0 && (_jsx(Box, { paddedRatio: 2, paddedHorizontally: 3, children: _jsx(Text, { textLight: true, medium: true, children: bodyText }) }))] }), _jsx(Spacing, { bottom: 1 })] }));
 };
 const MenuButton = styled(RawButton) `
   padding: 0 10px 0 10px;

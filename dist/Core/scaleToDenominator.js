@@ -1,6 +1,6 @@
 import Ellipsoid from "terriajs-cesium/Source/Core/Ellipsoid";
 export function scaleDenominatorToLevel(scaleDenominator, min = true, ows = true) {
-    if (scaleDenominator == undefined || scaleDenominator <= 0.0) {
+    if (scaleDenominator === undefined || scaleDenominator <= 0.0) {
         return undefined;
     }
     const dpi = 96; // Esri default DPI, unless we specify otherwise.

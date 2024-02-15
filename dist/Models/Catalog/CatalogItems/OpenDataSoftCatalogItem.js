@@ -6,7 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import { ApiClient, fromCatalog } from "@opendatasoft/api-client";
 import i18next from "i18next";
-import { computed, runInAction } from "mobx";
+import { computed, makeObservable, override, runInAction } from "mobx";
 import ms from "ms";
 import Mustache from "mustache";
 import JulianDate from "terriajs-cesium/Source/Core/JulianDate";
@@ -17,16 +17,15 @@ import isDefined from "../../../Core/isDefined";
 import { isJsonObject, isJsonString } from "../../../Core/Json";
 import TerriaError from "../../../Core/TerriaError";
 import AutoRefreshingMixin from "../../../ModelMixins/AutoRefreshingMixin";
-import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
 import TableMixin from "../../../ModelMixins/TableMixin";
 import UrlMixin from "../../../ModelMixins/UrlMixin";
 import TableAutomaticStylesStratum from "../../../Table/TableAutomaticStylesStratum";
 import { MetadataUrlTraits } from "../../../Traits/TraitsClasses/CatalogMemberTraits";
 import EnumDimensionTraits from "../../../Traits/TraitsClasses/DimensionTraits";
 import OpenDataSoftCatalogItemTraits from "../../../Traits/TraitsClasses/OpenDataSoftCatalogItemTraits";
-import TableColumnTraits from "../../../Traits/TraitsClasses/TableColumnTraits";
-import TableStyleTraits from "../../../Traits/TraitsClasses/TableStyleTraits";
-import TableTimeStyleTraits from "../../../Traits/TraitsClasses/TableTimeStyleTraits";
+import TableColumnTraits from "../../../Traits/TraitsClasses/Table/ColumnTraits";
+import TableStyleTraits from "../../../Traits/TraitsClasses/Table/StyleTraits";
+import TableTimeStyleTraits from "../../../Traits/TraitsClasses/Table/TimeStyleTraits";
 import CreateModel from "../../Definition/CreateModel";
 import createStratumInstance from "../../Definition/createStratumInstance";
 import LoadableStratum from "../../Definition/LoadableStratum";
@@ -35,12 +34,6 @@ import { isValidDataset } from "../CatalogGroups/OpenDataSoftCatalogGroup";
 // Column name to use for OpenDataSoft Record IDs
 const RECORD_ID_COL = "record_id";
 export class OpenDataSoftDatasetStratum extends LoadableStratum(OpenDataSoftCatalogItemTraits) {
-    constructor(catalogItem, dataset, pointTimeSeries) {
-        super();
-        this.catalogItem = catalogItem;
-        this.dataset = dataset;
-        this.pointTimeSeries = pointTimeSeries;
-    }
     static async load(catalogItem) {
         var _a, _b;
         if (!catalogItem.url)
@@ -70,9 +63,11 @@ export class OpenDataSoftDatasetStratum extends LoadableStratum(OpenDataSoftCata
                 pointTimeSeries = counts === null || counts === void 0 ? void 0 : counts.reduce((agg, current) => {
                     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
                     const samples = (_b = (_a = current === null || current === void 0 ? void 0 : current.record) === null || _a === void 0 ? void 0 : _a.fields) === null || _b === void 0 ? void 0 : _b.num;
-                    const minTime = ((_d = (_c = current === null || current === void 0 ? void 0 : current.record) === null || _c === void 0 ? void 0 : _c.fields) === null || _d === void 0 ? void 0 : _d.min_time) ? new Date((_f = (_e = current === null || current === void 0 ? void 0 : current.record) === null || _e === void 0 ? void 0 : _e.fields) === null || _f === void 0 ? void 0 : _f.min_time)
+                    const minTime = ((_d = (_c = current === null || current === void 0 ? void 0 : current.record) === null || _c === void 0 ? void 0 : _c.fields) === null || _d === void 0 ? void 0 : _d.min_time)
+                        ? new Date((_f = (_e = current === null || current === void 0 ? void 0 : current.record) === null || _e === void 0 ? void 0 : _e.fields) === null || _f === void 0 ? void 0 : _f.min_time)
                         : undefined;
-                    const maxTime = ((_h = (_g = current === null || current === void 0 ? void 0 : current.record) === null || _g === void 0 ? void 0 : _g.fields) === null || _h === void 0 ? void 0 : _h.max_time) ? new Date((_k = (_j = current === null || current === void 0 ? void 0 : current.record) === null || _j === void 0 ? void 0 : _j.fields) === null || _k === void 0 ? void 0 : _k.max_time)
+                    const maxTime = ((_h = (_g = current === null || current === void 0 ? void 0 : current.record) === null || _g === void 0 ? void 0 : _g.fields) === null || _h === void 0 ? void 0 : _h.max_time)
+                        ? new Date((_k = (_j = current === null || current === void 0 ? void 0 : current.record) === null || _j === void 0 ? void 0 : _j.fields) === null || _k === void 0 ? void 0 : _k.max_time)
                         : undefined;
                     let intervalSec;
                     if (minTime && maxTime && samples) {
@@ -93,6 +88,28 @@ export class OpenDataSoftDatasetStratum extends LoadableStratum(OpenDataSoftCata
     }
     duplicateLoadableStratum(model) {
         return new OpenDataSoftDatasetStratum(model, this.dataset, this.pointTimeSeries);
+    }
+    constructor(catalogItem, dataset, pointTimeSeries) {
+        super();
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogItem
+        });
+        Object.defineProperty(this, "dataset", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: dataset
+        });
+        Object.defineProperty(this, "pointTimeSeries", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: pointTimeSeries
+        });
+        makeObservable(this);
     }
     get name() {
         var _a, _b, _c;
@@ -131,7 +148,8 @@ export class OpenDataSoftDatasetStratum extends LoadableStratum(OpenDataSoftCata
         // Find first field which matches a region type
         return (_b = (_a = this.dataset.fields) === null || _a === void 0 ? void 0 : _a.find((f) => {
             var _a, _b;
-            return ((_a = this.catalogItem.matchRegionProvider(f.name)) === null || _a === void 0 ? void 0 : _a.regionType) || ((_b = this.catalogItem.matchRegionProvider(f.label)) === null || _b === void 0 ? void 0 : _b.regionType);
+            return ((_a = this.catalogItem.matchRegionProvider(f.name)) === null || _a === void 0 ? void 0 : _a.regionType) ||
+                ((_b = this.catalogItem.matchRegionProvider(f.label)) === null || _b === void 0 ? void 0 : _b.regionType);
         })) === null || _b === void 0 ? void 0 : _b.name;
     }
     get recordsCount() {
@@ -383,7 +401,12 @@ export class OpenDataSoftDatasetStratum extends LoadableStratum(OpenDataSoftCata
         return this.catalogItem.colorFieldName;
     }
 }
-OpenDataSoftDatasetStratum.stratumName = "openDataSoftDataset";
+Object.defineProperty(OpenDataSoftDatasetStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "openDataSoftDataset"
+});
 __decorate([
     computed
 ], OpenDataSoftDatasetStratum.prototype, "name", null);
@@ -476,9 +499,10 @@ function getTimeField(dataset) {
     return (_b = (_a = dataset.fields) === null || _a === void 0 ? void 0 : _a.find((f) => f.type === "datetime")) === null || _b === void 0 ? void 0 : _b.name;
 }
 StratumOrder.addLoadStratum(OpenDataSoftDatasetStratum.stratumName);
-export default class OpenDataSoftCatalogItem extends TableMixin(AutoRefreshingMixin(UrlMixin(CatalogMemberMixin(CreateModel(OpenDataSoftCatalogItemTraits))))) {
+class OpenDataSoftCatalogItem extends AutoRefreshingMixin(TableMixin(UrlMixin(CreateModel(OpenDataSoftCatalogItemTraits)))) {
     constructor(id, terria, sourceReference) {
         super(id, terria, sourceReference);
+        makeObservable(this);
         this.strata.set(TableAutomaticStylesStratum.stratumName, new TableAutomaticStylesStratum(this));
     }
     get type() {
@@ -584,7 +608,13 @@ export default class OpenDataSoftCatalogItem extends TableMixin(AutoRefreshingMi
         ]);
     }
 }
-OpenDataSoftCatalogItem.type = "opendatasoft-item";
+Object.defineProperty(OpenDataSoftCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "opendatasoft-item"
+});
+export default OpenDataSoftCatalogItem;
 __decorate([
     computed
 ], OpenDataSoftCatalogItem.prototype, "apiClient", null);
@@ -592,7 +622,7 @@ __decorate([
     computed
 ], OpenDataSoftCatalogItem.prototype, "availableFieldsDimension", null);
 __decorate([
-    computed
+    override
 ], OpenDataSoftCatalogItem.prototype, "selectableDimensions", null);
 StratumOrder.addLoadStratum(TableAutomaticStylesStratum.stratumName);
 //# sourceMappingURL=OpenDataSoftCatalogItem.js.map

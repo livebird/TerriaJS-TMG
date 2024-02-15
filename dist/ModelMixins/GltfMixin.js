@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { computed } from "mobx";
+import { computed, makeObservable, override } from "mobx";
 import Cartesian3 from "terriajs-cesium/Source/Core/Cartesian3";
 import HeadingPitchRoll from "terriajs-cesium/Source/Core/HeadingPitchRoll";
 import Transforms from "terriajs-cesium/Source/Core/Transforms";
@@ -15,18 +15,45 @@ import CustomDataSource from "terriajs-cesium/Source/DataSources/CustomDataSourc
 import Entity from "terriajs-cesium/Source/DataSources/Entity";
 import ModelGraphics from "terriajs-cesium/Source/DataSources/ModelGraphics";
 import HeightReference from "terriajs-cesium/Source/Scene/HeightReference";
+import proxyCatalogItemUrl from "../Models/Catalog/proxyCatalogItemUrl";
 import CatalogMemberMixin from "./CatalogMemberMixin";
 import MappableMixin from "./MappableMixin";
 import ShadowMixin from "./ShadowMixin";
-import proxyCatalogItemUrl from "../Models/Catalog/proxyCatalogItemUrl";
 // We want TS to look at the type declared in lib/ThirdParty/terriajs-cesium-extra/index.d.ts
 // and import doesn't allows us to do that, so instead we use require + type casting to ensure
 // we still maintain the type checking, without TS screaming with errors
 const Axis = require("terriajs-cesium/Source/Scene/Axis").default;
 function GltfMixin(Base) {
     class GltfMixin extends ShadowMixin(CatalogMemberMixin(MappableMixin(Base))) {
+        constructor(...args) {
+            super(...args);
+            // Create stable instances of DataSource and Entity instead
+            // of generating a new one each time the traits change and mobx recomputes.
+            // This vastly improves the performance.
+            //
+            // Note that these are private instances and must not be modified outside the Mixin
+            Object.defineProperty(this, "_dataSource", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: new CustomDataSource("glTF Model")
+            });
+            Object.defineProperty(this, "_modelEntity", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: new Entity({ name: "glTF Model Entity" })
+            });
+            makeObservable(this);
+        }
         get hasGltfMixin() {
             return true;
+        }
+        get disableZoomTo() {
+            const { latitude, longitude, height } = this.origin;
+            return (latitude === undefined ||
+                longitude === undefined ||
+                height === undefined);
         }
         get cesiumUpAxis() {
             if (this.upAxis === undefined) {
@@ -60,13 +87,28 @@ function GltfMixin(Base) {
         /**
          * Returns the orientation of the model in the ECEF frame
          */
-        get orientation() {
-            const { heading, pitch, roll } = this.rotation;
-            const hpr = HeadingPitchRoll.fromDegrees(heading !== null && heading !== void 0 ? heading : 0, pitch !== null && pitch !== void 0 ? pitch : 0, roll !== null && roll !== void 0 ? roll : 0);
-            const orientation = Transforms.headingPitchRollQuaternion(this.cesiumPosition, hpr);
-            return orientation;
+        get cesiumRotation() {
+            const { heading = 0, pitch = 0, roll = 0 } = this.rotation;
+            const hpr = HeadingPitchRoll.fromDegrees(heading, pitch, roll);
+            const rotation = Transforms.headingPitchRollQuaternion(this.cesiumPosition, hpr);
+            return rotation;
         }
-        get model() {
+        get transformationJson() {
+            return {
+                origin: {
+                    latitude: this.origin.latitude,
+                    longitude: this.origin.longitude,
+                    height: this.origin.height
+                },
+                rotation: {
+                    heading: this.rotation.heading,
+                    pitch: this.rotation.pitch,
+                    roll: this.rotation.roll
+                },
+                scale: this.scale
+            };
+        }
+        get modelGraphics() {
             if (this.gltfModelUrl === undefined) {
                 return undefined;
             }
@@ -92,20 +134,36 @@ function GltfMixin(Base) {
             }
             return super.shortReport;
         }
+        get modelEntity() {
+            const entity = this._modelEntity;
+            entity.position = new ConstantPositionProperty(this.cesiumPosition);
+            entity.orientation = new ConstantProperty(this.cesiumRotation);
+            entity.model = this.modelGraphics;
+            return entity;
+        }
         get mapItems() {
-            if (this.model === undefined) {
+            const modelEntity = this.modelEntity;
+            const modelGraphics = this.modelGraphics;
+            const dataSource = this._dataSource;
+            if (modelGraphics === undefined) {
                 return [];
             }
-            this.model.show = new ConstantProperty(this.show);
-            const dataSource = new CustomDataSource(this.name || "glTF model");
-            dataSource.entities.add(new Entity({
-                position: new ConstantPositionProperty(this.cesiumPosition),
-                orientation: new ConstantProperty(this.orientation),
-                model: this.model
-            }));
+            dataSource.show = this.show;
+            if (modelGraphics)
+                modelGraphics.show = new ConstantProperty(this.show);
+            if (this.name) {
+                dataSource.name = this.name;
+                modelEntity.name = this.name;
+            }
+            if (!dataSource.entities.contains(modelEntity)) {
+                dataSource.entities.add(modelEntity);
+            }
             return [dataSource];
         }
     }
+    __decorate([
+        override
+    ], GltfMixin.prototype, "disableZoomTo", null);
     __decorate([
         computed
     ], GltfMixin.prototype, "cesiumUpAxis", null);
@@ -120,13 +178,19 @@ function GltfMixin(Base) {
     ], GltfMixin.prototype, "cesiumPosition", null);
     __decorate([
         computed
-    ], GltfMixin.prototype, "orientation", null);
+    ], GltfMixin.prototype, "cesiumRotation", null);
     __decorate([
         computed
-    ], GltfMixin.prototype, "model", null);
+    ], GltfMixin.prototype, "transformationJson", null);
     __decorate([
         computed
+    ], GltfMixin.prototype, "modelGraphics", null);
+    __decorate([
+        override
     ], GltfMixin.prototype, "shortReport", null);
+    __decorate([
+        computed
+    ], GltfMixin.prototype, "modelEntity", null);
     __decorate([
         computed
     ], GltfMixin.prototype, "mapItems", null);

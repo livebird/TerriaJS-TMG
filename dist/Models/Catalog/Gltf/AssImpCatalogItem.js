@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, observable, runInAction } from "mobx";
+import { action, observable, runInAction, makeObservable } from "mobx";
 import URI from "urijs";
 import filterOutUndefined from "../../../Core/filterOutUndefined";
 import loadArrayBuffer from "../../../Core/loadArrayBuffer";
@@ -32,10 +32,22 @@ const supportedTextureExtensions = [
     "webp",
     "ktx2"
 ];
-export default class AssImpCatalogItem extends GltfMixin(CreateModel(AssImpCatalogItemTraits)) {
-    constructor() {
-        super(...arguments);
-        this.hasLocalData = false;
+class AssImpCatalogItem extends GltfMixin(CreateModel(AssImpCatalogItemTraits)) {
+    constructor(...args) {
+        super(...args);
+        Object.defineProperty(this, "gltfModelUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "hasLocalData", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        makeObservable(this);
     }
     get type() {
         return AssImpCatalogItem.type;
@@ -82,12 +94,18 @@ export default class AssImpCatalogItem extends GltfMixin(CreateModel(AssImpCatal
          * This will be populated with all files downloaded using `url` or `urls` - and all files from downloaded/uploaded zip files
          */
         const fileArrayBuffers = [];
+        let zipRootDir;
         await Promise.all(urls.map(async (url) => {
             // **Local data** - treat all URLs as zip if they have been uploaded
             if (isZip(url) || this.hasLocalData) {
                 const blob = await loadBlob(proxyCatalogItemUrl(this, url));
                 const zipFiles = await parseZipArrayBuffers(blob);
-                zipFiles.forEach((zipFile) => {
+                zipFiles.forEach((zipFile, i) => {
+                    if (i === 0 && zipFile.isDirectory) {
+                        // If the first entry is a directory, we treat it as a root
+                        // directory that contains all the other files.
+                        zipRootDir = zipFile.fileName;
+                    }
                     fileArrayBuffers.push({
                         name: zipFile.fileName,
                         arrayBuffer: zipFile.data
@@ -96,7 +114,16 @@ export default class AssImpCatalogItem extends GltfMixin(CreateModel(AssImpCatal
                     const blob = new Blob([zipFile.data]);
                     const dataUrl = URL.createObjectURL(blob);
                     // Push filename -> local data blob URI
-                    dataUrls.set(zipFile.fileName, dataUrl);
+                    let fileName = zipFile.fileName;
+                    if (zipRootDir) {
+                        // This zip appears to have contents inside a root
+                        // directory. Rewrite file names relative to this root so that
+                        // assimp can correctly resolve relatively referenced assets.
+                        fileName = zipFile.fileName.startsWith(zipRootDir)
+                            ? zipFile.fileName.slice(zipRootDir.length)
+                            : zipFile.fileName;
+                    }
+                    dataUrls.set(fileName, dataUrl);
                 });
             }
             // **Remote data** - explicitly defined in `url` or `urls`
@@ -116,14 +143,14 @@ export default class AssImpCatalogItem extends GltfMixin(CreateModel(AssImpCatal
         const assimpjs = (await import("assimpjs")).default;
         const ajs = await assimpjs();
         // Create assimpjs FileList object, and add the files
-        let fileList = new ajs.FileList();
+        const fileList = new ajs.FileList();
         for (let i = 0; i < fileArrayBuffers.length; i++) {
             fileList.AddFile(fileArrayBuffers[i].name, new Uint8Array(fileArrayBuffers[i].arrayBuffer));
         }
         // Convert files to GlTf 2
-        let result = ajs.ConvertFileList(fileList, "gltf2");
+        const result = ajs.ConvertFileList(fileList, "gltf2");
         const fileCount = result.FileCount();
-        if (!result.IsSuccess() || fileCount == 0) {
+        if (!result.IsSuccess() || fileCount === 0) {
             throw TerriaError.from(result.GetErrorCode(), {
                 title: "Failed to convert files to GlTf"
             });
@@ -160,15 +187,15 @@ export default class AssImpCatalogItem extends GltfMixin(CreateModel(AssImpCatal
                 (_b = gltfJson.images) === null || _b === void 0 ? void 0 : _b.forEach((image) => {
                     if (!image.uri)
                         return;
-                    // If any unsupported image URIs are detected (by extension/suffix) then we show a warning message listing them
-                    if (!supportedTextureExtensions.some((ext) => ext === new URI(image.uri).suffix())) {
-                        unsupportedTextures.push(image.uri);
-                    }
                     // Replace back slashes with forward slash
                     let newUrl = image.uri.replace(/\\/g, "/");
                     // Remove start "./" or "//" from uri
                     if (newUrl.startsWith("//") || newUrl.startsWith("./")) {
                         newUrl = newUrl.slice(2);
+                    }
+                    // If any unsupported image URIs are detected (by extension/suffix) then we show a warning message listing them
+                    if (!supportedTextureExtensions.some((ext) => ext === new URI(newUrl).suffix())) {
+                        unsupportedTextures.push(image.uri);
                     }
                     // Do we have substitute URL in dataUrls (see dataUrls for more info)
                     // This covers:
@@ -232,7 +259,13 @@ export default class AssImpCatalogItem extends GltfMixin(CreateModel(AssImpCatal
             });
     }
 }
-AssImpCatalogItem.type = "assimp";
+Object.defineProperty(AssImpCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "assimp"
+});
+export default AssImpCatalogItem;
 __decorate([
     observable
 ], AssImpCatalogItem.prototype, "gltfModelUrl", void 0);

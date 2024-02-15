@@ -4,17 +4,23 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, computed } from "mobx";
+import { action, computed, makeObservable } from "mobx";
 import { ItemSearchProviders } from "../Models/ItemSearchProviders/ItemSearchProviders";
 /**
  * This mixin adds capability for searching a catalog item using an {@link
  * ItemSearchProvider}.
  */
 function SearchableItemMixin(Base) {
-    class Klass extends Base {
-        constructor() {
-            super(...arguments);
-            this.hasSearchableItemMixin = true;
+    class SearchableItemMixin extends Base {
+        constructor(...args) {
+            super(...args);
+            Object.defineProperty(this, "hasSearchableItemMixin", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: true
+            });
+            makeObservable(this);
         }
         /**
          * Returns true if this item is searchable and has a valid item search provider defined.
@@ -37,11 +43,11 @@ function SearchableItemMixin(Base) {
     }
     __decorate([
         computed
-    ], Klass.prototype, "canSearch", null);
+    ], SearchableItemMixin.prototype, "canSearch", null);
     __decorate([
         action
-    ], Klass.prototype, "createItemSearchProvider", null);
-    return Klass;
+    ], SearchableItemMixin.prototype, "createItemSearchProvider", null);
+    return SearchableItemMixin;
 }
 (function (SearchableItemMixin) {
     function isMixedInto(model) {

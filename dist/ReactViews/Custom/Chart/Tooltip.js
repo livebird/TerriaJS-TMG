@@ -4,8 +4,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { observer } from "mobx-react";
-import { computed } from "mobx";
+import { computed, makeObservable } from "mobx";
 import { Tooltip as VisxTooltip } from "@visx/tooltip";
 import { CSSTransition } from "react-transition-group";
 import PropTypes from "prop-types";
@@ -14,9 +15,15 @@ import dateformat from "dateformat";
 import groupBy from "lodash-es/groupBy";
 import Styles from "./tooltip.scss";
 let Tooltip = class Tooltip extends React.Component {
-    constructor() {
-        super(...arguments);
-        this.prevItems = [];
+    constructor(props) {
+        super(props);
+        Object.defineProperty(this, "prevItems", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        makeObservable(this);
     }
     get items() {
         // When items` is unset, hold on to its last value. We do this because we
@@ -63,21 +70,21 @@ let Tooltip = class Tooltip extends React.Component {
     render() {
         const { items } = this.props;
         const show = items.length > 0;
-        return (React.createElement(CSSTransition, { in: show, classNames: "transition", timeout: 1000, unmountOnExit: true },
-            React.createElement(VisxTooltip, { className: Styles.tooltip, key: Math.random(), style: this.style },
-                React.createElement("div", { className: Styles.title }, this.title),
-                React.createElement("div", null,
-                    React.createElement(For, { each: "group", of: this.groups },
-                        React.createElement(TooltipGroup, { key: `tooltip-group-${group.name}`, name: this.groups.length > 1 ? group.name : undefined, items: group.items }))))));
+        return (_jsx(CSSTransition, { in: show, classNames: "transition", timeout: 1000, unmountOnExit: true, children: _jsxs(VisxTooltip, { className: Styles.tooltip, style: this.style, children: [_jsx("div", { className: Styles.title, children: this.title }), _jsx("div", { children: this.groups.map((group) => (_jsx(TooltipGroup, { name: this.groups.length > 1 ? group.name : undefined, items: group.items }, `tooltip-group-${group.name}`))) })] }, Math.random()) }));
     }
 };
-Tooltip.propTypes = {
-    items: PropTypes.array.isRequired,
-    left: PropTypes.number,
-    right: PropTypes.number,
-    top: PropTypes.number,
-    bottom: PropTypes.number
-};
+Object.defineProperty(Tooltip, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        items: PropTypes.array.isRequired,
+        left: PropTypes.number,
+        right: PropTypes.number,
+        top: PropTypes.number,
+        bottom: PropTypes.number
+    }
+});
 __decorate([
     computed
 ], Tooltip.prototype, "items", null);
@@ -96,31 +103,34 @@ Tooltip = __decorate([
 class TooltipGroup extends React.PureComponent {
     render() {
         const { name, items } = this.props;
-        return (React.createElement("div", { className: Styles.group },
-            name && React.createElement("div", { className: Styles.groupName }, name),
-            React.createElement(For, { each: "item", of: items },
-                React.createElement(TooltipItem, { key: `tooltipitem-${item.chartItem.key}`, item: item }))));
+        return (_jsxs("div", { className: Styles.group, children: [name && _jsx("div", { className: Styles.groupName, children: name }), items.map((item) => (_jsx(TooltipItem, { item: item }, `tooltipitem-${item.chartItem.key}`)))] }));
     }
 }
-TooltipGroup.propTypes = {
-    name: PropTypes.string,
-    items: PropTypes.array.isRequired
-};
+Object.defineProperty(TooltipGroup, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        name: PropTypes.string,
+        items: PropTypes.array.isRequired
+    }
+});
 let TooltipItem = class TooltipItem extends React.Component {
     render() {
         const chartItem = this.props.item.chartItem;
         const value = this.props.item.point.y;
         const formattedValue = isNaN(value) ? value : value.toFixed(2);
-        return (React.createElement("div", { className: Styles.item },
-            React.createElement("div", { className: Styles.itemSymbol, style: { backgroundColor: chartItem.getColor() } }),
-            React.createElement("div", { className: Styles.itemName }, chartItem.name),
-            React.createElement("div", { className: Styles.itemValue }, formattedValue),
-            React.createElement("div", { className: Styles.itemUnits }, chartItem.units)));
+        return (_jsxs("div", { className: Styles.item, children: [_jsx("div", { className: Styles.itemSymbol, style: { backgroundColor: chartItem.getColor() } }), _jsx("div", { className: Styles.itemName, children: chartItem.name }), _jsx("div", { className: Styles.itemValue, children: formattedValue }), _jsx("div", { className: Styles.itemUnits, children: chartItem.units })] }));
     }
 };
-TooltipItem.propTypes = {
-    item: PropTypes.object.isRequired
-};
+Object.defineProperty(TooltipItem, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        item: PropTypes.object.isRequired
+    }
+});
 TooltipItem = __decorate([
     observer
 ], TooltipItem);

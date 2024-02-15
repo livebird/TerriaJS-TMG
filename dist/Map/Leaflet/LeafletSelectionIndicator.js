@@ -3,16 +3,54 @@ import CesiumMath from "terriajs-cesium/Source/Core/Math";
 import EasingFunction from "terriajs-cesium/Source/Core/EasingFunction";
 import Ellipsoid from "terriajs-cesium/Source/Core/Ellipsoid";
 import L from "leaflet";
-import cesiumRequestAnimationFrame from "terriajs-cesium/Source/Core/requestAnimationFrame";
 import isDefined from "../../Core/isDefined";
 const TweenCollection = require("terriajs-cesium/Source/Scene/TweenCollection").default;
 const selectionIndicatorUrl = require("../../../wwwroot/images/NM-LocationTarget.svg");
 const cartographicScratch = new Cartographic();
 export default class LeafletSelectionIndicator {
     constructor(leaflet) {
-        this._tweens = new TweenCollection();
-        this._selectionIndicatorIsAppearing = false;
-        this._tweensAreRunning = false;
+        Object.defineProperty(this, "_leaflet", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_marker", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_tweens", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new TweenCollection()
+        });
+        Object.defineProperty(this, "_selectionIndicatorTween", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_selectionIndicatorIsAppearing", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "_selectionIndicatorDomElement", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_tweensAreRunning", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
         this._leaflet = leaflet;
         this._marker = L.marker([0, 0], {
             icon: L.divIcon({
@@ -41,7 +79,7 @@ export default class LeafletSelectionIndicator {
             this._selectionIndicatorTween.cancelTween();
             this._selectionIndicatorTween = undefined;
         }
-        var style = this._selectionIndicatorDomElement.style;
+        const style = this._selectionIndicatorDomElement.style;
         this._selectionIndicatorIsAppearing = true;
         const that = this;
         this._selectionIndicatorTween = this._tweens.add({
@@ -80,7 +118,7 @@ export default class LeafletSelectionIndicator {
             this._selectionIndicatorTween.cancelTween();
             this._selectionIndicatorTween = undefined;
         }
-        var style = this._selectionIndicatorDomElement.style;
+        const style = this._selectionIndicatorDomElement.style;
         this._selectionIndicatorIsAppearing = false;
         const that = this;
         this._selectionIndicatorTween = this._tweens.add({
@@ -111,20 +149,23 @@ export default class LeafletSelectionIndicator {
         if (this._tweensAreRunning) {
             return;
         }
-        var feature = this._leaflet.terria.selectedFeature;
+        const feature = this._leaflet.terria.selectedFeature;
         if (isDefined(feature) && isDefined(feature.position)) {
-            var cartographic = Ellipsoid.WGS84.cartesianToCartographic(feature.position.getValue(this._leaflet.terria.timelineClock.currentTime), cartographicScratch);
-            this._marker.setLatLng([
-                CesiumMath.toDegrees(cartographic.latitude),
-                CesiumMath.toDegrees(cartographic.longitude)
-            ]);
+            const positionValue = feature.position.getValue(this._leaflet.terria.timelineClock.currentTime);
+            if (isDefined(positionValue)) {
+                const cartographic = Ellipsoid.WGS84.cartesianToCartographic(positionValue, cartographicScratch);
+                this._marker.setLatLng([
+                    CesiumMath.toDegrees(cartographic.latitude),
+                    CesiumMath.toDegrees(cartographic.longitude)
+                ]);
+            }
         }
         if (this._tweens.length > 0) {
             this._tweens.update();
         }
         if (this._tweens.length !== 0 ||
             (isDefined(feature) && isDefined(feature.position))) {
-            cesiumRequestAnimationFrame(() => {
+            requestAnimationFrame(() => {
                 this._startTweens();
             });
         }

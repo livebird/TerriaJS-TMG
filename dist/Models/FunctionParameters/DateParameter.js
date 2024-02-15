@@ -1,9 +1,19 @@
 import FunctionParameter from "./FunctionParameter";
-export default class DateParameter extends FunctionParameter {
+class DateParameter extends FunctionParameter {
     constructor() {
         super(...arguments);
-        this.type = "date";
-        this.variant = "complex";
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "date"
+        });
+        Object.defineProperty(this, "variant", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "complex"
+        });
     }
     /**
      * Process value so that it can be used in an URL.
@@ -21,5 +31,11 @@ export default class DateParameter extends FunctionParameter {
         });
     }
 }
-DateParameter.type = "date";
+Object.defineProperty(DateParameter, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "date"
+});
+export default DateParameter;
 //# sourceMappingURL=DateParameter.js.map

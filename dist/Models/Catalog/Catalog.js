@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { autorun, observable } from "mobx";
+import { autorun, observable, makeObservable } from "mobx";
 import { USER_ADDED_CATEGORY_ID } from "../../Core/addedByUser";
 import CatalogGroup from "./CatalogGroup";
 import CommonStrata from "../Definition/CommonStrata";
@@ -13,6 +13,25 @@ import { BaseModel } from "../Definition/Model";
 import isDefined from "../../Core/isDefined";
 export default class Catalog {
     constructor(terria) {
+        Object.defineProperty(this, "group", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "terria", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_disposeCreateUserAddedGroup", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
         this.terria = terria;
         this.group = new CatalogGroup("/", this.terria);
         this.terria.addModel(this.group);

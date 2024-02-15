@@ -3,6 +3,24 @@ import Color from "terriajs-cesium/Source/Core/Color";
 export default class EnumColorMap extends ColorMap {
     constructor(options) {
         super();
+        Object.defineProperty(this, "values", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "colors", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "nullColor", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         this.nullColor = Color.clone(options.nullColor);
         const values = [];
         const colors = [];

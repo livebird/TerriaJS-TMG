@@ -6,11 +6,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import bbox from "@turf/bbox";
 import i18next from "i18next";
-import { clone } from "lodash-es";
-import { action, computed, observable, runInAction } from "mobx";
-import ImageryLayerFeatureInfo from "terriajs-cesium/Source/Scene/ImageryLayerFeatureInfo";
-import { json_style, LineSymbolizer, PolygonSymbolizer } from "protomaps";
-import isDefined from "../../../Core/isDefined";
+import { computed, runInAction, makeObservable, override } from "mobx";
+import { GeomType, json_style, LineSymbolizer, PolygonSymbolizer } from "protomaps";
 import loadJson from "../../../Core/loadJson";
 import TerriaError from "../../../Core/TerriaError";
 import ProtomapsImageryProvider, { GeojsonSource } from "../../../Map/ImageryProvider/ProtomapsImageryProvider";
@@ -28,8 +25,19 @@ import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
 class MapboxVectorTileLoadableStratum extends LoadableStratum(MapboxVectorTileCatalogItemTraits) {
     constructor(item, styleJson) {
         super();
-        this.item = item;
-        this.styleJson = styleJson;
+        Object.defineProperty(this, "item", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: item
+        });
+        Object.defineProperty(this, "styleJson", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: styleJson
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(newModel) {
         return new MapboxVectorTileLoadableStratum(newModel, this.styleJson);
@@ -61,6 +69,7 @@ class MapboxVectorTileLoadableStratum extends LoadableStratum(MapboxVectorTileCa
                     createStratumInstance(LegendItemTraits, {
                         color: this.item.fillColor,
                         outlineColor: this.item.lineColor,
+                        outlineWidth: this.item.lineColor ? 1 : undefined,
                         title: this.item.name
                     })
                 ]
@@ -81,7 +90,12 @@ class MapboxVectorTileLoadableStratum extends LoadableStratum(MapboxVectorTileCa
         }
     }
 }
-MapboxVectorTileLoadableStratum.stratumName = "MapboxVectorTileLoadable";
+Object.defineProperty(MapboxVectorTileLoadableStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "MapboxVectorTileLoadable"
+});
 __decorate([
     computed
 ], MapboxVectorTileLoadableStratum.prototype, "legends", null);
@@ -90,15 +104,18 @@ __decorate([
 ], MapboxVectorTileLoadableStratum.prototype, "rectangle", null);
 StratumOrder.addLoadStratum(MapboxVectorTileLoadableStratum.stratumName);
 class MapboxVectorTileCatalogItem extends MappableMixin(UrlMixin(CatalogMemberMixin(CreateModel(MapboxVectorTileCatalogItemTraits)))) {
-    constructor() {
-        super(...arguments);
-        this.forceProxy = true;
+    constructor(...args) {
+        super(...args);
+        makeObservable(this);
     }
     get type() {
         return MapboxVectorTileCatalogItem.type;
     }
     get typeName() {
         return i18next.t("models.mapboxVectorTile.name");
+    }
+    get forceProxy() {
+        return true;
     }
     async forceLoadMetadata() {
         const stratum = await MapboxVectorTileLoadableStratum.load(this);
@@ -112,14 +129,16 @@ class MapboxVectorTileCatalogItem extends MappableMixin(UrlMixin(CatalogMemberMi
         }
     }
     get paintRules() {
-        let rules = [];
+        const rules = [];
         if (this.layer) {
             if (this.fillColor) {
                 rules.push({
                     dataLayer: this.layer,
                     symbolizer: new PolygonSymbolizer({ fill: this.fillColor }),
                     minzoom: this.minimumZoom,
-                    maxzoom: this.maximumZoom
+                    maxzoom: this.maximumZoom,
+                    // Only apply polygon/fill symbolizer to polygon features (otherwise it will also apply to line features)
+                    filter: (z, f) => f.geomType === GeomType.Polygon
                 });
             }
             if (this.lineColor) {
@@ -148,14 +167,15 @@ class MapboxVectorTileCatalogItem extends MappableMixin(UrlMixin(CatalogMemberMi
         }
         return new ProtomapsImageryProvider({
             terria: this.terria,
+            id: this.uniqueId,
             data: this.url,
             minimumZoom: this.minimumZoom,
             maximumNativeZoom: this.maximumNativeZoom,
             maximumZoom: this.maximumZoom,
             credit: this.attribution,
             paintRules: this.paintRules,
-            labelRules: this.labelRules
-            // featureInfoFunc: this.featureInfoFromFeature,
+            labelRules: this.labelRules,
+            idProperty: this.idProperty
         });
     }
     forceLoadMapItems() {
@@ -176,27 +196,25 @@ class MapboxVectorTileCatalogItem extends MappableMixin(UrlMixin(CatalogMemberMi
             }
         ];
     }
-    featureInfoFromFeature(feature) {
-        const featureInfo = new ImageryLayerFeatureInfo();
-        if (isDefined(this.nameProperty)) {
-            featureInfo.name = feature.properties[this.nameProperty];
-        }
-        featureInfo.properties = clone(feature.properties);
-        featureInfo.data = {
-            id: feature.properties[this.idProperty]
-        }; // For highlight
-        return featureInfo;
-    }
 }
-MapboxVectorTileCatalogItem.type = "mvt";
+Object.defineProperty(MapboxVectorTileCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "mvt"
+});
 __decorate([
-    observable
-], MapboxVectorTileCatalogItem.prototype, "forceProxy", void 0);
+    override
+], MapboxVectorTileCatalogItem.prototype, "forceProxy", null);
 __decorate([
     computed
 ], MapboxVectorTileCatalogItem.prototype, "parsedJsonStyle", null);
 __decorate([
     computed
+    /** Convert traits into paint rules:
+     * - `layer` and `fillColor`/`lineColor` into simple rules
+     * - `parsedJsonStyle`
+     */
 ], MapboxVectorTileCatalogItem.prototype, "paintRules", null);
 __decorate([
     computed
@@ -207,8 +225,5 @@ __decorate([
 __decorate([
     computed
 ], MapboxVectorTileCatalogItem.prototype, "mapItems", null);
-__decorate([
-    action.bound
-], MapboxVectorTileCatalogItem.prototype, "featureInfoFromFeature", null);
 export default MapboxVectorTileCatalogItem;
 //# sourceMappingURL=MapboxVectorTileCatalogItem.js.map

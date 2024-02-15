@@ -5,4 +5,5 @@ It has also been refactored manually to provide better type names and reduce cod
 These are the structures which are inlcluded:
   dataStructures, conceptSchemes, codelists, agencySchemes, dataProviderSchemes, dataConsumerSchemes, organisationUnitSchemes, dataflows, metadataflows, provisionAgreements, structureSets, categorisations, attachmentConstraints, contentConstraints
 */
+export {};
 //# sourceMappingURL=SdmxJsonStructureMessage.js.map

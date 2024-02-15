@@ -5,20 +5,28 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { computed } from "mobx";
+import { computed, makeObservable, override } from "mobx";
 import getFilenameFromUri from "terriajs-cesium/Source/Core/getFilenameFromUri";
 import isDefined from "../../../Core/isDefined";
 import loadText from "../../../Core/loadText";
 import readText from "../../../Core/readText";
 import { networkRequestError } from "../../../Core/TerriaError";
-import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
 import GeoJsonMixin from "../../../ModelMixins/GeojsonMixin";
-import UrlMixin from "../../../ModelMixins/UrlMixin";
 import GpxCatalogItemTraits from "../../../Traits/TraitsClasses/GpxCatalogItemTraits";
 import CreateModel from "../../Definition/CreateModel";
 import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
 const toGeoJSON = require("@mapbox/togeojson");
-class GpxCatalogItem extends GeoJsonMixin(UrlMixin(CatalogMemberMixin(CreateModel(GpxCatalogItemTraits)))) {
+class GpxCatalogItem extends GeoJsonMixin(CreateModel(GpxCatalogItemTraits)) {
+    constructor(...args) {
+        super(...args);
+        Object.defineProperty(this, "_gpxFile", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
+    }
     get type() {
         return GpxCatalogItem.type;
     }
@@ -32,7 +40,7 @@ class GpxCatalogItem extends GeoJsonMixin(UrlMixin(CatalogMemberMixin(CreateMode
         return isDefined(this._gpxFile);
     }
     loadGpxText(text) {
-        var dom = new DOMParser().parseFromString(text, "text/xml");
+        const dom = new DOMParser().parseFromString(text, "text/xml");
         return toGeoJSON.gpx(dom);
     }
     async forceLoadGeojsonData() {
@@ -67,12 +75,17 @@ class GpxCatalogItem extends GeoJsonMixin(UrlMixin(CatalogMemberMixin(CreateMode
         return super.name;
     }
 }
-GpxCatalogItem.type = "gpx";
+Object.defineProperty(GpxCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "gpx"
+});
 __decorate([
     computed
 ], GpxCatalogItem.prototype, "hasLocalData", null);
 __decorate([
-    computed
+    override
 ], GpxCatalogItem.prototype, "name", null);
 export default GpxCatalogItem;
 //# sourceMappingURL=GpxCatalogItem.js.map

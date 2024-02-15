@@ -9,8 +9,18 @@ import primitiveTrait from "../Decorators/primitiveTrait";
 export default class ShadowTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.shadows = "NONE";
-        this.showShadowUi = true;
+        Object.defineProperty(this, "shadows", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "NONE"
+        });
+        Object.defineProperty(this, "showShadowUi", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
     }
 }
 __decorate([

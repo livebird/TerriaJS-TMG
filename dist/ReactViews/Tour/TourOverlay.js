@@ -1,4 +1,5 @@
 "use strict";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import PropTypes from "prop-types";
 import Styles from "../HelpScreens/obscure-overlay.scss";
@@ -45,32 +46,27 @@ const TourOverlay = ({ rectangle, onCancel }) => {
     const windowClass = classNames(Styles.window, {
         [Styles.isActive]: rectangle
     });
-    return (React.createElement("div", { className: windowClass },
-        React.createElement("div", { className: Styles.topOverlay, style: {
-                left: topOverlayPositionLeft,
-                top: topOverlayPositionTop,
-                width: topOverlayWidth,
-                height: topOverlayHeight
-            }, onClick: onCancel }),
-        React.createElement("div", { className: Styles.leftOverlay, style: {
-                left: leftOverlayPositionLeft,
-                top: leftOverlayPositionTop,
-                width: leftOverlayWidth,
-                height: leftOverlayHeight
-            }, onClick: onCancel }),
-        React.createElement("div", { className: Styles.rightOverlay, style: {
-                left: rightOverlayPositionLeft,
-                top: rightOverlayPositionTop,
-                width: rightOverlayWidth,
-                height: rightOverlayHeight
-            }, onClick: onCancel }),
-        React.createElement("div", { className: Styles.bottomOverlay, style: {
-                left: bottomOverlayPositionLeft,
-                top: bottomOverlayPositionTop,
-                width: bottomOverlayWidth,
-                height: bottomOverlayHeight
-            }, onClick: onCancel }),
-        React.createElement("div", { className: Styles.clearOverlay, onClick: advance })));
+    return (_jsxs("div", { className: windowClass, children: [_jsx("div", { className: Styles.topOverlay, style: {
+                    left: topOverlayPositionLeft,
+                    top: topOverlayPositionTop,
+                    width: topOverlayWidth,
+                    height: topOverlayHeight
+                }, onClick: onCancel }), _jsx("div", { className: Styles.leftOverlay, style: {
+                    left: leftOverlayPositionLeft,
+                    top: leftOverlayPositionTop,
+                    width: leftOverlayWidth,
+                    height: leftOverlayHeight
+                }, onClick: onCancel }), _jsx("div", { className: Styles.rightOverlay, style: {
+                    left: rightOverlayPositionLeft,
+                    top: rightOverlayPositionTop,
+                    width: rightOverlayWidth,
+                    height: rightOverlayHeight
+                }, onClick: onCancel }), _jsx("div", { className: Styles.bottomOverlay, style: {
+                    left: bottomOverlayPositionLeft,
+                    top: bottomOverlayPositionTop,
+                    width: bottomOverlayWidth,
+                    height: bottomOverlayHeight
+                }, onClick: onCancel }), _jsx("div", { className: Styles.clearOverlay, onClick: advance })] }));
 };
 TourOverlay.propTypes = {
     rectangle: PropTypes.object.isRequired,

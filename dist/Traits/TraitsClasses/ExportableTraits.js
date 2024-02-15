@@ -9,7 +9,12 @@ import ModelTraits from "../ModelTraits";
 export default class ExportableTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.disableExport = false;
+        Object.defineProperty(this, "disableExport", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
     }
 }
 __decorate([

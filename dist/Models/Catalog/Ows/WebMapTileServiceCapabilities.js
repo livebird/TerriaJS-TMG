@@ -4,11 +4,33 @@ import defined from "terriajs-cesium/Source/Core/defined";
 import loadXML from "../../../Core/loadXML";
 import { networkRequestError } from "../../../Core/TerriaError";
 import xml2json from "../../../ThirdParty/xml2json";
-export default class WebMapTileServiceCapabilities {
+class WebMapTileServiceCapabilities {
     constructor(xml, json) {
         var _a, _b;
-        this.xml = xml;
-        this.json = json;
+        Object.defineProperty(this, "xml", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: xml
+        });
+        Object.defineProperty(this, "json", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: json
+        });
+        Object.defineProperty(this, "layers", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "tileMatrixSets", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         this.layers = [];
         this.tileMatrixSets = [];
         const layerElements = (_a = this.json.Contents) === null || _a === void 0 ? void 0 : _a.Layer;
@@ -69,18 +91,24 @@ export default class WebMapTileServiceCapabilities {
         return this.tileMatrixSets.find((tileMatrixSet) => tileMatrixSet.Identifier === set);
     }
 }
-WebMapTileServiceCapabilities.fromUrl = createTransformer((url) => {
-    return Promise.resolve(loadXML(url)).then(function (capabilitiesXml) {
-        const json = xml2json(capabilitiesXml);
-        if (!defined(json.ServiceIdentification)) {
-            throw networkRequestError({
-                title: i18next.t("models.webMapTileServiceCatalogGroup.invalidCapabilitiesTitle"),
-                message: i18next.t("models.webMapTileServiceCatalogGroup.invalidCapabilitiesMessage", {
-                    url: url
-                })
-            });
-        }
-        return new WebMapTileServiceCapabilities(capabilitiesXml, json);
-    });
+Object.defineProperty(WebMapTileServiceCapabilities, "fromUrl", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: createTransformer((url) => {
+        return Promise.resolve(loadXML(url)).then(function (capabilitiesXml) {
+            const json = xml2json(capabilitiesXml);
+            if (!defined(json.ServiceIdentification)) {
+                throw networkRequestError({
+                    title: i18next.t("models.webMapTileServiceCatalogGroup.invalidCapabilitiesTitle"),
+                    message: i18next.t("models.webMapTileServiceCatalogGroup.invalidCapabilitiesMessage", {
+                        url: url
+                    })
+                });
+            }
+            return new WebMapTileServiceCapabilities(capabilitiesXml, json);
+        });
+    })
 });
+export default WebMapTileServiceCapabilities;
 //# sourceMappingURL=WebMapTileServiceCapabilities.js.map

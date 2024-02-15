@@ -37,8 +37,36 @@ let prevBoundsType = 0;
  **/
 class LeafletGeomVisualizer {
     constructor(leafletScene, entityCollection) {
-        this.leafletScene = leafletScene;
-        this.entityCollection = entityCollection;
+        Object.defineProperty(this, "leafletScene", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: leafletScene
+        });
+        Object.defineProperty(this, "entityCollection", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: entityCollection
+        });
+        Object.defineProperty(this, "_featureGroup", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_entitiesToVisualize", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_entityHash", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         entityCollection.collectionChanged.addEventListener(this._onCollectionChanged, this);
         this._featureGroup = L.featureGroup().addTo(leafletScene.map);
         this._entitiesToVisualize = new AssociativeArray();
@@ -381,7 +409,7 @@ class LeafletGeomVisualizer {
                 }
             }
         }
-        if (redrawLabel) {
+        if (redrawLabel && isDefined(text)) {
             const drawBillboard = function (image, dataurl) {
                 iconOptions.iconUrl = dataurl || image;
                 if (!isDefined(iconOptions.iconSize)) {
@@ -397,12 +425,14 @@ class LeafletGeomVisualizer {
                 fillColor: fillColor,
                 font: font
             });
-            const imageUrl = canvas.toDataURL();
-            const img = new Image();
-            img.onload = function () {
-                drawBillboard(img, imageUrl);
-            };
-            img.src = imageUrl;
+            if (isDefined(canvas)) {
+                const imageUrl = canvas.toDataURL();
+                const img = new Image();
+                img.onload = function () {
+                    drawBillboard(img, imageUrl);
+                };
+                img.src = imageUrl;
+            }
         }
     }
     _updateRectangle(entity, time, _entityHash, entityDetails) {
@@ -684,7 +714,7 @@ class LeafletGeomVisualizer {
             if (bPosChange) {
                 polyline.setLatLngs(latlngs);
             }
-            for (let prop in polylineOptions) {
+            for (const prop in polylineOptions) {
                 if (polylineOptions[prop] !== polyline.options[prop]) {
                     polyline.setStyle(polylineOptions);
                     break;
@@ -816,7 +846,7 @@ function _isCloseToWesternAntiMeridian(bounds) {
     return false;
 }
 function positionToLatLng(position, bounds) {
-    var cartographic = Ellipsoid.WGS84.cartesianToCartographic(position);
+    const cartographic = Ellipsoid.WGS84.cartesianToCartographic(position);
     let lon = CesiumMath.toDegrees(cartographic.longitude);
     if (bounds !== undefined) {
         if (_isCloseToEasternAntiMeridian(bounds)) {
@@ -833,7 +863,7 @@ function positionToLatLng(position, bounds) {
     return L.latLng(CesiumMath.toDegrees(cartographic.latitude), lon);
 }
 function hierarchyToLatLngs(hierarchy) {
-    let holes = [];
+    const holes = [];
     const positions = Array.isArray(hierarchy) ? hierarchy : hierarchy.positions;
     if (hierarchy.holes.length > 0) {
         hierarchy.holes.forEach((hole) => {
@@ -893,10 +923,10 @@ function getValueOrUndefined(property, time) {
     }
 }
 function convertEntityPositionsToLatLons(positions) {
-    var carts = Ellipsoid.WGS84.cartesianArrayToCartographicArray(positions);
-    var latlngs = [];
+    const carts = Ellipsoid.WGS84.cartesianArrayToCartographicArray(positions);
+    const latlngs = [];
     let lastLongitude;
-    for (var p = 0; p < carts.length; p++) {
+    for (let p = 0; p < carts.length; p++) {
         let lon = CesiumMath.toDegrees(carts[p].longitude);
         if (lastLongitude !== undefined) {
             if (lastLongitude - lon > 180) {

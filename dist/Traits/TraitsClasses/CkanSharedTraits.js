@@ -12,10 +12,36 @@ import ReferenceTraits from "./ReferenceTraits";
 export default class CkanSharedTraits extends mixTraits(ReferenceTraits) {
     constructor() {
         super(...arguments);
-        this.useResourceName = false;
-        this.useDatasetNameAndFormatWhereMultipleResources = true;
-        this.useCombinationNameWhereMultipleResources = false;
-        this.useSingleResource = false;
+        Object.defineProperty(this, "useResourceName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "useDatasetNameAndFormatWhereMultipleResources", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "useCombinationNameWhereMultipleResources", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "supportedResourceFormats", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "useSingleResource", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
     }
 }
 __decorate([

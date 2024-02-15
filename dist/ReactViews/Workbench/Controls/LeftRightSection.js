@@ -1,6 +1,6 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react";
-import React from "react";
 import { useTranslation, withTranslation } from "react-i18next";
 import styled from "styled-components";
 import defined from "terriajs-cesium/Source/Core/defined";
@@ -51,12 +51,7 @@ const LeftRightSection = observer(({ item }) => {
         !item.terria.showSplitter) {
         return null;
     }
-    return (React.createElement(React.Fragment, null,
-        React.createElement(Spacing, { bottom: 3 }),
-        React.createElement(Box, null,
-            React.createElement(LeftRightButton, { type: "button", onClick: goLeft, title: t("splitterTool.workbench.goleftTitle"), isActive: splitDirection === SplitDirection.LEFT }, t("splitterTool.workbench.goleft")),
-            React.createElement(LeftRightButton, { type: "button", onClick: goBoth, title: t("splitterTool.workbench.bothTitle"), isActive: splitDirection === SplitDirection.NONE }, t("splitterTool.workbench.both")),
-            React.createElement(LeftRightButton, { type: "button", onClick: goRight, title: t("splitterTool.workbench.gorightTitle"), isActive: splitDirection === SplitDirection.RIGHT }, t("splitterTool.workbench.goright")))));
+    return (_jsxs(_Fragment, { children: [_jsx(Spacing, { bottom: 3 }), _jsxs(Box, { children: [_jsx(LeftRightButton, { type: "button", onClick: goLeft, title: t("splitterTool.workbench.goleftTitle"), isActive: splitDirection === SplitDirection.LEFT, children: t("splitterTool.workbench.goleft") }), _jsx(LeftRightButton, { type: "button", onClick: goBoth, title: t("splitterTool.workbench.bothTitle"), isActive: splitDirection === SplitDirection.NONE, children: t("splitterTool.workbench.both") }), _jsx(LeftRightButton, { type: "button", onClick: goRight, title: t("splitterTool.workbench.gorightTitle"), isActive: splitDirection === SplitDirection.RIGHT, children: t("splitterTool.workbench.goright") })] })] }));
 });
 export default withTranslation()(LeftRightSection);
 //# sourceMappingURL=LeftRightSection.js.map

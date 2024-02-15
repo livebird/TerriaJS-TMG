@@ -1,14 +1,13 @@
 "use strict";
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import React from "react";
 import createReactClass from "create-react-class";
 import PropTypes from "prop-types";
 import PointParameterEditor from "./PointParameterEditor";
 import LineParameterEditor from "./LineParameterEditor";
-// import RectangleParameterEditor from "./RectangleParameterEditor";
 import PolygonParameterEditor from "./PolygonParameterEditor";
 import RegionParameterEditor from "./RegionParameterEditor";
 import RegionTypeParameterEditor from "./RegionTypeParameterEditor";
-import RegionDataParameterEditor from "./RegionDataParameterEditor";
 import BooleanParameterEditor from "./BooleanParameterEditor";
 import BooleanParameterGroupEditor from "./BooleanParameterGroupEditor";
 import DateParameterEditor from "./DateParameterEditor";
@@ -30,25 +29,21 @@ const ParameterEditor = createReactClass({
     },
     fieldId: new Date().getTime(),
     renderLabel() {
-        return (React.createElement("div", null,
-            React.createElement("label", { key: this.props.parameter.id, className: Styles.label, htmlFor: this.fieldId + this.props.parameter.type },
-                this.props.parameter.name,
-                this.props.parameter.isRequired && React.createElement("span", null, " (required)")),
-            typeof this.props.parameter.description === "string" &&
-                this.props.parameter.description !== ""
-                ? parseCustomMarkdownToReact(this.props.parameter.description, {
-                    parameter: this.props.parameter
-                })
-                : ""));
+        return (_jsxs("div", { children: [_jsxs("label", { className: Styles.label, htmlFor: this.fieldId + this.props.parameter.type, children: [this.props.parameter.name, this.props.parameter.isRequired && _jsx("span", { children: " (required)" })] }, this.props.parameter.id), typeof this.props.parameter.description === "string" &&
+                    this.props.parameter.description !== ""
+                    ? parseCustomMarkdownToReact(this.props.parameter.description, {
+                        parameter: this.props.parameter
+                    })
+                    : ""] }));
     },
     renderEditor() {
         for (let i = 0; i < ParameterEditor.parameterTypeConverters.length; ++i) {
             const converter = ParameterEditor.parameterTypeConverters[i];
             const editor = converter.parameterTypeToDiv(this.props.parameter.type, this);
             if (defined(editor)) {
-                return (React.createElement("div", { style: {
+                return (_jsx("div", { style: {
                         color: this.props.parameter.isValid ? "inherit" : "#ff0000"
-                    } }, editor));
+                    }, children: editor }));
             }
         }
         const genericEditor = ParameterEditor.parameterTypeConverters.filter(function (item) {
@@ -57,7 +52,7 @@ const ParameterEditor = createReactClass({
         return genericEditor.parameterTypeToDiv("generic", this);
     },
     render() {
-        return (React.createElement("div", { id: this.fieldId + this.props.parameter.type, className: Styles.fieldParameterEditor }, this.renderEditor()));
+        return (_jsx("div", { id: this.fieldId + this.props.parameter.type, className: Styles.fieldParameterEditor, children: this.renderEditor() }));
     }
 });
 ParameterEditor.parameterTypeConverters = [
@@ -65,9 +60,7 @@ ParameterEditor.parameterTypeConverters = [
         id: "point",
         parameterTypeToDiv: function PointParameterToDiv(type, parameterEditor) {
             if (type === this.id) {
-                return (React.createElement("div", null,
-                    parameterEditor.renderLabel(),
-                    React.createElement(PointParameterEditor, { previewed: parameterEditor.props.previewed, viewState: parameterEditor.props.viewState, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })));
+                return (_jsxs("div", { children: [parameterEditor.renderLabel(), _jsx(PointParameterEditor, { previewed: parameterEditor.props.previewed, viewState: parameterEditor.props.viewState, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })] }));
             }
         }
     },
@@ -75,9 +68,7 @@ ParameterEditor.parameterTypeConverters = [
         id: "line",
         parameterTypeToDiv: function LineParameterToDiv(type, parameterEditor) {
             if (type === this.id) {
-                return (React.createElement("div", null,
-                    parameterEditor.renderLabel(),
-                    React.createElement(LineParameterEditor, { previewed: parameterEditor.props.previewed, viewState: parameterEditor.props.viewState, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })));
+                return (_jsxs("div", { children: [parameterEditor.renderLabel(), _jsx(LineParameterEditor, { previewed: parameterEditor.props.previewed, viewState: parameterEditor.props.viewState, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })] }));
             }
         }
     },
@@ -106,9 +97,7 @@ ParameterEditor.parameterTypeConverters = [
         id: "polygon",
         parameterTypeToDiv: function PolygonParameterToDiv(type, parameterEditor) {
             if (type === this.id) {
-                return (React.createElement("div", null,
-                    parameterEditor.renderLabel(),
-                    React.createElement(PolygonParameterEditor, { previewed: parameterEditor.props.previewed, viewState: parameterEditor.props.viewState, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })));
+                return (_jsxs("div", { children: [parameterEditor.renderLabel(), _jsx(PolygonParameterEditor, { previewed: parameterEditor.props.previewed, viewState: parameterEditor.props.viewState, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })] }));
             }
         }
     },
@@ -116,9 +105,7 @@ ParameterEditor.parameterTypeConverters = [
         id: "enumeration",
         parameterTypeToDiv: function EnumerationParameterToDiv(type, parameterEditor) {
             if (type === this.id) {
-                return (React.createElement("div", null,
-                    parameterEditor.renderLabel(),
-                    React.createElement(EnumerationParameterEditor, { previewed: parameterEditor.props.previewed, viewState: parameterEditor.props.viewState, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })));
+                return (_jsxs("div", { children: [parameterEditor.renderLabel(), _jsx(EnumerationParameterEditor, { previewed: parameterEditor.props.previewed, viewState: parameterEditor.props.viewState, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })] }));
             }
         }
     },
@@ -126,9 +113,7 @@ ParameterEditor.parameterTypeConverters = [
         id: "date",
         parameterTypeToDiv: function DateParameterToDiv(type, parameterEditor) {
             if (type === this.id) {
-                return (React.createElement("div", null,
-                    parameterEditor.renderLabel(),
-                    React.createElement(DateParameterEditor, { previewed: parameterEditor.props.previewed, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })));
+                return (_jsxs("div", { children: [parameterEditor.renderLabel(), _jsx(DateParameterEditor, { previewed: parameterEditor.props.previewed, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })] }));
             }
         }
     },
@@ -136,9 +121,7 @@ ParameterEditor.parameterTypeConverters = [
         id: "dateTime",
         parameterTypeToDiv: function DateTimeParameterToDiv(type, parameterEditor) {
             if (type === this.id) {
-                return (React.createElement("div", null,
-                    parameterEditor.renderLabel(),
-                    React.createElement(DateTimeParameterEditor, { previewed: parameterEditor.props.previewed, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })));
+                return (_jsxs("div", { children: [parameterEditor.renderLabel(), _jsx(DateTimeParameterEditor, { previewed: parameterEditor.props.previewed, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })] }));
             }
         }
     },
@@ -146,9 +129,7 @@ ParameterEditor.parameterTypeConverters = [
         id: "region",
         parameterTypeToDiv: function RegionParameterToDiv(type, parameterEditor) {
             if (type === this.id) {
-                return (React.createElement("div", null,
-                    parameterEditor.renderLabel(),
-                    React.createElement(RegionParameterEditor, { previewed: parameterEditor.props.previewed, viewState: parameterEditor.props.viewState, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })));
+                return (_jsxs("div", { children: [parameterEditor.renderLabel(), _jsx(RegionParameterEditor, { previewed: parameterEditor.props.previewed, viewState: parameterEditor.props.viewState, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })] }));
             }
         }
     },
@@ -160,22 +141,7 @@ ParameterEditor.parameterTypeConverters = [
                     return (defined(param.regionTypeParameter) &&
                         param.regionTypeParameter === parameterEditor.props.parameter);
                 })[0];
-                return (React.createElement("div", null,
-                    React.createElement(If, { condition: regionParam === undefined },
-                        parameterEditor.renderLabel(),
-                        React.createElement(RegionTypeParameterEditor, { previewed: parameterEditor.props.previewed, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })),
-                    React.createElement(If, { condition: !parameterEditor.props.parameter.showInUi },
-                        React.createElement("div", { className: "Placeholder for regionType" }))));
-            }
-        }
-    },
-    {
-        id: "regionData",
-        parameterTypeToDiv: function RegionDataParameterToDiv(type, parameterEditor) {
-            if (type === this.id) {
-                return (React.createElement("div", null,
-                    parameterEditor.renderLabel(),
-                    React.createElement(RegionDataParameterEditor, { previewed: parameterEditor.props.previewed, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })));
+                return (_jsxs("div", { children: [regionParam === undefined && (_jsxs(_Fragment, { children: [parameterEditor.renderLabel(), _jsx(RegionTypeParameterEditor, { previewed: parameterEditor.props.previewed, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })] })), !parameterEditor.props.parameter.showInUi && (_jsx("div", { className: "Placeholder for regionType" }))] }));
             }
         }
     },
@@ -183,10 +149,8 @@ ParameterEditor.parameterTypeConverters = [
         id: "boolean",
         parameterTypeToDiv: function BooleanParameterToDiv(type, parameterEditor) {
             if (type === this.id) {
-                return (React.createElement("div", null,
-                    parameterEditor.props.parameter.hasNamedStates &&
-                        parameterEditor.renderLabel(),
-                    React.createElement(BooleanParameterEditor, { previewed: parameterEditor.props.previewed, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })));
+                return (_jsxs("div", { children: [parameterEditor.props.parameter.hasNamedStates &&
+                            parameterEditor.renderLabel(), _jsx(BooleanParameterEditor, { previewed: parameterEditor.props.previewed, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })] }));
             }
         }
     },
@@ -194,9 +158,7 @@ ParameterEditor.parameterTypeConverters = [
         id: "boolean-group",
         parameterTypeToDiv: function BooleanParameterGroupToDiv(type, parameterEditor) {
             if (type === this.id) {
-                return (React.createElement("div", null,
-                    parameterEditor.renderLabel(),
-                    React.createElement(BooleanParameterGroupEditor, { previewed: parameterEditor.props.previewed, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })));
+                return (_jsxs("div", { children: [parameterEditor.renderLabel(), _jsx(BooleanParameterGroupEditor, { previewed: parameterEditor.props.previewed, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })] }));
             }
         }
     },
@@ -204,9 +166,7 @@ ParameterEditor.parameterTypeConverters = [
         id: "geojson",
         parameterTypeToDiv: function GeoJsonParameterToDiv(type, parameterEditor) {
             if (type === this.id) {
-                return (React.createElement("div", null,
-                    parameterEditor.renderLabel(),
-                    React.createElement(GeoJsonParameterEditor, { previewed: parameterEditor.props.previewed, viewState: parameterEditor.props.viewState, parameter: parameterEditor.props.parameter })));
+                return (_jsxs("div", { children: [parameterEditor.renderLabel(), _jsx(GeoJsonParameterEditor, { previewed: parameterEditor.props.previewed, viewState: parameterEditor.props.viewState, parameter: parameterEditor.props.parameter })] }));
             }
         }
     },
@@ -214,9 +174,7 @@ ParameterEditor.parameterTypeConverters = [
         id: "info",
         parameterTypeToDiv: function GenericParameterToDiv(type, parameterEditor) {
             if (type === this.id) {
-                return (React.createElement("div", null,
-                    parameterEditor.renderLabel(),
-                    React.createElement(InfoParameterEditor, { previewed: parameterEditor.props.previewed, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })));
+                return (_jsxs("div", { children: [parameterEditor.renderLabel(), _jsx(InfoParameterEditor, { previewed: parameterEditor.props.previewed, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })] }));
             }
         }
     },
@@ -224,9 +182,7 @@ ParameterEditor.parameterTypeConverters = [
         id: "generic",
         parameterTypeToDiv: function GenericParameterToDiv(type, parameterEditor) {
             if (type === this.id) {
-                return (React.createElement("div", null,
-                    parameterEditor.renderLabel(),
-                    React.createElement(GenericParameterEditor, { previewed: parameterEditor.props.previewed, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })));
+                return (_jsxs("div", { children: [parameterEditor.renderLabel(), _jsx(GenericParameterEditor, { previewed: parameterEditor.props.previewed, parameter: parameterEditor.props.parameter, parameterViewModel: parameterEditor.props.parameterViewModel })] }));
             }
         }
     }

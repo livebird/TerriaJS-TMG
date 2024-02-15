@@ -24,6 +24,45 @@ import TransformationTraits from "./TransformationTraits";
 import UrlTraits from "./UrlTraits";
 import FeaturePickingTraits from "./FeaturePickingTraits";
 export class FilterTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "name", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "property", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "minimumValue", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "maximumValue", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "minimumShown", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "maximumShown", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -68,6 +107,21 @@ __decorate([
     })
 ], FilterTraits.prototype, "maximumShown", void 0);
 export class PointCloudShadingTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "attenuation", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "geometricErrorScale", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -84,6 +138,33 @@ __decorate([
     })
 ], PointCloudShadingTraits.prototype, "geometricErrorScale", void 0);
 export class OptionsTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "maximumScreenSpaceError", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "maximumNumberOfLoadedTiles", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "pointCloudShading", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "showCreditsOnScreen", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -106,11 +187,70 @@ __decorate([
         description: "Point cloud shading parameters"
     })
 ], OptionsTraits.prototype, "pointCloudShading", void 0);
+__decorate([
+    primitiveTrait({
+        type: "boolean",
+        name: "Show credits on screen",
+        description: "Whether to display the credits of this tileset on screen."
+    })
+], OptionsTraits.prototype, "showCreditsOnScreen", void 0);
 export default class Cesium3DTilesTraits extends mixTraits(HighlightColorTraits, PlaceEditorTraits, TransformationTraits, FeaturePickingTraits, MappableTraits, UrlTraits, CatalogMemberTraits, ShadowTraits, OpacityTraits, LegendOwnerTraits, ShadowTraits, ClippingPlanesTraits, SplitterTraits) {
     constructor() {
         super(...arguments);
-        this.colorBlendMode = "MIX";
-        this.colorBlendAmount = 0.5;
+        Object.defineProperty(this, "ionAssetId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "ionAccessToken", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "ionServer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "options", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "style", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "filters", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "colorBlendMode", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "MIX"
+        });
+        Object.defineProperty(this, "colorBlendAmount", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0.5
+        });
+        Object.defineProperty(this, "featureIdProperties", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([

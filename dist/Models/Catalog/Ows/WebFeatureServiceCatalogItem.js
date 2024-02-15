@@ -5,35 +5,26 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { computed, runInAction } from "mobx";
+import { computed, makeObservable, override, runInAction } from "mobx";
 import combine from "terriajs-cesium/Source/Core/combine";
+import TerriaError from "../../../Core/TerriaError";
 import containsAny from "../../../Core/containsAny";
 import isDefined from "../../../Core/isDefined";
 import isReadOnlyArray from "../../../Core/isReadOnlyArray";
 import loadText from "../../../Core/loadText";
-import TerriaError from "../../../Core/TerriaError";
 import gmlToGeoJson from "../../../Map/Vector/gmlToGeoJson";
+import { getName } from "../../../ModelMixins/CatalogMemberMixin";
 import GeoJsonMixin, { toFeatureCollection } from "../../../ModelMixins/GeojsonMixin";
 import GetCapabilitiesMixin from "../../../ModelMixins/GetCapabilitiesMixin";
-import UrlMixin from "../../../ModelMixins/UrlMixin";
 import xml2json from "../../../ThirdParty/xml2json";
 import { InfoSectionTraits } from "../../../Traits/TraitsClasses/CatalogMemberTraits";
-import WebFeatureServiceCatalogItemTraits, { SUPPORTED_CRS_4326, SUPPORTED_CRS_3857 } from "../../../Traits/TraitsClasses/WebFeatureServiceCatalogItemTraits";
+import WebFeatureServiceCatalogItemTraits, { SUPPORTED_CRS_3857, SUPPORTED_CRS_4326 } from "../../../Traits/TraitsClasses/WebFeatureServiceCatalogItemTraits";
 import CreateModel from "../../Definition/CreateModel";
-import createStratumInstance from "../../Definition/createStratumInstance";
 import LoadableStratum from "../../Definition/LoadableStratum";
+import createStratumInstance from "../../Definition/createStratumInstance";
 import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
 import WebFeatureServiceCapabilities, { getRectangleFromLayer } from "./WebFeatureServiceCapabilities";
 export class GetCapabilitiesStratum extends LoadableStratum(WebFeatureServiceCatalogItemTraits) {
-    constructor(catalogItem, capabilities) {
-        super();
-        this.catalogItem = catalogItem;
-        this.capabilities = capabilities;
-        // Helper function to check if geojson output is supported (by checking GetCapabilities OutputTypes OR FeatureType OutputTypes)
-        this.hasJsonOutputFormat = (outputFormats) => {
-            return isDefined(outputFormats === null || outputFormats === void 0 ? void 0 : outputFormats.find((format) => ["json", "JSON", "application/json"].includes(format)));
-        };
-    }
     static async load(catalogItem, capabilities) {
         if (!isDefined(catalogItem.getCapabilitiesUrl)) {
             throw new TerriaError({
@@ -44,6 +35,31 @@ export class GetCapabilitiesStratum extends LoadableStratum(WebFeatureServiceCat
         if (!isDefined(capabilities))
             capabilities = await WebFeatureServiceCapabilities.fromUrl(proxyCatalogItemUrl(catalogItem, catalogItem.getCapabilitiesUrl, catalogItem.getCapabilitiesCacheDuration));
         return new GetCapabilitiesStratum(catalogItem, capabilities);
+    }
+    constructor(catalogItem, capabilities) {
+        super();
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogItem
+        });
+        Object.defineProperty(this, "capabilities", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: capabilities
+        });
+        // Helper function to check if geojson output is supported (by checking GetCapabilities OutputTypes OR FeatureType OutputTypes)
+        Object.defineProperty(this, "hasJsonOutputFormat", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: (outputFormats) => {
+                return isDefined(outputFormats === null || outputFormats === void 0 ? void 0 : outputFormats.find((format) => ["json", "JSON", "application/json"].includes(format)));
+            }
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(model) {
         return new GetCapabilitiesStratum(model, this.capabilities);
@@ -210,13 +226,19 @@ __decorate([
 __decorate([
     computed
 ], GetCapabilitiesStratum.prototype, "srsName", null);
-class WebFeatureServiceCatalogItem extends GetCapabilitiesMixin(UrlMixin(GeoJsonMixin(CreateModel(WebFeatureServiceCatalogItemTraits)))) {
-    constructor() {
-        super(...arguments);
+class WebFeatureServiceCatalogItem extends GetCapabilitiesMixin(GeoJsonMixin(CreateModel(WebFeatureServiceCatalogItemTraits))) {
+    constructor(...args) {
+        super(...args);
         // hide elements in the info section which might show information about the datasource
-        this._sourceInfoItemNames = [
-            i18next.t("models.webFeatureServiceCatalogItem.getCapabilitiesUrl")
-        ];
+        Object.defineProperty(this, "_sourceInfoItemNames", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: [
+                i18next.t("models.webFeatureServiceCatalogItem.getCapabilitiesUrl")
+            ]
+        });
+        makeObservable(this);
     }
     get type() {
         return WebFeatureServiceCatalogItem.type;
@@ -262,12 +284,12 @@ class WebFeatureServiceCatalogItem extends GetCapabilitiesMixin(UrlMixin(GeoJson
             });
         }
         // Check if layers exist
-        const missingLayers = this.typeNamesArray.filter((layer) => !getCapabilitiesStratum.capabilitiesFeatureTypes.has(layer));
+        const missingLayers = this.typeNamesArray.filter((layer) => !isDefined(getCapabilitiesStratum.capabilitiesFeatureTypes.get(layer)));
         if (missingLayers.length > 0) {
             throw new TerriaError({
                 sender: this,
                 title: i18next.t("models.webFeatureServiceCatalogItem.noLayerFoundTitle"),
-                message: i18next.t("models.webFeatureServiceCatalogItem.noLayerFoundMessage", this)
+                message: i18next.t("models.webFeatureServiceCatalogItem.noLayerFoundMessage", { name: getName(this), typeNames: missingLayers.join(", ") })
             });
         }
         const url = this.uri
@@ -290,14 +312,24 @@ class WebFeatureServiceCatalogItem extends GetCapabilitiesMixin(UrlMixin(GeoJson
             try {
                 errorMessage = (_a = xml2json(getFeatureResponse).Exception) === null || _a === void 0 ? void 0 : _a.ExceptionText;
             }
-            catch { }
+            catch {
+                /* eslint-disable-line no-empty */
+            }
+            const originalError = isDefined(errorMessage)
+                ? new TerriaError({
+                    sender: this,
+                    title: "Exception from service",
+                    message: errorMessage
+                })
+                : undefined;
             throw new TerriaError({
                 sender: this,
                 title: i18next.t("models.webFeatureServiceCatalogItem.missingDataTitle"),
-                message: `${i18next.t("models.webFeatureServiceCatalogItem.missingDataMessage", this)} ${isDefined(errorMessage) ? `<br/>Error: ${errorMessage}` : ""}`
+                message: `${i18next.t("models.webFeatureServiceCatalogItem.missingDataMessage", { name: getName(this) })}`,
+                originalError
             });
         }
-        let geojsonData = this.outputFormat === "JSON"
+        const geojsonData = this.outputFormat === "JSON"
             ? JSON.parse(getFeatureResponse)
             : gmlToGeoJson(getFeatureResponse);
         const fc = toFeatureCollection(geojsonData);
@@ -331,16 +363,26 @@ class WebFeatureServiceCatalogItem extends GetCapabilitiesMixin(UrlMixin(GeoJson
  * in the Abstract, the Abstract will not be used.  This makes it easy to filter out placeholder data like
  * Geoserver's "A compliant implementation of WFS..." stock abstract.
  */
-WebFeatureServiceCatalogItem.abstractsToIgnore = [
-    "A compliant implementation of WFS",
-    "This is the reference implementation of WFS 1.0.0 and WFS 1.1.0, supports all WFS operations including Transaction."
-];
-WebFeatureServiceCatalogItem.type = "wfs";
+Object.defineProperty(WebFeatureServiceCatalogItem, "abstractsToIgnore", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: [
+        "A compliant implementation of WFS",
+        "This is the reference implementation of WFS 1.0.0 and WFS 1.1.0, supports all WFS operations including Transaction."
+    ]
+});
+Object.defineProperty(WebFeatureServiceCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "wfs"
+});
 __decorate([
     computed
 ], WebFeatureServiceCatalogItem.prototype, "typeNamesArray", null);
 __decorate([
-    computed
+    override
 ], WebFeatureServiceCatalogItem.prototype, "shortReport", null);
 export default WebFeatureServiceCatalogItem;
 //# sourceMappingURL=WebFeatureServiceCatalogItem.js.map

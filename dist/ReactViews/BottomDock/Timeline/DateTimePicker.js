@@ -4,7 +4,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, observable, reaction, runInAction } from "mobx";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { action, observable, reaction, runInAction, makeObservable } from "mobx";
 import { observer } from "mobx-react";
 import moment from "moment";
 import React from "react";
@@ -120,11 +121,23 @@ export const DateButton = styled(Button).attrs({
   border-radius: 4px;
 `;
 let DateTimePicker = class DateTimePicker extends React.Component {
-    constructor() {
-        super(...arguments);
-        this.currentDateIndice = { granularity: "century" };
+    constructor(props) {
+        super(props);
+        Object.defineProperty(this, "currentDateIndice", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: { granularity: "century" }
+        });
+        Object.defineProperty(this, "currentDateAutorunDisposer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
     }
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         const datesObject = this.props.dates;
         let defaultCentury;
         let defaultYear;
@@ -204,14 +217,10 @@ let DateTimePicker = class DateTimePicker extends React.Component {
     renderCenturyGrid(datesObject) {
         const centuries = datesObject.index;
         if (datesObject.dates && datesObject.dates.length >= 12) {
-            return (React.createElement(Grid, null,
-                React.createElement(GridHeading, null, "Select a century"),
-                centuries.map((c) => (React.createElement(DateButton, { key: c, css: `
+            return (_jsxs(Grid, { children: [_jsx(GridHeading, { children: "Select a century" }), centuries.map((c) => (_jsxs(DateButton, { css: `
                 display: inline-block;
                 width: 40%;
-              `, onClick: () => runInAction(() => (this.currentDateIndice.century = c)) },
-                    c,
-                    "00")))));
+              `, onClick: () => runInAction(() => (this.currentDateIndice.century = c)), children: [c, "00"] }, c)))] }));
         }
         else {
             return this.renderList(datesObject.dates);
@@ -221,20 +230,16 @@ let DateTimePicker = class DateTimePicker extends React.Component {
         if (datesObject.dates && datesObject.dates.length > 12) {
             const years = datesObject.index;
             const monthOfYear = Array.apply(null, { length: 12 }).map(Number.call, Number);
-            return (React.createElement(Grid, null,
-                React.createElement(GridHeading, null, "Select a year"),
-                React.createElement(GridBody, null, years.map((y) => (React.createElement(GridRow, { key: y, onClick: () => runInAction(() => {
-                        this.currentDateIndice.year = y;
-                        this.currentDateIndice.month = undefined;
-                        this.currentDateIndice.day = undefined;
-                        this.currentDateIndice.time = undefined;
-                    }) },
-                    React.createElement(GridLabel, null, y),
-                    React.createElement(GridRowInner, { marginRight: "11" }, monthOfYear.map((m) => (React.createElement(GridItem
-                    // className={datesObject[y][m] ? Styles.activeGrid : ""}
-                    , { 
-                        // className={datesObject[y][m] ? Styles.activeGrid : ""}
-                        active: isDefined(datesObject[y][m]), key: m }))))))))));
+            return (_jsxs(Grid, { children: [_jsx(GridHeading, { children: "Select a year" }), _jsx(GridBody, { children: years.map((y) => (_jsxs(GridRow, { onClick: () => runInAction(() => {
+                                this.currentDateIndice.year = y;
+                                this.currentDateIndice.month = undefined;
+                                this.currentDateIndice.day = undefined;
+                                this.currentDateIndice.time = undefined;
+                            }), children: [_jsx(GridLabel, { children: y }), _jsx(GridRowInner, { marginRight: "11", children: monthOfYear.map((m) => (_jsx(GridItem
+                                    // className={datesObject[y][m] ? Styles.activeGrid : ""}
+                                    , { 
+                                        // className={datesObject[y][m] ? Styles.activeGrid : ""}
+                                        active: isDefined(datesObject[y][m]) }, m))) })] }, y))) })] }));
         }
         else {
             return this.renderList(datesObject.dates);
@@ -246,32 +251,27 @@ let DateTimePicker = class DateTimePicker extends React.Component {
             return null;
         }
         if (datesObject[year].dates && datesObject[year].dates.length > 12) {
-            return (React.createElement(Grid, null,
-                React.createElement(GridHeading, null,
-                    React.createElement(BackButton, { title: this.props.t("dateTime.back"), onClick: () => {
-                            runInAction(() => {
-                                this.currentDateIndice.year = undefined;
-                                this.currentDateIndice.month = undefined;
-                                this.currentDateIndice.day = undefined;
-                                this.currentDateIndice.time = undefined;
-                            });
-                        } }, year)),
-                React.createElement(GridBody, null, monthNames.map((m, i) => (React.createElement(GridRow, { css: `
+            return (_jsxs(Grid, { children: [_jsx(GridHeading, { children: _jsx(BackButton, { title: this.props.t("dateTime.back"), onClick: () => {
+                                runInAction(() => {
+                                    this.currentDateIndice.year = undefined;
+                                    this.currentDateIndice.month = undefined;
+                                    this.currentDateIndice.day = undefined;
+                                    this.currentDateIndice.time = undefined;
+                                });
+                            }, children: year }) }), _jsx(GridBody, { children: monthNames.map((m, i) => (_jsxs(GridRow, { css: `
                   ${!isDefined(datesObject[year][i])
-                        ? `:hover {
+                                ? `:hover {
                   background: transparent;
                   cursor: default;
                 }`
-                        : ""}
-                `, key: m, onClick: () => isDefined(datesObject[year][i]) &&
-                        runInAction(() => {
-                            this.currentDateIndice.month = i;
-                            this.currentDateIndice.day = undefined;
-                            this.currentDateIndice.time = undefined;
-                        }) },
-                    React.createElement(GridLabel, null, m),
-                    React.createElement(GridRowInner, { marginRight: "3" }, daysInMonth(i + 1, year).map((d) => (React.createElement(GridItem, { active: isDefined(datesObject[year][i]) &&
-                            isDefined(datesObject[year][i][d + 1]), key: d }))))))))));
+                                : ""}
+                `, onClick: () => isDefined(datesObject[year][i]) &&
+                                runInAction(() => {
+                                    this.currentDateIndice.month = i;
+                                    this.currentDateIndice.day = undefined;
+                                    this.currentDateIndice.time = undefined;
+                                }), children: [_jsx(GridLabel, { children: m }), _jsx(GridRowInner, { marginRight: "3", children: daysInMonth(i + 1, year).map((d) => (_jsx(GridItem, { active: isDefined(datesObject[year][i]) &&
+                                            isDefined(datesObject[year][i][d + 1]) }, d))) })] }, m))) })] }));
         }
         else {
             return this.renderList(datesObject[year].dates);
@@ -302,27 +302,21 @@ let DateTimePicker = class DateTimePicker extends React.Component {
             // const monthObject = this.props.datesObject[this.currentDateIndice.year][this.currentDateIndice.month];
             // const daysToDisplay = Object.keys(monthObject).map(dayNumber => monthObject[dayNumber][0]);
             // const selected = isDefined(this.currentDateIndice.day) ? this.props.datesObject[this.currentDateIndice.year][this.currentDateIndice.month][this.currentDateIndice.day][0] : null;
-            return (React.createElement("div", { css: `
+            return (_jsxs("div", { css: `
             text-align: center;
             margin-top: -10px;
-          ` },
-                React.createElement("div", null,
-                    React.createElement(BackButton, { title: this.props.t("dateTime.back"), onClick: () => runInAction(() => {
-                            this.currentDateIndice.year = undefined;
-                            this.currentDateIndice.month = undefined;
-                            this.currentDateIndice.day = undefined;
-                            this.currentDateIndice.time = undefined;
-                        }) }, this.currentDateIndice.year),
-                    "\u00A0",
-                    React.createElement(BackButton, { title: this.props.t("dateTime.back"), onClick: () => runInAction(() => {
-                            this.currentDateIndice.month = undefined;
-                            this.currentDateIndice.day = undefined;
-                            this.currentDateIndice.time = undefined;
-                        }) }, monthNames[this.currentDateIndice.month]),
-                    React.createElement(Spacing, { bottom: 1 })),
-                React.createElement(DatePicker, { inline: true, onChange: (momentDateObj) => runInAction(() => {
-                        this.currentDateIndice.day = momentDateObj.date();
-                    }), includeDates: daysToDisplay, selected: selected })));
+          `, children: [_jsxs("div", { children: [_jsx(BackButton, { title: this.props.t("dateTime.back"), onClick: () => runInAction(() => {
+                                    this.currentDateIndice.year = undefined;
+                                    this.currentDateIndice.month = undefined;
+                                    this.currentDateIndice.day = undefined;
+                                    this.currentDateIndice.time = undefined;
+                                }), children: this.currentDateIndice.year }), "\u00A0", _jsx(BackButton, { title: this.props.t("dateTime.back"), onClick: () => runInAction(() => {
+                                    this.currentDateIndice.month = undefined;
+                                    this.currentDateIndice.day = undefined;
+                                    this.currentDateIndice.time = undefined;
+                                }), children: monthNames[this.currentDateIndice.month] }), _jsx(Spacing, { bottom: 1 })] }), _jsx(DatePicker, { inline: true, onChange: (momentDateObj) => runInAction(() => {
+                            this.currentDateIndice.day = momentDateObj.date();
+                        }), includeDates: daysToDisplay, selected: selected })] }));
         }
         else {
             return this.renderList(datesObject[this.currentDateIndice.year][this.currentDateIndice.month]
@@ -331,14 +325,12 @@ let DateTimePicker = class DateTimePicker extends React.Component {
     }
     renderList(items) {
         if (isDefined(items)) {
-            return (React.createElement(Grid, null,
-                React.createElement(GridHeading, null, "Select a time"),
-                React.createElement(GridBody, null, items.map((item) => (React.createElement(DateButton, { key: formatDateTime(item), onClick: () => {
-                        this.closePicker(item);
-                        this.props.onChange(item);
-                    } }, isDefined(this.props.dateFormat)
-                    ? dateFormat(item, this.props.dateFormat)
-                    : formatDateTime(item)))))));
+            return (_jsxs(Grid, { children: [_jsx(GridHeading, { children: "Select a time" }), _jsx(GridBody, { children: items.map((item) => (_jsx(DateButton, { onClick: () => {
+                                this.closePicker(item);
+                                this.props.onChange(item);
+                            }, children: isDefined(this.props.dateFormat)
+                                ? dateFormat(item, this.props.dateFormat)
+                                : formatDateTime(item) }, formatDateTime(item)))) })] }));
         }
     }
     renderHourView(datesObject) {
@@ -352,24 +344,9 @@ let DateTimePicker = class DateTimePicker extends React.Component {
             label: formatDateTime(m)
         }));
         if (timeOptions.length > 24) {
-            return (React.createElement(Grid, null,
-                React.createElement(GridHeading, null,
-                    `Select an hour on ${this.currentDateIndice.day} ${monthNames[this.currentDateIndice.month + 1]} ${this.currentDateIndice.year}`,
-                    " "),
-                React.createElement(GridBody, null, datesObject[this.currentDateIndice.year][this.currentDateIndice.month][this.currentDateIndice.day].index.map((item) => (React.createElement(DateButton, { key: item, onClick: () => runInAction(() => {
-                        this.currentDateIndice.hour = item;
-                    }) },
-                    React.createElement("span", null,
-                        item,
-                        " : 00 - ",
-                        item + 1,
-                        " : 00"),
-                    " ",
-                    React.createElement("span", null,
-                        "(",
-                        datesObject[this.currentDateIndice.year][this.currentDateIndice.month][this.currentDateIndice.day][item].length,
-                        " ",
-                        "options)")))))));
+            return (_jsxs(Grid, { children: [_jsxs(GridHeading, { children: [`Select an hour on ${this.currentDateIndice.day} ${monthNames[this.currentDateIndice.month + 1]} ${this.currentDateIndice.year}`, " "] }), _jsx(GridBody, { children: datesObject[this.currentDateIndice.year][this.currentDateIndice.month][this.currentDateIndice.day].index.map((item) => (_jsxs(DateButton, { onClick: () => runInAction(() => {
+                                this.currentDateIndice.hour = item;
+                            }), children: [_jsxs("span", { children: [item, " : 00 - ", item + 1, " : 00"] }), " ", _jsxs("span", { children: ["(", datesObject[this.currentDateIndice.year][this.currentDateIndice.month][this.currentDateIndice.day][item].length, " ", "options)"] })] }, item))) })] }));
         }
         else {
             return this.renderList(datesObject[this.currentDateIndice.year][this.currentDateIndice.month][this.currentDateIndice.day].dates);
@@ -427,14 +404,14 @@ let DateTimePicker = class DateTimePicker extends React.Component {
     render() {
         if (this.props.dates) {
             const datesObject = this.props.dates;
-            return (React.createElement("div", { css: `
+            return (_jsx("div", { css: `
             color: ${(p) => p.theme.textLight};
             display: table-cell;
             width: 30px;
             height: 30px;
           `, onClick: (event) => {
                     event.stopPropagation();
-                } }, this.props.isOpen && (React.createElement("div", { css: `
+                }, children: this.props.isOpen && (_jsxs("div", { css: `
                 background: ${(p) => p.theme.dark};
                 width: 260px;
                 height: 300px;
@@ -447,48 +424,45 @@ let DateTimePicker = class DateTimePicker extends React.Component {
                 z-index: 100;
 
                 ${this.props.openDirection === "down"
-                    ? `
+                        ? `
                   top: 40px;
                   left: -190px;
                 `
-                    : ""}
-              `, className: "scrollbars" },
-                React.createElement(BackButton, { title: this.props.t("dateTime.back"), css: `
+                        : ""}
+              `, className: "scrollbars", children: [_jsx(BackButton, { title: this.props.t("dateTime.back"), css: `
                   padding-bottom: 5px;
                   padding-right: 5px;
-                `, disabled: !isDefined(this.currentDateIndice[this.currentDateIndice.granularity]), type: "button", onClick: () => this.goBack() },
-                    React.createElement(Icon, { glyph: Icon.GLYPHS.left })),
-                !isDefined(this.currentDateIndice.century) &&
-                    this.renderCenturyGrid(datesObject),
-                isDefined(this.currentDateIndice.century) &&
-                    !isDefined(this.currentDateIndice.year) &&
-                    this.renderYearGrid(datesObject[this.currentDateIndice.century]),
-                isDefined(this.currentDateIndice.year) &&
-                    !isDefined(this.currentDateIndice.month) &&
-                    this.renderMonthGrid(datesObject[this.currentDateIndice.century]),
-                isDefined(this.currentDateIndice.year) &&
-                    isDefined(this.currentDateIndice.month) &&
-                    !isDefined(this.currentDateIndice.day) &&
-                    this.renderDayView(datesObject[this.currentDateIndice.century]),
-                isDefined(this.currentDateIndice.year) &&
-                    isDefined(this.currentDateIndice.month) &&
-                    isDefined(this.currentDateIndice.day) &&
-                    !isDefined(this.currentDateIndice.hour) &&
-                    this.renderHourView(datesObject[this.currentDateIndice.century]),
-                isDefined(this.currentDateIndice.year) &&
-                    isDefined(this.currentDateIndice.month) &&
-                    isDefined(this.currentDateIndice.day) &&
-                    isDefined(this.currentDateIndice.hour) &&
-                    this.renderMinutesView(datesObject[this.currentDateIndice.century])))));
+                `, disabled: !isDefined(this.currentDateIndice[this.currentDateIndice.granularity]), type: "button", onClick: () => this.goBack(), children: _jsx(Icon, { glyph: Icon.GLYPHS.left }) }), !isDefined(this.currentDateIndice.century) &&
+                            this.renderCenturyGrid(datesObject), isDefined(this.currentDateIndice.century) &&
+                            !isDefined(this.currentDateIndice.year) &&
+                            this.renderYearGrid(datesObject[this.currentDateIndice.century]), isDefined(this.currentDateIndice.year) &&
+                            !isDefined(this.currentDateIndice.month) &&
+                            this.renderMonthGrid(datesObject[this.currentDateIndice.century]), isDefined(this.currentDateIndice.year) &&
+                            isDefined(this.currentDateIndice.month) &&
+                            !isDefined(this.currentDateIndice.day) &&
+                            this.renderDayView(datesObject[this.currentDateIndice.century]), isDefined(this.currentDateIndice.year) &&
+                            isDefined(this.currentDateIndice.month) &&
+                            isDefined(this.currentDateIndice.day) &&
+                            !isDefined(this.currentDateIndice.hour) &&
+                            this.renderHourView(datesObject[this.currentDateIndice.century]), isDefined(this.currentDateIndice.year) &&
+                            isDefined(this.currentDateIndice.month) &&
+                            isDefined(this.currentDateIndice.day) &&
+                            isDefined(this.currentDateIndice.hour) &&
+                            this.renderMinutesView(datesObject[this.currentDateIndice.century])] })) }));
         }
         else {
             return null;
         }
     }
 };
-DateTimePicker.defaultProps = {
-    openDirection: "down"
-};
+Object.defineProperty(DateTimePicker, "defaultProps", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        openDirection: "down"
+    }
+});
 __decorate([
     observable
 ], DateTimePicker.prototype, "currentDateIndice", void 0);

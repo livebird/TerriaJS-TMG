@@ -16,13 +16,30 @@ export default function modelReferenceTrait(options) {
 export class ModelReferenceTrait extends Trait {
     constructor(id, options, parent) {
         super(id, options, parent);
-        this.decoratorForFlattened = computed.struct;
+        Object.defineProperty(this, "decoratorForFlattened", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: computed.struct
+        });
+        Object.defineProperty(this, "factory", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "modelParentId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         this.factory = options.factory;
         this.modelParentId = options.modelParentId;
     }
     getValue(model) {
         const strataTopToBottom = model.strataTopToBottom;
-        for (let stratum of strataTopToBottom.values()) {
+        for (const stratum of strataTopToBottom.values()) {
             const value = stratum[this.id];
             if (value !== undefined) {
                 return value;
@@ -50,7 +67,8 @@ export class ModelReferenceTrait extends Trait {
                         ? this.modelParentId
                         : "/"
                     : model.uniqueId, stratumName, jsonValue, {}).catchError((error) => errors.push(error));
-                result = (_a = newModel === null || newModel === void 0 ? void 0 : newModel.uniqueId) !== null && _a !== void 0 ? _a : createStubCatalogItem(model.terria).uniqueId;
+                result =
+                    (_a = newModel === null || newModel === void 0 ? void 0 : newModel.uniqueId) !== null && _a !== void 0 ? _a : createStubCatalogItem(model.terria).uniqueId;
             }
         }
         else {

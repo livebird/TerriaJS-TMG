@@ -4,7 +4,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, computed, observable, runInAction } from "mobx";
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
+import { action, computed, observable, runInAction, makeObservable } from "mobx";
 import { observer } from "mobx-react";
 import Slider from "rc-slider";
 import React from "react";
@@ -34,7 +35,13 @@ let SettingPanel = class SettingPanel extends React.Component {
      */
     constructor(props) {
         super(props);
-        this._hoverBaseMap = null;
+        Object.defineProperty(this, "_hoverBaseMap", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: null
+        });
+        makeObservable(this);
     }
     get activeMapName() {
         return this._hoverBaseMap
@@ -171,63 +178,15 @@ let SettingPanel = class SettingPanel extends React.Component {
             : t("settingPanel.timeline.hideLabel");
         return (
         //@ts-ignore - not yet ready to tackle tsfying MenuPanel
-        React.createElement(MenuPanel, { theme: dropdownTheme, btnRef: this.props.refFromHOC, btnTitle: t("settingPanel.btnTitle"), btnText: t("settingPanel.btnText"), viewState: this.props.viewState, smallScreen: this.props.viewState.useSmallScreenInterface },
-            React.createElement(Box, { padded: true, column: true },
-                React.createElement(Box, { paddedVertically: 1 },
-                    React.createElement(Text, { as: "label" }, t("settingPanel.mapView"))),
-                React.createElement(FlexGrid, { gap: 1, elementsNo: 3 }, Object.entries(MapViewers).map(([key, viewerMode]) => (React.createElement(SettingsButton, { key: key, isActive: key === currentViewer, onClick: (event) => this.selectViewer(key, event) },
-                    React.createElement(Text, { mini: true }, t(viewerMode.label)))))),
-                !!supportsSide && (React.createElement(React.Fragment, null,
-                    React.createElement(Spacing, { bottom: 2 }),
-                    React.createElement(Box, { column: true },
-                        React.createElement(Box, { paddedVertically: 1 },
-                            React.createElement(Text, { as: "label" }, t("settingPanel.terrain.sideLabel"))),
-                        React.createElement(FlexGrid, { gap: 1, elementsNo: 3 }, Object.values(sides).map((side) => (React.createElement(SettingsButton, { key: side, isActive: side === currentSide, onClick: (event) => this.showTerrainOnSide(side, event) },
-                            React.createElement(Text, { mini: true }, t(side))))))),
-                    !!supportsDepthTestAgainstTerrain && (React.createElement(React.Fragment, null,
-                        React.createElement(Spacing, { bottom: 2 }),
-                        React.createElement(Checkbox, { textProps: { small: true }, id: "depthTestAgainstTerrain", title: depthTestAgainstTerrainLabel, isChecked: depthTestAgainstTerrainEnabled, onChange: this.toggleDepthTestAgainstTerrainEnabled.bind(this) },
-                            React.createElement(TextSpan, null, t("settingPanel.terrain.hideUnderground"))))))),
-                React.createElement(React.Fragment, null,
-                    React.createElement(Spacing, { bottom: 2 }),
-                    React.createElement(Box, { column: true },
-                        React.createElement(Box, { paddedVertically: 1 },
-                            React.createElement(Text, { as: "label" }, t("settingPanel.baseMap"))),
-                        React.createElement(Box, { paddedVertically: 1 },
-                            React.createElement(Text, { as: "label", mini: true }, this.activeMapName)),
-                        React.createElement(FlexGrid, { gap: 1, elementsNo: 4 }, this.props.terria.baseMapsModel.baseMapItems.map((baseMap) => {
-                            var _a;
-                            return (React.createElement(StyledBasemapButton, { key: (_a = baseMap.item) === null || _a === void 0 ? void 0 : _a.uniqueId, isActive: baseMap.item === this.props.terria.mainViewer.baseMap, onClick: (event) => this.selectBaseMap(baseMap.item, event), onMouseEnter: this.mouseEnterBaseMap.bind(this, baseMap), onMouseLeave: this.mouseLeaveBaseMap.bind(this, baseMap), onFocus: this.mouseEnterBaseMap.bind(this, baseMap) },
-                                baseMap.item === this.props.terria.mainViewer.baseMap ? (React.createElement(Box, { position: "absolute", topRight: true },
-                                    React.createElement(StyledIcon, { light: true, glyph: GLYPHS.selected, styledWidth: "22px" }))) : null,
-                                React.createElement(StyledImage, { fullWidth: true, alt: baseMap.item ? baseMap.item.name : "", src: baseMap.image })));
-                        })))),
-                React.createElement(React.Fragment, null,
-                    React.createElement(Spacing, { bottom: 2 }),
-                    React.createElement(Box, { column: true },
-                        React.createElement(Box, { paddedVertically: 1 },
-                            React.createElement(Text, { as: "label" }, t("settingPanel.timeline.title"))),
-                        React.createElement(Checkbox, { textProps: { small: true }, id: "alwaysShowTimeline", isChecked: timelineStack.alwaysShowingTimeline, title: alwaysShowTimelineLabel, onChange: () => {
-                                timelineStack.setAlwaysShowTimeline(!timelineStack.alwaysShowingTimeline);
-                            } },
-                            React.createElement(TextSpan, null, t("settingPanel.timeline.alwaysShow"))))),
-                this.props.terria.mainViewer.viewerMode !== ViewerMode.Leaflet && (React.createElement(React.Fragment, null,
-                    React.createElement(Spacing, { bottom: 2 }),
-                    React.createElement(Box, { column: true },
-                        React.createElement(Box, { paddedVertically: 1 },
-                            React.createElement(Text, { as: "label" }, t("settingPanel.imageOptimisation"))),
-                        React.createElement(Checkbox, { textProps: { small: true }, id: "mapUseNativeResolution", isChecked: useNativeResolution, title: nativeResolutionLabel, onChange: () => this.toggleUseNativeResolution() },
-                            React.createElement(TextSpan, null, t("settingPanel.nativeResolutionHeader"))),
-                        React.createElement(Spacing, { bottom: 2 }),
-                        React.createElement(Box, { paddedVertically: 1 },
-                            React.createElement(Text, { as: "label" }, t("settingPanel.mapQuality"))),
-                        React.createElement(Box, { verticalCenter: true },
-                            React.createElement(Text, { mini: true }, t("settingPanel.qualityLabel")),
-                            React.createElement(Slider, { min: 1, max: 3, step: 0.1, value: this.props.terria.baseMaximumScreenSpaceError, onChange: (val) => this.onBaseMaximumScreenSpaceErrorChange(val), marks: { 2: "" }, "aria-valuetext": qualityLabels, css: `
+        _jsx(MenuPanel, { theme: dropdownTheme, btnRef: this.props.refFromHOC, btnTitle: t("settingPanel.btnTitle"), btnText: t("settingPanel.btnText"), viewState: this.props.viewState, smallScreen: this.props.viewState.useSmallScreenInterface, children: _jsxs(Box, { padded: true, column: true, children: [_jsx(Box, { paddedVertically: 1, children: _jsx(Text, { as: "label", children: t("settingPanel.mapView") }) }), _jsx(FlexGrid, { gap: 1, elementsNo: 3, children: Object.entries(MapViewers).map(([key, viewerMode]) => (_jsx(SettingsButton, { isActive: key === currentViewer, onClick: (event) => this.selectViewer(key, event), children: _jsx(Text, { mini: true, children: t(viewerMode.label) }) }, key))) }), !!supportsSide && (_jsxs(_Fragment, { children: [_jsx(Spacing, { bottom: 2 }), _jsxs(Box, { column: true, children: [_jsx(Box, { paddedVertically: 1, children: _jsx(Text, { as: "label", children: t("settingPanel.terrain.sideLabel") }) }), _jsx(FlexGrid, { gap: 1, elementsNo: 3, children: Object.values(sides).map((side) => (_jsx(SettingsButton, { isActive: side === currentSide, onClick: (event) => this.showTerrainOnSide(side, event), children: _jsx(Text, { mini: true, children: t(side) }) }, side))) })] }), !!supportsDepthTestAgainstTerrain && (_jsxs(_Fragment, { children: [_jsx(Spacing, { bottom: 2 }), _jsx(Checkbox, { textProps: { small: true }, id: "depthTestAgainstTerrain", title: depthTestAgainstTerrainLabel, isChecked: depthTestAgainstTerrainEnabled, onChange: this.toggleDepthTestAgainstTerrainEnabled.bind(this), children: _jsx(TextSpan, { children: t("settingPanel.terrain.hideUnderground") }) })] }))] })), _jsxs(_Fragment, { children: [_jsx(Spacing, { bottom: 2 }), _jsxs(Box, { column: true, children: [_jsx(Box, { paddedVertically: 1, children: _jsx(Text, { as: "label", children: t("settingPanel.baseMap") }) }), _jsx(Box, { paddedVertically: 1, children: _jsx(Text, { as: "label", mini: true, children: this.activeMapName }) }), _jsx(FlexGrid, { gap: 1, elementsNo: 4, children: this.props.terria.baseMapsModel.baseMapItems.map((baseMap) => {
+                                            var _a;
+                                            return (_jsxs(StyledBasemapButton, { isActive: baseMap.item === this.props.terria.mainViewer.baseMap, onClick: (event) => this.selectBaseMap(baseMap.item, event), onMouseEnter: this.mouseEnterBaseMap.bind(this, baseMap), onMouseLeave: this.mouseLeaveBaseMap.bind(this), onFocus: this.mouseEnterBaseMap.bind(this, baseMap), children: [baseMap.item === this.props.terria.mainViewer.baseMap ? (_jsx(Box, { position: "absolute", topRight: true, children: _jsx(StyledIcon, { light: true, glyph: GLYPHS.selected, styledWidth: "22px" }) })) : null, _jsx(StyledImage, { fullWidth: true, alt: baseMap.item ? baseMap.item.name : "", src: baseMap.image })] }, (_a = baseMap.item) === null || _a === void 0 ? void 0 : _a.uniqueId));
+                                        }) })] })] }), _jsxs(_Fragment, { children: [_jsx(Spacing, { bottom: 2 }), _jsxs(Box, { column: true, children: [_jsx(Box, { paddedVertically: 1, children: _jsx(Text, { as: "label", children: t("settingPanel.timeline.title") }) }), _jsx(Checkbox, { textProps: { small: true }, id: "alwaysShowTimeline", isChecked: timelineStack.alwaysShowingTimeline, title: alwaysShowTimelineLabel, onChange: () => {
+                                            timelineStack.setAlwaysShowTimeline(!timelineStack.alwaysShowingTimeline);
+                                        }, children: _jsx(TextSpan, { children: t("settingPanel.timeline.alwaysShow") }) })] })] }), this.props.terria.mainViewer.viewerMode !== ViewerMode.Leaflet && (_jsxs(_Fragment, { children: [_jsx(Spacing, { bottom: 2 }), _jsxs(Box, { column: true, children: [_jsx(Box, { paddedVertically: 1, children: _jsx(Text, { as: "label", children: t("settingPanel.imageOptimisation") }) }), _jsx(Checkbox, { textProps: { small: true }, id: "mapUseNativeResolution", isChecked: useNativeResolution, title: nativeResolutionLabel, onChange: () => this.toggleUseNativeResolution(), children: _jsx(TextSpan, { children: t("settingPanel.nativeResolutionHeader") }) }), _jsx(Spacing, { bottom: 2 }), _jsx(Box, { paddedVertically: 1, children: _jsx(Text, { as: "label", children: t("settingPanel.mapQuality") }) }), _jsxs(Box, { verticalCenter: true, children: [_jsx(Text, { mini: true, children: t("settingPanel.qualityLabel") }), _jsx(Slider, { min: 1, max: 3, step: 0.1, value: this.props.terria.baseMaximumScreenSpaceError, onChange: (val) => this.onBaseMaximumScreenSpaceErrorChange(val), marks: { 2: "" }, "aria-valuetext": qualityLabels, css: `
                       margin: 0 10px;
                       margin-top: 5px;
-                    ` }),
-                            React.createElement(Text, { mini: true }, t("settingPanel.performanceLabel")))))))));
+                    ` }), _jsx(Text, { mini: true, children: t("settingPanel.performanceLabel") })] })] })] }))] }) }));
     }
 };
 __decorate([

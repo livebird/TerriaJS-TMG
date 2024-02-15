@@ -14,24 +14,26 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 //  Solution: think in terms of pipelines with computed observables, document patterns.
 // 4. All code for all catalog item types needs to be loaded before we can do anything.
 import i18next from "i18next";
-import { computed, runInAction } from "mobx";
-import combine from "terriajs-cesium/Source/Core/combine";
+import { computed, makeObservable, override, runInAction } from "mobx";
 import GeographicTilingScheme from "terriajs-cesium/Source/Core/GeographicTilingScheme";
 import WebMercatorTilingScheme from "terriajs-cesium/Source/Core/WebMercatorTilingScheme";
+import combine from "terriajs-cesium/Source/Core/combine";
 import GetFeatureInfoFormat from "terriajs-cesium/Source/Scene/GetFeatureInfoFormat";
 import WebMapServiceImageryProvider from "terriajs-cesium/Source/Scene/WebMapServiceImageryProvider";
 import URI from "urijs";
+import TerriaError from "../../../Core/TerriaError";
 import createTransformerAllowUndefined from "../../../Core/createTransformerAllowUndefined";
 import filterOutUndefined from "../../../Core/filterOutUndefined";
 import isDefined from "../../../Core/isDefined";
-import TerriaError from "../../../Core/TerriaError";
 import CatalogMemberMixin, { getName } from "../../../ModelMixins/CatalogMemberMixin";
 import DiffableMixin from "../../../ModelMixins/DiffableMixin";
 import ExportWebCoverageServiceMixin from "../../../ModelMixins/ExportWebCoverageServiceMixin";
 import GetCapabilitiesMixin from "../../../ModelMixins/GetCapabilitiesMixin";
+import MappableMixin from "../../../ModelMixins/MappableMixin";
 import MinMaxLevelMixin from "../../../ModelMixins/MinMaxLevelMixin";
 import TileErrorHandlerMixin from "../../../ModelMixins/TileErrorHandlerMixin";
 import UrlMixin from "../../../ModelMixins/UrlMixin";
+import { csvFeatureInfoContext } from "../../../Table/tableFeatureInfoContext";
 import WebMapServiceCatalogItemTraits, { SUPPORTED_CRS_3857, SUPPORTED_CRS_4326 } from "../../../Traits/TraitsClasses/WebMapServiceCatalogItemTraits";
 import CommonStrata from "../../Definition/CommonStrata";
 import CreateModel from "../../Definition/CreateModel";
@@ -39,133 +41,162 @@ import LoadableStratum from "../../Definition/LoadableStratum";
 import StratumOrder from "../../Definition/StratumOrder";
 import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
 import WebMapServiceCapabilitiesStratum from "./WebMapServiceCapabilitiesStratum";
+// Remove problematic query parameters from URLs (GetCapabilities, GetMap, ...) - these are handled separately
+const QUERY_PARAMETERS_TO_REMOVE = [
+    "request",
+    "service",
+    "x",
+    "y",
+    "width",
+    "height",
+    "bbox",
+    "layers",
+    "styles",
+    "version",
+    "format",
+    "srs",
+    "crs"
+];
 /** This LoadableStratum is responsible for setting WMS version based on CatalogItem.url */
 export class WebMapServiceUrlStratum extends LoadableStratum(WebMapServiceCatalogItemTraits) {
     constructor(catalogItem) {
         super();
-        this.catalogItem = catalogItem;
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogItem
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(model) {
         return new WebMapServiceUrlStratum(model);
     }
     get useWmsVersion130() {
         var _a, _b;
-        if (((_a = this.catalogItem.url) === null || _a === void 0 ? void 0 : _a.toLowerCase().includes("version=1.1.0")) || ((_b = this.catalogItem.url) === null || _b === void 0 ? void 0 : _b.toLowerCase().includes("version=1.1.1"))) {
+        if (((_a = this.catalogItem.url) === null || _a === void 0 ? void 0 : _a.toLowerCase().includes("version=1.1.0")) ||
+            ((_b = this.catalogItem.url) === null || _b === void 0 ? void 0 : _b.toLowerCase().includes("version=1.1.1"))) {
             return false;
         }
     }
 }
-WebMapServiceUrlStratum.stratumName = "wms-url-stratum";
+Object.defineProperty(WebMapServiceUrlStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "wms-url-stratum"
+});
 __decorate([
     computed
 ], WebMapServiceUrlStratum.prototype, "useWmsVersion130", null);
 StratumOrder.addLoadStratum(WebMapServiceUrlStratum.stratumName);
-class WebMapServiceCatalogItem extends TileErrorHandlerMixin(ExportWebCoverageServiceMixin(DiffableMixin(MinMaxLevelMixin(GetCapabilitiesMixin(UrlMixin(CatalogMemberMixin(CreateModel(WebMapServiceCatalogItemTraits)))))))) {
+class WebMapServiceCatalogItem extends TileErrorHandlerMixin(ExportWebCoverageServiceMixin(DiffableMixin(MinMaxLevelMixin(GetCapabilitiesMixin(UrlMixin(MappableMixin(CatalogMemberMixin(CreateModel(WebMapServiceCatalogItemTraits))))))))) {
     constructor(id, terria, sourceReference) {
         super(id, terria, sourceReference);
         // hide elements in the info section which might show information about the datasource
-        this._sourceInfoItemNames = [
-            i18next.t("models.webMapServiceCatalogItem.getCapabilitiesUrl")
-        ];
-        this._webMapServiceCatalogGroup = undefined;
-        this._createImageryProvider = createTransformerAllowUndefined((time) => {
-            var _a, _b, _c;
-            // Don't show anything on the map until GetCapabilities finishes loading.
-            if (this.isLoadingMetadata) {
-                return undefined;
-            }
-            if (this.url === undefined) {
-                return undefined;
-            }
-            console.log(`Creating new ImageryProvider for time ${time}`);
-            // Set dimensionParameters
-            const dimensionParameters = formatDimensionsForOws(this.dimensions);
-            if (time !== undefined) {
-                dimensionParameters.time = time;
-            }
-            // Construct parameters objects
-            // We use slightly different parameters for GetMap and GetFeatureInfo requests
-            const parameters = {
-                ...(this.useWmsVersion130
-                    ? WebMapServiceCatalogItem.defaultParameters130
-                    : WebMapServiceCatalogItem.defaultParameters111),
-                ...this.parameters,
-                ...dimensionParameters
-            };
-            const getFeatureInfoParameters = {
-                ...(this.useWmsVersion130
-                    ? WebMapServiceCatalogItem.defaultGetFeatureParameters130
-                    : WebMapServiceCatalogItem.defaultGetFeatureParameters111),
-                feature_count: 1 +
-                    ((_a = this.maximumShownFeatureInfos) !== null && _a !== void 0 ? _a : this.terria.configParameters.defaultMaximumShownFeatureInfos),
-                ...this.parameters,
-                ...this.getFeatureInfoParameters,
-                ...dimensionParameters
-            };
-            const diffModeParameters = this.isShowingDiff
-                ? this.diffModeParameters
-                : {};
-            if (this.supportsColorScaleRange) {
-                parameters.COLORSCALERANGE = this.colorScaleRange;
-            }
-            if (isDefined(this.styles)) {
-                parameters.styles = this.styles;
-                getFeatureInfoParameters.styles = this.styles;
-            }
-            Object.assign(parameters, diffModeParameters);
-            // Remove problematic query parameters from URL - these are handled by the parameters objects
-            const queryParametersToRemove = [
-                "request",
-                "service",
-                "x",
-                "y",
-                "width",
-                "height",
-                "bbox",
-                "layers",
-                "styles",
-                "version",
-                "format",
-                "srs",
-                "crs"
-            ];
-            const baseUrl = queryParametersToRemove.reduce((url, parameter) => url
-                .removeQuery(parameter)
-                .removeQuery(parameter.toUpperCase())
-                .removeQuery(parameter.toLowerCase()), new URI(this.url));
-            // Set CRS for WMS 1.3.0
-            // Set SRS for WMS 1.1.1
-            const crs = this.useWmsVersion130 ? this.crs : undefined;
-            const srs = this.useWmsVersion130 ? undefined : this.crs;
-            const imageryOptions = {
-                url: proxyCatalogItemUrl(this, baseUrl.toString()),
-                layers: this.validLayers.length > 0 ? this.validLayers.join(",") : "",
-                parameters,
-                crs,
-                srs,
-                getFeatureInfoParameters,
-                getFeatureInfoUrl: this.getFeatureInfoUrl,
-                tileWidth: this.tileWidth,
-                tileHeight: this.tileHeight,
-                tilingScheme: this.tilingScheme,
-                maximumLevel: (_b = this.getMaximumLevel(true)) !== null && _b !== void 0 ? _b : this.maximumLevel,
-                minimumLevel: this.minimumLevel,
-                credit: this.attribution,
-                enablePickFeatures: this.allowFeaturePicking
-            };
-            if (isDefined((_c = this.getFeatureInfoFormat) === null || _c === void 0 ? void 0 : _c.type)) {
-                imageryOptions.getFeatureInfoFormats = [
-                    new GetFeatureInfoFormat(this.getFeatureInfoFormat.type, this.getFeatureInfoFormat.format)
-                ];
-            }
-            if (imageryOptions.maximumLevel !== undefined &&
-                this.hideLayerAfterMinScaleDenominator) {
-                // Make Cesium request one extra level so we can tell the user what's happening and return a blank image.
-                ++imageryOptions.maximumLevel;
-            }
-            const imageryProvider = new WebMapServiceImageryProvider(imageryOptions);
-            return this.updateRequestImage(imageryProvider);
+        Object.defineProperty(this, "_sourceInfoItemNames", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: [
+                i18next.t("models.webMapServiceCatalogItem.getCapabilitiesUrl")
+            ]
         });
+        Object.defineProperty(this, "_webMapServiceCatalogGroup", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "_createImageryProvider", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: createTransformerAllowUndefined((time) => {
+                var _a, _b, _c, _d, _e;
+                // Don't show anything on the map until GetCapabilities finishes loading.
+                if (this.isLoadingMetadata) {
+                    return undefined;
+                }
+                if (this.url === undefined) {
+                    return undefined;
+                }
+                console.log(`Creating new ImageryProvider for time ${time}`);
+                // Set dimensionParameters
+                const dimensionParameters = formatDimensionsForOws(this.dimensions);
+                if (time !== undefined) {
+                    dimensionParameters.time = time;
+                }
+                // Construct parameters objects
+                // We use slightly different parameters for GetMap and GetFeatureInfo requests
+                const parameters = {
+                    ...(this.useWmsVersion130
+                        ? WebMapServiceCatalogItem.defaultParameters130
+                        : WebMapServiceCatalogItem.defaultParameters111),
+                    ...this.parameters,
+                    ...dimensionParameters
+                };
+                const getFeatureInfoParameters = {
+                    ...(this.useWmsVersion130
+                        ? WebMapServiceCatalogItem.defaultGetFeatureParameters130
+                        : WebMapServiceCatalogItem.defaultGetFeatureParameters111),
+                    feature_count: 1 +
+                        ((_a = this.maximumShownFeatureInfos) !== null && _a !== void 0 ? _a : this.terria.configParameters.defaultMaximumShownFeatureInfos),
+                    ...this.parameters,
+                    // Note order is important here, as getFeatureInfoParameters may override `time` dimension value
+                    ...dimensionParameters,
+                    ...this.getFeatureInfoParameters
+                };
+                const diffModeParameters = this.isShowingDiff
+                    ? this.diffModeParameters
+                    : {};
+                if (this.supportsColorScaleRange) {
+                    parameters.COLORSCALERANGE = this.colorScaleRange;
+                }
+                // Styles parameter is mandatory (for GetMap and GetFeatureInfo requests), but can be empty string to use default style
+                parameters.styles = (_b = this.styles) !== null && _b !== void 0 ? _b : "";
+                getFeatureInfoParameters.styles = (_c = this.styles) !== null && _c !== void 0 ? _c : "";
+                Object.assign(parameters, diffModeParameters);
+                // Remove problematic query parameters from URL - these are handled by the parameters objects
+                const baseUrl = QUERY_PARAMETERS_TO_REMOVE.reduce((url, parameter) => url
+                    .removeQuery(parameter)
+                    .removeQuery(parameter.toUpperCase())
+                    .removeQuery(parameter.toLowerCase()), new URI(this.url));
+                // Set CRS for WMS 1.3.0
+                // Set SRS for WMS 1.1.1
+                const crs = this.useWmsVersion130 ? this.crs : undefined;
+                const srs = this.useWmsVersion130 ? undefined : this.crs;
+                const imageryOptions = {
+                    url: proxyCatalogItemUrl(this, baseUrl.toString()),
+                    layers: this.validLayers.length > 0 ? this.validLayers.join(",") : "",
+                    parameters,
+                    crs,
+                    srs,
+                    getFeatureInfoParameters,
+                    getFeatureInfoUrl: this.getFeatureInfoUrl,
+                    tileWidth: this.tileWidth,
+                    tileHeight: this.tileHeight,
+                    tilingScheme: this.tilingScheme,
+                    maximumLevel: (_d = this.getMaximumLevel(true)) !== null && _d !== void 0 ? _d : this.maximumLevel,
+                    minimumLevel: this.minimumLevel,
+                    credit: this.attribution
+                    // Note: we set enablePickFeatures in _currentImageryParts and _nextImageryParts
+                };
+                if (isDefined((_e = this.getFeatureInfoFormat) === null || _e === void 0 ? void 0 : _e.type)) {
+                    imageryOptions.getFeatureInfoFormats = [
+                        new GetFeatureInfoFormat(this.getFeatureInfoFormat.type, this.getFeatureInfoFormat.format)
+                    ];
+                }
+                if (imageryOptions.maximumLevel !== undefined &&
+                    this.hideLayerAfterMinScaleDenominator) {
+                    // Make Cesium request one extra level so we can tell the user what's happening and return a blank image.
+                    ++imageryOptions.maximumLevel;
+                }
+                const imageryProvider = new WebMapServiceImageryProvider(imageryOptions);
+                return this.updateRequestImage(imageryProvider);
+            })
+        });
+        makeObservable(this);
         this.strata.set(WebMapServiceUrlStratum.stratumName, new WebMapServiceUrlStratum(this));
     }
     get type() {
@@ -254,8 +285,11 @@ class WebMapServiceCatalogItem extends TileErrorHandlerMixin(ExportWebCoverageSe
     }
     get defaultGetCapabilitiesUrl() {
         if (this.uri) {
-            return this.uri
-                .clone()
+            const baseUrl = QUERY_PARAMETERS_TO_REMOVE.reduce((url, parameter) => url
+                .removeQuery(parameter)
+                .removeQuery(parameter.toUpperCase())
+                .removeQuery(parameter.toLowerCase()), this.uri.clone());
+            return baseUrl
                 .setSearch({
                 service: "WMS",
                 version: this.useWmsVersion130 ? "1.3.0" : "1.1.1",
@@ -268,7 +302,10 @@ class WebMapServiceCatalogItem extends TileErrorHandlerMixin(ExportWebCoverageSe
         }
     }
     get canDiffImages() {
-        const hasValidDiffStyles = this.availableDiffStyles.some((diffStyle) => { var _a, _b, _c; return (_c = (_b = (_a = this.styleSelectableDimensions) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.options) === null || _c === void 0 ? void 0 : _c.find((style) => style.id === diffStyle); });
+        const hasValidDiffStyles = this.availableDiffStyles.some((diffStyle) => {
+            var _a, _b, _c;
+            return (_c = (_b = (_a = this.styleSelectableDimensions) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.options) === null || _c === void 0 ? void 0 : _c.find((style) => style.id === diffStyle);
+        });
         return hasValidDiffStyles === true;
     }
     showDiffImage(firstDate, secondDate, diffStyleId) {
@@ -336,7 +373,9 @@ class WebMapServiceCatalogItem extends TileErrorHandlerMixin(ExportWebCoverageSe
         if (imageryProvider === undefined) {
             return undefined;
         }
-        imageryProvider.enablePickFeatures = true;
+        // Reset feature picking for the current imagery layer.
+        // We disable feature picking for the next imagery layer.
+        imageryProvider.enablePickFeatures = this.allowFeaturePicking;
         return {
             imageryProvider,
             alpha: this.opacity,
@@ -352,6 +391,7 @@ class WebMapServiceCatalogItem extends TileErrorHandlerMixin(ExportWebCoverageSe
             if (imageryProvider === undefined) {
                 return undefined;
             }
+            // Disable feature picking for the next imagery layer.
             imageryProvider.enablePickFeatures = false;
             return {
                 imageryProvider,
@@ -394,7 +434,8 @@ class WebMapServiceCatalogItem extends TileErrorHandlerMixin(ExportWebCoverageSe
         var _a;
         const index = this.getDiscreteTimeIndex(date);
         return index !== undefined
-            ? (_a = this.discreteTimesAsSortedJulianDates) === null || _a === void 0 ? void 0 : _a[index].tag : undefined;
+            ? (_a = this.discreteTimesAsSortedJulianDates) === null || _a === void 0 ? void 0 : _a[index].tag
+            : undefined;
     }
     get styleSelectableDimensions() {
         return this.availableStyles.map((layer, layerIndex) => {
@@ -403,7 +444,8 @@ class WebMapServiceCatalogItem extends TileErrorHandlerMixin(ExportWebCoverageSe
             // If multiple layers -> prepend layer name to name
             if (this.availableStyles.length > 1) {
                 // Attempt to get layer title from GetCapabilitiesStratum
-                const layerTitle = layer.layerName && ((_a = this.strata.get(GetCapabilitiesMixin.getCapabilitiesStratumName).capabilitiesLayers.get(layer.layerName)) === null || _a === void 0 ? void 0 : _a.Title);
+                const layerTitle = layer.layerName &&
+                    ((_a = this.strata.get(GetCapabilitiesMixin.getCapabilitiesStratumName).capabilitiesLayers.get(layer.layerName)) === null || _a === void 0 ? void 0 : _a.Title);
                 name = `${layerTitle || layer.layerName || `Layer ${layerIndex + 1}`} styles`;
             }
             const options = filterOutUndefined(layer.styles.map(function (s) {
@@ -416,7 +458,7 @@ class WebMapServiceCatalogItem extends TileErrorHandlerMixin(ExportWebCoverageSe
             }));
             // Try to set selectedId to value stored in `styles` trait for this `layerIndex`
             // The `styles` parameter is CSV, a style for each layer
-            let selectedId = (_c = (_b = this.styles) === null || _b === void 0 ? void 0 : _b.split(",")) === null || _c === void 0 ? void 0 : _c[layerIndex];
+            const selectedId = (_c = (_b = this.styles) === null || _b === void 0 ? void 0 : _b.split(",")) === null || _c === void 0 ? void 0 : _c[layerIndex];
             return {
                 name,
                 id: `${this.uniqueId}-${layer.layerName}-styles`,
@@ -501,47 +543,84 @@ class WebMapServiceCatalogItem extends TileErrorHandlerMixin(ExportWebCoverageSe
             ...this.styleSelectableDimensions
         ]);
     }
+    /** If GetFeatureInfo/GetTimeseries request is returning CSV, we need to parse it into TimeSeriesFeatureInfoContext.
+     */
+    get featureInfoContext() {
+        if (this.getFeatureInfoFormat.format !== "text/csv")
+            return () => ({});
+        return csvFeatureInfoContext(this);
+    }
 }
 /**
  * The collection of strings that indicate an Abstract property should be ignored.  If these strings occur anywhere
  * in the Abstract, the Abstract will not be used.  This makes it easy to filter out placeholder data like
  * Geoserver's "A compliant implementation of WMS..." stock abstract.
  */
-WebMapServiceCatalogItem.abstractsToIgnore = ["A compliant implementation of WMS"];
+Object.defineProperty(WebMapServiceCatalogItem, "abstractsToIgnore", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: ["A compliant implementation of WMS"]
+});
 /** Default WMS parameters for version=1.3.0 */
-WebMapServiceCatalogItem.defaultParameters130 = {
-    transparent: true,
-    format: "image/png",
-    exceptions: "XML",
-    styles: "",
-    version: "1.3.0"
-};
-WebMapServiceCatalogItem.defaultGetFeatureParameters130 = {
-    exceptions: "XML",
-    version: "1.3.0"
-};
+Object.defineProperty(WebMapServiceCatalogItem, "defaultParameters130", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        transparent: true,
+        format: "image/png",
+        exceptions: "XML",
+        styles: "",
+        version: "1.3.0"
+    }
+});
+Object.defineProperty(WebMapServiceCatalogItem, "defaultGetFeatureParameters130", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        exceptions: "XML",
+        version: "1.3.0"
+    }
+});
 /** Default WMS parameters for version=1.1.1 */
-WebMapServiceCatalogItem.defaultParameters111 = {
-    transparent: true,
-    format: "image/png",
-    exceptions: "application/vnd.ogc.se_xml",
-    styles: "",
-    tiled: true,
-    version: "1.1.1"
-};
-WebMapServiceCatalogItem.defaultGetFeatureParameters111 = {
-    exceptions: "application/vnd.ogc.se_xml",
-    version: "1.1.1"
-};
-WebMapServiceCatalogItem.type = "wms";
+Object.defineProperty(WebMapServiceCatalogItem, "defaultParameters111", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        transparent: true,
+        format: "image/png",
+        exceptions: "application/vnd.ogc.se_xml",
+        styles: "",
+        tiled: true,
+        version: "1.1.1"
+    }
+});
+Object.defineProperty(WebMapServiceCatalogItem, "defaultGetFeatureParameters111", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        exceptions: "application/vnd.ogc.se_xml",
+        version: "1.1.1"
+    }
+});
+Object.defineProperty(WebMapServiceCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "wms"
+});
 __decorate([
-    computed
+    override
 ], WebMapServiceCatalogItem.prototype, "shortReport", null);
 __decorate([
     computed
 ], WebMapServiceCatalogItem.prototype, "colorScaleRange", null);
 __decorate([
-    computed
+    override
 ], WebMapServiceCatalogItem.prototype, "cacheDuration", null);
 __decorate([
     computed
@@ -586,8 +665,11 @@ __decorate([
     computed
 ], WebMapServiceCatalogItem.prototype, "wmsDimensionSelectableDimensions", null);
 __decorate([
-    computed
+    override
 ], WebMapServiceCatalogItem.prototype, "selectableDimensions", null);
+__decorate([
+    computed
+], WebMapServiceCatalogItem.prototype, "featureInfoContext", null);
 /**
  * Add `_dim` prefix to dimensions for OWS (WMS, WCS...) excluding time, styles and elevation
  */

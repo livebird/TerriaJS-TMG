@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { observer } from "mobx-react";
 import React from "react";
 import ChartView from "../../Charts/ChartView";
@@ -18,16 +19,12 @@ const ChartDisclaimer = ({ terria }) => {
     ];
     if (uniqueChartDisclaimers.length === 0)
         return null;
-    return (React.createElement(Box, { backgroundColor: "#9a4b4b", column: true, paddedHorizontally: 2, css: `
+    return (_jsxs(Box, { backgroundColor: "#9a4b4b", column: true, paddedHorizontally: 2, css: `
         a,
         a:visited {
           color: white;
         }
-      ` },
-        React.createElement(Spacing, { bottom: 2 }),
-        uniqueChartDisclaimers.map((chartDisclaimer) => (React.createElement(React.Fragment, { key: chartDisclaimer },
-            React.createElement(Text, { textLight: true }, parseCustomHtmlToReact(chartDisclaimer)),
-            React.createElement(Spacing, { bottom: 2 }))))));
+      `, children: [_jsx(Spacing, { bottom: 2 }), uniqueChartDisclaimers.map((chartDisclaimer) => (_jsxs(React.Fragment, { children: [_jsx(Text, { textLight: true, children: parseCustomHtmlToReact(chartDisclaimer) }), _jsx(Spacing, { bottom: 2 })] }, chartDisclaimer)))] }));
 };
 export default observer(ChartDisclaimer);
 //# sourceMappingURL=ChartDisclaimer.js.map

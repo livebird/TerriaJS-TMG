@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import createReactClass from "create-react-class";
 import PropTypes from "prop-types";
@@ -77,19 +78,12 @@ const BooleanParameterGroupEditor = createReactClass({
             OneForAllId: OneForAllDivName,
             ParameterListId: name
         });
-        return (React.createElement("fieldset", null,
-            React.createElement("legend", null,
-                React.createElement("div", { style: { display: "inline-block" }, onClick: groupClick },
-                    React.createElement(MoreOrLess, { initialopen: whichIcon, myclass: Styles.btnRadio })),
-                React.createElement("div", { id: OneForAllDivName, style: { display: "inline-block" }, onClick: allClick },
-                    React.createElement(BooleanParameterEditor, { parameter: OneForAll }))),
-            React.createElement("div", { id: name, style: whichIcon ? { display: "block" } : { display: "none" } }, this.props.parameter.ParameterList.map(function (item, key) {
-                return (React.createElement("div", { key: key },
-                    React.createElement(BooleanParameterEditor, { parameter: item })));
-            }))));
+        return (_jsxs("fieldset", { children: [_jsxs("legend", { children: [_jsx("div", { style: { display: "inline-block" }, onClick: groupClick, children: _jsx(MoreOrLess, { initialopen: whichIcon, myclass: Styles.btnRadio }) }), _jsx("div", { id: OneForAllDivName, style: { display: "inline-block" }, onClick: allClick, children: _jsx(BooleanParameterEditor, { parameter: OneForAll }) })] }), _jsx("div", { id: name, style: whichIcon ? { display: "block" } : { display: "none" }, children: this.props.parameter.ParameterList.map(function (item, key) {
+                        return (_jsx("div", { children: _jsx(BooleanParameterEditor, { parameter: item }) }, key));
+                    }) })] }));
     },
     render() {
-        return React.createElement("div", null, this.renderCheckboxGroup());
+        return _jsx("div", { children: this.renderCheckboxGroup() });
     }
 });
 module.exports = BooleanParameterGroupEditor;

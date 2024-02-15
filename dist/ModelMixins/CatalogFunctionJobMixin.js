@@ -4,11 +4,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, computed, observable, runInAction } from "mobx";
+import { action, computed, observable, runInAction, makeObservable } from "mobx";
 import filterOutUndefined from "../Core/filterOutUndefined";
 import isDefined from "../Core/isDefined";
 import TerriaError from "../Core/TerriaError";
-import MappableMixin from "./MappableMixin";
 import CommonStrata from "../Models/Definition/CommonStrata";
 import createStratumInstance from "../Models/Definition/createStratumInstance";
 import LoadableStratum from "../Models/Definition/LoadableStratum";
@@ -18,10 +17,17 @@ import { InfoSectionTraits } from "../Traits/TraitsClasses/CatalogMemberTraits";
 import AutoRefreshingMixin from "./AutoRefreshingMixin";
 import CatalogMemberMixin from "./CatalogMemberMixin";
 import GroupMixin from "./GroupMixin";
+import MappableMixin from "./MappableMixin";
 class FunctionJobStratum extends LoadableStratum(CatalogFunctionJobTraits) {
     constructor(catalogFunctionJob) {
         super();
-        this.catalogFunctionJob = catalogFunctionJob;
+        Object.defineProperty(this, "catalogFunctionJob", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogFunctionJob
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(model) {
         return new FunctionJobStratum(model);
@@ -105,15 +111,31 @@ __decorate([
     computed
 ], FunctionJobStratum.prototype, "info", null);
 function CatalogFunctionJobMixin(Base) {
-    class CatalogFunctionJobMixin extends GroupMixin(AutoRefreshingMixin(CatalogMemberMixin(Base))) {
+    class CatalogFunctionJobMixin extends GroupMixin(AutoRefreshingMixin(MappableMixin(CatalogMemberMixin(Base)))) {
         constructor(...args) {
             super(...args);
-            this.pollingForResults = false;
-            this.downloadingResults = false;
+            Object.defineProperty(this, "pollingForResults", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: false
+            });
+            Object.defineProperty(this, "downloadingResults", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: false
+            });
             /**
              * Job result CatalogMembers - set from calling {@link CatalogFunctionJobMixin#downloadResults}
              */
-            this.results = [];
+            Object.defineProperty(this, "results", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: []
+            });
+            makeObservable(this);
             // Add FunctionJobStratum to strata
             runInAction(() => {
                 this.strata.set(FunctionJobStratum.name, new FunctionJobStratum(this));

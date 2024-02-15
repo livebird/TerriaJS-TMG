@@ -6,24 +6,31 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import i18next from "i18next";
 import { uniq } from "lodash-es";
-import { computed } from "mobx";
+import { computed, makeObservable } from "mobx";
 import filterOutUndefined from "../Core/filterOutUndefined";
 import isDefined from "../Core/isDefined";
 import createStratumInstance from "../Models/Definition/createStratumInstance";
 import LoadableStratum from "../Models/Definition/LoadableStratum";
 import { ShortReportTraits } from "../Traits/TraitsClasses/CatalogMemberTraits";
-import TableChartStyleTraits, { TableChartLineStyleTraits } from "../Traits/TraitsClasses/TableChartStyleTraits";
-import TableColorStyleTraits from "../Traits/TraitsClasses/TableColorStyleTraits";
-import TablePointSizeStyleTraits from "../Traits/TraitsClasses/TablePointSizeStyleTraits";
-import TableStyleTraits from "../Traits/TraitsClasses/TableStyleTraits";
-import TableTimeStyleTraits from "../Traits/TraitsClasses/TableTimeStyleTraits";
-import TableTraits from "../Traits/TraitsClasses/TableTraits";
+import TableChartStyleTraits, { TableChartLineStyleTraits } from "../Traits/TraitsClasses/Table/ChartStyleTraits";
+import TableColorStyleTraits from "../Traits/TraitsClasses/Table/ColorStyleTraits";
+import TablePointSizeStyleTraits from "../Traits/TraitsClasses/Table/PointSizeStyleTraits";
+import TableStyleTraits from "../Traits/TraitsClasses/Table/StyleTraits";
+import TableTimeStyleTraits from "../Traits/TraitsClasses/Table/TimeStyleTraits";
+import TableTraits from "../Traits/TraitsClasses/Table/TableTraits";
 import TableColumnType from "./TableColumnType";
+import { ImageryParts } from "../ModelMixins/MappableMixin";
 const DEFAULT_ID_COLUMN = "id";
-export default class TableAutomaticStylesStratum extends LoadableStratum(TableTraits) {
+class TableAutomaticStylesStratum extends LoadableStratum(TableTraits) {
     constructor(catalogItem) {
         super();
-        this.catalogItem = catalogItem;
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogItem
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(newModel) {
         return new TableAutomaticStylesStratum(newModel);
@@ -39,9 +46,7 @@ export default class TableAutomaticStylesStratum extends LoadableStratum(TableTr
             : undefined;
     }
     get disableSplitter() {
-        return !isDefined(this.catalogItem.activeTableStyle.regionColumn)
-            ? true
-            : undefined;
+        return !this.catalogItem.mapItems.find(ImageryParts.is) ? true : undefined;
     }
     /**
      * Set default activeStyle to first style with a scalar color column (if none is found then find first style with enum, text and then region)
@@ -60,12 +65,15 @@ export default class TableAutomaticStylesStratum extends LoadableStratum(TableTr
                 TableColumnType.text,
                 TableColumnType.region
             ];
-            const firstStyleOfEachType = types.map((columnType) => { var _a; return (_a = this.catalogItem.styles
-                .filter((style) => !style.hidden)
-                .find((s) => {
-                var _a, _b;
-                return ((_b = this.catalogItem.findColumnByName((_a = s.color) === null || _a === void 0 ? void 0 : _a.colorColumn)) === null || _b === void 0 ? void 0 : _b.type) === columnType;
-            })) === null || _a === void 0 ? void 0 : _a.id; });
+            const firstStyleOfEachType = types.map((columnType) => {
+                var _a;
+                return (_a = this.catalogItem.styles
+                    .filter((style) => !style.hidden)
+                    .find((s) => {
+                    var _a, _b;
+                    return ((_b = this.catalogItem.findColumnByName((_a = s.color) === null || _a === void 0 ? void 0 : _a.colorColumn)) === null || _b === void 0 ? void 0 : _b.type) === columnType;
+                })) === null || _a === void 0 ? void 0 : _a.id;
+            });
             return filterOutUndefined(firstStyleOfEachType)[0];
         }
     }
@@ -156,7 +164,10 @@ export default class TableAutomaticStylesStratum extends LoadableStratum(TableTr
             const [rowGroupId, rowIds] = this.catalogItem.activeTableStyle.rowGroups[i];
             // Check if there is only 1 unique date in this rowGroup
             const dates = rowIds
-                .map((rowId) => { var _a, _b; return (_b = (_a = this.catalogItem.activeTableStyle.timeColumn) === null || _a === void 0 ? void 0 : _a.valuesAsDates.values[rowId]) === null || _b === void 0 ? void 0 : _b.getTime(); })
+                .map((rowId) => {
+                var _a, _b;
+                return (_b = (_a = this.catalogItem.activeTableStyle.timeColumn) === null || _a === void 0 ? void 0 : _a.valuesAsDates.values[rowId]) === null || _b === void 0 ? void 0 : _b.getTime();
+            })
                 .filter(isDefined);
             if (uniq(dates).length <= 1)
                 flat++;
@@ -203,7 +214,13 @@ export default class TableAutomaticStylesStratum extends LoadableStratum(TableTr
             this.catalogItem.mapItems.length === 0);
     }
 }
-TableAutomaticStylesStratum.stratumName = "automaticTableStyles";
+Object.defineProperty(TableAutomaticStylesStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "automaticTableStyles"
+});
+export default TableAutomaticStylesStratum;
 __decorate([
     computed
 ], TableAutomaticStylesStratum.prototype, "rectangle", null);

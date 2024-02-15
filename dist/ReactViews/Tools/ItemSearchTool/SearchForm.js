@@ -1,5 +1,6 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import isEmpty from "lodash-es/isEmpty";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation, withTranslation } from "react-i18next";
 import ReactSelect from "react-select";
 import styled from "styled-components";
@@ -53,28 +54,20 @@ const SearchForm = (props) => {
     };
     const clearForm = () => setQuery({});
     const disabled = state.is === "searching";
-    return (React.createElement(Form, { onSubmit: onSubmit },
-        React.createElement(Box, { centered: true },
-            state.is === "searching" && (React.createElement(Loading, null, t("itemSearchTool.searching"))),
-            state.is === "error" && (React.createElement(ErrorComponent, null, t("itemSearchTool.searchError")))),
-        React.createElement(FieldSet, { disabled: disabled },
-            parameters.map((p) => {
-                var _a;
-                return (React.createElement(Field, { key: p.id },
-                    React.createElement(Parameter, { parameter: p, onChange: setParameterValue(p.id, p.type), value: (_a = query[p.id]) === null || _a === void 0 ? void 0 : _a.value, disabled: disabled, t: t })));
-            }),
-            React.createElement(SearchButton, { primary: true, type: "submit", disabled: disabled }, t("itemSearchTool.searchBtnText")),
-            React.createElement(Button, { secondary: true, type: "reset", onClick: clearForm, disabled: disabled }, t("itemSearchTool.resetBtnText")))));
+    return (_jsxs(Form, { onSubmit: onSubmit, children: [_jsxs(Box, { centered: true, children: [state.is === "searching" && (_jsx(Loading, { children: t("itemSearchTool.searching") })), state.is === "error" && (_jsx(ErrorComponent, { children: t("itemSearchTool.searchError") }))] }), _jsxs(FieldSet, { disabled: disabled, children: [parameters.map((p) => {
+                        var _a;
+                        return (_jsx(Field, { children: _jsx(Parameter, { parameter: p, onChange: setParameterValue(p.id, p.type), value: (_a = query[p.id]) === null || _a === void 0 ? void 0 : _a.value, disabled: disabled, t: t }) }, p.id));
+                    }), _jsx(SearchButton, { primary: true, type: "submit", disabled: disabled, children: t("itemSearchTool.searchBtnText") }), _jsx(Button, { secondary: true, type: "reset", onClick: clearForm, disabled: disabled, children: t("itemSearchTool.resetBtnText") })] })] }));
 };
 const Parameter = (props) => {
     const { parameter } = props;
     switch (parameter.type) {
         case "numeric":
-            return React.createElement(NumericParameter, Object.assign({}, props, { parameter: parameter }));
+            return _jsx(NumericParameter, { ...props, parameter: parameter });
         case "enum":
-            return React.createElement(EnumParameter, Object.assign({}, props, { parameter: parameter }));
+            return _jsx(EnumParameter, { ...props, parameter: parameter });
         case "text":
-            return React.createElement(TextParameter, Object.assign({}, props, { parameter: parameter }));
+            return _jsx(TextParameter, { ...props, parameter: parameter });
     }
 };
 export const NumericParameter = (props) => {
@@ -90,19 +83,9 @@ export const NumericParameter = (props) => {
             newValue[tag] = parsed;
         props.onChange(isEmpty(newValue) ? undefined : newValue);
     };
-    return (React.createElement(Box, { column: true },
-        React.createElement(ParameterName, null, parameter.name),
-        React.createElement(Box, { css: `
+    return (_jsxs(Box, { column: true, children: [_jsx(ParameterName, { children: parameter.name }), _jsxs(Box, { css: `
           justify-content: space-between;
-        ` },
-            React.createElement(HalfWidthLabel, null,
-                React.createElement(Box, { column: true },
-                    React.createElement(Text, { small: true }, t("itemSearchTool.numericParameter.minimum")),
-                    React.createElement(Input, { type: "number", name: `${parameter.id}-min`, value: (_a = value === null || value === void 0 ? void 0 : value.start) !== null && _a !== void 0 ? _a : "", min: min, max: max, step: "any", placeholder: min.toString(), onChange: onChange("start") }))),
-            React.createElement(HalfWidthLabel, null,
-                React.createElement(Box, { column: true },
-                    React.createElement(Text, { small: true }, t("itemSearchTool.numericParameter.maximum")),
-                    React.createElement(Input, { type: "number", name: `${parameter.id}-max`, value: (_b = value === null || value === void 0 ? void 0 : value.end) !== null && _b !== void 0 ? _b : "", min: min, max: max, step: "any", placeholder: max.toString(), onChange: onChange("end") }))))));
+        `, children: [_jsx(HalfWidthLabel, { children: _jsxs(Box, { column: true, children: [_jsx(Text, { small: true, children: t("itemSearchTool.numericParameter.minimum") }), _jsx(Input, { type: "number", name: `${parameter.id}-min`, value: (_a = value === null || value === void 0 ? void 0 : value.start) !== null && _a !== void 0 ? _a : "", min: min, max: max, step: "any", placeholder: min.toString(), onChange: onChange("start") })] }) }), _jsx(HalfWidthLabel, { children: _jsxs(Box, { column: true, children: [_jsx(Text, { small: true, children: t("itemSearchTool.numericParameter.maximum") }), _jsx(Input, { type: "number", name: `${parameter.id}-max`, value: (_b = value === null || value === void 0 ? void 0 : value.end) !== null && _b !== void 0 ? _b : "", min: min, max: max, step: "any", placeholder: max.toString(), onChange: onChange("end") })] }) })] })] }));
 };
 const EnumParameter = (props) => {
     const { parameter, disabled } = props;
@@ -115,17 +98,11 @@ const EnumParameter = (props) => {
         const values = selectedOptions === null || selectedOptions === void 0 ? void 0 : selectedOptions.map(({ value }) => value);
         props.onChange((values === null || values === void 0 ? void 0 : values.length) === 0 ? undefined : values);
     };
-    return (React.createElement(Box, { column: true },
-        React.createElement(Label, null,
-            React.createElement(ParameterName, null, parameter.name),
-            React.createElement(Select, { name: parameter.id, options: options, isMulti: true, value: value, menuPosition: "fixed", onChange: onChange, isDisabled: disabled }))));
+    return (_jsx(Box, { column: true, children: _jsxs(Label, { children: [_jsx(ParameterName, { children: parameter.name }), _jsx(Select, { name: parameter.id, options: options, isMulti: true, value: value, menuPosition: "fixed", onChange: onChange, isDisabled: disabled })] }) }));
 };
 const TextParameter = (props) => {
     const { parameter, value, onChange } = props;
-    return (React.createElement(Box, { column: true },
-        React.createElement(Label, null,
-            React.createElement(ParameterName, null, parameter.name),
-            React.createElement(Input, { type: "text", name: parameter.id, value: value || "", onChange: (e) => onChange(e.target.value ? e.target.value : undefined) }))));
+    return (_jsx(Box, { column: true, children: _jsxs(Label, { children: [_jsx(ParameterName, { children: parameter.name }), _jsx(Input, { type: "text", name: parameter.id, value: value || "", onChange: (e) => onChange(e.target.value ? e.target.value : undefined) })] }) }));
 };
 const Form = styled.form `
   width: 100%;

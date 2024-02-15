@@ -4,20 +4,26 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { computed } from "mobx";
+import { computed, makeObservable } from "mobx";
 import CesiumMath from "terriajs-cesium/Source/Core/Math";
 import isDefined from "../../Core/isDefined";
 import FunctionParameter from "./FunctionParameter";
-export default class PointParameter extends FunctionParameter {
-    constructor() {
-        super(...arguments);
-        this.type = "point";
+class PointParameter extends FunctionParameter {
+    constructor(...args) {
+        super(...args);
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "point"
+        });
+        makeObservable(this);
     }
     /**
      * Get feature as geojson for display on map.
      */
     static getGeoJsonFeature(value) {
-        var coordinates = [
+        const coordinates = [
             CesiumMath.toDegrees(value.longitude),
             CesiumMath.toDegrees(value.latitude),
             value.height
@@ -46,7 +52,13 @@ export default class PointParameter extends FunctionParameter {
         }
     }
 }
-PointParameter.type = "point";
+Object.defineProperty(PointParameter, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "point"
+});
+export default PointParameter;
 __decorate([
     computed
 ], PointParameter.prototype, "geoJsonFeature", null);

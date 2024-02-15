@@ -9,8 +9,18 @@ import ModelTraits from "../ModelTraits";
 export default class OpacityTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.opacity = 0.8;
-        this.disableOpacityControl = false;
+        Object.defineProperty(this, "opacity", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0.8
+        });
+        Object.defineProperty(this, "disableOpacityControl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
     }
 }
 __decorate([

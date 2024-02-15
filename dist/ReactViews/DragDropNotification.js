@@ -5,6 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import classNames from "classnames";
 import { reaction } from "mobx";
 import { observer } from "mobx-react";
@@ -12,12 +13,22 @@ import PropTypes from "prop-types";
 import React from "react";
 import Icon from "../Styled/Icon";
 import Styles from "./drag-drop-notification.scss";
-import { withViewState } from "./StandardUserInterface/ViewStateContext";
+import { withViewState } from "./Context";
 let DragDropNotification = class DragDropNotification extends React.Component {
     constructor(props) {
         super(props);
-        this.notificationTimeout = null;
-        this.lastUploadedFilesReaction = null;
+        Object.defineProperty(this, "notificationTimeout", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: null
+        });
+        Object.defineProperty(this, "lastUploadedFilesReaction", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: null
+        });
         this.state = {
             showNotification: false
         };
@@ -57,26 +68,19 @@ let DragDropNotification = class DragDropNotification extends React.Component {
     }
     render() {
         const fileNames = this.props.viewState.lastUploadedFiles.join(",");
-        return (React.createElement("button", { className: classNames(Styles.notification, {
+        return (_jsxs("button", { className: classNames(Styles.notification, {
                 [Styles.isActive]: this.state.showNotification && fileNames.length > 0
-            }), onMouseEnter: this.handleHover.bind(this), onMouseLeave: this.handleMouseLeave.bind(this), onClick: this.handleClick.bind(this) },
-            React.createElement("div", { className: Styles.icon },
-                React.createElement(Icon, { glyph: Icon.GLYPHS.upload })),
-            React.createElement("div", { className: Styles.info },
-                React.createElement("span", { className: Styles.filename },
-                    '"',
-                    fileNames,
-                    '"'),
-                " ",
-                this.props.viewState.lastUploadedFiles.length > 1 ? "have" : "has",
-                " ",
-                "been added to ",
-                React.createElement("span", { className: Styles.action }, "My data"))));
+            }), onMouseEnter: this.handleHover.bind(this), onMouseLeave: this.handleMouseLeave.bind(this), onClick: this.handleClick.bind(this), children: [_jsx("div", { className: Styles.icon, children: _jsx(Icon, { glyph: Icon.GLYPHS.upload }) }), _jsxs("div", { className: Styles.info, children: [_jsxs("span", { className: Styles.filename, children: ['"', fileNames, '"'] }), " ", this.props.viewState.lastUploadedFiles.length > 1 ? "have" : "has", " ", "been added to ", _jsx("span", { className: Styles.action, children: "My data" })] })] }));
     }
 };
-DragDropNotification.propTypes = {
-    viewState: PropTypes.object
-};
+Object.defineProperty(DragDropNotification, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        viewState: PropTypes.object
+    }
+});
 DragDropNotification = __decorate([
     observer
 ], DragDropNotification);

@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import { uniq } from "lodash-es";
-import { computed } from "mobx";
+import { computed, makeObservable } from "mobx";
 import filterOutUndefined from "../Core/filterOutUndefined";
 import { isMakiIcon } from "../Map/Icons/Maki/MakiIcons";
 import { isDataSource } from "../ModelMixins/MappableMixin";
@@ -20,7 +20,13 @@ import { StyleMapLegend } from "./StyleMapLegend";
 export class TableAutomaticLegendStratum extends LoadableStratum(LegendOwnerTraits) {
     constructor(_item) {
         super();
-        this._item = _item;
+        Object.defineProperty(this, "_item", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: _item
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(newModel) {
         return new TableAutomaticLegendStratum(newModel);
@@ -111,7 +117,12 @@ export class TableAutomaticLegendStratum extends LoadableStratum(LegendOwnerTrai
         ];
     }
 }
-TableAutomaticLegendStratum.stratumName = "table-legend";
+Object.defineProperty(TableAutomaticLegendStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "table-legend"
+});
 __decorate([
     computed
 ], TableAutomaticLegendStratum.prototype, "legendItemOverrides", null);

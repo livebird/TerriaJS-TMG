@@ -4,15 +4,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx } from "react/jsx-runtime";
 import { scaleLinear } from "@visx/scale";
 import { interpolateNumber as d3InterpolateNumber } from "d3-interpolate";
-import { computed } from "mobx";
+import { computed, makeObservable } from "mobx";
 import { observer } from "mobx-react";
 import PropTypes from "prop-types";
 import React from "react";
 import Glyphs from "./Glyphs";
 import { GlyphCircle } from "@visx/glyph";
 let MomentPointsChart = class MomentPointsChart extends React.Component {
+    constructor(props) {
+        super(props);
+        makeObservable(this);
+    }
     get points() {
         const { chartItem, basisItem, basisItemScales, scales } = this.props;
         if (basisItem) {
@@ -65,22 +70,30 @@ let MomentPointsChart = class MomentPointsChart extends React.Component {
             return {};
         };
         const Glyph = (_a = Glyphs[glyph]) !== null && _a !== void 0 ? _a : GlyphCircle;
-        return (React.createElement("g", { id: id },
-            React.createElement(For, { each: "p", index: "i", of: this.points },
-                React.createElement(Glyph, Object.assign({ key: `${baseKey}-${i}`, left: scales.x(p.x), top: scales.y(p.y), size: 100, fill: fillColor, fillOpacity: p.isSelected ? 1.0 : 0.3 }, clickProps(p))))));
+        return (_jsx("g", { id: id, children: this.points.map((p, i) => (_jsx(Glyph, { left: scales.x(p.x), top: scales.y(p.y), size: 100, fill: fillColor, fillOpacity: p.isSelected ? 1.0 : 0.3, ...clickProps(p) }, `${baseKey}-${i}`))) }));
     }
 };
-MomentPointsChart.propTypes = {
-    id: PropTypes.string.isRequired,
-    chartItem: PropTypes.object.isRequired,
-    basisItem: PropTypes.object,
-    basisItemScales: PropTypes.object,
-    scales: PropTypes.object.isRequired,
-    glyph: PropTypes.string
-};
-MomentPointsChart.defaultProps = {
-    glyph: "circle"
-};
+Object.defineProperty(MomentPointsChart, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        id: PropTypes.string.isRequired,
+        chartItem: PropTypes.object.isRequired,
+        basisItem: PropTypes.object,
+        basisItemScales: PropTypes.object,
+        scales: PropTypes.object.isRequired,
+        glyph: PropTypes.string
+    }
+});
+Object.defineProperty(MomentPointsChart, "defaultProps", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        glyph: "circle"
+    }
+});
 __decorate([
     computed
 ], MomentPointsChart.prototype, "points", null);

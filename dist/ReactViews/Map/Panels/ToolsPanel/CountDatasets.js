@@ -1,13 +1,14 @@
 "use strict";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { observer } from "mobx-react";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { applyTranslationIfExists, TRANSLATE_KEY_PREFIX } from "../../../../Language/languageHelpers";
 import CatalogMemberMixin from "../../../../ModelMixins/CatalogMemberMixin";
 import GroupMixin from "../../../../ModelMixins/GroupMixin";
 import ReferenceMixin from "../../../../ModelMixins/ReferenceMixin";
 import Loader from "../../../Loader";
-import { useViewState } from "../../../StandardUserInterface/ViewStateContext";
+import { useViewState } from "../../../Context";
 import Styles from "./tools-panel.scss";
 const CountDatasets = observer((props) => {
     const [btnStringOrComponent, setBtnStringOrComponent] = useState(`${TRANSLATE_KEY_PREFIX}countDatasets.btnText`);
@@ -50,7 +51,7 @@ const CountDatasets = observer((props) => {
                     };
                     path.push(member.name);
                     const loadPromise = member.loadMembers();
-                    let countPromise = member.isLoading
+                    const countPromise = member.isLoading
                         ? loadPromise
                             .then((result) => result.throwIfError())
                             .then(recurseAndUpdateTotals.bind(undefined, member, stats, childStats, path.slice()))
@@ -69,7 +70,7 @@ const CountDatasets = observer((props) => {
             const promise = counter(member, childStats, path).then(function () {
                 stats.groups += childStats.groups + 1;
                 stats.members += childStats.members;
-                stats.messages.push.apply(stats.messages, childStats.messages);
+                stats.messages.push(...childStats.messages);
                 stats.subTotals.push(childStats);
             });
             return promise;
@@ -77,7 +78,7 @@ const CountDatasets = observer((props) => {
         function reportLoadError(member, stats, path) {
             stats.messages.push(path.join(" -> ") + t("countDatasets.loadError"));
         }
-        setBtnStringOrComponent(React.createElement(Loader, { message: t("countDatasets.countingMessage") }));
+        setBtnStringOrComponent(_jsx(Loader, { message: t("countDatasets.countingMessage") }));
         // ++countValue;
         const root = viewState.terria.catalog.group;
         counter(root, totals, []).then(function () {
@@ -104,11 +105,9 @@ const CountDatasets = observer((props) => {
             props.updateResults(info);
         });
     };
-    return (React.createElement("form", null,
-        t("countDatasets.title"),
-        React.createElement("button", { className: Styles.submit, onClick: countDatasets, type: "button", value: t("countDatasets.btnCount") }, typeof btnStringOrComponent === "string"
-            ? applyTranslationIfExists(btnStringOrComponent, i18n)
-            : btnStringOrComponent)));
+    return (_jsxs("form", { children: [t("countDatasets.title"), _jsx("button", { className: Styles.submit, onClick: countDatasets, type: "button", value: t("countDatasets.btnCount"), children: typeof btnStringOrComponent === "string"
+                    ? applyTranslationIfExists(btnStringOrComponent, i18n)
+                    : btnStringOrComponent })] }));
 });
 export default CountDatasets;
 //# sourceMappingURL=CountDatasets.js.map

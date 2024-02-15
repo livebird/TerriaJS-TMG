@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { computed } from "mobx";
+import { computed, makeObservable } from "mobx";
 import UrlTemplateImageryProvider from "terriajs-cesium/Source/Scene/UrlTemplateImageryProvider";
 import isDefined from "../../../Core/isDefined";
 import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
@@ -18,7 +18,11 @@ import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
  * - {y}: The tile Y coordinate in the tiling scheme, where 0 is the Northernmost tile.
  * - {s}: One of the available subdomains, used to overcome browser limits on the number of simultaneous requests per host.
  */
-export default class UrlTemplateImageryCatalogItem extends MappableMixin(CatalogMemberMixin(CreateModel(UrlTemplateImageryCatalogItemTraits))) {
+class UrlTemplateImageryCatalogItem extends MappableMixin(CatalogMemberMixin(CreateModel(UrlTemplateImageryCatalogItemTraits))) {
+    constructor(...args) {
+        super(...args);
+        makeObservable(this);
+    }
     get type() {
         return UrlTemplateImageryCatalogItem.type;
     }
@@ -58,7 +62,13 @@ export default class UrlTemplateImageryCatalogItem extends MappableMixin(Catalog
         });
     }
 }
-UrlTemplateImageryCatalogItem.type = "url-template-imagery";
+Object.defineProperty(UrlTemplateImageryCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "url-template-imagery"
+});
+export default UrlTemplateImageryCatalogItem;
 __decorate([
     computed
 ], UrlTemplateImageryCatalogItem.prototype, "mapItems", null);

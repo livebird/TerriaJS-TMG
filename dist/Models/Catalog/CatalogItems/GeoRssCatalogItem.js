@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { computed, runInAction } from "mobx";
+import { computed, runInAction, makeObservable } from "mobx";
 import getFilenameFromUri from "terriajs-cesium/Source/Core/getFilenameFromUri";
 import RuntimeError from "terriajs-cesium/Source/Core/RuntimeError";
 import isDefined from "../../../Core/isDefined";
@@ -14,9 +14,7 @@ import readXml from "../../../Core/readXml";
 import replaceUnderscores from "../../../Core/replaceUnderscores";
 import { networkRequestError } from "../../../Core/TerriaError";
 import { geoRss2ToGeoJson, geoRssAtomToGeoJson } from "../../../Map/Vector/geoRssConvertor";
-import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
 import GeoJsonMixin from "../../../ModelMixins/GeojsonMixin";
-import UrlMixin from "../../../ModelMixins/UrlMixin";
 import { InfoSectionTraits } from "../../../Traits/TraitsClasses/CatalogMemberTraits";
 import GeoRssCatalogItemTraits from "../../../Traits/TraitsClasses/GeoRssCatalogItemTraits";
 import CreateModel from "../../Definition/CreateModel";
@@ -32,8 +30,19 @@ var GeoRssFormat;
 class GeoRssStratum extends LoadableStratum(GeoRssCatalogItemTraits) {
     constructor(_item, _feed) {
         super();
-        this._item = _item;
-        this._feed = _feed;
+        Object.defineProperty(this, "_item", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: _item
+        });
+        Object.defineProperty(this, "_feed", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: _feed
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(newModel) {
         return new GeoRssStratum(newModel, this._feed);
@@ -91,7 +100,12 @@ class GeoRssStratum extends LoadableStratum(GeoRssCatalogItemTraits) {
         ];
     }
 }
-GeoRssStratum.stratumName = "georss";
+Object.defineProperty(GeoRssStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "georss"
+});
 __decorate([
     computed
 ], GeoRssStratum.prototype, "name", null);
@@ -102,7 +116,17 @@ __decorate([
     computed
 ], GeoRssStratum.prototype, "info", null);
 StratumOrder.addLoadStratum(GeoRssStratum.stratumName);
-export default class GeoRssCatalogItem extends GeoJsonMixin(UrlMixin(CatalogMemberMixin(CreateModel(GeoRssCatalogItemTraits)))) {
+class GeoRssCatalogItem extends GeoJsonMixin(CreateModel(GeoRssCatalogItemTraits)) {
+    constructor(...args) {
+        super(...args);
+        Object.defineProperty(this, "_georssFile", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
+    }
     get type() {
         return GeoRssCatalogItem.type;
     }
@@ -163,7 +187,13 @@ export default class GeoRssCatalogItem extends GeoJsonMixin(UrlMixin(CatalogMemb
         return Promise.resolve();
     }
 }
-GeoRssCatalogItem.type = "georss";
+Object.defineProperty(GeoRssCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "georss"
+});
+export default GeoRssCatalogItem;
 __decorate([
     computed
 ], GeoRssCatalogItem.prototype, "hasLocalData", null);

@@ -5,7 +5,12 @@ import React from "react";
 export default class RaiseToUserErrorBoundary extends React.Component {
     constructor() {
         super(...arguments);
-        this.state = { hasError: false };
+        Object.defineProperty(this, "state", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: { hasError: false }
+        });
     }
     static getDerivedStateFromError(error) {
         return {

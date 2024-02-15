@@ -38,8 +38,8 @@ export default function createRegionMappedImageryProvider(style, currentTime) {
         styleFunc: function (feature) {
             var _a, _b;
             const regionId = feature.properties[regionType.uniqueIdProp];
-            let rowNumber = getImageryLayerFilteredRow(style, currentTimeRows, valuesAsRegions.regionIdToRowNumbersMap.get(regionId));
-            let value = isDefined(rowNumber)
+            const rowNumber = getImageryLayerFilteredRow(style, currentTimeRows, valuesAsRegions.regionIdToRowNumbersMap.get(regionId));
+            const value = isDefined(rowNumber)
                 ? valueFunction(rowNumber)
                 : null;
             const color = colorMap.mapValueToColor(value);

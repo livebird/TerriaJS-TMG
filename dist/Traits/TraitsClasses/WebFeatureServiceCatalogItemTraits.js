@@ -30,7 +30,42 @@ export const SUPPORTED_CRS_3857 = [
 export default class WebFeatureServiceCatalogItemTraits extends mixTraits(GeoJsonTraits, GetCapabilitiesTraits) {
     constructor() {
         super(...arguments);
-        this.maxFeatures = 1000;
+        Object.defineProperty(this, "typeNames", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "maxFeatures", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 1000
+        });
+        Object.defineProperty(this, "srsName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "outputFormat", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "parameters", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "style", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
     }
 }
 __decorate([

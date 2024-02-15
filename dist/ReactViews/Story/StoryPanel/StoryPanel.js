@@ -4,6 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import classNames from "classnames";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react";
@@ -17,8 +18,8 @@ import getPath from "../../../Core/getPath";
 import TerriaError from "../../../Core/TerriaError";
 import Box from "../../../Styled/Box";
 import Hr from "../../../Styled/Hr";
-import { onStoryButtonClick } from "../../Map/StoryButton/StoryButton";
-import { withViewState } from "../../StandardUserInterface/ViewStateContext";
+import { onStoryButtonClick } from "../../Map/MenuBar/StoryButton/StoryButton";
+import { withViewState } from "../../Context";
 import Styles from "../story-panel.scss";
 import StoryBody from "./StoryBody";
 import FooterBar from "./StoryFooterBar";
@@ -63,6 +64,18 @@ export async function activateStory(scene, terria) {
 let StoryPanel = class StoryPanel extends React.Component {
     constructor(props) {
         super(props);
+        Object.defineProperty(this, "keydownListener", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "slideRef", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         this.state = {
             isCollapsed: false,
             inView: false
@@ -84,12 +97,12 @@ let StoryPanel = class StoryPanel extends React.Component {
             }
             else if (e.key === "ArrowRight" ||
                 e.key === "ArrowDown") {
-                this.props.viewState.currentStoryId + 1 != stories.length &&
+                this.props.viewState.currentStoryId + 1 !== stories.length &&
                     this.goToNextStory();
             }
             else if (e.key === "ArrowLeft" ||
                 e.key === "ArrowUp") {
-                this.props.viewState.currentStoryId != 0 && this.goToPrevStory();
+                this.props.viewState.currentStoryId !== 0 && this.goToPrevStory();
             }
         };
         window.addEventListener("keydown", this.keydownListener, true);
@@ -161,8 +174,7 @@ let StoryPanel = class StoryPanel extends React.Component {
     render() {
         const stories = this.props.viewState.terria.stories || [];
         const story = stories[this.props.viewState.currentStoryId];
-        return (React.createElement(Swipeable, { onSwipedLeft: () => this.goToNextStory(), onSwipedRight: () => this.goToPrevStory() },
-            React.createElement(Box, { className: classNames(this.props.viewState.topElement === "StoryPanel"
+        return (_jsx(Swipeable, { onSwipedLeft: () => this.goToNextStory(), onSwipedRight: () => this.goToPrevStory(), children: _jsx(Box, { className: classNames(this.props.viewState.topElement === "StoryPanel"
                     ? "top-element"
                     : ""), centered: true, fullWidth: true, paddedHorizontally: 4, position: "absolute", onClick: () => this.onClickContainer(), css: `
             transition: padding, 0.2s;
@@ -181,30 +193,23 @@ let StoryPanel = class StoryPanel extends React.Component {
               `}
               bottom: 90px;
             }
-          ` },
-                React.createElement(Box, { column: true, rounded: true, className: classNames(Styles.storyContainer, {
+          `, children: _jsxs(Box, { column: true, rounded: true, className: classNames(Styles.storyContainer, {
                         [Styles.isMounted]: this.state.inView
-                    }), key: story.id, ref: this.slideRef, css: `
+                    }), ref: this.slideRef, css: `
               @media (min-width: 992px) {
                 max-width: 60vw;
               }
-            ` },
-                    React.createElement(Box, { paddedHorizontally: 3, paddedVertically: 2.4, column: true },
-                        React.createElement(TitleBar, { title: story.title, isCollapsed: this.state.isCollapsed, collapseHandler: () => this.toggleCollapse(), closeHandler: () => this.exitStory() }),
-                        React.createElement(StoryBody, { isCollapsed: this.state.isCollapsed, story: story })),
-                    React.createElement(Hr, { fullWidth: true, size: 1, borderBottomColor: this.props.theme.greyLighter }),
-                    React.createElement(Box, { paddedHorizontally: 3, fullWidth: true },
-                        React.createElement(FooterBar, { goPrev: () => this.goToPrevStory(), goNext: () => this.goToNextStory(), jumpToStory: (index) => this.navigateStory(index), zoomTo: () => this.onCenterScene(story), currentHumanIndex: this.props.viewState.currentStoryId + 1, totalStories: stories.length, listStories: () => {
-                                runInAction(() => {
-                                    this.props.viewState.storyShown = false;
-                                });
-                                onStoryButtonClick({
-                                    terria: this.props.viewState.terria,
-                                    theme: this.props.theme,
-                                    viewState: this.props.viewState,
-                                    animationDuration: 250
-                                })();
-                            } }))))));
+            `, children: [_jsxs(Box, { paddedHorizontally: 3, paddedVertically: 2.4, column: true, children: [_jsx(TitleBar, { title: story.title, isCollapsed: this.state.isCollapsed, collapseHandler: () => this.toggleCollapse(), closeHandler: () => this.exitStory() }), _jsx(StoryBody, { isCollapsed: this.state.isCollapsed, story: story })] }), _jsx(Hr, { fullWidth: true, size: 1, borderBottomColor: this.props.theme.greyLighter }), _jsx(Box, { paddedHorizontally: 3, fullWidth: true, children: _jsx(FooterBar, { goPrev: () => this.goToPrevStory(), goNext: () => this.goToNextStory(), jumpToStory: (index) => this.navigateStory(index), zoomTo: () => this.onCenterScene(story), currentHumanIndex: this.props.viewState.currentStoryId + 1, totalStories: stories.length, listStories: () => {
+                                    runInAction(() => {
+                                        this.props.viewState.storyShown = false;
+                                    });
+                                    onStoryButtonClick({
+                                        terria: this.props.viewState.terria,
+                                        theme: this.props.theme,
+                                        viewState: this.props.viewState,
+                                        animationDuration: 250
+                                    })();
+                                } }) })] }, story.id) }) }));
     }
 };
 StoryPanel = __decorate([

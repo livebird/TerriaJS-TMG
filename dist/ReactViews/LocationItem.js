@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import CesiumMath from "terriajs-cesium/Source/Core/Math";
 import Ellipsoid from "terriajs-cesium/Source/Core/Ellipsoid";
 import prettifyCoordinates from "../Map/Vector/prettifyCoordinates";
@@ -18,9 +19,7 @@ export default function LocationItem(props) {
         longitude = pretty.longitude;
     }
     const { t } = useTranslation();
-    return (React.createElement("div", { className: Styles.location },
-        React.createElement("span", null, t("featureInfo.latLon")),
-        React.createElement("span", null, latitude + ", " + longitude)));
+    return (_jsxs("div", { className: Styles.location, children: [_jsx("span", { children: t("featureInfo.latLon") }), _jsx("span", { children: latitude + ", " + longitude })] }));
 }
 LocationItem.propTypes = {
     position: PropTypes.object

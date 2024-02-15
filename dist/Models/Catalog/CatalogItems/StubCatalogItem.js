@@ -15,7 +15,12 @@ import primitiveTrait from "../../../Traits/Decorators/primitiveTrait";
 export class StubCatalogItemTraits extends mixTraits(CatalogMemberTraits) {
     constructor() {
         super(...arguments);
-        this.isExperiencingIssues = true;
+        Object.defineProperty(this, "isExperiencingIssues", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
     }
 }
 __decorate([
@@ -25,7 +30,7 @@ __decorate([
         description: "Whether the catalog item is experiencing issues which may cause its data to be unavailable"
     })
 ], StubCatalogItemTraits.prototype, "isExperiencingIssues", void 0);
-export default class StubCatalogItem extends CatalogMemberMixin(CreateModel(StubCatalogItemTraits)) {
+class StubCatalogItem extends CatalogMemberMixin(CreateModel(StubCatalogItemTraits)) {
     get type() {
         return StubCatalogItem.type;
     }
@@ -33,5 +38,11 @@ export default class StubCatalogItem extends CatalogMemberMixin(CreateModel(Stub
         return Promise.resolve();
     }
 }
-StubCatalogItem.type = "stub";
+Object.defineProperty(StubCatalogItem, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "stub"
+});
+export default StubCatalogItem;
 //# sourceMappingURL=StubCatalogItem.js.map

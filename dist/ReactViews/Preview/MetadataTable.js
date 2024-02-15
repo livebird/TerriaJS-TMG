@@ -1,6 +1,7 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
-import { isArrayLike } from "mobx";
 import createReactClass from "create-react-class";
+import { isObservableArray } from "mobx";
 import PropTypes from "prop-types";
 import Styles from "./metadata-table.scss";
 /**
@@ -11,32 +12,32 @@ const MetadataTable = createReactClass({
     propTypes: {
         metadataItem: PropTypes.object.isRequired // A MetadataItem instance.
     },
+    renderDataCell(metadataItem, key) {
+        if (typeof metadataItem[key] === "object") {
+            return _jsx(MetadataTable, { metadataItem: metadataItem[key] });
+        }
+        else if (Array.isArray(metadataItem[key]) ||
+            isObservableArray(metadataItem[key])) {
+            return metadataItem[key].length > 0 && isJoinable(metadataItem[key])
+                ? metadataItem[key].join(", ")
+                : null;
+        }
+        else
+            return metadataItem[key];
+    },
+    renderObjectItemRow(key, i) {
+        const metadataItem = this.props.metadataItem;
+        return (_jsxs("tr", { children: [_jsx("th", { className: Styles.name, children: key }), _jsx("td", { className: Styles.value, children: this.renderDataCell(metadataItem, key) })] }, i));
+    },
     render() {
         const metadataItem = this.props.metadataItem;
         const keys = Object.keys(metadataItem);
-        const isArr = isArrayLike(metadataItem);
+        const isArr = Array.isArray(metadataItem) || isObservableArray(metadataItem);
         if (keys.length === 0 && !isArr)
             return null;
-        return (React.createElement("div", { className: Styles.root },
-            React.createElement("table", null,
-                React.createElement("tbody", null,
-                    React.createElement(Choose, null,
-                        React.createElement(When, { condition: isArr },
-                            React.createElement(If, { condition: metadataItem.length > 0 && isJoinable(metadataItem) },
-                                React.createElement("tr", null,
-                                    React.createElement("td", null, metadataItem.join(", "))))),
-                        React.createElement(When, { condition: keys.length > 0 && !isArr },
-                            React.createElement(For, { each: "key", index: "i", of: keys },
-                                React.createElement("tr", { key: i },
-                                    React.createElement("th", { className: Styles.name }, key),
-                                    React.createElement("td", { className: Styles.value },
-                                        React.createElement(Choose, null,
-                                            React.createElement(When, { condition: typeof metadataItem[key] === "object" },
-                                                React.createElement(MetadataTable, { metadataItem: metadataItem[key] })),
-                                            React.createElement(When, { condition: isArrayLike(metadataItem[key]) },
-                                                React.createElement(If, { condition: metadataItem[key].length > 0 &&
-                                                        isJoinable(metadataItem[key]) }, metadataItem[key].join(", "))),
-                                            React.createElement(Otherwise, null, metadataItem[key])))))))))));
+        return (_jsx("div", { className: Styles.root, children: _jsx("table", { children: _jsxs("tbody", { children: [isArr && metadataItem.length > 0 && isJoinable(metadataItem) && (_jsx("tr", { children: _jsx("td", { children: metadataItem.join(", ") }) })), !isArr &&
+                            keys.length > 0 &&
+                            keys.map((key, i) => this.renderObjectItemRow(key, i))] }) }) }));
     }
 });
 /**

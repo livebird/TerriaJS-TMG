@@ -14,6 +14,21 @@ import primitiveTrait from "../Decorators/primitiveTrait";
 import UrlTraits from "./UrlTraits";
 import LegendOwnerTraits from "./LegendOwnerTraits";
 export class ReplaceStringTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "find", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "replace", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -43,6 +58,33 @@ __decorate([
  * Then regionTypeReplacements are applied (which can replace regionType with a different regionType - using [{find:string, replace:string}] pattern)
  */
 export class ModelOverrideTraits extends mixTraits(EnumDimensionTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "id", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "regionType", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "regionTypeReplacements", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -79,6 +121,15 @@ __decorate([
     })
 ], ModelOverrideTraits.prototype, "regionTypeReplacements", void 0);
 export default class SdmxCommonTraits extends mixTraits(UrlTraits, CatalogMemberTraits, LegendOwnerTraits, GroupTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "modelOverrides", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     objectArrayTrait({

@@ -4,7 +4,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, computed, observable } from "mobx";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { action, computed, observable, makeObservable } from "mobx";
 import { observer } from "mobx-react";
 import React from "react";
 import { withTranslation } from "react-i18next";
@@ -20,9 +21,15 @@ import Button from "../../../Styled/Button";
 import Spacing from "../../../Styled/Spacing";
 const dateFormat = require("dateformat");
 let DatePicker = class DatePicker extends React.Component {
-    constructor() {
-        super(...arguments);
-        this.isOpen = false;
+    constructor(props) {
+        super(props);
+        Object.defineProperty(this, "isOpen", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        makeObservable(this);
     }
     get currentDate() {
         const date = this.props.item.currentDiscreteJulianDate;
@@ -85,24 +92,10 @@ let DatePicker = class DatePicker extends React.Component {
     }
     render() {
         const { heading, item, t } = this.props;
-        return (React.createElement(Box, { column: true, centered: true, flex: 1 },
-            React.createElement(Spacing, { bottom: 4 }),
-            React.createElement(Box, { centered: true },
-                React.createElement(StyledIcon, { light: true, styledWidth: "21px", glyph: Icon.GLYPHS.calendar2, css: "margin-top:-2px;" }),
-                React.createElement(Spacing, { right: 2 }),
-                React.createElement(Text, { textLight: true, extraLarge: true }, heading)),
-            React.createElement(Spacing, { bottom: 2 }),
-            React.createElement(Box, null,
-                React.createElement(PrevButton, { disabled: item.isPreviousDiscreteTimeAvailable === false, title: t("diffTool.datePicker.previousDateTitle"), onClick: this.moveToPreviousDate }),
-                React.createElement(DateButton, { primary: true, isOpen: this.isOpen, onClick: this.toggleOpen, title: t("diffTool.datePicker.dateButtonTitle") },
-                    React.createElement(TextSpan, { extraLarge: true }, this.formattedCurrentDate || "-")),
-                React.createElement(NextButton, { disabled: item.isNextDiscreteTimeAvailable === false, title: t("diffTool.datePicker.nextDateTitle"), onClick: this.moveToNextDate })),
-            React.createElement("div", { style: {
-                    display: this.isOpen ? "block" : "none",
-                    position: "absolute"
-                } },
-                React.createElement(DateTimePicker, { currentDate: this.currentDate, dates: this.props.item.objectifiedDates, onChange: this.changeCurrentDate, openDirection: "none", isOpen: this.isOpen, onOpen: () => this.setIsOpen(true), onClose: () => this.setIsOpen(false) })),
-            React.createElement(Spacing, { bottom: 4 })));
+        return (_jsxs(Box, { column: true, centered: true, flex: 1, children: [_jsx(Spacing, { bottom: 4 }), _jsxs(Box, { centered: true, children: [_jsx(StyledIcon, { light: true, styledWidth: "21px", glyph: Icon.GLYPHS.calendar2, css: "margin-top:-2px;" }), _jsx(Spacing, { right: 2 }), _jsx(Text, { textLight: true, extraLarge: true, children: heading })] }), _jsx(Spacing, { bottom: 2 }), _jsxs(Box, { children: [_jsx(PrevButton, { disabled: item.isPreviousDiscreteTimeAvailable === false, title: t("diffTool.datePicker.previousDateTitle"), onClick: this.moveToPreviousDate }), _jsx(DateButton, { primary: true, isOpen: this.isOpen, onClick: this.toggleOpen, title: t("diffTool.datePicker.dateButtonTitle"), children: _jsx(TextSpan, { extraLarge: true, children: this.formattedCurrentDate || "-" }) }), _jsx(NextButton, { disabled: item.isNextDiscreteTimeAvailable === false, title: t("diffTool.datePicker.nextDateTitle"), onClick: this.moveToNextDate })] }), _jsx("div", { style: {
+                        display: this.isOpen ? "block" : "none",
+                        position: "absolute"
+                    }, children: _jsx(DateTimePicker, { currentDate: this.currentDate, dates: this.props.item.objectifiedDates, onChange: this.changeCurrentDate, openDirection: "none", isOpen: this.isOpen, onOpen: () => this.setIsOpen(true), onClose: () => this.setIsOpen(false) }) }), _jsx(Spacing, { bottom: 4 })] }));
     }
 };
 __decorate([
@@ -149,13 +142,13 @@ const PagerButton = styled(Button).attrs({
   flex-direction: column;
 `;
 const PrevButton = styled(PagerButton).attrs({
-    renderIcon: () => (React.createElement(StyledIcon, { css: "transform:rotate(90deg);", light: true, styledWidth: "15px", glyph: Icon.GLYPHS.arrowDown }))
+    renderIcon: () => (_jsx(StyledIcon, { css: "transform:rotate(90deg);", light: true, styledWidth: "15px", glyph: Icon.GLYPHS.arrowDown }))
 }) `
   ${({ theme }) => theme.borderRadiusLeft(theme.radius40Button)}
   margin-right: 1px;
 `;
 const NextButton = styled(PagerButton).attrs({
-    renderIcon: () => (React.createElement(StyledIcon, { css: "transform:rotate(270deg);", light: true, styledWidth: "15px", glyph: Icon.GLYPHS.arrowDown }))
+    renderIcon: () => (_jsx(StyledIcon, { css: "transform:rotate(270deg);", light: true, styledWidth: "15px", glyph: Icon.GLYPHS.arrowDown }))
 }) `
   ${({ theme }) => theme.borderRadiusRight(theme.radius40Button)}
   margin-left: 1px;

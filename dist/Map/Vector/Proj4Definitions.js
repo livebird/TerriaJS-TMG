@@ -1,11 +1,8 @@
-"use strict";
 /**
  * Defines the built-in proj4 projection definitions known to TerriaJS.  Additional projections can be added
  * to this object literal.
- * @alias Proj4Definitions
- * @type {Object}
  */
-var Proj4Definitions = {
+const Proj4Definitions = {
     // Built-in proj4 entries
     "EPSG:4326": "EPSG:4326",
     WGS84: "WGS84",
@@ -43,7 +40,9 @@ var Proj4Definitions = {
     "EPSG:20257": "+proj=utm +zone=57 +south +ellps=aust_SA +units=m +no_defs",
     "EPSG:20258": "+proj=utm +zone=58 +south +ellps=aust_SA +units=m +no_defs",
     "EPSG:102100": "EPSG:3857",
-    "EPSG:27700": "+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 +units=m +no_defs"
+    "EPSG:27700": "+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 +units=m +no_defs",
+    "EPSG:7844": "+proj=longlat +ellps=GRS80 +no_defs +type=crs",
+    "EPSG:7855": "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs"
 };
-module.exports = Proj4Definitions;
+export default Proj4Definitions;
 //# sourceMappingURL=Proj4Definitions.js.map

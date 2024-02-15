@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { computed, observable } from "mobx";
+import { computed, observable, makeObservable } from "mobx";
 import FunctionParameter from "./FunctionParameter";
 import LineParameter from "./LineParameter";
 import PointParameter from "./PointParameter";
@@ -18,10 +18,28 @@ export function isGeoJsonFunctionParameter(fp) {
         GeoJsonParameter.type
     ].includes(fp.type);
 }
-export default class GeoJsonParameter extends FunctionParameter {
+class GeoJsonParameter extends FunctionParameter {
     constructor(catalogFunction, options) {
         super(catalogFunction, options);
-        this.type = "geojson";
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "geojson"
+        });
+        Object.defineProperty(this, "subtype", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "regionParameter", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
         this.regionParameter = options.regionParameter;
     }
     /**
@@ -61,11 +79,37 @@ export default class GeoJsonParameter extends FunctionParameter {
         // TODO rest
     }
 }
-GeoJsonParameter.type = "geojson";
-GeoJsonParameter.PointType = "point";
-GeoJsonParameter.PolygonType = "polygon";
-GeoJsonParameter.RegionType = "region";
-GeoJsonParameter.SelectAPolygonType = "selectAPolygon";
+Object.defineProperty(GeoJsonParameter, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "geojson"
+});
+Object.defineProperty(GeoJsonParameter, "PointType", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "point"
+});
+Object.defineProperty(GeoJsonParameter, "PolygonType", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "polygon"
+});
+Object.defineProperty(GeoJsonParameter, "RegionType", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "region"
+});
+Object.defineProperty(GeoJsonParameter, "SelectAPolygonType", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "selectAPolygon"
+});
+export default GeoJsonParameter;
 __decorate([
     observable
 ], GeoJsonParameter.prototype, "subtype", void 0);

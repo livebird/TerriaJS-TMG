@@ -5,7 +5,7 @@ import loadXML from "../../../Core/loadXML";
 import { networkRequestError } from "../../../Core/TerriaError";
 import xml2json from "../../../ThirdParty/xml2json";
 export function getRectangleFromLayer(layer) {
-    var egbb = layer.EX_GeographicBoundingBox; // required in WMS 1.3.0
+    const egbb = layer.EX_GeographicBoundingBox; // required in WMS 1.3.0
     if (egbb) {
         return {
             west: egbb.westBoundLongitude,
@@ -15,7 +15,7 @@ export function getRectangleFromLayer(layer) {
         };
     }
     else {
-        var llbb = layer.LatLonBoundingBox; // required in WMS 1.0.0 through 1.1.1
+        const llbb = layer.LatLonBoundingBox; // required in WMS 1.0.0 through 1.1.1
         if (llbb) {
             return {
                 west: llbb.minx,
@@ -25,12 +25,58 @@ export function getRectangleFromLayer(layer) {
             };
         }
     }
+    // Work way through ancestors until we get a rectangle.
+    if (layer._parent)
+        return getRectangleFromLayer(layer._parent);
     return undefined;
 }
-export default class WebMapServiceCapabilities {
+class WebMapServiceCapabilities {
+    get Service() {
+        return this.json.Service;
+    }
     constructor(xml, json) {
-        this.xml = xml;
-        this.json = json;
+        Object.defineProperty(this, "xml", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: xml
+        });
+        Object.defineProperty(this, "json", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: json
+        });
+        Object.defineProperty(this, "rootLayers", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "allLayers", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "topLevelNamedLayers", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "layersByName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "layersByTitle", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         this.allLayers = [];
         this.rootLayers = [];
         this.topLevelNamedLayers = [];
@@ -74,9 +120,6 @@ export default class WebMapServiceCapabilities {
             }
             rootLayers.forEach((layer) => traverseLayer(layer, true));
         }
-    }
-    get Service() {
-        return this.json.Service;
     }
     /**
      * Finds the layer in GetCapabilities corresponding to a given layer name. Names are
@@ -135,17 +178,23 @@ export default class WebMapServiceCapabilities {
         return values;
     }
 }
-WebMapServiceCapabilities.fromUrl = createTransformer((url) => {
-    return Promise.resolve(loadXML(url)).then(function (capabilitiesXml) {
-        const json = xml2json(capabilitiesXml);
-        if (!defined(json.Capability)) {
-            throw networkRequestError({
-                title: "Invalid GetCapabilities",
-                message: `The URL ${url} was retrieved successfully but it does not appear to be a valid Web Map Service (WMS) GetCapabilities document.` +
-                    `\n\nEither the catalog file has been set up incorrectly, or the server address has changed.`
-            });
-        }
-        return new WebMapServiceCapabilities(capabilitiesXml, json);
-    });
+Object.defineProperty(WebMapServiceCapabilities, "fromUrl", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: createTransformer((url) => {
+        return Promise.resolve(loadXML(url)).then(function (capabilitiesXml) {
+            const json = xml2json(capabilitiesXml);
+            if (!defined(json.Capability)) {
+                throw networkRequestError({
+                    title: "Invalid GetCapabilities",
+                    message: `The URL ${url} was retrieved successfully but it does not appear to be a valid Web Map Service (WMS) GetCapabilities document.` +
+                        `\n\nEither the catalog file has been set up incorrectly, or the server address has changed.`
+                });
+            }
+            return new WebMapServiceCapabilities(capabilitiesXml, json);
+        });
+    })
 });
+export default WebMapServiceCapabilities;
 //# sourceMappingURL=WebMapServiceCapabilities.js.map

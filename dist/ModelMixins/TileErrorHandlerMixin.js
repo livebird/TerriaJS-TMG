@@ -14,16 +14,47 @@ import DiscretelyTimeVaryingMixin from "./DiscretelyTimeVaryingMixin";
  *
  */
 function TileErrorHandlerMixin(Base) {
-    class Klass extends Base {
+    class TileErrorHandlerMixin extends Base {
         constructor() {
             super(...arguments);
-            this.tileFailures = 0;
-            this.tileRetriesByMap = new Map();
-            this.tileRetryOptions = {
-                retries: 8,
-                minTimeout: 200,
-                randomize: true
-            };
+            Object.defineProperty(this, "tileFailures", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: 0
+            });
+            Object.defineProperty(this, "tileRetriesByMap", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: new Map()
+            });
+            Object.defineProperty(this, "tileRetryOptions", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: {
+                    retries: 8,
+                    minTimeout: 200,
+                    randomize: true
+                }
+            });
+            /**
+             * A hook that may be implemented by catalog items for custom handling of tile errors.
+             *
+             * @param maybeError A tile request promise that that fails with the tile error
+             * @param tile       The tile to be fetched
+             * @returns          A modified promise
+             *
+             * The item can then decide to retry the tile request after adding custom parameters
+             * like an authentication token.
+             */
+            Object.defineProperty(this, "handleTileError", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
         }
         get hasTileErrorHandlerMixin() {
             return true;
@@ -257,7 +288,7 @@ function TileErrorHandlerMixin(Base) {
         const intersection = Rectangle.intersection(tileExtent, rectangle);
         return intersection === undefined;
     }
-    return Klass;
+    return TileErrorHandlerMixin;
 }
 (function (TileErrorHandlerMixin) {
     function isMixedInto(model) {

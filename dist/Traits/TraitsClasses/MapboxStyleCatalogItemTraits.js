@@ -13,10 +13,42 @@ import ImageryProviderTraits from "./ImageryProviderTraits";
 export default class MapboxStyleCatalogItemTraits extends mixTraits(ImageryProviderTraits, CatalogMemberTraits, MappableTraits, LegendOwnerTraits) {
     constructor() {
         super(...arguments);
-        this.url = "https://api.mapbox.com/styles/v1/";
-        this.username = "mapbox";
-        this.tilesize = 512;
-        this.scaleFactor = false;
+        Object.defineProperty(this, "url", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "https://api.mapbox.com/styles/v1/"
+        });
+        Object.defineProperty(this, "username", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "mapbox"
+        });
+        Object.defineProperty(this, "styleId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "accessToken", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "tilesize", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 512
+        });
+        Object.defineProperty(this, "scaleFactor", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
     }
 }
 __decorate([

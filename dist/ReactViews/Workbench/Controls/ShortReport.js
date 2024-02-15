@@ -5,6 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react";
 import React from "react";
@@ -44,19 +45,15 @@ let ShortReport = class ShortReport extends React.Component {
             (!isDefined(shortReportSections) || shortReportSections.length === 0)) {
             return null;
         }
-        return (React.createElement(Box, { fullWidth: true, displayInlineBlock: true, padded: true },
-            isDefined(item.shortReport) && (React.createElement(Text, { textLight: true, medium: true }, parseCustomMarkdownToReact(item.shortReport, {
-                catalogItem: item
-            }))),
-            shortReportSections
-                .filter((r) => r.name)
-                .map((r, i) => (React.createElement(React.Fragment, { key: r.name },
-                r.content ? (React.createElement(Collapsible, { title: r.name, isOpen: r.show, onToggle: (show) => this.clickShortReport(item, r.name, show) }, parseCustomMarkdownToReact(r.content, {
-                    catalogItem: item
-                }))) : (React.createElement(Text, { textLight: true, medium: true }, parseCustomMarkdownToReact(r.name, {
-                    catalogItem: item
-                }))),
-                i < shortReportSections.length - 1 && React.createElement(Spacing, { bottom: 2 }))))));
+        return (_jsxs(Box, { fullWidth: true, displayInlineBlock: true, padded: true, children: [isDefined(item.shortReport) && (_jsx(Text, { textLight: true, medium: true, children: parseCustomMarkdownToReact(item.shortReport, {
+                        catalogItem: item
+                    }) })), shortReportSections
+                    .filter((r) => r.name)
+                    .map((r, i) => (_jsxs(React.Fragment, { children: [r.content ? (_jsx(Collapsible, { title: r.name, isOpen: r.show, onToggle: (show) => this.clickShortReport(item, r.name, show), children: parseCustomMarkdownToReact(r.content, {
+                                catalogItem: item
+                            }) })) : (_jsx(Text, { textLight: true, medium: true, children: parseCustomMarkdownToReact(r.name, {
+                                catalogItem: item
+                            }) })), i < shortReportSections.length - 1 && _jsx(Spacing, { bottom: 2 })] }, r.name)))] }));
     }
 };
 ShortReport = __decorate([

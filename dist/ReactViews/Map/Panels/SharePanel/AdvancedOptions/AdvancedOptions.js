@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import styled from "styled-components";
 import Box from "../../../../../Styled/Box";
@@ -15,25 +16,12 @@ export const AdvancedOptions = ({ canShortenUrl, shouldShorten, includeStoryInSh
     const toogleAdvancedOptions = () => {
         setAdvancedOptions((prevState) => !prevState);
     };
-    return (React.createElement(Box, { column: true },
-        React.createElement(RawButton, { onClick: toogleAdvancedOptions, css: `
+    return (_jsxs(Box, { column: true, children: [_jsxs(RawButton, { onClick: toogleAdvancedOptions, css: `
           display: flex;
           align-items: center;
-        ` },
-            React.createElement(TextSpan, { fullWidth: true, medium: true, css: `
+        `, children: [_jsx(TextSpan, { fullWidth: true, medium: true, css: `
             display: flex;
-          ` }, t("share.btnAdvanced")),
-            advancedOptions ? (React.createElement(AdvanceOptionsIcon, { glyph: GLYPHS.opened })) : (React.createElement(AdvanceOptionsIcon, { glyph: GLYPHS.closed }))),
-        advancedOptions && (React.createElement(React.Fragment, null,
-            React.createElement(StyledHr, null),
-            React.createElement(Box, { column: true },
-                React.createElement(Checkbox, { textProps: { medium: true }, id: "includeStory", title: "Include Story in Share", isChecked: includeStoryInShare, onChange: includeStoryInShareOnChange },
-                    React.createElement(TextSpan, null, t("includeStory.message"))),
-                React.createElement(Spacing, { bottom: 1 }),
-                React.createElement(Checkbox, { textProps: { medium: true }, id: "shortenUrl", isChecked: shouldShorten, onChange: shouldShortenOnChange, isDisabled: !canShortenUrl },
-                    React.createElement(TextSpan, null, t("share.shortenUsingService"))),
-                React.createElement(Spacing, { bottom: 2 }),
-                React.createElement(EmbedSection, { shareUrl: shareUrl === null || shareUrl === void 0 ? void 0 : shareUrl.current }))))));
+          `, children: t("share.btnAdvanced") }), advancedOptions ? (_jsx(AdvanceOptionsIcon, { glyph: GLYPHS.opened })) : (_jsx(AdvanceOptionsIcon, { glyph: GLYPHS.closed }))] }), advancedOptions && (_jsxs(_Fragment, { children: [_jsx(StyledHr, {}), _jsxs(Box, { column: true, children: [_jsx(Checkbox, { textProps: { medium: true }, id: "includeStory", title: "Include Story in Share", isChecked: includeStoryInShare, onChange: includeStoryInShareOnChange, children: _jsx(TextSpan, { children: t("includeStory.message") }) }), _jsx(Spacing, { bottom: 1 }), _jsx(Checkbox, { textProps: { medium: true }, id: "shortenUrl", isChecked: shouldShorten, onChange: shouldShortenOnChange, isDisabled: !canShortenUrl, children: _jsx(TextSpan, { children: t("share.shortenUsingService") }) }), _jsx(Spacing, { bottom: 2 }), _jsx(EmbedSection, { shareUrl: shareUrl === null || shareUrl === void 0 ? void 0 : shareUrl.current })] })] }))] }));
 };
 const AdvanceOptionsIcon = styled(StyledIcon).attrs({
     styledWidth: "10px",

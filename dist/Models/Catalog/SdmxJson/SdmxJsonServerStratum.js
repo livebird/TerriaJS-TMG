@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { action, computed } from "mobx";
+import { action, computed, makeObservable } from "mobx";
 import RequestErrorEvent from "terriajs-cesium/Source/Core/RequestErrorEvent";
 import Resource from "terriajs-cesium/Source/Core/Resource";
 import filterOutUndefined from "../../../Core/filterOutUndefined";
@@ -21,11 +21,54 @@ import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
 import StratumOrder from "../../Definition/StratumOrder";
 import SdmxJsonCatalogItem from "./SdmxJsonCatalogItem";
 export class SdmxServerStratum extends LoadableStratum(SdmxCatalogGroupTraits) {
+    static async load(catalogGroup) {
+        var _a, _b, _c, _d, _e, _f, _g;
+        // Load agency schemes (may be undefined)
+        const agencySchemes = (_b = (_a = (await loadSdmxJsonStructure(proxyCatalogItemUrl(catalogGroup, `${catalogGroup.url}/agencyscheme/`), true))) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.agencySchemes;
+        // Load category schemes (may be undefined)
+        const categorySchemeResponse = await loadSdmxJsonStructure(proxyCatalogItemUrl(catalogGroup, `${catalogGroup.url}/categoryscheme?references=parentsandsiblings`), true);
+        let dataflows = (_c = categorySchemeResponse === null || categorySchemeResponse === void 0 ? void 0 : categorySchemeResponse.data) === null || _c === void 0 ? void 0 : _c.dataflows;
+        // If no dataflows from category schemes -> try getting all of them through `dataflow` endpoint
+        if (!isDefined(dataflows)) {
+            dataflows = (_e = (_d = (await loadSdmxJsonStructure(proxyCatalogItemUrl(catalogGroup, `${catalogGroup.url}/dataflow/`), true))) === null || _d === void 0 ? void 0 : _d.data) === null || _e === void 0 ? void 0 : _e.dataflows;
+            if (!isDefined(dataflows)) {
+                throw new TerriaError({
+                    title: i18next.t("models.sdmxServerStratum.loadDataErrorTitle"),
+                    message: i18next.t("models.sdmxServerStratum.loadDataErrorMessage")
+                });
+            }
+        }
+        return new SdmxServerStratum(catalogGroup, {
+            agencySchemes,
+            categorySchemes: (_f = categorySchemeResponse === null || categorySchemeResponse === void 0 ? void 0 : categorySchemeResponse.data) === null || _f === void 0 ? void 0 : _f.categorySchemes,
+            categorisations: (_g = categorySchemeResponse === null || categorySchemeResponse === void 0 ? void 0 : categorySchemeResponse.data) === null || _g === void 0 ? void 0 : _g.categorisations,
+            dataflows
+        });
+    }
+    duplicateLoadableStratum(model) {
+        return new SdmxServerStratum(model, this.sdmxServer);
+    }
     constructor(catalogGroup, sdmxServer) {
         super();
-        this.catalogGroup = catalogGroup;
-        this.sdmxServer = sdmxServer;
-        this.dataflowTree = {};
+        Object.defineProperty(this, "catalogGroup", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogGroup
+        });
+        Object.defineProperty(this, "sdmxServer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: sdmxServer
+        });
+        Object.defineProperty(this, "dataflowTree", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {}
+        });
+        makeObservable(this);
         // If categorisations exist => organise Dataflows into a tree!
         if (isDefined(this.sdmxServer.categorisations)) {
             this.sdmxServer.categorisations.forEach((categorisiation) => {
@@ -110,33 +153,6 @@ export class SdmxServerStratum extends LoadableStratum(SdmxCatalogGroupTraits) {
                 return tree;
             }, {});
         }
-    }
-    static async load(catalogGroup) {
-        var _a, _b, _c, _d, _e, _f, _g;
-        // Load agency schemes (may be undefined)
-        let agencySchemes = (_b = (_a = (await loadSdmxJsonStructure(proxyCatalogItemUrl(catalogGroup, `${catalogGroup.url}/agencyscheme/`), true))) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.agencySchemes;
-        // Load category schemes (may be undefined)
-        let categorySchemeResponse = await loadSdmxJsonStructure(proxyCatalogItemUrl(catalogGroup, `${catalogGroup.url}/categoryscheme?references=parentsandsiblings`), true);
-        let dataflows = (_c = categorySchemeResponse === null || categorySchemeResponse === void 0 ? void 0 : categorySchemeResponse.data) === null || _c === void 0 ? void 0 : _c.dataflows;
-        // If no dataflows from category schemes -> try getting all of them through `dataflow` endpoint
-        if (!isDefined(dataflows)) {
-            dataflows = (_e = (_d = (await loadSdmxJsonStructure(proxyCatalogItemUrl(catalogGroup, `${catalogGroup.url}/dataflow/`), true))) === null || _d === void 0 ? void 0 : _d.data) === null || _e === void 0 ? void 0 : _e.dataflows;
-            if (!isDefined(dataflows)) {
-                throw new TerriaError({
-                    title: i18next.t("models.sdmxServerStratum.loadDataErrorTitle"),
-                    message: i18next.t("models.sdmxServerStratum.loadDataErrorMessage")
-                });
-            }
-        }
-        return new SdmxServerStratum(catalogGroup, {
-            agencySchemes,
-            categorySchemes: (_f = categorySchemeResponse === null || categorySchemeResponse === void 0 ? void 0 : categorySchemeResponse.data) === null || _f === void 0 ? void 0 : _f.categorySchemes,
-            categorisations: (_g = categorySchemeResponse === null || categorySchemeResponse === void 0 ? void 0 : categorySchemeResponse.data) === null || _g === void 0 ? void 0 : _g.categorisations,
-            dataflows
-        });
-    }
-    duplicateLoadableStratum(model) {
-        return new SdmxServerStratum(model, this.sdmxServer);
     }
     get members() {
         var _a;
@@ -230,7 +246,7 @@ export class SdmxServerStratum extends LoadableStratum(SdmxCatalogGroupTraits) {
     getCategoryFromCatagoryScheme(categoryScheme, id) {
         if (!isDefined(id))
             return;
-        let resolvedCategoryScheme = typeof categoryScheme === "string"
+        const resolvedCategoryScheme = typeof categoryScheme === "string"
             ? this.getCategoryScheme(categoryScheme)
             : categoryScheme;
         return this.getCategoryFromCategories(resolvedCategoryScheme === null || resolvedCategoryScheme === void 0 ? void 0 : resolvedCategoryScheme.categories, id);
@@ -248,7 +264,12 @@ export class SdmxServerStratum extends LoadableStratum(SdmxCatalogGroupTraits) {
         return flatten(filterOutUndefined(agencies)).find((d) => d.id === id);
     }
 }
-SdmxServerStratum.stratumName = "sdmxServer";
+Object.defineProperty(SdmxServerStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "sdmxServer"
+});
 __decorate([
     computed
 ], SdmxServerStratum.prototype, "members", null);

@@ -5,23 +5,60 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import primitiveTrait from "../Decorators/primitiveTrait";
+import { traitClass } from "../Trait";
 import mixTraits from "../mixTraits";
 import CatalogMemberTraits from "./CatalogMemberTraits";
 import { GeoJsonTraits } from "./GeoJsonTraits";
 import LegendOwnerTraits from "./LegendOwnerTraits";
 import MappableTraits from "./MappableTraits";
 import UrlTraits from "./UrlTraits";
-export default class ArcGisFeatureServerCatalogItemTraits extends mixTraits(UrlTraits, MappableTraits, CatalogMemberTraits, LegendOwnerTraits, GeoJsonTraits) {
+let ArcGisFeatureServerCatalogItemTraits = class ArcGisFeatureServerCatalogItemTraits extends mixTraits(UrlTraits, MappableTraits, CatalogMemberTraits, LegendOwnerTraits, GeoJsonTraits) {
     constructor() {
         super(...arguments);
-        this.clampToGround = true;
-        this.useStyleInformationFromService = true;
-        this.layerDef = "1=1";
-        this.where = "1=1";
-        this.maxFeatures = 5000;
-        this.featuresPerRequest = 1000;
+        Object.defineProperty(this, "clampToGround", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "useStyleInformationFromService", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "layerDef", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "1=1"
+        });
+        Object.defineProperty(this, "where", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "1=1"
+        });
+        Object.defineProperty(this, "maxFeatures", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 5000
+        });
+        Object.defineProperty(this, "featuresPerRequest", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 1000
+        });
+        Object.defineProperty(this, "supportsPagination", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
-}
+};
 __decorate([
     primitiveTrait({
         type: "boolean",
@@ -72,4 +109,18 @@ __decorate([
         description: "Whether this feature service supports pagination. By default, this will be inferred from the server's response."
     })
 ], ArcGisFeatureServerCatalogItemTraits.prototype, "supportsPagination", void 0);
+ArcGisFeatureServerCatalogItemTraits = __decorate([
+    traitClass({
+        description: `Creates a single item in the catalog from one ESRI WFS layer.
+
+  <strong>Note:</strong> <i>Must specify <b>layer ID</b>, e.g. <code>/0</code>, in the URL path.</i>`,
+        example: {
+            url: "https://services5.arcgis.com/OvOcYIrJnM97ABBA/arcgis/rest/services/Australian_Public_Hospitals_WFL1/FeatureServer/0",
+            type: "esri-featureServer",
+            name: "Australian Public Hospitals",
+            id: "some id"
+        }
+    })
+], ArcGisFeatureServerCatalogItemTraits);
+export default ArcGisFeatureServerCatalogItemTraits;
 //# sourceMappingURL=ArcGisFeatureServerCatalogItemTraits.js.map

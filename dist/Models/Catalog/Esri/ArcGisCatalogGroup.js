@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { action, computed, runInAction } from "mobx";
+import { action, computed, makeObservable, override, runInAction } from "mobx";
 import URI from "urijs";
 import filterOutUndefined from "../../../Core/filterOutUndefined";
 import isDefined from "../../../Core/isDefined";
@@ -16,20 +16,31 @@ import { networkRequestError } from "../../../Core/TerriaError";
 import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
 import GroupMixin from "../../../ModelMixins/GroupMixin";
 import UrlMixin from "../../../ModelMixins/UrlMixin";
-import ArcGisCatalogGroupTraits from "../../../Traits/TraitsClasses/ArcGisMapServerCatalogGroupTraits";
-import ArcGisFeatureServerCatalogGroup, { FeatureServerStratum } from "./ArcGisFeatureServerCatalogGroup";
-import ArcGisMapServerCatalogGroup, { MapServerStratum } from "./ArcGisMapServerCatalogGroup";
+import ArcGisCatalogGroupTraits from "../../../Traits/TraitsClasses/ArcGisCatalogGroupTraits";
 import CommonStrata from "../../Definition/CommonStrata";
 import CreateModel from "../../Definition/CreateModel";
 import LoadableStratum from "../../Definition/LoadableStratum";
-import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
 import StratumOrder from "../../Definition/StratumOrder";
+import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
+import ArcGisFeatureServerCatalogGroup, { FeatureServerStratum } from "./ArcGisFeatureServerCatalogGroup";
+import ArcGisMapServerCatalogGroup, { MapServerStratum } from "./ArcGisMapServerCatalogGroup";
 const validServerTypes = ["MapServer", "FeatureServer"];
 class ArcGisServerStratum extends LoadableStratum(ArcGisCatalogGroupTraits) {
     constructor(_catalogGroup, _arcgisServer) {
         super();
-        this._catalogGroup = _catalogGroup;
-        this._arcgisServer = _arcgisServer;
+        Object.defineProperty(this, "_catalogGroup", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: _catalogGroup
+        });
+        Object.defineProperty(this, "_arcgisServer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: _arcgisServer
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(model) {
         return new ArcGisServerStratum(model, this._arcgisServer);
@@ -38,8 +49,8 @@ class ArcGisServerStratum extends LoadableStratum(ArcGisCatalogGroupTraits) {
         return this._arcgisServer;
     }
     static async load(catalogGroup) {
-        var terria = catalogGroup.terria;
-        var uri = new URI(catalogGroup.url).addQuery("f", "json");
+        const terria = catalogGroup.terria;
+        const uri = new URI(catalogGroup.url).addQuery("f", "json");
         return loadJson(proxyCatalogItemUrl(catalogGroup, uri.toString()))
             .then((arcgisServer) => {
             // Is this really a ArcGisServer REST response?
@@ -105,7 +116,7 @@ class ArcGisServerStratum extends LoadableStratum(ArcGisCatalogGroupTraits) {
         // Replace the stratum inherited from the parent group.
         model.strata.delete(CommonStrata.definition);
         model.setTrait(CommonStrata.definition, "name", replaceUnderscores(folder));
-        var uri = new URI(this._catalogGroup.url).segment(folder);
+        const uri = new URI(this._catalogGroup.url).segment(folder);
         model.setTrait(CommonStrata.definition, "url", uri.toString());
     }
     createMembersFromServices() {
@@ -143,13 +154,18 @@ class ArcGisServerStratum extends LoadableStratum(ArcGisCatalogGroupTraits) {
         // Replace the stratum inherited from the parent group.
         model.strata.delete(CommonStrata.definition);
         model.setTrait(CommonStrata.definition, "name", replaceUnderscores(localName));
-        var uri = new URI(this._catalogGroup.url)
+        const uri = new URI(this._catalogGroup.url)
             .segment(localName)
             .segment(service.type);
         model.setTrait(CommonStrata.definition, "url", uri.toString());
     }
 }
-ArcGisServerStratum.stratumName = "arcgisServer";
+Object.defineProperty(ArcGisServerStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "arcgisServer"
+});
 __decorate([
     computed
 ], ArcGisServerStratum.prototype, "members", null);
@@ -172,7 +188,11 @@ __decorate([
     action
 ], ArcGisServerStratum.prototype, "createMemberFromService", null);
 StratumOrder.addLoadStratum(ArcGisServerStratum.stratumName);
-export default class ArcGisCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(ArcGisCatalogGroupTraits)))) {
+class ArcGisCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(ArcGisCatalogGroupTraits)))) {
+    constructor(...args) {
+        super(...args);
+        makeObservable(this);
+    }
     get type() {
         return ArcGisCatalogGroup.type;
     }
@@ -225,15 +245,21 @@ export default class ArcGisCatalogGroup extends UrlMixin(GroupMixin(CatalogMembe
         });
     }
 }
-ArcGisCatalogGroup.type = "esri-group";
+Object.defineProperty(ArcGisCatalogGroup, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "esri-group"
+});
+export default ArcGisCatalogGroup;
 __decorate([
-    computed
+    override
 ], ArcGisCatalogGroup.prototype, "cacheDuration", null);
 function removePathFromName(basePath, name) {
     if (!basePath && basePath.length === 0) {
         return name;
     }
-    var index = name.indexOf(basePath);
+    const index = name.indexOf(basePath);
     if (index === 0) {
         return name.substring(basePath.length + 1);
     }
@@ -242,7 +268,7 @@ function removePathFromName(basePath, name) {
     }
 }
 function getBasePath(catalogGroup) {
-    var match = /rest\/services\/(.*)/i.exec(catalogGroup.url || "");
+    const match = /rest\/services\/(.*)/i.exec(catalogGroup.url || "");
     if (match && match.length > 1) {
         return match[1];
     }

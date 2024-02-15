@@ -15,6 +15,7 @@ export default class TerriaTooltipCustomComponent extends CustomComponent {
         return ["title"];
     }
     processNode(context, node, children) {
+        /* eslint-disable-next-line react/no-children-prop */
         return React.createElement(TooltipWithButtonLauncher, {
             dismissOnLeave: true,
             launcherComponent: () => { var _a; return (_a = node.attribs) === null || _a === void 0 ? void 0 : _a.title; },

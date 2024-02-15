@@ -1,3 +1,4 @@
+export {};
 /**
  * Types that can be used after upgrade to ts4.
  */

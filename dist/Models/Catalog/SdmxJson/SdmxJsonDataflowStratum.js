@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { computed } from "mobx";
+import { computed, makeObservable } from "mobx";
 import filterOutUndefined from "../../../Core/filterOutUndefined";
 import isDefined from "../../../Core/isDefined";
 import { networkRequestError } from "../../../Core/TerriaError";
@@ -14,11 +14,11 @@ import { FeatureInfoTemplateTraits } from "../../../Traits/TraitsClasses/Feature
 import LegendTraits from "../../../Traits/TraitsClasses/LegendTraits";
 import SdmxCatalogItemTraits from "../../../Traits/TraitsClasses/SdmxCatalogItemTraits";
 import { ModelOverrideTraits } from "../../../Traits/TraitsClasses/SdmxCommonTraits";
-import TableChartStyleTraits, { TableChartLineStyleTraits } from "../../../Traits/TraitsClasses/TableChartStyleTraits";
-import TableColorStyleTraits from "../../../Traits/TraitsClasses/TableColorStyleTraits";
-import TableColumnTraits, { ColumnTransformationTraits } from "../../../Traits/TraitsClasses/TableColumnTraits";
-import TableStyleTraits from "../../../Traits/TraitsClasses/TableStyleTraits";
-import TableTimeStyleTraits from "../../../Traits/TraitsClasses/TableTimeStyleTraits";
+import TableChartStyleTraits, { TableChartLineStyleTraits } from "../../../Traits/TraitsClasses/Table/ChartStyleTraits";
+import TableColorStyleTraits from "../../../Traits/TraitsClasses/Table/ColorStyleTraits";
+import TableColumnTraits, { ColumnTransformationTraits } from "../../../Traits/TraitsClasses/Table/ColumnTraits";
+import TableStyleTraits from "../../../Traits/TraitsClasses/Table/StyleTraits";
+import TableTimeStyleTraits from "../../../Traits/TraitsClasses/Table/TimeStyleTraits";
 import createCombinedModel from "../../Definition/createCombinedModel";
 import createStratumInstance from "../../Definition/createStratumInstance";
 import LoadableStratum from "../../Definition/LoadableStratum";
@@ -27,11 +27,6 @@ import { filterEnums } from "../../SelectableDimensions/SelectableDimensions";
 import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
 import { loadSdmxJsonStructure, parseSdmxUrn } from "./SdmxJsonServerStratum";
 export class SdmxJsonDataflowStratum extends LoadableStratum(SdmxCatalogItemTraits) {
-    constructor(catalogItem, sdmxJsonDataflow) {
-        super();
-        this.catalogItem = catalogItem;
-        this.sdmxJsonDataflow = sdmxJsonDataflow;
-    }
     duplicateLoadableStratum(model) {
         return new SdmxJsonDataflowStratum(model, this.sdmxJsonDataflow);
     }
@@ -40,7 +35,7 @@ export class SdmxJsonDataflowStratum extends LoadableStratum(SdmxCatalogItemTrai
      */
     static async load(catalogItem) {
         // Load dataflow (+ all related references)
-        let dataflowStructure = await loadSdmxJsonStructure(proxyCatalogItemUrl(catalogItem, `${catalogItem.baseUrl}/dataflow/${catalogItem.agencyId}/${catalogItem.dataflowId}?references=all`), false);
+        const dataflowStructure = await loadSdmxJsonStructure(proxyCatalogItemUrl(catalogItem, `${catalogItem.baseUrl}/dataflow/${catalogItem.agencyId}/${catalogItem.dataflowId}?references=all`), false);
         // Check response
         if (!isDefined(dataflowStructure.data)) {
             throw networkRequestError({
@@ -70,6 +65,22 @@ export class SdmxJsonDataflowStratum extends LoadableStratum(SdmxCatalogItemTrai
             contentConstraints: dataflowStructure.data.contentConstraints
         });
     }
+    constructor(catalogItem, sdmxJsonDataflow) {
+        super();
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogItem
+        });
+        Object.defineProperty(this, "sdmxJsonDataflow", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: sdmxJsonDataflow
+        });
+        makeObservable(this);
+    }
     get description() {
         return this.sdmxJsonDataflow.dataflow.description;
     }
@@ -82,7 +93,7 @@ export class SdmxJsonDataflowStratum extends LoadableStratum(SdmxCatalogItemTrai
         var _a, _b, _c;
         return filterOutUndefined((_c = (_b = (_a = this.sdmxJsonDataflow) === null || _a === void 0 ? void 0 : _a.dataflow.annotations) === null || _b === void 0 ? void 0 : _b.filter((a) => a.type === "EXT_RESOURCE" && a.text).map((annotation) => {
             var _a, _b;
-            let text = (_b = (_a = annotation.texts) === null || _a === void 0 ? void 0 : _a[i18next.language]) !== null && _b !== void 0 ? _b : annotation.text;
+            const text = (_b = (_a = annotation.texts) === null || _a === void 0 ? void 0 : _a[i18next.language]) !== null && _b !== void 0 ? _b : annotation.text;
             const title = text.includes("|") ? text.split("|")[0] : undefined;
             const url = text.includes("|") ? text.split("|")[1] : text;
             return createStratumInstance(MetadataUrlTraits, { title, url });
@@ -155,7 +166,8 @@ export class SdmxJsonDataflowStratum extends LoadableStratum(SdmxCatalogItemTrai
             .filter((dim) => {
             var _a;
             return dim.id &&
-                dim.type === "Dimension" && ((_a = dim.localRepresentation) === null || _a === void 0 ? void 0 : _a.enumeration);
+                dim.type === "Dimension" &&
+                ((_a = dim.localRepresentation) === null || _a === void 0 ? void 0 : _a.enumeration);
         })
             .map((dim) => {
             var _a, _b, _c, _d, _e;
@@ -168,15 +180,19 @@ export class SdmxJsonDataflowStratum extends LoadableStratum(SdmxCatalogItemTrai
             const allowedOptionIds = Array.isArray(constraints)
                 ? constraints.reduce((keys, constraint) => {
                     var _a;
-                    (_a = constraint.cubeRegions) === null || _a === void 0 ? void 0 : _a.forEach((cubeRegion) => { var _a, _b; return (_b = (_a = cubeRegion.keyValues) === null || _a === void 0 ? void 0 : _a.filter((kv) => kv.id === dim.id)) === null || _b === void 0 ? void 0 : _b.forEach((regionKey) => { var _a; return (_a = regionKey.values) === null || _a === void 0 ? void 0 : _a.forEach((value) => keys.add(value)); }); });
+                    (_a = constraint.cubeRegions) === null || _a === void 0 ? void 0 : _a.forEach((cubeRegion) => {
+                        var _a, _b;
+                        return (_b = (_a = cubeRegion.keyValues) === null || _a === void 0 ? void 0 : _a.filter((kv) => kv.id === dim.id)) === null || _b === void 0 ? void 0 : _b.forEach((regionKey) => { var _a; return (_a = regionKey.values) === null || _a === void 0 ? void 0 : _a.forEach((value) => keys.add(value)); });
+                    });
                     return keys;
                 }, new Set())
                 : new Set();
             let options = [];
             // Get codes by merging allowedOptionIds with codelist
-            let filteredCodesList = (_c = (allowedOptionIds.size > 0
-                ? (_b = codelist === null || codelist === void 0 ? void 0 : codelist.codes) === null || _b === void 0 ? void 0 : _b.filter((code) => allowedOptionIds.has(code.id)) : // If no allowedOptions were found -> return all codes
-             codelist === null || codelist === void 0 ? void 0 : codelist.codes)) !== null && _c !== void 0 ? _c : [];
+            const filteredCodesList = (_c = (allowedOptionIds.size > 0
+                ? (_b = codelist === null || codelist === void 0 ? void 0 : codelist.codes) === null || _b === void 0 ? void 0 : _b.filter((code) => allowedOptionIds.has(code.id))
+                : // If no allowedOptions were found -> return all codes
+                    codelist === null || codelist === void 0 ? void 0 : codelist.codes)) !== null && _c !== void 0 ? _c : [];
             // Create options object
             // If modelOverride `options` has been defined -> use it
             // Other wise use filteredCodesList
@@ -194,7 +210,8 @@ export class SdmxJsonDataflowStratum extends LoadableStratum(SdmxCatalogItemTrai
                         return { id: code.id, name: code.name, value: undefined };
                     });
             // Use first option as default if no other default is provided
-            let selectedId = (modelOverride === null || modelOverride === void 0 ? void 0 : modelOverride.allowUndefined) ? undefined
+            let selectedId = (modelOverride === null || modelOverride === void 0 ? void 0 : modelOverride.allowUndefined)
+                ? undefined
                 : (_d = options[0]) === null || _d === void 0 ? void 0 : _d.id;
             // Override selectedId if it a valid option
             const selectedIdOverride = modelOverride === null || modelOverride === void 0 ? void 0 : modelOverride.selectedId;
@@ -265,7 +282,7 @@ export class SdmxJsonDataflowStratum extends LoadableStratum(SdmxCatalogItemTrai
         const unitMeasure = filterOutUndefined((_a = this.catalogItem.modelOverrides) === null || _a === void 0 ? void 0 : _a.filter((override) => override.type === "unit-measure" && override.id).map((override) => {
             var _a, _b, _c, _d, _e;
             // Find dimension/attribute id with concept or codelist override
-            let dimOrAttr = (_a = this.getAttributionWithConceptOrCodelist(override.id)) !== null && _a !== void 0 ? _a : this.getDimensionWithConceptOrCodelist(override.id);
+            const dimOrAttr = (_a = this.getAttributionWithConceptOrCodelist(override.id)) !== null && _a !== void 0 ? _a : this.getDimensionWithConceptOrCodelist(override.id);
             const column = this.catalogItem.findColumnByName(dimOrAttr === null || dimOrAttr === void 0 ? void 0 : dimOrAttr.id);
             if ((column === null || column === void 0 ? void 0 : column.uniqueValues.values.length) === 1) {
                 // If this column has a codelist, use it to format the value
@@ -277,7 +294,7 @@ export class SdmxJsonDataflowStratum extends LoadableStratum(SdmxCatalogItemTrai
         // Find frequency from dimensions with modelOverrides of type "frequency".
         const frequencyDim = this.getDimensionsWithOverrideType("frequency").find((dim) => isDefined(dim.selectedId));
         // Try to get option label if it exists
-        let frequency = (_c = (_b = frequencyDim === null || frequencyDim === void 0 ? void 0 : frequencyDim.options.find((o) => o.id === frequencyDim.selectedId)) === null || _b === void 0 ? void 0 : _b.name) !== null && _c !== void 0 ? _c : frequencyDim === null || frequencyDim === void 0 ? void 0 : frequencyDim.id;
+        const frequency = (_c = (_b = frequencyDim === null || frequencyDim === void 0 ? void 0 : frequencyDim.options.find((o) => o.id === frequencyDim.selectedId)) === null || _b === void 0 ? void 0 : _b.name) !== null && _c !== void 0 ? _c : frequencyDim === null || frequencyDim === void 0 ? void 0 : frequencyDim.id;
         return `${unitMeasure ||
             i18next.t("models.sdmxJsonDataflowStratum.defaultUnitMeasure")}${frequency ? ` (${frequency})` : ""}`;
     }
@@ -298,7 +315,7 @@ export class SdmxJsonDataflowStratum extends LoadableStratum(SdmxCatalogItemTrai
         const unitMultiplier = filterOutUndefined((_b = this.catalogItem.modelOverrides) === null || _b === void 0 ? void 0 : _b.filter((override) => override.type === "unit-multiplier" && override.id).map((override) => {
             var _a;
             // Find dimension/attribute id with concept or codelist
-            let dimOrAttr = (_a = this.getAttributionWithConceptOrCodelist(override.id)) !== null && _a !== void 0 ? _a : this.getDimensionWithConceptOrCodelist(override.id);
+            const dimOrAttr = (_a = this.getAttributionWithConceptOrCodelist(override.id)) !== null && _a !== void 0 ? _a : this.getDimensionWithConceptOrCodelist(override.id);
             return dimOrAttr === null || dimOrAttr === void 0 ? void 0 : dimOrAttr.id;
         }))[0];
         return createStratumInstance(TableColumnTraits, {
@@ -350,7 +367,8 @@ export class SdmxJsonDataflowStratum extends LoadableStratum(SdmxCatalogItemTrai
             // Note this will override previous regionType
             if ((modelOverride === null || modelOverride === void 0 ? void 0 : modelOverride.type) === "region") {
                 // Use selectedId of first dimension with one
-                regionType = (_g = (_f = this.catalogItem.matchRegionProvider((_e = this.getDimensionsWithOverrideType("region-type").find((d) => isDefined(d.selectedId))) === null || _e === void 0 ? void 0 : _e.selectedId)) === null || _f === void 0 ? void 0 : _f.regionType) !== null && _g !== void 0 ? _g : regionType;
+                regionType =
+                    (_g = (_f = this.catalogItem.matchRegionProvider((_e = this.getDimensionsWithOverrideType("region-type").find((d) => isDefined(d.selectedId))) === null || _e === void 0 ? void 0 : _e.selectedId)) === null || _f === void 0 ? void 0 : _f.regionType) !== null && _g !== void 0 ? _g : regionType;
             }
             // Try to find valid region type from:
             // - dimension ID
@@ -359,7 +377,8 @@ export class SdmxJsonDataflowStratum extends LoadableStratum(SdmxCatalogItemTrai
             // - concept name?
             // - concept id (the string, not the full URN)
             if (!isDefined(regionType))
-                regionType = (_q = (_o = (_l = (_j = (_h = this.catalogItem.matchRegionProvider(dim.id)) === null || _h === void 0 ? void 0 : _h.regionType) !== null && _j !== void 0 ? _j : (_k = this.catalogItem.matchRegionProvider(codelist === null || codelist === void 0 ? void 0 : codelist.name)) === null || _k === void 0 ? void 0 : _k.regionType) !== null && _l !== void 0 ? _l : (_m = this.catalogItem.matchRegionProvider(codelist === null || codelist === void 0 ? void 0 : codelist.id)) === null || _m === void 0 ? void 0 : _m.regionType) !== null && _o !== void 0 ? _o : (_p = this.catalogItem.matchRegionProvider(concept === null || concept === void 0 ? void 0 : concept.name)) === null || _p === void 0 ? void 0 : _p.regionType) !== null && _q !== void 0 ? _q : (_r = this.catalogItem.matchRegionProvider(concept === null || concept === void 0 ? void 0 : concept.id)) === null || _r === void 0 ? void 0 : _r.regionType;
+                regionType =
+                    (_q = (_o = (_l = (_j = (_h = this.catalogItem.matchRegionProvider(dim.id)) === null || _h === void 0 ? void 0 : _h.regionType) !== null && _j !== void 0 ? _j : (_k = this.catalogItem.matchRegionProvider(codelist === null || codelist === void 0 ? void 0 : codelist.name)) === null || _k === void 0 ? void 0 : _k.regionType) !== null && _l !== void 0 ? _l : (_m = this.catalogItem.matchRegionProvider(codelist === null || codelist === void 0 ? void 0 : codelist.id)) === null || _m === void 0 ? void 0 : _m.regionType) !== null && _o !== void 0 ? _o : (_p = this.catalogItem.matchRegionProvider(concept === null || concept === void 0 ? void 0 : concept.name)) === null || _p === void 0 ? void 0 : _p.regionType) !== null && _q !== void 0 ? _q : (_r = this.catalogItem.matchRegionProvider(concept === null || concept === void 0 ? void 0 : concept.id)) === null || _r === void 0 ? void 0 : _r.regionType;
             // Apply regionTypeReplacements (which can replace regionType with a different regionType - using [{find:string, replace:string}] pattern)
             if ((modelOverride === null || modelOverride === void 0 ? void 0 : modelOverride.type) === "region") {
                 const replacement = (_t = (_s = modelOverride === null || modelOverride === void 0 ? void 0 : modelOverride.regionTypeReplacements) === null || _s === void 0 ? void 0 : _s.find((r) => r.find === regionType)) === null || _t === void 0 ? void 0 : _t.replace;
@@ -428,7 +447,8 @@ export class SdmxJsonDataflowStratum extends LoadableStratum(SdmxCatalogItemTrai
     get resolvedRegionColumn() {
         return this.catalogItem.tableColumns.find((tableCol) => {
             var _a;
-            return tableCol.name === ((_a = this.dimensionColumns.find((dimCol) => dimCol.type === "region")) === null || _a === void 0 ? void 0 : _a.name);
+            return tableCol.name ===
+                ((_a = this.dimensionColumns.find((dimCol) => dimCol.type === "region")) === null || _a === void 0 ? void 0 : _a.name);
         });
     }
     /** If we only have a single region (or no regions)
@@ -438,7 +458,8 @@ export class SdmxJsonDataflowStratum extends LoadableStratum(SdmxCatalogItemTrai
      **/
     get disableRegion() {
         var _a, _b, _c;
-        return (!this.catalogItem.isLoading && ((_a = this.resolvedRegionColumn) === null || _a === void 0 ? void 0 : _a.ready) &&
+        return (!this.catalogItem.isLoading &&
+            ((_a = this.resolvedRegionColumn) === null || _a === void 0 ? void 0 : _a.ready) &&
             ((_c = (_b = this.resolvedRegionColumn) === null || _b === void 0 ? void 0 : _b.valuesAsRegions.uniqueRegionIds.length) !== null && _c !== void 0 ? _c : 0) <= 1);
     }
     /** Get nice title to use for chart
@@ -578,7 +599,7 @@ export class SdmxJsonDataflowStratum extends LoadableStratum(SdmxCatalogItemTrai
         const conceptId = (_a = conceptUrn === null || conceptUrn === void 0 ? void 0 : conceptUrn.descendantIds) === null || _a === void 0 ? void 0 : _a[0];
         if (!isDefined(conceptId))
             return;
-        let resolvedConceptScheme = typeof conceptSchemeId === "string"
+        const resolvedConceptScheme = typeof conceptSchemeId === "string"
             ? this.getConceptScheme(conceptSchemeId)
             : conceptSchemeId;
         return (_b = resolvedConceptScheme === null || resolvedConceptScheme === void 0 ? void 0 : resolvedConceptScheme.concepts) === null || _b === void 0 ? void 0 : _b.find((d) => d.id === conceptId);
@@ -620,7 +641,12 @@ export class SdmxJsonDataflowStratum extends LoadableStratum(SdmxCatalogItemTrai
         });
     }
 }
-SdmxJsonDataflowStratum.stratumName = "sdmxJsonDataflow";
+Object.defineProperty(SdmxJsonDataflowStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "sdmxJsonDataflow"
+});
 __decorate([
     computed
 ], SdmxJsonDataflowStratum.prototype, "description", null);

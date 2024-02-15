@@ -15,11 +15,36 @@ import LegendOwnerTraits from "./LegendOwnerTraits";
 export default class CatalogFunctionJobTraits extends mixTraits(CatalogFunctionTraits, AutoRefreshingTraits, CatalogMemberTraits, LegendOwnerTraits, GroupTraits) {
     constructor() {
         super(...arguments);
-        this.logs = [];
-        this.jobStatus = "inactive";
-        this.downloadedResults = false;
-        this.refreshEnabled = false;
-        this.refreshInterval = 1;
+        Object.defineProperty(this, "logs", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "jobStatus", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "inactive"
+        });
+        Object.defineProperty(this, "downloadedResults", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "refreshEnabled", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "refreshInterval", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 1
+        });
     }
 }
 __decorate([

@@ -1,5 +1,6 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import clipboard from "clipboard";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import styled from "styled-components";
 import Box from "../Styled/Box";
@@ -49,29 +50,21 @@ const Clipboard = (props) => {
         };
     }, [id]);
     const isLightTheme = theme === "light";
-    return (React.createElement(ClipboardDiv, null,
-        React.createElement(Box, null,
-            source,
-            React.createElement(Button, { primary: true, css: `
+    return (_jsxs(ClipboardDiv, { children: [_jsxs(Box, { children: [source, _jsx(Button, { primary: true, css: `
             width: 80px;
             border-radius: 2px;
             ${rounded && `border-radius:  0 32px 32px 0;`}
-          `, className: `btn-copy-${id}`, "data-clipboard-target": `#${id}`, textProps: { large: true } }, t("clipboard.copy"))),
-        status !== CopyStatus.NotCopiedOrWaiting && (React.createElement(React.Fragment, null,
-            React.createElement(Spacing, { bottom: 2 }),
-            React.createElement(Box, { css: `
+          `, className: `btn-copy-${id}`, "data-clipboard-target": `#${id}`, textProps: { large: true }, children: t("clipboard.copy") })] }), status !== CopyStatus.NotCopiedOrWaiting && (_jsxs(_Fragment, { children: [_jsx(Spacing, { bottom: 2 }), _jsxs(Box, { css: `
               line-height: 10px;
-            ` },
-                React.createElement(StyledIcon, { light: !isLightTheme, realDark: isLightTheme, glyph: status === CopyStatus.Success
-                        ? Icon.GLYPHS.selected
-                        : Icon.GLYPHS.close, styledWidth: "20px", css: `
+            `, children: [_jsx(StyledIcon, { light: !isLightTheme, realDark: isLightTheme, glyph: status === CopyStatus.Success
+                                    ? Icon.GLYPHS.selected
+                                    : Icon.GLYPHS.close, styledWidth: "20px", css: `
                 margin: 8px;
                 margin-left: 0;
                 display: inline-block;
-              ` }),
-                React.createElement(TooltipText, null, status === CopyStatus.Success
-                    ? t("clipboard.success")
-                    : t("clipboard.unsuccessful")))))));
+              ` }), _jsx(TooltipText, { children: status === CopyStatus.Success
+                                    ? t("clipboard.success")
+                                    : t("clipboard.unsuccessful") })] })] }))] }));
 };
 export default Clipboard;
 const ClipboardDiv = styled.div `

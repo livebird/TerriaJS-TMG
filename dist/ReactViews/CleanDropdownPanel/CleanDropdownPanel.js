@@ -1,4 +1,5 @@
 "use strict";
+import { jsx as _jsx } from "react/jsx-runtime";
 // Ref now needs to be passed in via refForCaret as there is no longer a button
 // in CleanDropdownPanel
 // proptypes are in mixin
@@ -59,7 +60,7 @@ const CleanDropdownPanel = createReactClass({
         }
     },
     render() {
-        return (React.createElement(Box, { styledWidth: "auto", className: this.props.theme.outer, css: `
+        return (_jsx(Box, { styledWidth: "auto", className: this.props.theme.outer, css: `
           // unfortunately this is probably the quickest way to deal with the
           // mix of scss+styled-components atm
           .tjs-sc-InnerPanelCloseButton {
@@ -73,9 +74,7 @@ const CleanDropdownPanel = createReactClass({
           }
           max-width: calc(100vw - 10px);
           ${this.props.cleanDropdownPanelStyles}
-        ` },
-            React.createElement(If, { condition: this.isOpen() },
-                React.createElement(InnerPanel, { showDropdownInCenter: this.props.showDropdownInCenter, showDropdownAsModal: this.props.showDropdownAsModal, modalWidth: this.props.modalWidth, onDismissed: this.onDismissed, innerRef: this.onInnerMounted, doNotCloseFlag: this.getDoNotCloseFlag(), theme: this.props.theme, caretOffset: this.state.caretOffset, dropdownOffset: this.state.dropdownOffset }, this.props.children))));
+        `, children: this.isOpen() && (_jsx(InnerPanel, { showDropdownInCenter: this.props.showDropdownInCenter, showDropdownAsModal: this.props.showDropdownAsModal, modalWidth: this.props.modalWidth, onDismissed: this.onDismissed, innerRef: this.onInnerMounted, doNotCloseFlag: this.getDoNotCloseFlag(), theme: this.props.theme, caretOffset: this.state.caretOffset, dropdownOffset: this.state.dropdownOffset, children: this.props.children })) }));
     }
 });
 export default CleanDropdownPanel;

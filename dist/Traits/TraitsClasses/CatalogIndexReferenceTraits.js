@@ -11,7 +11,24 @@ import CatalogMemberReferenceTraits from "./CatalogMemberReferenceTraits";
 export default class CatalogIndexReferenceTraits extends mixTraits(CatalogMemberReferenceTraits) {
     constructor() {
         super(...arguments);
-        this.memberKnownContainerUniqueIds = [];
+        Object.defineProperty(this, "memberKnownContainerUniqueIds", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "shareKeys", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "nameInCatalog", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([

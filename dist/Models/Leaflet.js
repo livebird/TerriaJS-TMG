@@ -4,10 +4,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import i18next from "i18next";
-import { action, autorun, computed, observable, runInAction } from "mobx";
+import { action, autorun, computed, makeObservable, observable, reaction, runInAction } from "mobx";
 import { computedFn } from "mobx-utils";
-import cesiumCancelAnimationFrame from "terriajs-cesium/Source/Core/cancelAnimationFrame";
 import Cartesian2 from "terriajs-cesium/Source/Core/Cartesian2";
 import Cartographic from "terriajs-cesium/Source/Core/Cartographic";
 import defaultValue from "terriajs-cesium/Source/Core/defaultValue";
@@ -15,7 +13,6 @@ import Ellipsoid from "terriajs-cesium/Source/Core/Ellipsoid";
 import EventHelper from "terriajs-cesium/Source/Core/EventHelper";
 import CesiumMath from "terriajs-cesium/Source/Core/Math";
 import Rectangle from "terriajs-cesium/Source/Core/Rectangle";
-import cesiumRequestAnimationFrame from "terriajs-cesium/Source/Core/requestAnimationFrame";
 import DataSource from "terriajs-cesium/Source/DataSources/DataSource";
 import DataSourceCollection from "terriajs-cesium/Source/DataSources/DataSourceCollection";
 import SplitDirection from "terriajs-cesium/Source/Scene/SplitDirection";
@@ -42,36 +39,191 @@ import hasTraits from "./Definition/hasTraits";
 import TerriaFeature from "./Feature/Feature";
 import GlobeOrMap from "./GlobeOrMap";
 import { LeafletAttribution } from "./LeafletAttribution";
-import MapInteractionMode from "./MapInteractionMode";
 // We want TS to look at the type declared in lib/ThirdParty/terriajs-cesium-extra/index.d.ts
 // and import doesn't allows us to do that, so instead we use require + type casting to ensure
 // we still maintain the type checking, without TS screaming with errors
 const FeatureDetection = require("terriajs-cesium/Source/Core/FeatureDetection").default;
 // This class is an observer. It probably won't contain any observables itself
 export default class Leaflet extends GlobeOrMap {
+    updateMapObservables() {
+        this.size = this.map.getSize();
+        this.nw = this.map.containerPointToLayerPoint([0, 0]);
+        this.se = this.map.containerPointToLayerPoint(this.size);
+    }
+    _makeImageryLayerFromParts(parts, item) {
+        if (parts.imageryProvider === undefined)
+            return undefined;
+        if (TileErrorHandlerMixin.isMixedInto(item)) {
+            // because this code path can run multiple times, make sure we remove the
+            // handler if it is already registered
+            parts.imageryProvider.errorEvent.removeEventListener(item.onTileLoadError, item);
+            parts.imageryProvider.errorEvent.addEventListener(item.onTileLoadError, item);
+        }
+        return this._createImageryLayer(parts.imageryProvider, parts.clippingRectangle);
+    }
     constructor(terriaViewer, container) {
         super();
-        this.type = "Leaflet";
-        this.dataSources = new DataSourceCollection();
-        this.canShowSplitter = true;
-        this._stopRequestAnimationFrame = false;
-        this._pickedFeatures = undefined;
-        this._pauseMapInteractionCount = 0;
-        this._createImageryLayer = computedFn((ip, clippingRectangle) => {
-            const layerOptions = {
-                bounds: clippingRectangle && rectangleToLatLngBounds(clippingRectangle)
-            };
-            // We have two different kinds of ImageryProviderLeaflet layers
-            // - Grid layer will use the ImageryProvider in the more traditional way - calling `requestImage` to draw the image on to a canvas
-            // - Tile layer will pass tile URLs to leaflet objects - which is a bit more "Leaflety" than Grid layer
-            // Tile layer is preferred. Grid layer mainly exists for custom Imagery Providers which aren't just a tile of image URLs
-            if (supportsImageryProviderGridLayer(ip)) {
-                return new ImageryProviderLeafletGridLayer(this, ip, layerOptions);
-            }
-            else {
-                return new ImageryProviderLeafletTileLayer(this, ip, layerOptions);
-            }
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "Leaflet"
         });
+        Object.defineProperty(this, "terria", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "terriaViewer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "map", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "scene", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "dataSources", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new DataSourceCollection()
+        });
+        Object.defineProperty(this, "dataSourceDisplay", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "canShowSplitter", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "_attributionControl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_leafletVisualizer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_eventHelper", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_selectionIndicator", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_stopRequestAnimationFrame", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "_cesiumReqAnimFrameId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_pickedFeatures", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "_pauseMapInteractionCount", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
+        /* Disposers */
+        Object.defineProperty(this, "_disposeWorkbenchMapItemsSubscription", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_disposeDisableInteractionSubscription", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_disposeSelectedFeatureSubscription", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_disposeSplitterReaction", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        // These are used to split CesiumTileLayer and MapboxCanvasVectorTileLayer
+        Object.defineProperty(this, "size", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "nw", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "se", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_createImageryLayer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: computedFn((ip, clippingRectangle) => {
+                const layerOptions = {
+                    bounds: clippingRectangle && rectangleToLatLngBounds(clippingRectangle)
+                };
+                // We have two different kinds of ImageryProviderLeaflet layers
+                // - Grid layer will use the ImageryProvider in the more traditional way - calling `requestImage` to draw the image on to a canvas
+                // - Tile layer will pass tile URLs to leaflet objects - which is a bit more "Leaflety" than Grid layer
+                // Tile layer is preferred. Grid layer mainly exists for custom Imagery Providers which aren't just a tile of image URLs
+                if (supportsImageryProviderGridLayer(ip)) {
+                    return new ImageryProviderLeafletGridLayer(this, ip, layerOptions);
+                }
+                else {
+                    return new ImageryProviderLeafletTileLayer(this, ip, layerOptions);
+                }
+            })
+        });
+        makeObservable(this);
         this.terria = terriaViewer.terria;
         this.terriaViewer = terriaViewer;
         this.map = L.map(container, {
@@ -100,7 +252,7 @@ export default class Leaflet extends GlobeOrMap {
         const ticker = () => {
             if (!this._stopRequestAnimationFrame) {
                 this.terria.timelineClock.tick();
-                this._cesiumReqAnimFrameId = cesiumRequestAnimationFrame(ticker);
+                this._cesiumReqAnimFrameId = requestAnimationFrame(ticker);
             }
         };
         // Start ticker asynchronously to avoid calling an action in the consctructor
@@ -146,20 +298,6 @@ export default class Leaflet extends GlobeOrMap {
         });
         this._initProgressEvent();
     }
-    updateMapObservables() {
-        this.size = this.map.getSize();
-        this.nw = this.map.containerPointToLayerPoint([0, 0]);
-        this.se = this.map.containerPointToLayerPoint(this.size);
-    }
-    _makeImageryLayerFromParts(parts, item) {
-        if (TileErrorHandlerMixin.isMixedInto(item)) {
-            // because this code path can run multiple times, make sure we remove the
-            // handler if it is already registered
-            parts.imageryProvider.errorEvent.removeEventListener(item.onTileLoadError, item);
-            parts.imageryProvider.errorEvent.addEventListener(item.onTileLoadError, item);
-        }
-        return this._createImageryLayer(parts.imageryProvider, parts.clippingRectangle);
-    }
     get attributionPrefix() {
         return this._attributionControl.prefix;
     }
@@ -171,7 +309,7 @@ export default class Leaflet extends GlobeOrMap {
      */
     _initProgressEvent() {
         const onTileLoadChange = () => {
-            var tilesLoadingCount = 0;
+            let tilesLoadingCount = 0;
             this.map.eachLayer(function (layerOrGridlayer) {
                 // _tiles is protected but our knockout-loading-logic accesses it here anyway
                 const layer = layerOrGridlayer;
@@ -236,19 +374,46 @@ export default class Leaflet extends GlobeOrMap {
         // synchronously as a result of timelineClock ticking due to ticker()
         this._stopRequestAnimationFrame = true;
         if (isDefined(this._cesiumReqAnimFrameId)) {
-            cesiumCancelAnimationFrame(this._cesiumReqAnimFrameId);
+            cancelAnimationFrame(this._cesiumReqAnimFrameId);
         }
         this.dataSourceDisplay.destroy();
         this.map.off("move");
         this.map.off("zoom");
         this.map.remove();
     }
+    get availableCatalogItems() {
+        const catalogItems = [
+            ...this.terriaViewer.items.get(),
+            this.terriaViewer.baseMap
+        ];
+        return catalogItems;
+    }
+    get availableDataSources() {
+        const catalogItems = this.availableCatalogItems;
+        /* Handle datasources */
+        const allMapItems = [].concat(...catalogItems.filter(isDefined).map((item) => item.mapItems));
+        const dataSources = allMapItems.filter(isDataSource);
+        return dataSources;
+    }
     observeModelLayer() {
-        return autorun(() => {
-            const catalogItems = [
-                ...this.terriaViewer.items.get(),
-                this.terriaViewer.baseMap
-            ];
+        // Setup reaction to sync datSources collection with availableDataSources
+        //
+        // To avoid buggy concurrent syncs, we have to ensure that even when
+        // multiple sync reactions are triggered, we run them one after the
+        // other. To do this, we make each run of the reaction wait for the
+        // previous `syncDataSourcesPromise` to finish before starting itself.
+        let syncDataSourcesPromise = Promise.resolve();
+        const dataSourcesReactionDisposer = reaction(() => this.availableDataSources, () => {
+            syncDataSourcesPromise = syncDataSourcesPromise
+                .then(async () => {
+                await this.syncDataSourceCollection(this.availableDataSources, this.dataSources);
+                this.notifyRepaintRequired();
+            })
+                .catch(console.error);
+        }, { fireImmediately: true });
+        // Reaction to sync imagery from model layer with cesium map
+        const imageryReactionDisposer = autorun(() => {
+            const catalogItems = this.availableCatalogItems;
             // Flatmap
             const allImageryMapItems = [].concat(...catalogItems
                 .filter(isDefined)
@@ -278,7 +443,7 @@ export default class Leaflet extends GlobeOrMap {
             // Add layer and update its zIndex
             let zIndex = 100; // Start at an arbitrary value
             allImagery.reverse().forEach(({ parts, layer }) => {
-                if (parts.show) {
+                if (layer && parts.show) {
                     layer.setOpacity(parts.alpha);
                     layer.setZIndex(zIndex);
                     zIndex++;
@@ -286,36 +451,46 @@ export default class Leaflet extends GlobeOrMap {
                         this.map.addLayer(layer);
                     }
                 }
-                else {
+                else if (layer) {
                     this.map.removeLayer(layer);
                 }
             });
-            /* Handle datasources */
-            const allMapItems = [].concat(...catalogItems.filter(isDefined).map((item) => item.mapItems));
-            const allDataSources = allMapItems.filter(isDataSource);
-            // Remove deleted data sources
-            let dataSources = this.dataSources;
-            for (let i = 0; i < dataSources.length; i++) {
-                const d = dataSources.get(i);
-                if (allDataSources.indexOf(d) === -1) {
-                    dataSources.remove(d);
-                    --i;
-                }
-            }
-            // Add new data sources, remove hidden ones
-            allDataSources.forEach((d) => {
-                if (d.show) {
-                    if (!dataSources.contains(d)) {
-                        dataSources.add(d);
-                    }
-                }
-                else {
-                    dataSources.remove(d);
-                }
-            });
-            // Ensure stacking order matches order in allDataSources - first item appears on top.
-            allDataSources.forEach((d) => dataSources.raiseToTop(d));
         });
+        return () => {
+            dataSourcesReactionDisposer();
+            imageryReactionDisposer();
+        };
+    }
+    /**
+     * Syncs the `dataSources` collection against the latest `availableDataSources`.
+     *
+     */
+    async syncDataSourceCollection(availableDataSources, dataSources) {
+        // 1. Remove deleted data sources
+        //
+        // Iterate backwards because we're removing items.
+        for (let i = dataSources.length - 1; i >= 0; i--) {
+            const ds = dataSources.get(i);
+            if (availableDataSources.indexOf(ds) === -1 || !ds.show) {
+                dataSources.remove(ds);
+            }
+        }
+        // 2. Add new data sources
+        for (const ds of availableDataSources) {
+            if (!dataSources.contains(ds) && ds.show) {
+                await dataSources.add(ds);
+            }
+        }
+        // 3. Ensure stacking order matches order in `availableDataSources` - first item appears on top.
+        runInAction(() => availableDataSources.forEach((ds) => {
+            // There is a buggy/un-intended side-effect when calling raiseToTop() with
+            // a source that doesn't exist in the collection. Doing this will replace
+            // the last entry in the collection with the new one. So we should be
+            // careful to raiseToTop() only if the DS already exists in the collection.
+            // Relevant code:
+            //   https://github.com/CesiumGS/cesium/blob/dbd452328a48bfc4e192146862a9f8fa15789dc8/packages/engine/Source/DataSources/DataSourceCollection.js#L298-L299
+            dataSources.contains(ds) && dataSources.raiseToTop(ds);
+        }));
     }
     doZoomTo(target, flightDurationSeconds = 3.0) {
         if (!isDefined(target)) {
@@ -378,35 +553,6 @@ export default class Leaflet extends GlobeOrMap {
             alt: latLngHeight.height
         }), providerCoords, existingFeatures);
     }
-    /**
-     * Return features at a latitude, longitude and (optionally) height for the given imageryLayer.
-     * @param latLngHeight The position on the earth to pick
-     * @param providerCoords A map of imagery provider urls to the tile coords used to get features for those imagery
-     * @returns A flat array of all the features for the given tiles that are currently on the map
-     */
-    async getFeaturesAtLocation(latLngHeight, providerCoords) {
-        const pickMode = new MapInteractionMode({
-            message: i18next.t("models.imageryLayer.resolvingAvailability"),
-            onCancel: () => {
-                this.terria.mapInteractionModeStack.pop();
-            }
-        });
-        this.terria.mapInteractionModeStack.push(pickMode);
-        this._pickFeatures(L.latLng({
-            lat: latLngHeight.latitude,
-            lng: latLngHeight.longitude,
-            alt: latLngHeight.height
-        }), providerCoords, [], true);
-        if (pickMode.pickedFeatures) {
-            const pickedFeatures = pickMode.pickedFeatures;
-            await pickedFeatures.allFeaturesAvailablePromise;
-        }
-        return runInAction(() => {
-            var _a;
-            this.terria.mapInteractionModeStack.pop();
-            return (_a = pickMode.pickedFeatures) === null || _a === void 0 ? void 0 : _a.features;
-        });
-    }
     /*
      * There are two "listeners" for clicks which are set up in our constructor.
      * - One fires for any click: `map.on('click', ...`.  It calls `pickFeatures`.
@@ -431,7 +577,7 @@ export default class Leaflet extends GlobeOrMap {
         if (entity.entityCollection && entity.entityCollection.owner) {
             const owner = entity.entityCollection.owner;
             if (owner instanceof DataSource &&
-                owner.name == GlobeOrMap._featureHighlightName) {
+                owner.name === GlobeOrMap._featureHighlightName) {
                 return;
             }
         }
@@ -654,7 +800,12 @@ export default class Leaflet extends GlobeOrMap {
         this._highlightFeature(feature);
         if (isDefined(feature) && isDefined(feature.position)) {
             const cartographicScratch = new Cartographic();
-            const cartographic = Ellipsoid.WGS84.cartesianToCartographic(feature.position.getValue(this.terria.timelineClock.currentTime), cartographicScratch);
+            const cartesianPosition = feature.position.getValue(this.terria.timelineClock.currentTime);
+            if (cartesianPosition === undefined) {
+                this._selectionIndicator.animateSelectionIndicatorDepart();
+                return;
+            }
+            const cartographic = Ellipsoid.WGS84.cartesianToCartographic(cartesianPosition, cartographicScratch);
             this._selectionIndicator.setLatLng(L.latLng([
                 CesiumMath.toDegrees(cartographic.latitude),
                 CesiumMath.toDegrees(cartographic.longitude)
@@ -783,8 +934,11 @@ __decorate([
     computed
 ], Leaflet.prototype, "attributions", null);
 __decorate([
-    action
-], Leaflet.prototype, "getFeaturesAtLocation", null);
+    computed
+], Leaflet.prototype, "availableCatalogItems", null);
+__decorate([
+    computed
+], Leaflet.prototype, "availableDataSources", null);
 __decorate([
     action
 ], Leaflet.prototype, "_featurePicked", null);

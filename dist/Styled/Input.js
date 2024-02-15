@@ -1,4 +1,4 @@
-import React from "react";
+import { jsx as _jsx } from "react/jsx-runtime";
 import styled, { css, useTheme } from "styled-components";
 import Box from "./Box";
 const commonStyles = css `
@@ -91,8 +91,7 @@ export const StyledInput = styled.input `
 const Input = (props) => {
     const { boxProps, ...rest } = props;
     const theme = useTheme();
-    return (React.createElement(Box, Object.assign({ fullWidth: true }, boxProps),
-        React.createElement(StyledInput, Object.assign({}, rest))));
+    return (_jsx(Box, { fullWidth: true, ...boxProps, children: _jsx(StyledInput, { ...rest }) }));
 };
 export default Input;
 //# sourceMappingURL=Input.js.map

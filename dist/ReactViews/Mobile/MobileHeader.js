@@ -4,6 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import classNames from "classnames";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react";
@@ -11,13 +12,14 @@ import PropTypes from "prop-types";
 import React from "react";
 import { withTranslation } from "react-i18next";
 import styled, { withTheme } from "styled-components";
+import { applyTranslationIfExists } from "../../Language/languageHelpers";
 import { removeMarker } from "../../Models/LocationMarkerUtils";
 import Box from "../../Styled/Box";
 import { RawButton } from "../../Styled/Button";
 import Icon, { StyledIcon } from "../../Styled/Icon";
 import SearchBox from "../Search/SearchBox";
 import Branding from "../SidePanel/Branding";
-import { withViewState } from "../StandardUserInterface/ViewStateContext";
+import { withViewState } from "../Context";
 import Styles from "./mobile-header.scss";
 import MobileMenu from "./MobileMenu";
 import MobileModalWindow from "./MobileModalWindow";
@@ -115,49 +117,33 @@ let MobileHeader = class MobileHeader extends React.Component {
             menuIsOpen: false
         });
     }
+    renderSearch() {
+        const { t, viewState } = this.props;
+        const searchState = viewState.searchState;
+        return (_jsxs("div", { className: Styles.formSearchData, children: [searchState.showMobileLocationSearch && (_jsx(SearchBox, { searchText: searchState.locationSearchText, onSearchTextChanged: this.changeLocationSearchText.bind(this), onDoSearch: this.searchLocations.bind(this), placeholder: applyTranslationIfExists(viewState.terria.searchBarModel.placeholder, this.props.i18n), alwaysShowClear: true, onClear: this.closeLocationSearch.bind(this), autoFocus: true })), searchState.showMobileCatalogSearch && (_jsx(SearchBox, { searchText: searchState.catalogSearchText, onSearchTextChanged: this.changeCatalogSearchText.bind(this), onDoSearch: this.searchCatalog.bind(this), placeholder: t("search.searchCatalogue"), onClear: this.closeCatalogSearch.bind(this), autoFocus: true }))] }));
+    }
     render() {
         const searchState = this.props.viewState.searchState;
         const { t } = this.props;
         const nowViewingLength = this.props.viewState.terria.workbench.items !== undefined
             ? this.props.viewState.terria.workbench.items.length
             : 0;
-        return (React.createElement("div", { className: Styles.ui },
-            React.createElement(Box, { justifySpaceBetween: true, fullWidth: true, fullHeight: true, paddedRatio: 1, backgroundColor: this.props.theme.dark },
-                React.createElement(Choose, null,
-                    React.createElement(When, { condition: !searchState.showMobileLocationSearch &&
-                            !searchState.showMobileCatalogSearch },
-                        React.createElement(Box, { position: "absolute", css: `
+        return (_jsxs("div", { className: Styles.ui, children: [_jsx(Box, { justifySpaceBetween: true, fullWidth: true, fullHeight: true, paddedRatio: 1, backgroundColor: this.props.theme.dark, children: !searchState.showMobileLocationSearch &&
+                        !searchState.showMobileCatalogSearch ? (_jsxs(_Fragment, { children: [_jsxs(Box, { position: "absolute", css: `
                   left: 5px;
-                ` },
-                            React.createElement(HamburgerButton, { type: "button", onClick: this.props.viewState.toggleMobileMenu.bind(this.props.viewState), title: t("mobile.toggleNavigation") },
-                                React.createElement(StyledIcon, { light: true, glyph: Icon.GLYPHS.menu, styledWidth: "20px", styledHeight: "20px" })),
-                            React.createElement(Branding, { terria: this.props.viewState.terria, viewState: this.props.viewState, version: this.props.version })),
-                        React.createElement("div", { className: Styles.groupRight, css: `
+                `, children: [_jsx(HamburgerButton, { type: "button", onClick: this.props.viewState.toggleMobileMenu.bind(this.props.viewState), title: t("mobile.toggleNavigation"), children: _jsx(StyledIcon, { light: true, glyph: Icon.GLYPHS.menu, styledWidth: "20px", styledHeight: "20px" }) }), _jsx(Branding, { terria: this.props.viewState.terria, viewState: this.props.viewState, version: this.props.version })] }), _jsxs("div", { className: Styles.groupRight, css: `
                   background-color: ${(p) => p.theme.dark};
-                ` },
-                            React.createElement("button", { type: "button", className: Styles.btnAdd, onClick: this.onMobileDataCatalogClicked.bind(this) },
-                                t("mobile.addDataBtnText"),
-                                React.createElement(StyledIcon, { glyph: Icon.GLYPHS.increase, styledWidth: "20px", styledHeight: "20px" })),
-                            React.createElement(If, { condition: nowViewingLength > 0 },
-                                React.createElement("button", { type: "button", className: Styles.btnNowViewing, onClick: this.onMobileNowViewingClicked.bind(this) },
-                                    React.createElement(Icon, { glyph: Icon.GLYPHS.eye }),
-                                    React.createElement("span", { className: classNames(Styles.nowViewingCount, {
-                                            [Styles.doubleDigit]: nowViewingLength > 9
-                                        }) }, nowViewingLength))),
-                            React.createElement("button", { className: Styles.btnSearch, type: "button", onClick: this.showSearch.bind(this) },
-                                React.createElement(StyledIcon, { glyph: Icon.GLYPHS.search, styledWidth: "20px", styledHeight: "20px" })))),
-                    React.createElement(Otherwise, null,
-                        React.createElement("div", { className: Styles.formSearchData },
-                            React.createElement(Choose, null,
-                                React.createElement(When, { condition: searchState.showMobileLocationSearch },
-                                    React.createElement(SearchBox, { searchText: searchState.locationSearchText, onSearchTextChanged: this.changeLocationSearchText.bind(this), onDoSearch: this.searchLocations.bind(this), placeholder: t("search.placeholder"), alwaysShowClear: true, onClear: this.closeLocationSearch.bind(this), autoFocus: true })),
-                                React.createElement(When, { condition: searchState.showMobileCatalogSearch },
-                                    React.createElement(SearchBox, { searchText: searchState.catalogSearchText, onSearchTextChanged: this.changeCatalogSearchText.bind(this), onDoSearch: this.searchCatalog.bind(this), placeholder: t("search.searchCatalogue"), onClear: this.closeCatalogSearch.bind(this), autoFocus: true }))))))),
-            React.createElement(MobileMenu, { menuItems: this.props.menuItems, menuLeftItems: this.props.menuLeftItems, viewState: this.props.viewState, allBaseMaps: this.props.allBaseMaps, terria: this.props.viewState.terria, showFeedback: !!this.props.viewState.terria.configParameters.feedbackUrl }),
-            !this.props.viewState.isMapInteractionActive && (React.createElement(MobileModalWindow, { terria: this.props.viewState.terria, viewState: this.props.viewState }))));
+                `, children: [_jsxs("button", { type: "button", className: Styles.btnAdd, onClick: this.onMobileDataCatalogClicked.bind(this), children: [t("mobile.addDataBtnText"), _jsx(StyledIcon, { glyph: Icon.GLYPHS.increase, styledWidth: "20px", styledHeight: "20px" })] }), nowViewingLength > 0 && (_jsxs("button", { type: "button", className: Styles.btnNowViewing, onClick: this.onMobileNowViewingClicked.bind(this), children: [_jsx(Icon, { glyph: Icon.GLYPHS.eye }), _jsx("span", { className: classNames(Styles.nowViewingCount, {
+                                                    [Styles.doubleDigit]: nowViewingLength > 9
+                                                }), children: nowViewingLength })] })), _jsx("button", { className: Styles.btnSearch, type: "button", onClick: this.showSearch.bind(this), children: _jsx(StyledIcon, { glyph: Icon.GLYPHS.search, styledWidth: "20px", styledHeight: "20px" }) })] })] })) : (this.renderSearch()) }), _jsx(MobileMenu, { menuItems: this.props.menuItems, menuLeftItems: this.props.menuLeftItems, viewState: this.props.viewState, terria: this.props.viewState.terria, showFeedback: !!this.props.viewState.terria.configParameters.feedbackUrl }), !this.props.viewState.isMapInteractionActive && (_jsx(MobileModalWindow, { terria: this.props.viewState.terria, viewState: this.props.viewState }))] }));
     }
 };
-MobileHeader.displayName = "MobileHeader";
+Object.defineProperty(MobileHeader, "displayName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "MobileHeader"
+});
 MobileHeader = __decorate([
     observer
 ], MobileHeader);
@@ -180,12 +166,12 @@ const HamburgerButton = styled(RawButton) `
 `;
 MobileHeader.propTypes = {
     viewState: PropTypes.object.isRequired,
-    allBaseMaps: PropTypes.array,
     version: PropTypes.string,
     menuLeftItems: PropTypes.array,
     menuItems: PropTypes.array,
     theme: PropTypes.object,
-    t: PropTypes.func.isRequired
+    t: PropTypes.func.isRequired,
+    i18n: PropTypes.object
 };
 export default withTranslation()(withTheme(withViewState(MobileHeader)));
 //# sourceMappingURL=MobileHeader.js.map

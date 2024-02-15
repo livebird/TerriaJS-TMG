@@ -10,7 +10,18 @@ import mixTraits from "../mixTraits";
 export default class AutoRefreshingTraits extends mixTraits(MappableTraits) {
     constructor() {
         super(...arguments);
-        this.refreshEnabled = true;
+        Object.defineProperty(this, "refreshInterval", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "refreshEnabled", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
     }
 }
 __decorate([

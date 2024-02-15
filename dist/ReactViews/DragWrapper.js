@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import PropTypes from "prop-types";
 import interact from "interactjs";
@@ -46,7 +47,7 @@ class DragWrapper extends React.Component {
         window.removeEventListener("resize", this.resizeListener, false);
     }
     render() {
-        return React.createElement("div", { ref: (node) => (this.node = node) }, this.props.children);
+        return _jsx("div", { ref: (node) => (this.node = node), children: this.props.children });
     }
 }
 DragWrapper.propTypes = {

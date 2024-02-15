@@ -6,7 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { observable } from "mobx";
+import { observable, makeObservable } from "mobx";
 import RequestErrorEvent from "terriajs-cesium/Source/Core/RequestErrorEvent";
 import { terriaErrorNotification } from "../ReactViews/Notification/terriaErrorNotification";
 import filterOutUndefined from "./filterOutUndefined";
@@ -50,29 +50,6 @@ export function parseOverrides(overrides) {
  * by throwing an exception because no one would be able to catch it.
  */
 export default class TerriaError {
-    constructor(options) {
-        var _a, _b, _c, _d, _e, _f;
-        this.importance = 0;
-        this._message = options.message;
-        this._title = (_a = options.title) !== null && _a !== void 0 ? _a : { key: "core.terriaError.defaultTitle" };
-        this.sender = options.sender;
-        this._raisedToUser = (_b = options.raisedToUser) !== null && _b !== void 0 ? _b : false;
-        this.overrideRaiseToUser = options.overrideRaiseToUser;
-        this.importance = (_c = options.importance) !== null && _c !== void 0 ? _c : 0;
-        this.showDetails = (_d = options.showDetails) !== null && _d !== void 0 ? _d : false;
-        // Transform originalError to an array if needed
-        this.originalError = isDefined(options.originalError)
-            ? Array.isArray(options.originalError)
-                ? options.originalError
-                : [options.originalError]
-            : [];
-        this.severity = (_e = options.severity) !== null && _e !== void 0 ? _e : TerriaErrorSeverity.Error;
-        this.stack = ((_f = new Error().stack) !== null && _f !== void 0 ? _f : "")
-            .split("\n")
-            // Filter out some less useful lines in the stack trace
-            .filter((s) => ["result.ts", "terriaerror.ts", "opendatasoft.apiclient.umd.js"].every((remove) => !s.toLowerCase().includes(remove)))
-            .join("\n");
-    }
     /**
      * Convenience function to generate a TerriaError from some unknown error. It will try to extract a meaningful message from whatever object it is given.
      *
@@ -179,6 +156,91 @@ export default class TerriaError {
             ...parseOverrides(overrides)
         });
     }
+    constructor(options) {
+        var _a, _b, _c, _d, _e, _f;
+        Object.defineProperty(this, "_message", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_title", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_raisedToUser", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "importance", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
+        Object.defineProperty(this, "severity", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        /** `sender` isn't really used for anything at the moment... */
+        Object.defineProperty(this, "sender", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "originalError", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "stack", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        /** Override shouldRaiseToUser (see `get shouldRaiseToUser()`) */
+        Object.defineProperty(this, "overrideRaiseToUser", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "showDetails", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
+        this._message = options.message;
+        this._title = (_a = options.title) !== null && _a !== void 0 ? _a : { key: "core.terriaError.defaultTitle" };
+        this.sender = options.sender;
+        this._raisedToUser = (_b = options.raisedToUser) !== null && _b !== void 0 ? _b : false;
+        this.overrideRaiseToUser = options.overrideRaiseToUser;
+        this.importance = (_c = options.importance) !== null && _c !== void 0 ? _c : 0;
+        this.showDetails = (_d = options.showDetails) !== null && _d !== void 0 ? _d : false;
+        // Transform originalError to an array if needed
+        this.originalError = isDefined(options.originalError)
+            ? Array.isArray(options.originalError)
+                ? options.originalError
+                : [options.originalError]
+            : [];
+        this.severity = (_e = options.severity) !== null && _e !== void 0 ? _e : TerriaErrorSeverity.Error;
+        this.stack = ((_f = new Error().stack) !== null && _f !== void 0 ? _f : "")
+            .split("\n")
+            // Filter out some less useful lines in the stack trace
+            .filter((s) => ["result.ts", "terriaerror.ts", "opendatasoft.apiclient.umd.js"].every((remove) => !s.toLowerCase().includes(remove)))
+            .join("\n");
+    }
     get message() {
         return resolveI18n(this._message);
     }
@@ -192,9 +254,9 @@ export default class TerriaError {
     /** True if `severity` is `Error` and the error hasn't been raised yet - or return this.overrideRaiseToUser if it is defined */
     get shouldRaiseToUser() {
         var _a;
-        return ((_a = 
+        return (
         // Return this.overrideRaiseToUser override if it is defined
-        this.overrideRaiseToUser) !== null && _a !== void 0 ? _a : 
+        (_a = this.overrideRaiseToUser) !== null && _a !== void 0 ? _a : 
         // Otherwise, we should raise the error if it hasn't already been raised and the severity is ERROR
         (!this.raisedToUser &&
             (typeof this.severity === "function"
@@ -203,7 +265,7 @@ export default class TerriaError {
     }
     /** Has any error in the error tree been raised to the user? */
     get raisedToUser() {
-        return this.flatten().find((error) => error._raisedToUser) ? true : false;
+        return !!this.flatten().find((error) => error._raisedToUser);
     }
     /** Resolve error seveirty */
     get resolvedSeverity() {

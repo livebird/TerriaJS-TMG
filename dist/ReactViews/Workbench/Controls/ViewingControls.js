@@ -4,8 +4,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { sortBy, uniqBy } from "lodash";
-import { action, computed, runInAction } from "mobx";
+import { action, computed, runInAction, makeObservable } from "mobx";
 import { observer } from "mobx-react";
 import React from "react";
 import { withTranslation } from "react-i18next";
@@ -85,6 +86,7 @@ let ViewingControls = class ViewingControls extends React.Component {
     constructor(props) {
         // Required step: always call the parent class' constructor
         super(props);
+        makeObservable(this);
         // Set the state directly. Use props if necessary.
         this.state = {
             isMapZoomingToCatalogItem: false
@@ -248,7 +250,7 @@ let ViewingControls = class ViewingControls extends React.Component {
         });
     }
     async previewItem() {
-        let item = this.props.item;
+        const item = this.props.item;
         // Open up all the parents (doesn't matter that this sets it to enabled as well because it already is).
         getAncestors(this.props.item)
             .map((item) => getDereferencedIfExists(item))
@@ -310,52 +312,21 @@ let ViewingControls = class ViewingControls extends React.Component {
                 viewState.terria.raiseErrorToUser(TerriaError.from(err));
             }
         };
-        return (React.createElement("ul", null,
-            this.viewingControls.map((viewingControl) => (React.createElement("li", { key: viewingControl.id },
-                React.createElement(ViewingControlMenuButton, { onClick: () => handleOnClick(viewingControl), title: viewingControl.iconTitle },
-                    React.createElement(BoxViewingControl, null,
-                        React.createElement(StyledIcon, Object.assign({}, viewingControl.icon)),
-                        React.createElement("span", null, viewingControl.name)))))),
-            canSplit ? (React.createElement("li", { key: "workbench.splitItem" },
-                React.createElement(ViewingControlMenuButton, { onClick: this.splitItem.bind(this), title: t("workbench.splitItemTitle") },
-                    React.createElement(BoxViewingControl, null,
-                        React.createElement(StyledIcon, { glyph: Icon.GLYPHS.compare }),
-                        React.createElement("span", null, t("workbench.splitItem")))))) : null,
-            viewState.useSmallScreenInterface === false &&
-                DiffableMixin.isMixedInto(item) &&
-                !item.isShowingDiff &&
-                item.canDiffImages ? (React.createElement("li", { key: "workbench.diffImage" },
-                React.createElement(ViewingControlMenuButton, { onClick: this.openDiffTool.bind(this), title: t("workbench.diffImageTitle") },
-                    React.createElement(BoxViewingControl, null,
-                        React.createElement(StyledIcon, { glyph: Icon.GLYPHS.difference }),
-                        React.createElement("span", null, t("workbench.diffImage")))))) : null,
-            viewState.useSmallScreenInterface === false &&
-                ExportableMixin.isMixedInto(item) &&
-                item.canExportData ? (React.createElement("li", { key: "workbench.exportData" },
-                React.createElement(ViewingControlMenuButton, { onClick: this.exportDataClicked.bind(this), title: t("workbench.exportDataTitle") },
-                    React.createElement(BoxViewingControl, null,
-                        React.createElement(StyledIcon, { glyph: Icon.GLYPHS.upload }),
-                        React.createElement("span", null, t("workbench.exportData")))))) : null,
-            viewState.useSmallScreenInterface === false &&
-                SearchableItemMixin.isMixedInto(item) &&
-                item.canSearch ? (React.createElement("li", { key: "workbench.searchItem" },
-                React.createElement(ViewingControlMenuButton, { onClick: this.searchItem.bind(this), title: t("workbench.searchItemTitle") },
-                    React.createElement(BoxViewingControl, null,
-                        React.createElement(StyledIcon, { glyph: Icon.GLYPHS.search }),
-                        React.createElement("span", null, t("workbench.searchItem")))))) : null,
-            React.createElement("li", { key: "workbench.removeFromMap" },
-                React.createElement(ViewingControlMenuButton, { onClick: this.removeFromMap.bind(this), title: t("workbench.removeFromMapTitle") },
-                    React.createElement(BoxViewingControl, null,
-                        React.createElement(StyledIcon, { glyph: Icon.GLYPHS.cancel }),
-                        React.createElement("span", null, t("workbench.removeFromMap")))))));
+        return (_jsxs("ul", { children: [this.viewingControls.map((viewingControl) => (_jsx("li", { children: _jsx(ViewingControlMenuButton, { onClick: () => handleOnClick(viewingControl), title: viewingControl.iconTitle, children: _jsxs(BoxViewingControl, { children: [_jsx(StyledIcon, { ...viewingControl.icon }), _jsx("span", { children: viewingControl.name })] }) }) }, viewingControl.id))), canSplit ? (_jsx("li", { children: _jsx(ViewingControlMenuButton, { onClick: this.splitItem.bind(this), title: t("workbench.splitItemTitle"), children: _jsxs(BoxViewingControl, { children: [_jsx(StyledIcon, { glyph: Icon.GLYPHS.compare }), _jsx("span", { children: t("workbench.splitItem") })] }) }) }, "workbench.splitItem")) : null, viewState.useSmallScreenInterface === false &&
+                    DiffableMixin.isMixedInto(item) &&
+                    !item.isShowingDiff &&
+                    item.canDiffImages ? (_jsx("li", { children: _jsx(ViewingControlMenuButton, { onClick: this.openDiffTool.bind(this), title: t("workbench.diffImageTitle"), children: _jsxs(BoxViewingControl, { children: [_jsx(StyledIcon, { glyph: Icon.GLYPHS.difference }), _jsx("span", { children: t("workbench.diffImage") })] }) }) }, "workbench.diffImage")) : null, viewState.useSmallScreenInterface === false &&
+                    ExportableMixin.isMixedInto(item) &&
+                    item.canExportData ? (_jsx("li", { children: _jsx(ViewingControlMenuButton, { onClick: this.exportDataClicked.bind(this), title: t("workbench.exportDataTitle"), children: _jsxs(BoxViewingControl, { children: [_jsx(StyledIcon, { glyph: Icon.GLYPHS.upload }), _jsx("span", { children: t("workbench.exportData") })] }) }) }, "workbench.exportData")) : null, viewState.useSmallScreenInterface === false &&
+                    SearchableItemMixin.isMixedInto(item) &&
+                    item.canSearch ? (_jsx("li", { children: _jsx(ViewingControlMenuButton, { onClick: this.searchItem.bind(this), title: t("workbench.searchItemTitle"), children: _jsxs(BoxViewingControl, { children: [_jsx(StyledIcon, { glyph: Icon.GLYPHS.search }), _jsx("span", { children: t("workbench.searchItem") })] }) }) }, "workbench.searchItem")) : null, _jsx("li", { children: _jsx(ViewingControlMenuButton, { onClick: this.removeFromMap.bind(this), title: t("workbench.removeFromMapTitle"), children: _jsxs(BoxViewingControl, { children: [_jsx(StyledIcon, { glyph: Icon.GLYPHS.cancel }), _jsx("span", { children: t("workbench.removeFromMap") })] }) }) }, "workbench.removeFromMap")] }));
     }
     render() {
         const viewState = this.props.viewState;
         const item = this.props.item;
         const { t } = this.props;
         const showMenu = item.uniqueId === viewState.workbenchItemWithOpenControls;
-        return (React.createElement(Box, null,
-            React.createElement(Ul, { css: `
+        return (_jsxs(Box, { children: [_jsxs(Ul, { css: `
             list-style: none;
             padding-left: 0;
             margin: 0;
@@ -372,24 +343,20 @@ let ViewingControls = class ViewingControls extends React.Component {
             & > button:last-child {
               margin-right: 0;
             }
-          `, gap: 2 },
-                React.createElement(WorkbenchButton, { onClick: this.zoomTo.bind(this), title: t("workbench.zoomToTitle"), disabled: 
-                    // disabled if the item cannot be zoomed to or if a zoom is already in progress
-                    (MappableMixin.isMixedInto(item) && item.disableZoomTo) ||
-                        this.state.isMapZoomingToCatalogItem === true, iconElement: () => this.state.isMapZoomingToCatalogItem ? (React.createElement(AnimatedSpinnerIcon, null)) : (React.createElement(Icon, { glyph: Icon.GLYPHS.search })) }, t("workbench.zoomTo")),
-                React.createElement(WorkbenchButton, { onClick: this.previewItem.bind(this), title: t("workbench.previewItemTitle"), iconElement: () => React.createElement(Icon, { glyph: Icon.GLYPHS.about }), disabled: CatalogMemberMixin.isMixedInto(item) && item.disableAboutData }, t("workbench.previewItem")),
-                React.createElement(WorkbenchButton, { css: "flex-grow:0;", onClick: (e) => {
-                        e.stopPropagation();
-                        runInAction(() => {
-                            if (viewState.workbenchItemWithOpenControls === item.uniqueId) {
-                                viewState.workbenchItemWithOpenControls = undefined;
-                            }
-                            else {
-                                viewState.workbenchItemWithOpenControls = item.uniqueId;
-                            }
-                        });
-                    }, title: t("workbench.showMoreActionsTitle"), iconOnly: true, iconElement: () => React.createElement(Icon, { glyph: Icon.GLYPHS.menuDotted }) })),
-            showMenu && (React.createElement(Box, { css: `
+          `, gap: 2, children: [_jsx(WorkbenchButton, { onClick: this.zoomTo.bind(this), title: t("workbench.zoomToTitle"), disabled: 
+                            // disabled if the item cannot be zoomed to or if a zoom is already in progress
+                            (MappableMixin.isMixedInto(item) && item.disableZoomTo) ||
+                                this.state.isMapZoomingToCatalogItem === true, iconElement: () => this.state.isMapZoomingToCatalogItem ? (_jsx(AnimatedSpinnerIcon, {})) : (_jsx(Icon, { glyph: Icon.GLYPHS.search })), children: t("workbench.zoomTo") }), _jsx(WorkbenchButton, { onClick: this.previewItem.bind(this), title: t("workbench.previewItemTitle"), iconElement: () => _jsx(Icon, { glyph: Icon.GLYPHS.about }), disabled: CatalogMemberMixin.isMixedInto(item) && item.disableAboutData, children: t("workbench.previewItem") }), _jsx(WorkbenchButton, { css: "flex-grow:0;", onClick: (e) => {
+                                e.stopPropagation();
+                                runInAction(() => {
+                                    if (viewState.workbenchItemWithOpenControls === item.uniqueId) {
+                                        viewState.workbenchItemWithOpenControls = undefined;
+                                    }
+                                    else {
+                                        viewState.workbenchItemWithOpenControls = item.uniqueId;
+                                    }
+                                });
+                            }, title: t("workbench.showMoreActionsTitle"), iconOnly: true, iconElement: () => _jsx(Icon, { glyph: Icon.GLYPHS.menuDotted }) })] }), showMenu && (_jsx(Box, { css: `
               position: absolute;
               z-index: 100;
               right: 0;
@@ -403,7 +370,7 @@ let ViewingControls = class ViewingControls extends React.Component {
               ul {
                 list-style: none;
               }
-            ` }, this.renderViewingControlsMenu()))));
+            `, children: this.renderViewingControlsMenu() }))] }));
     }
 };
 __decorate([

@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import defined from "terriajs-cesium/Source/Core/defined";
 import createReactClass from "create-react-class";
@@ -37,8 +38,7 @@ const DateParameterEditor = createReactClass({
         const style = defined(this.props.parameter) && defined(this.props.parameter.value)
             ? Styles.field
             : Styles.fieldDatePlaceholder;
-        return (React.createElement("div", null,
-            React.createElement("input", { className: style, type: "date", placeholder: "YYYY-MM-DD", onChange: this.onChangeDate, value: this.state["date"] })));
+        return (_jsx("div", { children: _jsx("input", { className: style, type: "date", placeholder: "YYYY-MM-DD", onChange: this.onChangeDate, value: this.state["date"] }) }));
     }
 });
 module.exports = DateParameterEditor;

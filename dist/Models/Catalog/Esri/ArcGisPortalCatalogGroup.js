@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { action, computed, runInAction } from "mobx";
+import { action, computed, makeObservable, override, runInAction } from "mobx";
 import URI from "urijs";
 import isDefined from "../../../Core/isDefined";
 import loadJson from "../../../Core/loadJson";
@@ -16,23 +16,59 @@ import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
 import GroupMixin from "../../../ModelMixins/GroupMixin";
 import UrlMixin from "../../../ModelMixins/UrlMixin";
 import ArcGisPortalCatalogGroupTraits from "../../../Traits/TraitsClasses/ArcGisPortalCatalogGroupTraits";
-import ArcGisPortalItemReference from "./ArcGisPortalItemReference";
-import CatalogGroup from "../CatalogGroup";
 import CommonStrata from "../../Definition/CommonStrata";
 import CreateModel from "../../Definition/CreateModel";
 import LoadableStratum from "../../Definition/LoadableStratum";
-import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
 import StratumOrder from "../../Definition/StratumOrder";
+import CatalogGroup from "../CatalogGroup";
+import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
+import ArcGisPortalItemReference from "./ArcGisPortalItemReference";
 export class ArcGisPortalStratum extends LoadableStratum(ArcGisPortalCatalogGroupTraits) {
     constructor(_catalogGroup, _arcgisResponse, _arcgisGroupResponse) {
         super();
-        this._catalogGroup = _catalogGroup;
-        this._arcgisResponse = _arcgisResponse;
-        this._arcgisGroupResponse = _arcgisGroupResponse;
-        this.groups = [];
-        this.filteredGroups = [];
-        this.datasets = [];
-        this.filteredDatasets = [];
+        Object.defineProperty(this, "_catalogGroup", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: _catalogGroup
+        });
+        Object.defineProperty(this, "_arcgisResponse", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: _arcgisResponse
+        });
+        Object.defineProperty(this, "_arcgisGroupResponse", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: _arcgisGroupResponse
+        });
+        Object.defineProperty(this, "groups", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "filteredGroups", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "datasets", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "filteredDatasets", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        makeObservable(this);
         this.datasets = this.getDatasets();
         this.filteredDatasets = this.getFilteredDatasets();
         this.groups = this.getGroups();
@@ -42,7 +78,7 @@ export class ArcGisPortalStratum extends LoadableStratum(ArcGisPortalCatalogGrou
         return new ArcGisPortalStratum(model, this._arcgisResponse, this._arcgisGroupResponse);
     }
     static async load(catalogGroup) {
-        var terria = catalogGroup.terria;
+        const terria = catalogGroup.terria;
         let portalGroupsServerResponse = undefined;
         let portalItemsServerResponse = undefined;
         // If we need to group by groups we use slightly different API's
@@ -182,7 +218,7 @@ export class ArcGisPortalStratum extends LoadableStratum(ArcGisPortalCatalogGrou
     getGroups() {
         if (this._catalogGroup.groupBy === "none")
             return [];
-        let groups = [
+        const groups = [
             ...createUngroupedGroup(this),
             ...createGroupsByPortalGroups(this)
         ];
@@ -219,7 +255,7 @@ export class ArcGisPortalStratum extends LoadableStratum(ArcGisPortalCatalogGrou
         });
     }
     addCatalogItemToCatalogGroup(catalogItem, dataset, groupId) {
-        let group = this._catalogGroup.terria.getModelById(CatalogGroup, groupId);
+        const group = this._catalogGroup.terria.getModelById(CatalogGroup, groupId);
         if (group !== undefined) {
             group.add(CommonStrata.definition, catalogItem);
         }
@@ -259,7 +295,12 @@ export class ArcGisPortalStratum extends LoadableStratum(ArcGisPortalCatalogGrou
         }
     }
 }
-ArcGisPortalStratum.stratumName = "arcgisPortal";
+Object.defineProperty(ArcGisPortalStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "arcgisPortal"
+});
 __decorate([
     computed
 ], ArcGisPortalStratum.prototype, "members", null);
@@ -276,7 +317,11 @@ __decorate([
     action
 ], ArcGisPortalStratum.prototype, "createMemberFromDataset", null);
 StratumOrder.addLoadStratum(ArcGisPortalStratum.stratumName);
-export default class ArcGisPortalCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(ArcGisPortalCatalogGroupTraits)))) {
+class ArcGisPortalCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(ArcGisPortalCatalogGroupTraits)))) {
+    constructor(...args) {
+        super(...args);
+        makeObservable(this);
+    }
     get type() {
         return ArcGisPortalCatalogGroup.type;
     }
@@ -311,9 +356,15 @@ export default class ArcGisPortalCatalogGroup extends UrlMixin(GroupMixin(Catalo
         }
     }
 }
-ArcGisPortalCatalogGroup.type = "arcgis-portal-group";
+Object.defineProperty(ArcGisPortalCatalogGroup, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "arcgis-portal-group"
+});
+export default ArcGisPortalCatalogGroup;
 __decorate([
-    computed
+    override
 ], ArcGisPortalCatalogGroup.prototype, "cacheDuration", null);
 function createGroup(groupId, terria, groupName) {
     const g = new CatalogGroup(groupId, terria);

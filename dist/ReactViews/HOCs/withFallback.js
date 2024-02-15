@@ -1,4 +1,5 @@
-import React, { Suspense } from "react";
+import { jsx as _jsx } from "react/jsx-runtime";
+import { Suspense } from "react";
 import PropTypes from "prop-types";
 // TODO: better fallback
 // This is used as i18n can be configured by a TerriaMap to run & use suspense,
@@ -10,8 +11,7 @@ import PropTypes from "prop-types";
  */
 export const withFallback = (WrappedComponent) => {
     const WithFallback = (props) => {
-        return (React.createElement(Suspense, { fallback: "Loading..." },
-            React.createElement(WrappedComponent, Object.assign({}, props))));
+        return (_jsx(Suspense, { fallback: "Loading...", children: _jsx(WrappedComponent, { ...props }) }));
     };
     WithFallback.propTypes = {
         terria: PropTypes.object.isRequired,

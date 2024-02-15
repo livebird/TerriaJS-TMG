@@ -4,31 +4,201 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, observable, runInAction } from "mobx";
+import { action, observable, runInAction, makeObservable } from "mobx";
 import defaultValue from "terriajs-cesium/Source/Core/defaultValue";
 import DeveloperError from "terriajs-cesium/Source/Core/DeveloperError";
 import isDefined from "../../Core/isDefined";
 import loadJson from "../../Core/loadJson";
 export default class RegionProvider {
+    get regions() {
+        return this._regions;
+    }
+    get loaded() {
+        return this._loaded;
+    }
     constructor(regionType, properties, corsProxy) {
-        this._appliedReplacements = {
-            serverReplacements: {},
-            disambigServerReplacements: {},
-            dataReplacements: {},
-            disambigDataReplacements: {}
-        };
+        Object.defineProperty(this, "corsProxy", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "regionType", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "regionProp", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "nameProp", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "description", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "layerName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "server", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "serverSubdomains", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "serverMinZoom", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "serverMaxZoom", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "serverMaxNativeZoom", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "bbox", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "aliases", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "serverReplacements", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "dataReplacements", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "disambigProp", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "uniqueIdProp", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "textCodes", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "regionIdsFile", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "regionDisambigIdsFile", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "disambigDataReplacements", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "disambigServerReplacements", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "disambigAliases", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_appliedReplacements", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                serverReplacements: {},
+                disambigServerReplacements: {},
+                dataReplacements: {},
+                disambigDataReplacements: {}
+            }
+        });
         /**
          * Array of attributes of each region, once retrieved from the server.
          */
-        this._regions = [];
+        Object.defineProperty(this, "_regions", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
         /**
          * Look-up table of attributes, for speed.
          */
-        this._idIndex = {};
+        Object.defineProperty(this, "_idIndex", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {}
+        });
         /** Cache the loadRegionID promises so they are not regenerated each time until this._regions is defined. */
-        this._loadRegionIDsPromises = undefined;
+        Object.defineProperty(this, "_loadRegionIDsPromises", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
         /** Flag to indicate if loadRegionID has finished */
-        this._loaded = false;
+        Object.defineProperty(this, "_loaded", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        makeObservable(this);
         this.regionType = regionType;
         this.corsProxy = corsProxy;
         this.regionProp = properties.regionProp;
@@ -67,12 +237,6 @@ export default class RegionProvider {
         this.textCodes = defaultValue(properties.textCodes, false); // yes, it's singular...
         this.regionIdsFile = properties.regionIdsFile;
         this.regionDisambigIdsFile = properties.regionDisambigIdsFile;
-    }
-    get regions() {
-        return this._regions;
-    }
-    get loaded() {
-        return this._loaded;
     }
     setDisambigProperties(dp) {
         this.disambigDataReplacements = dp === null || dp === void 0 ? void 0 : dp.dataReplacements;
@@ -206,7 +370,7 @@ export default class RegionProvider {
         else {
             r = s.toLowerCase().trim();
         }
-        let replacements = this[replacementsProp];
+        const replacements = this[replacementsProp];
         if (replacements === undefined || replacements.length === 0) {
             return r;
         }
@@ -232,8 +396,8 @@ export default class RegionProvider {
             return -1;
         }
         const codeAfterReplacement = this.applyReplacements(code, "dataReplacements");
-        let id = this._idIndex[code];
-        let idAfterReplacement = this._idIndex[codeAfterReplacement];
+        const id = this._idIndex[code];
+        const idAfterReplacement = this._idIndex[codeAfterReplacement];
         if (!isDefined(id) && !isDefined(idAfterReplacement)) {
             return -1;
         }

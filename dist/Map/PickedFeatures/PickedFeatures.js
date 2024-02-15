@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { observable } from "mobx";
+import { observable, makeObservable } from "mobx";
 import MappableMixin, { ImageryParts } from "../../ModelMixins/MappableMixin";
 export function isProviderCoords(obj) {
     if (obj) {
@@ -24,14 +24,61 @@ export function isProviderCoordsMap(obj) {
 export default class PickedFeatures {
     constructor() {
         /**
+         * Gets or sets a promise that indicates, when it resolves, that all picked features are available in the
+         * {@see PickedFeatures#features} array.
+         */
+        Object.defineProperty(this, "allFeaturesAvailablePromise", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        /**
          * Gets or sets a value indicating whether the list of picked features is still loading.
          */
-        this.isLoading = true;
+        Object.defineProperty(this, "isLoading", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        /**
+         * Gets or sets the ground position that was picked, if any.
+         */
+        Object.defineProperty(this, "pickPosition", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         /**
          * Gets or sets the array of picked features.  The array is observable and may be updated up until the point that
          * {@see PickedFeatures#allFeaturesAvailablePromise} resolves.
          */
-        this.features = [];
+        Object.defineProperty(this, "features", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        /**
+         * Gets or sets a message describing an error that occurred while picking features.
+         * If this property is undefined, no error occurred.
+         * @type {String}
+         */
+        Object.defineProperty(this, "error", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "providerCoords", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
     }
 }
 __decorate([

@@ -1,6 +1,6 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react";
-import React from "react";
 import defined from "terriajs-cesium/Source/Core/defined";
 import addedByUser from "../../Core/addedByUser";
 import { DataSourceAction } from "../../Core/AnalyticEvents/analyticEvents";
@@ -50,6 +50,6 @@ export default observer(function DataCatalogReference({ reference, viewState, on
     else {
         btnState = ButtonState.Add;
     }
-    return (React.createElement(React.Fragment, null, reference.isGroup ? (React.createElement(CatalogGroup, { text: reference.name || "...", isPrivate: reference.isPrivate, title: path, onClick: setPreviewedItem, topLevel: isTopLevel, loading: reference.isLoadingReference, open: reference.isLoadingReference })) : (React.createElement(CatalogItem, { onTextClick: setPreviewedItem, selected: isSelected, text: reference.name || "...", isPrivate: reference.isPrivate, title: path, btnState: btnState, onBtnClick: reference.isFunction ? setPreviewedItem : add }))));
+    return reference.isGroup ? (_jsx(CatalogGroup, { text: reference.name || "...", isPrivate: reference.isPrivate, title: path, onClick: setPreviewedItem, topLevel: isTopLevel, loading: reference.isLoadingReference, open: reference.isLoadingReference })) : (_jsx(CatalogItem, { onTextClick: setPreviewedItem, selected: isSelected, text: reference.name || "...", isPrivate: reference.isPrivate, title: path, btnState: btnState, onBtnClick: reference.isFunction ? setPreviewedItem : add }));
 });
 //# sourceMappingURL=DataCatalogReference.js.map

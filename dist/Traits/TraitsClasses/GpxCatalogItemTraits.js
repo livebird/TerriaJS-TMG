@@ -10,6 +10,15 @@ import CatalogMemberTraits from "./CatalogMemberTraits";
 import { GeoJsonTraits } from "./GeoJsonTraits";
 import LegendOwnerTraits from "./LegendOwnerTraits";
 export default class GpxCatalogItemTraits extends mixTraits(GeoJsonTraits, CatalogMemberTraits, LegendOwnerTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "gpxString", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({

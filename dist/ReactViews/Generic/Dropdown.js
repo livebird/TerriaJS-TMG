@@ -1,4 +1,5 @@
 "use strict";
+import { jsxs as _jsxs, jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import PropTypes from "prop-types";
 import createReactClass from "create-react-class";
@@ -99,24 +100,13 @@ const Dropdown = createReactClass({
     },
     render() {
         const isOpenStyle = Styles.isOpen + " " + (this.props.theme.isOpen || "");
-        return (React.createElement("div", { className: classNames(Styles.dropdown, this.props.theme.dropdown) },
-            React.createElement("button", { type: "button", onClick: this.onButtonClicked, className: classNames(this.props.theme.button, Styles.btnDropdown), ref: (element) => {
-                    this.buttonElement = element;
-                }, disabled: this.props.disabled },
-                defined(this.props.selected)
-                    ? this.props.selected[this.props.textProperty]
-                    : this.props.children,
-                defined(this.props.theme.icon) ? this.props.theme.icon : null),
-            React.createElement("ul", { className: classNames(Styles.list, this.props.theme.list, {
-                    [isOpenStyle]: this.state.isOpen
-                }) },
-                React.createElement(For, { each: "option", of: this.props.options, index: "index" },
-                    React.createElement("li", { key: option[this.props.textProperty] },
-                        React.createElement(Choose, null,
-                            React.createElement(When, { condition: option.href },
-                                React.createElement("a", { href: option.href, target: "_blank", rel: "noopener noreferrer", className: classNames(Styles.btnOption, this.props.theme.btnOption || "", { [Styles.isSelected]: option === this.props.selected }), download: option.download }, option[this.props.textProperty])),
-                            React.createElement(Otherwise, null,
-                                React.createElement("button", { type: "button", className: classNames(Styles.btnOption, this.props.theme.btnOption || "", { [Styles.isSelected]: option === this.props.selected }), onClick: () => this.select(option, index) }, option[this.props.textProperty]))))))));
+        return (_jsxs("div", { className: classNames(Styles.dropdown, this.props.theme.dropdown), children: [_jsxs("button", { type: "button", onClick: this.onButtonClicked, className: classNames(this.props.theme.button, Styles.btnDropdown), ref: (element) => {
+                        this.buttonElement = element;
+                    }, disabled: this.props.disabled, children: [defined(this.props.selected)
+                            ? this.props.selected[this.props.textProperty]
+                            : this.props.children, defined(this.props.theme.icon) ? this.props.theme.icon : null] }), _jsx("ul", { className: classNames(Styles.list, this.props.theme.list, {
+                        [isOpenStyle]: this.state.isOpen
+                    }), children: this.props.options.map((option, i) => (_jsx("li", { children: option.href ? (_jsx("a", { href: option.href, target: "_blank", rel: "noopener noreferrer", className: classNames(Styles.btnOption, this.props.theme.btnOption || "", { [Styles.isSelected]: option === this.props.selected }), download: option.download, children: option[this.props.textProperty] })) : (_jsx("button", { type: "button", className: classNames(Styles.btnOption, this.props.theme.btnOption || "", { [Styles.isSelected]: option === this.props.selected }), onClick: () => this.select(option, i), children: option[this.props.textProperty] })) }, option[this.props.textProperty]))) })] }));
     }
 });
 module.exports = Dropdown;

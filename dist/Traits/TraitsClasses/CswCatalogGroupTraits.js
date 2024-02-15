@@ -14,6 +14,27 @@ import primitiveTrait from "../Decorators/primitiveTrait";
 import UrlTraits from "./UrlTraits";
 import LegendOwnerTraits from "./LegendOwnerTraits";
 export class DomainSpecTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "domainPropertyName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "hierarchySeparator", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "queryPropertyName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -39,17 +60,84 @@ __decorate([
 export default class CswCatalogGroupTraits extends mixTraits(GetCapabilitiesTraits, GroupTraits, UrlTraits, CatalogMemberTraits, LegendOwnerTraits) {
     constructor() {
         super(...arguments);
-        this.flatten = false;
-        this.includeWms = true;
-        this.includeKml = true;
-        this.includeCsv = true;
-        this.includeEsriMapServer = true;
-        this.includeGeoJson = true;
-        this.wmsResourceFormat = "\\bwms\\b";
-        this.kmlResourceFormat = "\\bkml\\b";
-        this.csvResourceFormat = "\\bcsv-geo-";
-        this.esriMapServerResourceFormat = "\\besri rest\\b";
-        this.geoJsonResourceFormat = "\\bgeojson\\b";
+        Object.defineProperty(this, "flatten", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "domainSpecification", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "includeWms", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "includeKml", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "includeCsv", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "includeEsriMapServer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "includeGeoJson", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "wmsResourceFormat", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "\\bwms\\b"
+        });
+        Object.defineProperty(this, "kmlResourceFormat", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "\\bkml\\b"
+        });
+        Object.defineProperty(this, "csvResourceFormat", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "\\bcsv-geo-"
+        });
+        Object.defineProperty(this, "esriMapServerResourceFormat", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "\\besri rest\\b"
+        });
+        Object.defineProperty(this, "geoJsonResourceFormat", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "\\bgeojson\\b"
+        });
+        Object.defineProperty(this, "getRecordsTemplate", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([

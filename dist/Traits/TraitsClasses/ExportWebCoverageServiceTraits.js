@@ -11,6 +11,21 @@ import mixTraits from "../mixTraits";
 import ModelTraits from "../ModelTraits";
 import ExportableTraits from "./ExportableTraits";
 export class KeyValueTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "key", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "value", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -29,7 +44,36 @@ __decorate([
 export class WebCoverageServiceParameterTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.outputFormat = "image/geotiff";
+        Object.defineProperty(this, "outputCrs", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "outputFormat", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "image/geotiff"
+        });
+        Object.defineProperty(this, "subsets", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "duplicateSubsetValues", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "additionalParameters", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([
@@ -72,6 +116,27 @@ __decorate([
     })
 ], WebCoverageServiceParameterTraits.prototype, "additionalParameters", void 0);
 export default class ExportWebCoverageServiceTraits extends mixTraits(ExportableTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "linkedWcsUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "linkedWcsCoverage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "linkedWcsParameters", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({

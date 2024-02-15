@@ -1,16 +1,24 @@
 "use strict";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import classNames from "classnames";
 import React from "react";
 import createReactClass from "create-react-class";
 import PropTypes from "prop-types";
 import defined from "terriajs-cesium/Source/Core/defined";
-import knockout from "terriajs-cesium/Source/ThirdParty/knockout";
 import GeoJsonCatalogItem from "../../Models/Catalog/CatalogItems/GeoJsonCatalogItem";
 import WebMapServiceCatalogItem from "../../Models/Catalog/Ows/WebMapServiceCatalogItem";
 import { withTranslation } from "react-i18next";
 import RegionTypeParameterEditor from "./RegionTypeParameterEditor";
 import Styles from "./parameter-editors.scss";
 import CommonStrata from "../../Models/Definition/CommonStrata";
+const knockout = {
+    defineProperty() {
+        throw new Error("This component needs to be fixed to not use Knockout.");
+    },
+    getObservable() {
+        throw new Error("This component needs to be fixed to not use Knockout.");
+    }
+};
 const RegionPicker = createReactClass({
     displayName: "RegionPicker",
     propTypes: {
@@ -238,19 +246,15 @@ const RegionPicker = createReactClass({
     },
     render() {
         const { t } = this.props;
-        return (React.createElement("div", { className: Styles.parameterEditor },
-            React.createElement(RegionTypeParameterEditor, { previewed: this.props.previewed, parameter: this.props.parameter.regionTypeParameter }),
-            React.createElement("input", { className: Styles.field, type: "text", autoComplete: "off", value: this.state.autocompleteText ||
-                    getDisplayValue(this.regionValue, this.props.parameter), onChange: this.textChange, placeholder: t("analytics.regionName") }),
-            this.renderOptions()));
+        return (_jsxs("div", { className: Styles.parameterEditor, children: [_jsx(RegionTypeParameterEditor, { previewed: this.props.previewed, parameter: this.props.parameter.regionTypeParameter }), _jsx("input", { className: Styles.field, type: "text", autoComplete: "off", value: this.state.autocompleteText ||
+                        getDisplayValue(this.regionValue, this.props.parameter), onChange: this.textChange, placeholder: t("analytics.regionName") }), this.renderOptions()] }));
     },
     renderOptions() {
         const className = classNames({
             [Styles.autocomplete]: true,
             [Styles.isHidden]: !this.state.autocompleteVisible
         });
-        return (React.createElement("ul", { className: className }, this.state.autocompleteOptions.map((op, i) => (React.createElement("li", { key: i },
-            React.createElement("button", { type: "button", className: Styles.autocompleteItem, onClick: this.selectRegion.bind(this, op) }, op.name))))));
+        return (_jsx("ul", { className: className, children: this.state.autocompleteOptions.map((op, i) => (_jsx("li", { children: _jsx("button", { type: "button", className: Styles.autocompleteItem, onClick: this.selectRegion.bind(this, op), children: op.name }) }, i))) }));
     }
 });
 /**

@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action } from "mobx";
+import { action, makeObservable } from "mobx";
 import Cartesian3 from "terriajs-cesium/Source/Core/Cartesian3";
 import Cartographic from "terriajs-cesium/Source/Core/Cartographic";
 import EllipsoidTerrainProvider from "terriajs-cesium/Source/Core/EllipsoidTerrainProvider";
@@ -27,18 +27,80 @@ const KeyMap = {
 };
 export default class MovementsController {
     constructor(cesium, onMove, pedestrianHeight, maxVerticalLookAngle) {
-        this.cesium = cesium;
-        this.onMove = onMove;
-        this.pedestrianHeight = pedestrianHeight;
-        this.maxVerticalLookAngle = maxVerticalLookAngle;
+        Object.defineProperty(this, "cesium", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: cesium
+        });
+        Object.defineProperty(this, "onMove", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: onMove
+        });
+        Object.defineProperty(this, "pedestrianHeight", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: pedestrianHeight
+        });
+        Object.defineProperty(this, "maxVerticalLookAngle", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: maxVerticalLookAngle
+        });
         // Current mode
-        this.mode = "walk";
+        Object.defineProperty(this, "mode", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "walk"
+        });
         // Current active movements
-        this.activeMovements = new Set();
+        Object.defineProperty(this, "activeMovements", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new Set()
+        });
+        // Latest estimate of the height of the surface from the ellipsoid
+        Object.defineProperty(this, "currentSurfaceHeightEstimate", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         // True if we are currently updating surface height estimate
-        this.isUpdatingSurfaceHeightEstimate = false;
+        Object.defineProperty(this, "isUpdatingSurfaceHeightEstimate", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
         // True if we are currently animating surface height change
-        this.isAnimatingSurfaceHeightChange = false;
+        Object.defineProperty(this, "isAnimatingSurfaceHeightChange", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        // The position of the mouse when a mouse action is started
+        Object.defineProperty(this, "startMousePosition", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        // The latest position of the mouse while the action is active
+        Object.defineProperty(this, "currentMousePosition", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
         this.currentSurfaceHeightEstimate = this.camera.positionCartographic.height;
         this.updateSurfaceHeightEstimate();
     }

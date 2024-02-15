@@ -4,6 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import { withTranslation } from "react-i18next";
 import Styles from "./mappable-preview.scss";
@@ -38,8 +39,7 @@ let ExportData = class ExportData extends React.Component {
             !ExportableMixin.isMixedInto(catalogItem) ||
             !catalogItem.canExportData)
             return null;
-        return (React.createElement("div", { className: Styles.metadata },
-            React.createElement("button", { onClick: this.exportDataClicked.bind(this, catalogItem) }, "Export data")));
+        return (_jsx("div", { className: Styles.metadata, children: _jsx("button", { onClick: this.exportDataClicked.bind(this, catalogItem), children: "Export data" }) }));
     }
 };
 ExportData = __decorate([

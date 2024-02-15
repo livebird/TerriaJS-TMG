@@ -11,6 +11,33 @@ import ModelTraits from "../ModelTraits";
 import AttributionTraits from "./AttributionTraits";
 import { FeatureInfoTemplateTraits } from "./FeatureInfoTraits";
 export class RectangleTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "west", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "south", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "east", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "north", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -43,10 +70,42 @@ __decorate([
 export class LookAtTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.targetHeight = 100;
-        this.heading = 0;
-        this.pitch = 45;
-        this.range = 500;
+        Object.defineProperty(this, "targetLongitude", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "targetLatitude", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "targetHeight", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 100
+        });
+        Object.defineProperty(this, "heading", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
+        Object.defineProperty(this, "pitch", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 45
+        });
+        Object.defineProperty(this, "range", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 500
+        });
     }
 }
 __decorate([
@@ -92,6 +151,27 @@ __decorate([
     })
 ], LookAtTraits.prototype, "range", void 0);
 export class VectorTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "x", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "y", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "z", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -115,6 +195,27 @@ __decorate([
     })
 ], VectorTraits.prototype, "z", void 0);
 export class CameraTraits extends RectangleTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "position", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "direction", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "up", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     objectTrait({
@@ -138,6 +239,21 @@ __decorate([
     })
 ], CameraTraits.prototype, "up", void 0);
 export class IdealZoomTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "lookAt", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "camera", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     objectTrait({
@@ -154,6 +270,51 @@ __decorate([
     })
 ], IdealZoomTraits.prototype, "camera", void 0);
 export class InitialMessageTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "title", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "content", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "key", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "confirmation", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "confirmText", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "width", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "height", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -204,13 +365,69 @@ __decorate([
         description: "Height of the message."
     })
 ], InitialMessageTraits.prototype, "height", void 0);
-export default class MappableTraits extends mixTraits(AttributionTraits) {
+class MappableTraits extends mixTraits(AttributionTraits) {
     constructor() {
         super(...arguments);
-        this.disablePreview = false;
-        this.disableZoomTo = false;
-        this.zoomOnAddToWorkbench = false;
-        this.show = true;
+        Object.defineProperty(this, "rectangle", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "idealZoom", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "disablePreview", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "disableZoomTo", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "zoomOnAddToWorkbench", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "show", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        Object.defineProperty(this, "initialMessage", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "featureInfoTemplate", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "showStringIfPropertyValueIsNull", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "maximumShownFeatureInfos", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([
@@ -283,4 +500,5 @@ __decorate([
         description: 'The maximum number of "feature infos" that can be displayed in feature info panel.'
     })
 ], MappableTraits.prototype, "maximumShownFeatureInfos", void 0);
+export default MappableTraits;
 //# sourceMappingURL=MappableTraits.js.map

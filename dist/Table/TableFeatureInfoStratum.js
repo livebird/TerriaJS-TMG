@@ -5,15 +5,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import LoadableStratum from "../Models/Definition/LoadableStratum";
-import TableTraits from "../Traits/TraitsClasses/TableTraits";
-import { computed } from "mobx";
+import TableTraits from "../Traits/TraitsClasses/Table/TableTraits";
+import { computed, makeObservable } from "mobx";
 import createStratumInstance from "../Models/Definition/createStratumInstance";
 import { FeatureInfoTemplateTraits } from "../Traits/TraitsClasses/FeatureInfoTraits";
 import StratumOrder from "../Models/Definition/StratumOrder";
-export default class TableFeatureInfoStratum extends LoadableStratum(TableTraits) {
+class TableFeatureInfoStratum extends LoadableStratum(TableTraits) {
     constructor(catalogItem) {
         super();
-        this.catalogItem = catalogItem;
+        Object.defineProperty(this, "catalogItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: catalogItem
+        });
+        makeObservable(this);
     }
     static load(item) {
         return new TableFeatureInfoStratum(item);
@@ -33,7 +39,13 @@ export default class TableFeatureInfoStratum extends LoadableStratum(TableTraits
         });
     }
 }
-TableFeatureInfoStratum.stratumName = "tableFeatureInfo";
+Object.defineProperty(TableFeatureInfoStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "tableFeatureInfo"
+});
+export default TableFeatureInfoStratum;
 __decorate([
     computed
 ], TableFeatureInfoStratum.prototype, "featureInfoTemplate", null);

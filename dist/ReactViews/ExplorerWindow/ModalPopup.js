@@ -1,5 +1,6 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import classNames from "classnames";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Styles from "./explorer-window.scss";
 const SLIDE_DURATION = 300;
@@ -50,13 +51,9 @@ const ModalPopup = (props) => {
     // Render explorer panel when explorer panel should be visible
     //  or when sliding out (animation)
     const renderUi = props.isVisible || inTransition;
-    return renderUi ? (React.createElement("div", { className: classNames(Styles.modalWrapper, props.isTopElement ? "top-element" : ""), id: "explorer-panel-wrapper", "aria-hidden": !props.isVisible },
-        React.createElement("div", { onClick: props.onClose, id: "modal-overlay", className: Styles.modalOverlay, tabIndex: -1 }),
-        React.createElement("div", { id: "explorer-panel", className: classNames(Styles.explorerPanel, {
-                [Styles.isMounted]: props.isVisible && !inTransition
-            }), "aria-labelledby": "modalTitle", "aria-describedby": "modalDescription", role: "dialog" },
-            React.createElement("button", { type: "button", onClick: props.onClose, className: Styles.btnCloseModal, title: t("addData.closeDataPanel"), "data-target": "close-modal" }, t("addData.done")),
-            props.children))) : null;
+    return renderUi ? (_jsxs("div", { className: classNames(Styles.modalWrapper, props.isTopElement ? "top-element" : ""), id: "explorer-panel-wrapper", "aria-hidden": !props.isVisible, children: [_jsx("div", { onClick: props.onClose, id: "modal-overlay", className: Styles.modalOverlay, tabIndex: -1 }), _jsxs("div", { id: "explorer-panel", className: classNames(Styles.explorerPanel, {
+                    [Styles.isMounted]: props.isVisible && !inTransition
+                }), "aria-labelledby": "modalTitle", "aria-describedby": "modalDescription", role: "dialog", children: [_jsx("button", { type: "button", onClick: props.onClose, className: Styles.btnCloseModal, title: t("addData.closeDataPanel"), "data-target": "close-modal", children: t("addData.done") }), props.children] })] })) : null;
 };
 export default ModalPopup;
 //# sourceMappingURL=ModalPopup.js.map

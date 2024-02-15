@@ -5,6 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react";
 import Slider from "rc-slider";
@@ -38,14 +39,9 @@ let OpacitySection = class OpacitySection extends React.Component {
                 item.disableOpacityControl)) {
             return null;
         }
-        return (React.createElement(React.Fragment, null,
-            React.createElement(Spacing, { bottom: 2 }),
-            React.createElement(Box, { verticalCenter: true },
-                React.createElement(StyledLabel, { small: true, htmlFor: "opacity" }, t("workbench.opacity", {
-                    opacity: Math.round(item.opacity * 100)
-                })),
-                React.createElement(Spacing, { right: 3 }),
-                React.createElement(Slider, { min: 0, max: 100, value: (item.opacity * 100) | 0, onChange: this.changeOpacity }))));
+        return (_jsxs(_Fragment, { children: [_jsx(Spacing, { bottom: 2 }), _jsxs(Box, { verticalCenter: true, children: [_jsx(StyledLabel, { small: true, htmlFor: "opacity", children: t("workbench.opacity", {
+                                opacity: Math.round(item.opacity * 100)
+                            }) }), _jsx(Spacing, { right: 3 }), _jsx(Slider, { min: 0, max: 100, value: (item.opacity * 100) | 0, onChange: this.changeOpacity })] })] }));
     }
 };
 OpacitySection = __decorate([

@@ -16,8 +16,24 @@ export default class TextIndex {
      * @param url Url of the text index file
      */
     constructor(url) {
-        this.url = url;
-        this.type = IndexType.text;
+        Object.defineProperty(this, "url", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: url
+        });
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: IndexType.text
+        });
+        Object.defineProperty(this, "miniSearchIndex", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
     /**
      * Loads the text index.

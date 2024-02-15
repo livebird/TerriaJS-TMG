@@ -1,6 +1,6 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react";
-import React from "react";
 import { useTranslation } from "react-i18next";
 import defined from "terriajs-cesium/Source/Core/defined";
 import addedByUser from "../../Core/addedByUser";
@@ -68,7 +68,7 @@ export default observer(function DataCatalogItem({ item, viewState, onActionButt
     else {
         btnState = ButtonState.Add;
     }
-    return (React.createElement(CatalogItem, { onTextClick: setPreviewedItem, selected: isSelected, text: item.nameInCatalog, isPrivate: item.isPrivate, title: getPath(item, " -> "), btnState: btnState, onBtnClick: onBtnClicked, 
+    return (_jsx(CatalogItem, { onTextClick: setPreviewedItem, selected: isSelected, text: item.nameInCatalog, isPrivate: item.isPrivate, title: getPath(item, " -> "), btnState: btnState, onBtnClick: onBtnClicked, 
         // All things are "removable" - meaning add and remove from workbench,
         //    but only user data is "trashable"
         trashable: removable, onTrashClick: removable ? onTrashClicked : undefined, titleOverrides: STATE_TO_TITLE }));

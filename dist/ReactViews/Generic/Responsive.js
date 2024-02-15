@@ -1,5 +1,5 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import PropTypes from "prop-types";
-import React from "react";
 const MediaQuery = require("react-responsive").default;
 // This should come from some config some where
 const small = 768;
@@ -10,19 +10,19 @@ const BreakpointPropTypes = {
     children: PropTypes.node
 };
 export function ExtraSmall(props) {
-    return React.createElement(MediaQuery, { maxWidth: small }, props.children);
+    return _jsx(MediaQuery, { maxWidth: small, children: props.children });
 }
 export function Small(props) {
-    return React.createElement(MediaQuery, { maxWidth: small - 1 }, props.children);
+    return _jsx(MediaQuery, { maxWidth: small - 1, children: props.children });
 }
 export function Medium(props) {
-    return React.createElement(MediaQuery, { minWidth: small }, props.children);
+    return _jsx(MediaQuery, { minWidth: small, children: props.children });
 }
 export function Large(props) {
-    return React.createElement(MediaQuery, { minWidth: medium }, props.children);
+    return _jsx(MediaQuery, { minWidth: medium, children: props.children });
 }
 export function ExtraLarge(props) {
-    return React.createElement(MediaQuery, { minWidth: large }, props.children);
+    return _jsx(MediaQuery, { minWidth: large, children: props.children });
 }
 ExtraSmall.propTypes = BreakpointPropTypes;
 Small.propTypes = BreakpointPropTypes;

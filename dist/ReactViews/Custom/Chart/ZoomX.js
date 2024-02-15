@@ -24,14 +24,19 @@ let ZoomX = class ZoomX extends React.Component {
         return this.props.children;
     }
 };
-ZoomX.propTypes = {
-    initialScale: PropTypes.func.isRequired,
-    scaleExtent: PropTypes.array.isRequired,
-    translateExtent: PropTypes.array.isRequired,
-    children: PropTypes.node,
-    onZoom: PropTypes.func.isRequired,
-    surface: PropTypes.string.isRequired // selector for querying the zoom surface
-};
+Object.defineProperty(ZoomX, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        initialScale: PropTypes.func.isRequired,
+        scaleExtent: PropTypes.array.isRequired,
+        translateExtent: PropTypes.array.isRequired,
+        children: PropTypes.node,
+        onZoom: PropTypes.func.isRequired,
+        surface: PropTypes.string.isRequired // selector for querying the zoom surface
+    }
+});
 ZoomX = __decorate([
     observer
 ], ZoomX);

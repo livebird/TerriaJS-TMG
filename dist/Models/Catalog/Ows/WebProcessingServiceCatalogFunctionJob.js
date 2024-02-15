@@ -5,11 +5,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { action, computed, isObservableArray, observable, runInAction, toJS } from "mobx";
+import { action, computed, isObservableArray, observable, runInAction, toJS, makeObservable, override } from "mobx";
 import Mustache from "mustache";
 import URI from "urijs";
 import isDefined from "../../../Core/isDefined";
-import { isJsonObject } from "../../../Core/Json";
 import TerriaError from "../../../Core/TerriaError";
 import CatalogFunctionJobMixin from "../../../ModelMixins/CatalogFunctionJobMixin";
 import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
@@ -33,7 +32,13 @@ const createGuid = require("terriajs-cesium/Source/Core/createGuid").default;
 class WpsLoadableStratum extends LoadableStratum(WebProcessingServiceCatalogFunctionJobTraits) {
     constructor(item) {
         super();
-        this.item = item;
+        Object.defineProperty(this, "item", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: item
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(newModel) {
         return new WpsLoadableStratum(newModel);
@@ -59,7 +64,8 @@ class WpsLoadableStratum extends LoadableStratum(WebProcessingServiceCatalogFunc
     get featureInfoTemplate() {
         var _a;
         const template = [
-            "#### Inputs\n\n" + ((_a = this.item.info.find((info) => info.name === "Inputs")) === null || _a === void 0 ? void 0 : _a.content),
+            "#### Inputs\n\n" +
+                ((_a = this.item.info.find((info) => info.name === "Inputs")) === null || _a === void 0 ? void 0 : _a.content),
             "#### Outputs\n\n" + this.outputsSectionHtml
         ].join("\n\n");
         return createStratumInstance(FeatureInfoTemplateTraits, {
@@ -111,7 +117,12 @@ class WpsLoadableStratum extends LoadableStratum(WebProcessingServiceCatalogFunc
         return (_a = this.item.geoJsonItem) === null || _a === void 0 ? void 0 : _a.rectangle;
     }
 }
-WpsLoadableStratum.stratumName = "wpsLoadable";
+Object.defineProperty(WpsLoadableStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "wpsLoadable"
+});
 __decorate([
     computed
 ], WpsLoadableStratum.prototype, "shortReportSections", null);
@@ -128,10 +139,22 @@ __decorate([
     action
 ], WpsLoadableStratum, "load", null);
 StratumOrder.addLoadStratum(WpsLoadableStratum.stratumName);
-export default class WebProcessingServiceCatalogFunctionJob extends XmlRequestMixin(CatalogFunctionJobMixin(CreateModel(WebProcessingServiceCatalogFunctionJobTraits))) {
-    constructor() {
-        super(...arguments);
-        this.proxyCacheDuration = "1d";
+class WebProcessingServiceCatalogFunctionJob extends XmlRequestMixin(CatalogFunctionJobMixin(CreateModel(WebProcessingServiceCatalogFunctionJobTraits))) {
+    constructor(...args) {
+        super(...args);
+        Object.defineProperty(this, "proxyCacheDuration", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "1d"
+        });
+        Object.defineProperty(this, "geoJsonItem", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
     }
     get type() {
         return WebProcessingServiceCatalogFunctionJob.type;
@@ -283,7 +306,7 @@ export default class WebProcessingServiceCatalogFunctionJob extends XmlRequestMi
         }));
         // Create geojson catalog item for input features
         const geojsonFeatures = runInAction(() => this.geojsonFeatures);
-        if (isJsonObject(geojsonFeatures, false)) {
+        if (Array.isArray(geojsonFeatures) || isObservableArray(geojsonFeatures)) {
             runInAction(() => {
                 this.geoJsonItem = new GeoJsonCatalogItem(createGuid(), this.terria);
                 updateModelFromJson(this.geoJsonItem, CommonStrata.user, {
@@ -342,17 +365,14 @@ export default class WebProcessingServiceCatalogFunctionJob extends XmlRequestMi
     }
     async createCatalogItemFromJson(json) {
         let itemJson = json;
-        try {
-            if (this.forceConvertResultsToV8 ||
-                // If startData.version has version 0.x.x - user catalog-converter to convert result
-                ("version" in itemJson &&
-                    typeof itemJson.version === "string" &&
-                    itemJson.version.startsWith("0"))) {
-                itemJson = await convertResultV7toV8(json);
-            }
-        }
-        catch (e) {
-            throw e;
+        if (this.forceConvertResultsToV8 ||
+            // If startData.version has version 0.x.x - user catalog-converter to convert result
+            ("version" in itemJson &&
+                typeof itemJson.version === "string" &&
+                itemJson.version.startsWith("0"))) {
+            itemJson = await convertResultV7toV8(json).catch((e) => {
+                throw e;
+            });
         }
         const catalogItem = upsertModelFromJson(CatalogMemberFactory, this.terria, this.uniqueId || "", CommonStrata.user, {
             ...itemJson,
@@ -366,7 +386,13 @@ export default class WebProcessingServiceCatalogFunctionJob extends XmlRequestMi
         return catalogItem;
     }
 }
-WebProcessingServiceCatalogFunctionJob.type = "wps-result";
+Object.defineProperty(WebProcessingServiceCatalogFunctionJob, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "wps-result"
+});
+export default WebProcessingServiceCatalogFunctionJob;
 __decorate([
     observable
 ], WebProcessingServiceCatalogFunctionJob.prototype, "geoJsonItem", void 0);
@@ -377,7 +403,7 @@ __decorate([
     action
 ], WebProcessingServiceCatalogFunctionJob.prototype, "checkStatus", null);
 __decorate([
-    computed
+    override
 ], WebProcessingServiceCatalogFunctionJob.prototype, "mapItems", null);
 __decorate([
     computed
@@ -388,7 +414,7 @@ function formatOutputValue(title, value) {
     }
     const values = value.split(",");
     return values.reduce(function (previousValue, currentValue) {
-        if (value.match(/[.\/](png|jpg|jpeg|gif|svg)/i)) {
+        if (value.match(/[./](png|jpg|jpeg|gif|svg)/i)) {
             return (previousValue +
                 '<a href="' +
                 currentValue +

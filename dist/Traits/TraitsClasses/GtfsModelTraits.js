@@ -12,6 +12,21 @@ import ModelTraits from "../ModelTraits";
 import GltfTraits from "./GltfTraits";
 import UrlTraits from "./UrlTraits";
 export class ColorGroupTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "color", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "regExp", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -28,6 +43,21 @@ __decorate([
     })
 ], ColorGroupTraits.prototype, "regExp", void 0);
 export class ColorModelsByPropertyTraits extends ModelTraits {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "property", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "colorGroups", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({
@@ -45,6 +75,33 @@ __decorate([
     })
 ], ColorModelsByPropertyTraits.prototype, "colorGroups", void 0);
 export default class GtfsModelTraits extends mixTraits(GltfTraits, UrlTraits) {
+    constructor() {
+        super(...arguments);
+        Object.defineProperty(this, "maximumDistance", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "maximumScale", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "minimumPixelSize", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "colorModelsByProperty", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+    }
 }
 __decorate([
     primitiveTrait({

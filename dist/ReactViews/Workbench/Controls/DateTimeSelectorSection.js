@@ -4,6 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import dateFormat from "dateformat";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react";
@@ -23,9 +24,14 @@ import DateTimePicker from "../../BottomDock/Timeline/DateTimePicker";
 let DateTimeSelectorSection = class DateTimeSelectorSection extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            isOpen: false
-        };
+        Object.defineProperty(this, "state", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: {
+                isOpen: false
+            }
+        });
         this.changeDateTime = this.changeDateTime.bind(this);
         this.onTimelineButtonClicked = this.onTimelineButtonClicked.bind(this);
         this.onShowOnChartButtonClicked =
@@ -119,42 +125,26 @@ let DateTimeSelectorSection = class DateTimeSelectorSection extends React.Compon
             }
         }
         const attachedToTimeline = item.terria.timelineStack.contains(item);
-        return (React.createElement(Box, { column: true, paddedVertically: true },
-            React.createElement(Text, { medium: true, textLight: true, id: "dateTimeSelectorLabel" }, (_a = item.timeLabel) !== null && _a !== void 0 ? _a : t("dateTime.selectorLabel")),
-            React.createElement(Spacing, { bottom: 1 }),
-            React.createElement(Box, { fullWidth: true, justifySpaceBetween: true, styledHeight: "30px", gap: true },
-                React.createElement(Box, { backgroundColor: "rgba(250, 250, 250, 0.2)", css: `
+        return (_jsxs(Box, { column: true, paddedVertically: true, children: [_jsx(Text, { medium: true, textLight: true, id: "dateTimeSelectorLabel", children: (_a = item.timeLabel) !== null && _a !== void 0 ? _a : t("dateTime.selectorLabel") }), _jsx(Spacing, { bottom: 1 }), _jsxs(Box, { fullWidth: true, justifySpaceBetween: true, styledHeight: "30px", gap: true, children: [_jsxs(Box, { backgroundColor: "rgba(250, 250, 250, 0.2)", css: `
               border-radius: 2px;
               flex-grow: 1;
-            ` },
-                    React.createElement(StyledButton, { disabled: !item.isPreviousDiscreteTimeAvailable, onClick: this.onPreviousButtonClicked, title: t("dateTime.previous"), css: `
+            `, children: [_jsx(StyledButton, { disabled: !item.isPreviousDiscreteTimeAvailable, onClick: this.onPreviousButtonClicked, title: t("dateTime.previous"), css: `
                 border-right: 1px solid rgba(255, 255, 255, 0.15);
                 border-radius: 2px 0 0 2px;
-              ` },
-                        React.createElement(StyledIcon, { glyph: GLYPHS.previous, styledWidth: "8px" })),
-                    React.createElement(StyledButton, { onClick: this.toggleOpen, title: t("dateTime.selectTime"), id: "current-date-btn", css: `
+              `, children: _jsx(StyledIcon, { glyph: GLYPHS.previous, styledWidth: "8px" }) }), _jsx(StyledButton, { onClick: this.toggleOpen, title: t("dateTime.selectTime"), id: "current-date-btn", css: `
                 flex-grow: 1;
                 padding: 0 10px;
-              ` },
-                        React.createElement(TextSpan, { large: true, textLight: true, id: "current-date" }, isDefined(discreteTime)
-                            ? discreteTime
-                            : t("dateTime.outOfRange"))),
-                    React.createElement(StyledButton, { disabled: !item.isNextDiscreteTimeAvailable, onClick: this.onNextButtonClicked, title: t("dateTime.next"), css: `
+              `, children: _jsx(TextSpan, { large: true, textLight: true, id: "current-date", children: isDefined(discreteTime)
+                                            ? discreteTime
+                                            : t("dateTime.outOfRange") }) }), _jsx(StyledButton, { disabled: !item.isNextDiscreteTimeAvailable, onClick: this.onNextButtonClicked, title: t("dateTime.next"), css: `
                 border-left: 1px solid rgba(255, 255, 255, 0.15);
                 border-radius: 0 2px 2px 0;
-              ` },
-                        React.createElement(StyledIcon, { glyph: GLYPHS.next, styledWidth: "8px" })),
-                    React.createElement("div", { css: `
+              `, children: _jsx(StyledIcon, { glyph: GLYPHS.next, styledWidth: "8px" }) }), _jsx("div", { css: `
                 width: 0;
                 height: 0;
-              `, title: t("dateTime.selectTime") },
-                        React.createElement(DateTimePicker, { currentDate: item.currentDiscreteJulianDate === undefined
-                                ? undefined
-                                : JulianDate.toDate(item.currentDiscreteJulianDate), dates: item.objectifiedDates, onChange: this.changeDateTime, openDirection: "down", isOpen: this.state.isOpen, onOpen: this.onOpen, onClose: this.onClose, dateFormat: format }))),
-                React.createElement(TimelineButton, { active: attachedToTimeline, type: "button", onClick: this.onTimelineButtonClicked, title: t("dateTime.useTimeline") },
-                    React.createElement(StyledIcon, { light: true, styledWidth: "20px", glyph: GLYPHS.timeline })),
-                React.createElement(TimelineButton, { active: item.showInChartPanel, type: "button", onClick: this.onShowOnChartButtonClicked, title: t("dateTime.availableTimeChart") },
-                    React.createElement(StyledIcon, { light: true, styledWidth: "20px", glyph: GLYPHS.lineChart })))));
+              `, title: t("dateTime.selectTime"), children: _jsx(DateTimePicker, { currentDate: item.currentDiscreteJulianDate === undefined
+                                            ? undefined
+                                            : JulianDate.toDate(item.currentDiscreteJulianDate), dates: item.objectifiedDates, onChange: this.changeDateTime, openDirection: "down", isOpen: this.state.isOpen, onOpen: this.onOpen, onClose: this.onClose, dateFormat: format }) })] }), _jsx(TimelineButton, { active: attachedToTimeline, type: "button", onClick: this.onTimelineButtonClicked, title: t("dateTime.useTimeline"), children: _jsx(StyledIcon, { light: true, styledWidth: "20px", glyph: GLYPHS.timeline }) }), _jsx(TimelineButton, { active: item.showInChartPanel, type: "button", onClick: this.onShowOnChartButtonClicked, title: t("dateTime.availableTimeChart"), children: _jsx(StyledIcon, { light: true, styledWidth: "20px", glyph: GLYPHS.lineChart }) })] })] }));
     }
 };
 DateTimeSelectorSection = __decorate([

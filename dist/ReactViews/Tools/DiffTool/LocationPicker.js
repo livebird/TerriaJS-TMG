@@ -4,7 +4,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, observable, reaction } from "mobx";
+import { jsx as _jsx } from "react/jsx-runtime";
+import { action, observable, reaction, makeObservable } from "mobx";
 import { observer } from "mobx-react";
 import React from "react";
 import Ellipsoid from "terriajs-cesium/Source/Core/Ellipsoid";
@@ -13,11 +14,33 @@ import { addMarker, removeMarker } from "../../../Models/LocationMarkerUtils";
 import MapInteractionMode, { UIMode } from "../../../Models/MapInteractionMode";
 import Loader from "../../Loader";
 let LocationPicker = class LocationPicker extends React.Component {
+    constructor(props) {
+        super(props);
+        Object.defineProperty(this, "pickMode", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "currentPick", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "pickDisposer", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        makeObservable(this);
+    }
     setupPicker() {
         const { terria, location, onPicking, onPicked } = this.props;
         this.pickMode = new MapInteractionMode({
             message: "",
-            messageAsNode: React.createElement("div", null),
+            messageAsNode: _jsx("div", {}),
             uiMode: UIMode.Difference
         });
         addInteractionModeToMap(terria, this.pickMode);
@@ -28,7 +51,7 @@ let LocationPicker = class LocationPicker extends React.Component {
             if (newPick === undefined || newPick.pickPosition === undefined) {
                 return;
             }
-            this.pickMode.customUi = () => (React.createElement(Loader, { message: `Querying ${location ? "new" : ""} position...` }));
+            this.pickMode.customUi = () => (_jsx(Loader, { message: `Querying ${location ? "new" : ""} position...` }));
             const position = cartesianToDegrees(newPick.pickPosition);
             showMarker(this.props.terria, position);
             this.currentPick = newPick;

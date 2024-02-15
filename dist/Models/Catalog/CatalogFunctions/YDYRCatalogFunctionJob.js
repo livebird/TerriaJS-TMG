@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, runInAction } from "mobx";
+import { action, runInAction, makeObservable } from "mobx";
 import filterOutUndefined from "../../../Core/filterOutUndefined";
 import isDefined from "../../../Core/isDefined";
 import loadJson from "../../../Core/loadJson";
@@ -17,10 +17,13 @@ import CreateModel from "../../Definition/CreateModel";
 import CsvCatalogItem from "../CatalogItems/CsvCatalogItem";
 import proxyCatalogItemUrl from "../proxyCatalogItemUrl";
 import { ALGORITHMS, DATASETS } from "./YDYRCatalogFunction";
-export default class YDYRCatalogFunctionJob extends CatalogFunctionJobMixin(CreateModel(YDYRCatalogFunctionJobTraits)) {
-    constructor() {
-        super(...arguments);
-        this.typeName = "YourDataYourRegions Job";
+class YDYRCatalogFunctionJob extends CatalogFunctionJobMixin(CreateModel(YDYRCatalogFunctionJobTraits)) {
+    constructor(...args) {
+        super(...args);
+        makeObservable(this);
+    }
+    get typeName() {
+        return "YourDataYourRegions Job";
     }
     get type() {
         return YDYRCatalogFunctionJob.type;
@@ -164,7 +167,7 @@ export default class YDYRCatalogFunctionJob extends CatalogFunctionJobMixin(Crea
             return [];
         }
         const csvResult = new CsvCatalogItem(`${this.uniqueId}-result`, this.terria, undefined);
-        let regionColumnSplit = (_a = DATASETS.find((d) => { var _a; return d.title === ((_a = this.parameters) === null || _a === void 0 ? void 0 : _a["Output Geography"]); })) === null || _a === void 0 ? void 0 : _a.geographyName.split("_");
+        const regionColumnSplit = (_a = DATASETS.find((d) => { var _a; return d.title === ((_a = this.parameters) === null || _a === void 0 ? void 0 : _a["Output Geography"]); })) === null || _a === void 0 ? void 0 : _a.geographyName.split("_");
         let regionColumn = "";
         if (isDefined(regionColumnSplit) && regionColumnSplit.length === 2) {
             regionColumn = `${regionColumnSplit[0]}_code_${regionColumnSplit[1]}`;
@@ -177,7 +180,13 @@ export default class YDYRCatalogFunctionJob extends CatalogFunctionJobMixin(Crea
         return [csvResult];
     }
 }
-YDYRCatalogFunctionJob.type = "ydyr-job";
+Object.defineProperty(YDYRCatalogFunctionJob, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "ydyr-job"
+});
+export default YDYRCatalogFunctionJob;
 __decorate([
     action
 ], YDYRCatalogFunctionJob.prototype, "_invoke", null);

@@ -1,4 +1,4 @@
-import React from "react";
+import { jsx as _jsx } from "react/jsx-runtime";
 import PropTypes from "prop-types";
 import { useRefForTerria } from "../Hooks/useRefForTerria";
 /*
@@ -7,7 +7,7 @@ import { useRefForTerria } from "../Hooks/useRefForTerria";
 export const withTerriaRef = (WrappedComponent, refName) => {
     const WithTerriaRef = (props) => {
         const hocRef = useRefForTerria(refName, props.viewState);
-        return React.createElement(WrappedComponent, Object.assign({ refFromHOC: hocRef }, props));
+        return _jsx(WrappedComponent, { refFromHOC: hocRef, ...props });
     };
     WithTerriaRef.propTypes = {
         viewState: PropTypes.object.isRequired

@@ -14,9 +14,42 @@ export default class Marker extends MappableMixin(CreateModel(MappableTraits)) {
      */
     constructor(terria, iconUrl, position, rotation) {
         super(undefined, terria);
-        this.terria = terria;
-        this.iconUrl = iconUrl;
-        this.currentRotation = 0;
+        Object.defineProperty(this, "terria", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: terria
+        });
+        Object.defineProperty(this, "iconUrl", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: iconUrl
+        });
+        Object.defineProperty(this, "dataSource", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "icon", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "currentRotation", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
+        Object.defineProperty(this, "position", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         this.position = position;
         this.dataSource = new CustomDataSource();
         this.icon = new RotatableIcon(iconUrl, 24, 24);
@@ -64,6 +97,32 @@ class RotatableIcon {
      */
     constructor(iconUrl, width, height) {
         var _a;
+        Object.defineProperty(this, "image", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "ctx", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        // The canvas on which the icon is drawn and transformed
+        Object.defineProperty(this, "canvas", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        // Resolves when the icon image is loaded and ready to be drawn
+        Object.defineProperty(this, "loadPromise", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         this.image = new Image();
         this.canvas = document.createElement("canvas");
         this.ctx = (_a = this.canvas.getContext("2d")) !== null && _a !== void 0 ? _a : undefined;

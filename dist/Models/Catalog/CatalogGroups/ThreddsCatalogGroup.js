@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { action, computed, runInAction } from "mobx";
+import { action, computed, runInAction, makeObservable, override } from "mobx";
 import threddsCrawler from "thredds-catalog-crawler/src/entryBrowser";
 import isDefined from "../../../Core/isDefined";
 import CatalogMemberMixin from "../../../ModelMixins/CatalogMemberMixin";
@@ -22,8 +22,19 @@ import ThreddsItemReference from "../CatalogReferences/ThreddsItemReference";
 export class ThreddsStratum extends LoadableStratum(ThreddsCatalogGroupTraits) {
     constructor(_catalogGroup) {
         super();
-        this._catalogGroup = _catalogGroup;
-        this.threddsCatalog = undefined;
+        Object.defineProperty(this, "_catalogGroup", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: _catalogGroup
+        });
+        Object.defineProperty(this, "threddsCatalog", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        makeObservable(this);
     }
     duplicateLoadableStratum(model) {
         return new ThreddsStratum(model);
@@ -59,7 +70,7 @@ export class ThreddsStratum extends LoadableStratum(ThreddsCatalogGroupTraits) {
     async createMembers() {
         if (!isDefined(this._catalogGroup.url))
             return;
-        let proxy = proxyCatalogItemBaseUrl(this._catalogGroup, this._catalogGroup.url);
+        const proxy = proxyCatalogItemBaseUrl(this._catalogGroup, this._catalogGroup.url);
         this.threddsCatalog = await threddsCrawler(this._catalogGroup.url, proxy
             ? {
                 proxy
@@ -117,7 +128,12 @@ export class ThreddsStratum extends LoadableStratum(ThreddsCatalogGroupTraits) {
         return item;
     }
 }
-ThreddsStratum.stratumName = "thredds";
+Object.defineProperty(ThreddsStratum, "stratumName", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "thredds"
+});
 __decorate([
     computed
 ], ThreddsStratum.prototype, "members", null);
@@ -131,7 +147,11 @@ __decorate([
     action
 ], ThreddsStratum.prototype, "createMemberFromDataset", null);
 StratumOrder.addLoadStratum(ThreddsStratum.stratumName);
-export default class ThreddsCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(ThreddsCatalogGroupTraits)))) {
+class ThreddsCatalogGroup extends UrlMixin(GroupMixin(CatalogMemberMixin(CreateModel(ThreddsCatalogGroupTraits)))) {
+    constructor(...args) {
+        super(...args);
+        makeObservable(this);
+    }
     get type() {
         return ThreddsCatalogGroup.type;
     }
@@ -162,8 +182,14 @@ export default class ThreddsCatalogGroup extends UrlMixin(GroupMixin(CatalogMemb
         }
     }
 }
-ThreddsCatalogGroup.type = "thredds-group";
+Object.defineProperty(ThreddsCatalogGroup, "type", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "thredds-group"
+});
+export default ThreddsCatalogGroup;
 __decorate([
-    computed
+    override
 ], ThreddsCatalogGroup.prototype, "cacheDuration", null);
 //# sourceMappingURL=ThreddsCatalogGroup.js.map

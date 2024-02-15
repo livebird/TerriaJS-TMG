@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import L from "leaflet";
-import { autorun, computed, observable } from "mobx";
+import { autorun, computed, observable, makeObservable } from "mobx";
 import Cartographic from "terriajs-cesium/Source/Core/Cartographic";
 import CesiumEvent from "terriajs-cesium/Source/Core/Event";
 import CesiumMath from "terriajs-cesium/Source/Core/Math";
@@ -16,16 +16,67 @@ export const isImageryProviderGridLayer = (obj) => {
 export default class ImageryProviderLeafletGridLayer extends L.GridLayer {
     constructor(leaflet, imageryProvider, options) {
         super(Object.assign(options, { async: true, tileSize: 256 }));
-        this.leaflet = leaflet;
-        this.imageryProvider = imageryProvider;
-        this.errorEvent = new CesiumEvent();
-        this.initialized = false;
-        this._usable = false;
-        this._delayedUpdate = undefined;
-        this._zSubtract = 0;
-        this._previousCredits = [];
-        this.splitDirection = SplitDirection.NONE;
-        this.splitPosition = 0.5;
+        Object.defineProperty(this, "leaflet", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: leaflet
+        });
+        Object.defineProperty(this, "imageryProvider", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: imageryProvider
+        });
+        Object.defineProperty(this, "errorEvent", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new CesiumEvent()
+        });
+        Object.defineProperty(this, "initialized", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "_usable", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(this, "_delayedUpdate", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "_zSubtract", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
+        Object.defineProperty(this, "_previousCredits", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "splitDirection", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: SplitDirection.NONE
+        });
+        Object.defineProperty(this, "splitPosition", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0.5
+        });
+        makeObservable(this);
         // Handle splitter rection (and disposing reaction)
         let disposeSplitterReaction;
         this.on("add", () => {
@@ -88,11 +139,9 @@ export default class ImageryProviderLeafletGridLayer extends L.GridLayer {
         const size = this.getTileSize();
         canvas.width = size.x;
         canvas.height = size.y;
-        this.imageryProvider.readyPromise
-            .then(() => {
-            const n = this.imageryProvider.tilingScheme.getNumberOfXTilesAtLevel(tilePoint.z);
-            return this.imageryProvider.requestImageForCanvas(CesiumMath.mod(tilePoint.x, n), tilePoint.y, tilePoint.z, canvas);
-        })
+        const n = this.imageryProvider.tilingScheme.getNumberOfXTilesAtLevel(tilePoint.z);
+        this.imageryProvider
+            .requestImageForCanvas(CesiumMath.mod(tilePoint.x, n), tilePoint.y, tilePoint.z, canvas)
             .then(function (canvas) {
             done(undefined, canvas);
         });
@@ -101,20 +150,16 @@ export default class ImageryProviderLeafletGridLayer extends L.GridLayer {
     getFeaturePickingCoords(map, longitudeRadians, latitudeRadians) {
         const ll = new Cartographic(CesiumMath.negativePiToPi(longitudeRadians), latitudeRadians, 0.0);
         const level = Math.round(map.getZoom());
-        return this.imageryProvider.readyPromise.then(() => {
-            const tilingScheme = this.imageryProvider.tilingScheme;
-            const coords = tilingScheme.positionToTileXY(ll, level);
-            return {
-                x: coords.x,
-                y: coords.y,
-                level: level
-            };
-        });
+        const tilingScheme = this.imageryProvider.tilingScheme;
+        const coords = tilingScheme.positionToTileXY(ll, level);
+        return {
+            x: coords.x,
+            y: coords.y,
+            level: level
+        };
     }
     pickFeatures(x, y, level, longitudeRadians, latitudeRadians) {
-        return this.imageryProvider.readyPromise.then(() => {
-            return this.imageryProvider.pickFeatures(x, y, level, longitudeRadians, latitudeRadians);
-        });
+        return this.imageryProvider.pickFeatures(x, y, level, longitudeRadians, latitudeRadians);
     }
 }
 __decorate([

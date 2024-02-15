@@ -1,7 +1,10 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 /* eslint-disable camelcase */
 import React, { useRef } from "react";
 import { Editor } from "@tinymce/tinymce-react";
 import PropTypes from "prop-types";
+// eslint-disable-next-line no-unused-vars
+import tinymce from "tinymce"; // must import despite being unused
 /* Required TinyMCE components */
 import "tinymce/icons/default";
 import "tinymce/themes/silver";
@@ -21,7 +24,7 @@ import contentCss from "!!raw-loader!tinymce/skins/content/default/content.min.c
 import contentUiCss from "!!raw-loader!tinymce/skins/ui/oxide/content.min.css";
 export default function TinyEditor(props) {
     const editorRef = useRef(null);
-    return (React.createElement(Editor, { onInit: (evt, editor) => (editorRef.current = editor), value: props.html, onEditorChange: props.onChange, init: {
+    return (_jsx(Editor, { onInit: (evt, editor) => (editorRef.current = editor), value: props.html, onEditorChange: props.onChange, init: {
             height: 450,
             skin: false,
             menubar: false,

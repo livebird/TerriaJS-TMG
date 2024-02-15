@@ -4,6 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react";
 import React from "react";
@@ -16,7 +17,12 @@ import Timeline from "./Timeline/Timeline";
 let BottomDock = class BottomDock extends React.Component {
     constructor() {
         super(...arguments);
-        this.refToMeasure = null;
+        Object.defineProperty(this, "refToMeasure", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: null
+        });
     }
     handleClick() {
         runInAction(() => {
@@ -33,18 +39,13 @@ let BottomDock = class BottomDock extends React.Component {
     render() {
         const { terria } = this.props;
         const top = terria.timelineStack.top;
-        return (React.createElement("div", { className: `${Styles.bottomDock} ${this.props.viewState.topElement === "BottomDock" ? "top-element" : ""}`, ref: (element) => {
+        return (_jsxs("div", { className: `${Styles.bottomDock} ${this.props.viewState.topElement === "BottomDock" ? "top-element" : ""}`, ref: (element) => {
                 if (element !== null) {
                     this.refToMeasure = element;
                 }
             }, tabIndex: 0, onClick: this.handleClick.bind(this), css: `
           background: ${(p) => p.theme.dark};
-        ` },
-            React.createElement("div", { id: "TJS-BottomDockFirstPortal" }),
-            React.createElement(ChartDisclaimer, { terria: terria, viewState: this.props.viewState }),
-            React.createElement(ChartPanel, { terria: terria, viewState: this.props.viewState }),
-            top && (React.createElement(Timeline, { terria: terria, elementConfig: this.props.terria.elements.get("timeline") })),
-            React.createElement("div", { id: "TJS-BottomDockLastPortal" })));
+        `, children: [_jsx("div", { id: "TJS-BottomDockFirstPortal" }), _jsx(ChartDisclaimer, { terria: terria, viewState: this.props.viewState }), _jsx(ChartPanel, { terria: terria, viewState: this.props.viewState }), top && (_jsx(Timeline, { terria: terria, elementConfig: this.props.terria.elements.get("timeline") })), _jsx("div", { id: "TJS-BottomDockLastPortal" })] }));
     }
 };
 BottomDock = __decorate([

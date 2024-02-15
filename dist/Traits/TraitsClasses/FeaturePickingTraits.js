@@ -9,7 +9,12 @@ import primitiveTrait from "../Decorators/primitiveTrait";
 export default class FeaturePickingTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.allowFeaturePicking = true;
+        Object.defineProperty(this, "allowFeaturePicking", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
     }
 }
 __decorate([

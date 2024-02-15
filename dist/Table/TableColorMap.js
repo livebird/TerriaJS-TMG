@@ -5,7 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import * as d3Scale from "d3-scale-chromatic";
-import { computed } from "mobx";
+import { computed, makeObservable } from "mobx";
 import Color from "terriajs-cesium/Source/Core/Color";
 import createColorForIdTransformer from "../Core/createColorForIdTransformer";
 import filterOutUndefined from "../Core/filterOutUndefined";
@@ -90,9 +90,25 @@ export default class TableColorMap {
     constructor(
     /** Title used for ConstantColorMaps - and to create a unique color for a particular Table-based CatalogItem */
     title, colorColumn, colorTraits) {
-        this.title = title;
-        this.colorColumn = colorColumn;
-        this.colorTraits = colorTraits;
+        Object.defineProperty(this, "title", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: title
+        });
+        Object.defineProperty(this, "colorColumn", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: colorColumn
+        });
+        Object.defineProperty(this, "colorTraits", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: colorTraits
+        });
+        makeObservable(this);
     }
     get type() {
         return this.colorMap instanceof DiscreteColorMap
@@ -149,7 +165,7 @@ export default class TableColorMap {
                 // Get colorScale from `d3-scale-chromatic` library - all continuous color schemes start with "interpolate"
                 // See https://github.com/d3/d3-scale-chromatic#diverging
                 // d3 continuous color schemes are represented as a function which map a value [0,1] to a color]
-                let colorScale = this.colorScaleContinuous();
+                const colorScale = this.colorScaleContinuous();
                 return new ContinuousColorMap({
                     colorScale,
                     minValue: this.minimumValue,
@@ -190,7 +206,8 @@ export default class TableColorMap {
                     return {
                         value: e.value,
                         color: colorColumn.type !== TableColumnType.region
-                            ? (_a = Color.fromCssColorString(e.color)) !== null && _a !== void 0 ? _a : Color.TRANSPARENT : this.regionColor
+                            ? (_a = Color.fromCssColorString(e.color)) !== null && _a !== void 0 ? _a : Color.TRANSPARENT
+                            : this.regionColor
                     };
                 })),
                 nullColor: this.nullColor
@@ -236,7 +253,7 @@ export default class TableColorMap {
         const numberOfBins = this.binMaximums.length;
         // Pick a color for every bin.
         const binColors = this.colorTraits.binColors || [];
-        let colorScale = this.colorScaleCategorical(this.binMaximums.length);
+        const colorScale = this.colorScaleCategorical(this.binMaximums.length);
         const result = [];
         for (let i = 0; i < numberOfBins; ++i) {
             if (i < binColors.length) {
@@ -305,7 +322,7 @@ export default class TableColorMap {
         }
         // No enumColors traits provided - so create a color for each unique value
         const uniqueValues = colorColumn.uniqueValues.values;
-        let colorScale = this.colorScaleCategorical(uniqueValues.length);
+        const colorScale = this.colorScaleCategorical(uniqueValues.length);
         return colorScale
             .map((color, i) => {
             return {
@@ -337,7 +354,8 @@ export default class TableColorMap {
     get nullColor() {
         var _a;
         return this.colorTraits.nullColor
-            ? (_a = Color.fromCssColorString(this.colorTraits.nullColor)) !== null && _a !== void 0 ? _a : Color.TRANSPARENT : Color.TRANSPARENT;
+            ? (_a = Color.fromCssColorString(this.colorTraits.nullColor)) !== null && _a !== void 0 ? _a : Color.TRANSPARENT
+            : Color.TRANSPARENT;
     }
     get regionColor() {
         return Color.fromCssColorString(this.colorTraits.regionColor);
@@ -578,11 +596,14 @@ export default class TableColorMap {
         var _a, _b, _c;
         if (((_a = this.colorColumn) === null || _a === void 0 ? void 0 : _a.name) &&
             ((_b = this.colorColumn) === null || _b === void 0 ? void 0 : _b.tableModel.activeStyle) === ((_c = this.colorColumn) === null || _c === void 0 ? void 0 : _c.name)) {
-            runLater(() => { var _a, _b; return (_a = this.colorColumn) === null || _a === void 0 ? void 0 : _a.tableModel.terria.raiseErrorToUser(new TerriaError({
-                title: "Invalid colorPalette",
-                message: `Column ${(_b = this.colorColumn) === null || _b === void 0 ? void 0 : _b.name} has an invalid color palette - \`"${this.colorTraits.colorPalette}"\`.
+            runLater(() => {
+                var _a, _b;
+                return (_a = this.colorColumn) === null || _a === void 0 ? void 0 : _a.tableModel.terria.raiseErrorToUser(new TerriaError({
+                    title: "Invalid colorPalette",
+                    message: `Column ${(_b = this.colorColumn) === null || _b === void 0 ? void 0 : _b.name} has an invalid color palette - \`"${this.colorTraits.colorPalette}"\`.
             Will use default color palette \`"${this.defaultColorPaletteName}"\` instead`
-            })); });
+                }));
+            });
         }
     }
 }

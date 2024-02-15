@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { action, computed, observable } from "mobx";
+import { action, computed, observable, makeObservable } from "mobx";
 /**
  * Tracks pending notifications, and provides and interface for adding and removing them.
  * Notification queue is first-in, first-out.
@@ -12,8 +12,19 @@ import { action, computed, observable } from "mobx";
  */
 export default class NotificationState {
     constructor() {
-        this.notifications = [];
-        this.alreadyNotifiedKeys = new Set();
+        Object.defineProperty(this, "notifications", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: []
+        });
+        Object.defineProperty(this, "alreadyNotifiedKeys", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: new Set()
+        });
+        makeObservable(this);
     }
     addNotificationToQueue(notification) {
         var _a;

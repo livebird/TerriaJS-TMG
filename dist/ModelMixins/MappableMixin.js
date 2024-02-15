@@ -5,13 +5,64 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import i18next from "i18next";
-import { computed, runInAction } from "mobx";
+import { computed, makeObservable, observable, runInAction } from "mobx";
 import Rectangle from "terriajs-cesium/Source/Core/Rectangle";
 import AsyncLoader from "../Core/AsyncLoader";
 import Result from "../Core/Result";
 import CatalogMemberMixin, { getName } from "./CatalogMemberMixin";
+export class ImageryParts {
+    static fromAsync(options) {
+        const result = new ImageryParts({
+            imageryProvider: undefined,
+            alpha: options.alpha,
+            clippingRectangle: options.clippingRectangle,
+            show: options.show
+        });
+        options.imageryProviderPromise.then((imageryProvider) => {
+            if (imageryProvider) {
+                runInAction(() => {
+                    result.imageryProvider = imageryProvider;
+                });
+            }
+        });
+        return result;
+    }
+    constructor(options) {
+        var _a, _b;
+        Object.defineProperty(this, "imageryProvider", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "alpha", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0.8
+        });
+        Object.defineProperty(this, "clippingRectangle", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: undefined
+        });
+        Object.defineProperty(this, "show", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
+        this.imageryProvider = options.imageryProvider;
+        this.alpha = (_a = options.alpha) !== null && _a !== void 0 ? _a : 0.8;
+        this.clippingRectangle = options.clippingRectangle;
+        this.show = (_b = options.show) !== null && _b !== void 0 ? _b : true;
+    }
+}
+__decorate([
+    observable
+], ImageryParts.prototype, "imageryProvider", void 0);
 // This discriminator only discriminates between ImageryParts and DataSource
-export var ImageryParts;
 (function (ImageryParts) {
     function is(object) {
         return "imageryProvider" in object;
@@ -32,10 +83,21 @@ export function isDataSource(object) {
 }
 function MappableMixin(Base) {
     class MappableMixin extends Base {
-        constructor() {
-            super(...arguments);
-            this.initialMessageShown = false;
-            this._mapItemsLoader = new AsyncLoader(this.forceLoadMapItems.bind(this));
+        constructor(...args) {
+            super(...args);
+            Object.defineProperty(this, "initialMessageShown", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: false
+            });
+            Object.defineProperty(this, "_mapItemsLoader", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: new AsyncLoader(this.forceLoadMapItems.bind(this))
+            });
+            makeObservable(this);
         }
         get isMappable() {
             return true;

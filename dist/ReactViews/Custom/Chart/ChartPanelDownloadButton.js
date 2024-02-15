@@ -1,8 +1,8 @@
 "use strict";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import FileSaver from "file-saver";
 import { runInAction, toJS } from "mobx";
 import { observer } from "mobx-react";
-import React from "react";
 import FeatureDetection from "terriajs-cesium/Source/Core/FeatureDetection";
 import isDefined from "../../../Core/isDefined";
 import Result from "../../../Core/Result";
@@ -73,18 +73,14 @@ async function download(items) {
     }
 }
 export const ChartPanelDownloadButton = observer((props) => {
-    {
-        // For the moment we only support TableMixin items
-        const tableItems = props.chartableItems.filter(TableMixin.isMixedInto);
-        const isDownloadSupported = FeatureDetection.supportsTypedArrays() &&
-            FeatureDetection.supportsWebWorkers();
-        const isExportDisabled = props.chartableItems.some((item) => hasTraits(item, ExportableTraits, "disableExport") &&
-            item.disableExport === true);
-        if (!isDownloadSupported || isExportDisabled || tableItems.length === 0)
-            return null;
-        return (React.createElement("button", { className: Styles.btnDownload, onClick: () => download(props.chartableItems.filter(TableMixin.isMixedInto)) },
-            React.createElement(Icon, { glyph: Icon.GLYPHS.download }),
-            "Download"));
-    }
+    // For the moment we only support TableMixin items
+    const tableItems = props.chartableItems.filter(TableMixin.isMixedInto);
+    const isDownloadSupported = FeatureDetection.supportsTypedArrays() &&
+        FeatureDetection.supportsWebWorkers();
+    const isExportDisabled = props.chartableItems.some((item) => hasTraits(item, ExportableTraits, "disableExport") &&
+        item.disableExport === true);
+    if (!isDownloadSupported || isExportDisabled || tableItems.length === 0)
+        return null;
+    return (_jsxs("button", { className: Styles.btnDownload, onClick: () => download(props.chartableItems.filter(TableMixin.isMixedInto)), children: [_jsx(Icon, { glyph: Icon.GLYPHS.download }), "Download"] }));
 });
 //# sourceMappingURL=ChartPanelDownloadButton.js.map

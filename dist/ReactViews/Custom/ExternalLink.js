@@ -1,7 +1,7 @@
-import { default as React } from "react";
+import { jsx as _jsx } from "react/jsx-runtime";
 import { useTranslation } from "react-i18next";
 import styled from "styled-components";
-import { useViewState } from "../StandardUserInterface/ViewStateContext";
+import { useViewState } from "../Context";
 const Icon = require("../../Styled/Icon").default;
 const { StyledIcon } = require("../../Styled/Icon");
 export const ExternalLinkWithWarning = (props) => {
@@ -21,9 +21,9 @@ export const ExternalLinkWithWarning = (props) => {
         });
     };
     if (!props.attributes.href) {
-        return React.createElement("a", Object.assign({}, props.attributes), props.children);
+        return _jsx("a", { ...props.attributes, children: props.children });
     }
-    return (React.createElement("a", Object.assign({}, props.attributes, { onClick: onClick }), props.children));
+    return (_jsx("a", { ...props.attributes, onClick: onClick, children: props.children }));
 };
 export const ExternalLinkIcon = styled(StyledIcon).attrs({
     glyph: Icon.GLYPHS.externalLink,

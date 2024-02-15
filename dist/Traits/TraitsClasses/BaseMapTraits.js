@@ -13,7 +13,24 @@ import ModelTraits from "../ModelTraits";
 export class BaseMapTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.contrastColor = "#ffffff";
+        Object.defineProperty(this, "image", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "contrastColor", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "#ffffff"
+        });
+        Object.defineProperty(this, "item", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([
@@ -40,7 +57,36 @@ __decorate([
 export class BaseMapsTraits extends ModelTraits {
     constructor() {
         super(...arguments);
-        this.previewBaseMapId = "basemap-positron";
+        Object.defineProperty(this, "defaultBaseMapId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "defaultBaseMapName", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "previewBaseMapId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: "basemap-positron"
+        });
+        Object.defineProperty(this, "items", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "enabledBaseMaps", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
 }
 __decorate([

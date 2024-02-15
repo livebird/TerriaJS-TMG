@@ -5,9 +5,24 @@ import createStratumInstance from "../Models/Definition/createStratumInstance";
  */
 export default class NestedStrataMap {
     constructor(parentTraitsClass, parent, parentProperty) {
-        this.parentTraitsClass = parentTraitsClass;
-        this.parent = parent;
-        this.parentProperty = parentProperty;
+        Object.defineProperty(this, "parentTraitsClass", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: parentTraitsClass
+        });
+        Object.defineProperty(this, "parent", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: parent
+        });
+        Object.defineProperty(this, "parentProperty", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: parentProperty
+        });
     }
     clear() {
         this.parent.forEach((value) => {
@@ -54,7 +69,7 @@ export default class NestedStrataMap {
         return this.entries();
     }
     *entries() {
-        for (let entry of this.parent.entries()) {
+        for (const entry of this.parent.entries()) {
             const parentValue = entry[1];
             const value = parentValue[this.parentProperty];
             if (value === undefined) {
@@ -65,12 +80,12 @@ export default class NestedStrataMap {
     }
     *keys() {
         // Only return keys that have a value.
-        for (let entry of this.entries()) {
+        for (const entry of this.entries()) {
             yield entry[0];
         }
     }
     *values() {
-        for (let entry of this.parent.entries()) {
+        for (const entry of this.parent.entries()) {
             const parentValue = entry[1];
             const value = parentValue[this.parentProperty];
             if (value === undefined) {

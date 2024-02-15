@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import PropTypes from "prop-types";
 import createReactClass from "create-react-class";
@@ -29,11 +30,9 @@ const FileInput = createReactClass({
     },
     render() {
         const { t } = this.props;
-        return (React.createElement("form", { className: Styles.fileInput, onMouseEnter: () => this.setState({ hovered: true }), onMouseLeave: () => this.setState({ hovered: false }) },
-            React.createElement("input", { type: "file", onChange: this.handleChange, accept: this.props.accept, className: Styles.input }),
-            React.createElement("label", { className: classNames(Styles.btn, {
-                    [Styles.btnHover]: this.state.hovered
-                }) }, this.state.value ? this.state.value : t("addData.browse"))));
+        return (_jsxs("form", { className: Styles.fileInput, onMouseEnter: () => this.setState({ hovered: true }), onMouseLeave: () => this.setState({ hovered: false }), children: [_jsx("input", { type: "file", onChange: this.handleChange, accept: this.props.accept, className: Styles.input }), _jsx("label", { className: classNames(Styles.btn, {
+                        [Styles.btnHover]: this.state.hovered
+                    }), children: this.state.value ? this.state.value : t("addData.browse") })] }));
     }
 });
 module.exports = withTranslation()(FileInput);

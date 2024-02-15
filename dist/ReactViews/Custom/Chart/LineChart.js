@@ -4,6 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+import { jsx as _jsx } from "react/jsx-runtime";
 import { LinePath } from "@visx/shape";
 import { line } from "d3-shape";
 import PropTypes from "prop-types";
@@ -23,16 +24,20 @@ let LineChart = class LineChart extends React.PureComponent {
     render() {
         const { chartItem, scales, color } = this.props;
         const stroke = color || chartItem.getColor();
-        return (React.createElement("g", { id: this.props.id },
-            React.createElement(LinePath, { data: chartItem.points, x: (p) => scales.x(p.x), y: (p) => scales.y(p.y), stroke: stroke, strokeWidth: 2 })));
+        return (_jsx("g", { id: this.props.id, children: _jsx(LinePath, { data: chartItem.points, x: (p) => scales.x(p.x), y: (p) => scales.y(p.y), stroke: stroke, strokeWidth: 2 }) }));
     }
 };
-LineChart.propTypes = {
-    id: PropTypes.string.isRequired,
-    chartItem: PropTypes.object.isRequired,
-    scales: PropTypes.object.isRequired,
-    color: PropTypes.string
-};
+Object.defineProperty(LineChart, "propTypes", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: {
+        id: PropTypes.string.isRequired,
+        chartItem: PropTypes.object.isRequired,
+        scales: PropTypes.object.isRequired,
+        color: PropTypes.string
+    }
+});
 LineChart = __decorate([
     observer
 ], LineChart);

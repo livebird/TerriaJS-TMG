@@ -10,7 +10,12 @@ import { ItemPropertiesTraits } from "./ItemPropertiesTraits";
 export default class ReferenceTraits extends mixTraits(ItemPropertiesTraits) {
     constructor() {
         super(...arguments);
-        this.isOpenInWorkbench = true;
+        Object.defineProperty(this, "isOpenInWorkbench", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: true
+        });
     }
 }
 __decorate([

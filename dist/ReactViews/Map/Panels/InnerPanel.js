@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import PropTypes from "prop-types";
 import createReactClass from "create-react-class";
@@ -82,7 +83,7 @@ const InnerPanel = createReactClass({
     },
     render() {
         const { t } = this.props;
-        return (React.createElement("div", { className: classNames(
+        return (_jsxs("div", { className: classNames(
             // Until we break these few components out of sass, we'll use regular ol classnames
             "tjs-sc-InnerPanel", Styles.inner, this.props.theme.inner, { [Styles.isOpen]: this.state.isOpenCss }, { [Styles.showDropdownAsModal]: this.props.showDropdownAsModal }, { [Styles.showDropdownInCenter]: this.props.showDropdownInCenter }), css: `
           background: ${(p) => p.theme.dark};
@@ -94,12 +95,11 @@ const InnerPanel = createReactClass({
                 transformOrigin: this.props.showDropdownInCenter
                     ? "0 top"
                     : this.props.caretOffset && `${this.props.caretOffset} top`
-            } },
-            React.createElement("button", { type: "button", className: classNames(
-                // Until we break these few components out of sass, we'll use regular ol classnames
-                "tjs-sc-InnerPanelCloseButton", Styles.innerCloseBtn, {
-                    [Styles.innerCloseBtnForModal]: this.props.showDropdownAsModal
-                }), onClick: this.forceClose, title: t("general.close"), "aria-label": t("general.close"), showDropdownAsModal: this.props.showDropdownAsModal, css: `
+            }, children: [_jsx("button", { type: "button", className: classNames(
+                    // Until we break these few components out of sass, we'll use regular ol classnames
+                    "tjs-sc-InnerPanelCloseButton", Styles.innerCloseBtn, {
+                        [Styles.innerCloseBtnForModal]: this.props.showDropdownAsModal
+                    }), onClick: this.forceClose, title: t("general.close"), "aria-label": t("general.close"), showDropdownAsModal: this.props.showDropdownAsModal, css: `
             svg {
               fill: ${(p) => p.theme.textLight};
             }
@@ -110,18 +110,14 @@ const InnerPanel = createReactClass({
               }
             }
             ${(p) => p.showDropdownAsModal &&
-                    `
+                        `
                 svg {
                   fill: ${p.theme.grey};
                 }
             `}
-          ` },
-                React.createElement(Icon, { glyph: Icon.GLYPHS.close })),
-            React.createElement(If, { condition: defined(this.props.caretOffset) && !this.props.showDropdownAsModal },
-                React.createElement("span", { className: classNames(Styles.caret, "tjs-sc-InnerPanel__caret"), style: { left: this.props.caretOffset }, css: `
+          `, children: _jsx(Icon, { glyph: Icon.GLYPHS.close }) }), defined(this.props.caretOffset) && !this.props.showDropdownAsModal && (_jsx("span", { className: classNames(Styles.caret, "tjs-sc-InnerPanel__caret"), style: { left: this.props.caretOffset }, css: `
               background: ${(p) => p.theme.dark};
-            ` })),
-            React.createElement("div", { className: Styles.content }, this.props.children)));
+            ` })), _jsx("div", { className: Styles.content, children: this.props.children })] }));
     }
 });
 export default withTranslation()(InnerPanel);

@@ -17,9 +17,30 @@ export default class NumericIndex {
      * @param range  The maximum and minimum value in the index.
      */
     constructor(url, range) {
-        this.url = url;
-        this.range = range;
-        this.type = IndexType.numeric;
+        Object.defineProperty(this, "url", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: url
+        });
+        Object.defineProperty(this, "range", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: range
+        });
+        Object.defineProperty(this, "type", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: IndexType.numeric
+        });
+        Object.defineProperty(this, "idValuePairs", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
     /**
      * Load a numeric index.

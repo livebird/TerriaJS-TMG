@@ -2,7 +2,12 @@ import PointSizeMap from "./PointSizeMap";
 export default class ConstantPointSizeMap extends PointSizeMap {
     constructor(pointSize) {
         super();
-        this.pointSize = pointSize;
+        Object.defineProperty(this, "pointSize", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: pointSize
+        });
     }
     mapValueToPointSize(value) {
         return this.pointSize;
